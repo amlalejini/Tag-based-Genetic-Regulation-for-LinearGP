@@ -11,6 +11,7 @@
 #include "tools/matchbin_utils.h"
 
 #include "AltSignalWorld.h"
+#include "AltSignalConfig.h"
 
 TEST_CASE( "Hello World", "[general]" ) {
   std::cout << "Hello tests!" << std::endl;
@@ -78,5 +79,14 @@ TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
 */
 
 TEST_CASE( "AltSignalWorld ") {
-  AltSignalWorld world;
+  AltSignalConfig config;
+  config.SEED(2);
+  config.POP_SIZE(100);
+  config.GENERATIONS(100);
+
+  emp::Random random(config.SEED());
+  AltSignalWorld world(random);
+
+  world.Setup(config);
+
 }

@@ -6,19 +6,18 @@
 #ifndef _ALT_SIGNAL_WORLD_H
 #define _ALT_SIGNAL_WORLD_H
 
-// emp tools
+// Empirical
 #include "tools/BitSet.h"
 #include "tools/MatchBin.h"
 #include "tools/matchbin_utils.h"
-
-// emp Evolve includes
+#include "control/Signal.h"
 #include "Evolve/World.h"
-
 // SignalGP includes
 #include "hardware/SignalGP/impls/SignalGPLinearFunctionsProgram.h"
 #include "hardware/SignalGP/utils/MemoryModel.h"
-
+// Local includes
 #include "AltSignalOrg.h"
+#include "AltSignalConfig.h"
 
 
 // TODO - use compile args!
@@ -30,8 +29,14 @@ namespace AltSignalWorldDefs {
   using matchbin_selector_t = emp::RankedSelector<>;    // 0% min threshold
 }
 
+/// Custom hardware component for SignalGP.
+struct CustomHardware {
+  int response=-1;
+};
+
 class AltSignalWorld : public emp::World<AltSignalOrganism> {
 public:
+
   using tag_t = emp::BitSet<AltSignalWorldDefs::TAG_LEN>;
   using inst_arg_t = int;
   using org_t = AltSignalOrganism;
@@ -43,8 +48,12 @@ public:
   using hardware_t = emp::signalgp::LinearFunctionsProgramSignalGP<mem_model_t,
                                                                   tag_t,
                                                                   inst_arg_t,
-                                                                  matchbin_t>;
+                                                                  matchbin_t,
+                                                                  CustomHardware>;
+  using event_lib_t = typename hardware_t::event_lib_t;
+  using inst_lib_t = typename hardware_t::inst_lib_t;
 
+  /// State of the environment during an evaluation.
   struct Environment {
     size_t num_states=0;
     size_t cur_state=0;
@@ -53,15 +62,77 @@ public:
 
 protected:
 
+  size_t GENERATIONS;
+  size_t POP_SIZE;
+
   Environment eval_environment;
 
+  bool setup = false;
+  emp::Ptr<inst_lib_t> inst_lib;
+  emp::Ptr<event_lib_t> event_lib;
+
+  emp::Signal<void(void)> end_setup_sig;
+
+  void InitConfigs(const AltSignalConfig & config);
+
+  void InitPop();
+  void InitPop_Random();
+
+  void DoEvaluation();
+  void DoSelection();
 
 public:
   AltSignalWorld() {}
   AltSignalWorld(emp::Random & r) : emp::World<AltSignalOrganism>(r) {}
 
-  // ~AltSignalWorld() {}
+  ~AltSignalWorld() {
+    if (setup) {
+      inst_lib.Delete();
+      event_lib.Delete();
+    }
+  }
+  void Reset();
 
+  /// Setup world!
+  void Setup(const AltSignalConfig & config);
+
+  void RunStep();
+  void Run();
 };
+
+// ---- PROTECTED IMPLEMENTATIONS ----
+void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
+  GENERATIONS = config.GENERATIONS();
+  POP_SIZE = config.POP_SIZE();
+}
+
+void AltSignalWorld::InitPop() {
+  InitPop_Random();
+}
+
+void AltSignalWorld::InitPop_Random() {
+  // TODO!
+}
+
+// ---- PUBLIC IMPLEMENTATIONS ----
+
+void AltSignalWorld::Setup(const AltSignalConfig & config) {
+  // Localize configuration parameters.
+  InitConfigs(config);
+
+  // Create instruction/event libraries.
+  inst_lib = emp::NewPtr<inst_lib_t>();
+  event_lib = emp::NewPtr<event_lib_t>();
+
+  // How should population be initialized?
+  end_setup_sig.AddAction([this]() {
+    std::cout << "Initializing population...";
+    InitPop();
+    std::cout << " Done" << std::endl;
+  });
+
+  end_setup_sig.Trigger();
+  setup = true;
+}
 
 #endif
