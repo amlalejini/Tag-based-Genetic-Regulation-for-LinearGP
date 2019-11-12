@@ -1,27 +1,44 @@
 #ifndef ALT_SIGNAL_DIGITAL_ORGANISM_H
 #define ALT_SIGNAL_DIGITAL_ORGANISM_H
 
-struct AltSignalPhenotype {
-  double resources_consumed=0.0;
-};
 
-struct AltSignalGenome {
 
-};
 
+template<typename TAG_T, typename INST_ARG_T>
 class AltSignalOrganism {
 public:
+  struct AltSignalGenome;
 
+  using program_t = emp::signalgp::LinearFunctionsProgram<TAG_T, INST_ARG_T>;
+  using genome_t = AltSignalGenome;
 
-  // using hardware_t = ;
-  // using program_t = ;
+  struct AltSignalGenome {
+    program_t program;
+    AltSignalGenome(const program_t & p) : program(p) {}
+    AltSignalGenome(const AltSignalGenome &) = default;
+    AltSignalGenome(AltSignalGenome &&) = default;
+  };
+
+  struct AltSignalPhenotype {
+    double resources_consumed=0.0;
+  };
 
 protected:
   AltSignalPhenotype phenotype;
-  AltSignalGenome genome;
+  genome_t genome;
 
 public:
+  AltSignalOrganism(const genome_t & g)
+    : phenotype(), genome(g) {}
 
+  AltSignalOrganism(const AltSignalOrganism &) = default;
+  AltSignalOrganism(AltSignalOrganism &&) = default;
+
+  genome_t & GetGenome() { return genome; }
+  const genome_t & GetGenome() const { return genome; }
+
+  AltSignalPhenotype & GetPhenotype() { return phenotype; }
+  const AltSignalPhenotype & GetPhenotype() const { return phenotype; }
 };
 
 #endif

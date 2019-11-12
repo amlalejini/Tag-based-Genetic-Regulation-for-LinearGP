@@ -23,10 +23,14 @@
 // TODO - use compile args!
 namespace AltSignalWorldDefs {
   constexpr size_t TAG_LEN = 64;
+  constexpr size_t INST_TAG_CNT = 1;
+  constexpr size_t INST_ARG_CNT = 3;
   // matchbin <VALUE, METRIC, SELECTOR>
   using matchbin_val_t = size_t;                        // Module ID
   using matchbin_metric_t = emp::StreakMetric<TAG_LEN>; // How should we measure tag similarity?
   using matchbin_selector_t = emp::RankedSelector<>;    // 0% min threshold
+
+  using org_t = AltSignalOrganism<emp::BitSet<TAG_LEN>,int>;
 }
 
 /// Custom hardware component for SignalGP.
@@ -34,12 +38,11 @@ struct CustomHardware {
   int response=-1;
 };
 
-class AltSignalWorld : public emp::World<AltSignalOrganism> {
+class AltSignalWorld : public emp::World<AltSignalWorldDefs::org_t> {
 public:
-
   using tag_t = emp::BitSet<AltSignalWorldDefs::TAG_LEN>;
   using inst_arg_t = int;
-  using org_t = AltSignalOrganism;
+  using org_t = AltSignalOrganism<tag_t,inst_arg_t>;
 
   using matchbin_t = emp::MatchBin<AltSignalWorldDefs::matchbin_val_t,
                                    AltSignalWorldDefs::matchbin_metric_t,
@@ -83,7 +86,7 @@ protected:
 
 public:
   AltSignalWorld() {}
-  AltSignalWorld(emp::Random & r) : emp::World<AltSignalOrganism>(r) {}
+  AltSignalWorld(emp::Random & r) : emp::World<org_t>(r) {}
 
   ~AltSignalWorld() {
     if (setup) {
@@ -101,6 +104,7 @@ public:
 };
 
 // ---- PROTECTED IMPLEMENTATIONS ----
+
 void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   GENERATIONS = config.GENERATIONS();
   POP_SIZE = config.POP_SIZE();
@@ -111,7 +115,9 @@ void AltSignalWorld::InitPop() {
 }
 
 void AltSignalWorld::InitPop_Random() {
-  // TODO!
+  for (size_t i = 0; i < POP_SIZE; ++i) {
+    // TODO!
+  }
 }
 
 // ---- PUBLIC IMPLEMENTATIONS ----
