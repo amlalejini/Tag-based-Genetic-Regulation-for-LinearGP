@@ -24,9 +24,12 @@
 
 // TODO - use compile args!
 namespace AltSignalWorldDefs {
-  constexpr size_t TAG_LEN = 64;
-  constexpr size_t INST_TAG_CNT = 1;
-  constexpr size_t INST_ARG_CNT = 3;
+  constexpr size_t TAG_LEN = 64;      // How many bits per tag?
+  constexpr size_t INST_TAG_CNT = 1;  // How many tags per instruction?
+  constexpr size_t INST_ARG_CNT = 3;  // How many instruction arguments per instruction?
+  constexpr size_t FUNC_NUM_TAGS = 1; // How many tags are associated with each function in a program?
+  constexpr int INST_MIN_ARG_VAL = 0; // Minimum argument value?
+  constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
   // matchbin <VALUE, METRIC, SELECTOR>
   using matchbin_val_t = size_t;                        // Module ID
   using matchbin_metric_t = emp::StreakMetric<TAG_LEN>; // How should we measure tag similarity?
@@ -68,9 +71,14 @@ public:
   };
 
 protected:
-
+  // Default group
   size_t GENERATIONS;
   size_t POP_SIZE;
+  // Program group
+  size_t MIN_FUNC_CNT;
+  size_t MAX_FUNC_CNT;
+  size_t MIN_FUNC_INST_CNT;
+  size_t MAX_FUNC_INST_CNT;
 
   Environment eval_environment;
 
@@ -110,9 +118,15 @@ public:
 
 // ---- PROTECTED IMPLEMENTATIONS ----
 
+/// Localize configuration parameters (as member variables) from given AltSignalConfig
+/// object.
 void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   GENERATIONS = config.GENERATIONS();
   POP_SIZE = config.POP_SIZE();
+  MIN_FUNC_CNT = config.MIN_FUNC_CNT();
+  MAX_FUNC_CNT = config.MAX_FUNC_CNT();
+  MIN_FUNC_INST_CNT = config.MIN_FUNC_INST_CNT();
+  MAX_FUNC_INST_CNT = config.MAX_FUNC_INST_CNT();
 }
 
 /// Create and initialize instruction set with default instructions.
@@ -154,12 +168,23 @@ void AltSignalWorld::InitInstLib() {
 }
 
 void AltSignalWorld::InitPop() {
+  this->Clear();
   InitPop_Random();
 }
 
+/// Initialize population with randomly generated orgranisms.
 void AltSignalWorld::InitPop_Random() {
   for (size_t i = 0; i < POP_SIZE; ++i) {
-    // TODO!
+    this->Inject({emp::signalgp::GenRandLinearFunctionsProgram<hardware_t, AltSignalWorldDefs::TAG_LEN>
+                                  (*random_ptr, *inst_lib,
+                                   MIN_FUNC_CNT, MAX_FUNC_CNT,
+                                   AltSignalWorldDefs::FUNC_NUM_TAGS,
+                                   MIN_FUNC_INST_CNT, MAX_FUNC_INST_CNT,
+                                   AltSignalWorldDefs::INST_TAG_CNT,
+                                   AltSignalWorldDefs::INST_ARG_CNT,
+                                   AltSignalWorldDefs::INST_MIN_ARG_VAL,
+                                   AltSignalWorldDefs::INST_MAX_ARG_VAL)
+                  }, 1);
   }
 }
 

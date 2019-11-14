@@ -10,7 +10,10 @@ EMP_BUILD_CONFIG(AltSignalConfig,
     VALUE(POP_SIZE, size_t, 100, "How big is our population?"),
 
   GROUP(PROGRAM_GROUP, "Program settings"),
-
+    VALUE(MIN_FUNC_CNT, size_t, 0, "Minimum number of functions per program."),
+    VALUE(MAX_FUNC_CNT, size_t, 32, "Maximum number of functions per program."),
+    VALUE(MIN_FUNC_INST_CNT, size_t, 128, "Minimum number of instructions per function."),
+    VALUE(MAX_FUNC_INST_CNT, size_t, 128, "Maximum number of instructions per function."),
   GROUP(HARDWARE_GROUP, "Virtual hardware settings"),
 
   GROUP(SELECTION_GROUP, "Selection settings"),
