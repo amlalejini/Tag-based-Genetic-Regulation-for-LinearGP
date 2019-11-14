@@ -14,6 +14,7 @@
 #include "tools/BitSet.h"
 #include "tools/MatchBin.h"
 #include "tools/matchbin_utils.h"
+#include "tools/string_utils.h"
 #include "control/Signal.h"
 #include "Evolve/World.h"
 // SignalGP includes
@@ -114,6 +115,7 @@ protected:
   // Environment group
   size_t NUM_SIGNAL_RESPONSES;
   size_t NUM_ENV_CYCLES;
+  size_t CPU_TIME_PER_ENV_CYCLE;
   // Program group
   size_t MIN_FUNC_CNT;
   size_t MAX_FUNC_CNT;
@@ -180,6 +182,7 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   // environment group
   NUM_SIGNAL_RESPONSES = config.NUM_SIGNAL_RESPONSES();
   NUM_ENV_CYCLES = config.NUM_ENV_CYCLES();
+  CPU_TIME_PER_ENV_CYCLE = config.CPU_TIME_PER_ENV_CYCLE();
   // program group
   MIN_FUNC_CNT = config.MIN_FUNC_CNT();
   MAX_FUNC_CNT = config.MAX_FUNC_CNT();
@@ -250,6 +253,21 @@ void AltSignalWorld::InitInstLib() {
   inst_lib->AddInst("While", emp::signalgp::lfp_inst_impl::Inst_While<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
   inst_lib->AddInst("Countdown", emp::signalgp::lfp_inst_impl::Inst_Countdown<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
   inst_lib->AddInst("Routine", emp::signalgp::lfp_inst_impl::Inst_Routine<hardware_t, inst_t>, "");
+
+  // Add response instructions
+  for (size_t i = 0; i < NUM_SIGNAL_RESPONSES; ++i) {
+    inst_lib->AddInst("Response-" + emp::to_string(i), [this, i](hardware_t & hw, const inst_t & inst) {
+      // Mark response in hardware.
+      hw.GetCustomComponent().response = i;
+      // Remove all pending threads.
+      hw.RemoveAllPendingThreads();
+      // Mark all active threads as dead.
+      for (size_t thread_id : hw.GetActiveThreadIDs()) {
+        hw.GetThread(thread_id).SetDead();
+      }
+    }, "Set organism response to environment.");
+  }
+
 }
 
 /// Create and initialize event library.
@@ -295,6 +313,7 @@ void AltSignalWorld::DoEvaluation() {
   }
 }
 
+/// Evaluate a single organism.
 void AltSignalWorld::EvaluateOrg(org_t & org) {
   eval_environment.ResetEnv();
   org.GetPhenotype().Reset();
@@ -304,7 +323,25 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
   // Evaluate organism in the environment!
   for (size_t cycle = 0; cycle < NUM_ENV_CYCLES; ++cycle) {
     eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.env_signal_tag));
-    // TODO!
+    // Step hardware! If at any point there are no active || pending threads, we're done!
+    for (size_t step = 0; step < CPU_TIME_PER_ENV_CYCLE; ++step) {
+      eval_hardware->SingleProcess();
+      if (!(eval_hardware->GetNumActiveThreads() || eval_hardware->GetNumPendingThreads())) break;
+    }
+    // Did hardware consume the resource?
+    const int org_response = eval_hardware->GetCustomComponent().response;
+    if (org_response == (int)eval_environment.cur_state) {
+      // Correct response!
+      org.GetPhenotype().resources_consumed += 1;
+      org.GetPhenotype().correct_resp_cnt += 1;
+    } else if (org_response == -1) {
+      // No response!
+      org.GetPhenotype().no_resp_cnt += 1;
+    } else {
+      // Incorrect response, end evaluation.
+      break;
+    }
+    eval_environment.AdvanceEnv();
   }
 }
 // ---- PUBLIC IMPLEMENTATIONS ----
