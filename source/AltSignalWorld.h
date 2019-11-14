@@ -8,6 +8,8 @@
 #ifndef _ALT_SIGNAL_WORLD_H
 #define _ALT_SIGNAL_WORLD_H
 
+// C++ std
+#include <functional>
 // Empirical
 #include "tools/BitSet.h"
 #include "tools/MatchBin.h"
@@ -40,9 +42,31 @@ namespace AltSignalWorldDefs {
   using org_t = AltSignalOrganism<emp::BitSet<TAG_LEN>,int>;
 }
 
+/// Custom Event type!
+template<size_t W>
+struct Event : emp::signalgp::BaseEvent {
+  using tag_t = emp::BitSet<W>;
+  tag_t tag;
+
+  Event(size_t _id, tag_t _tag) : BaseEvent(_id), tag(_tag) {}
+
+  tag_t & GetTag() { return tag; }
+  const tag_t & GetTag() const { return tag; }
+
+  void Print(std::ostream & os) const {
+    os << "{id:" << GetID() << ",tag:";
+    tag.Print(os);
+    os << "}";
+  }
+};
+
 /// Custom hardware component for SignalGP.
 struct CustomHardware {
   int response=-1;
+
+  void Reset() {
+    response = -1;
+  }
 };
 
 class AltSignalWorld : public emp::World<AltSignalWorldDefs::org_t> {
@@ -61,9 +85,15 @@ public:
                                                                   matchbin_t,
                                                                   CustomHardware>;
   using event_lib_t = typename hardware_t::event_lib_t;
+  using base_event_t = typename hardware_t::event_t;
+  using event_t = Event<AltSignalWorldDefs::TAG_LEN>;
   using inst_lib_t = typename hardware_t::inst_lib_t;
   using inst_t = typename hardware_t::inst_t;
   using inst_prop_t = typename hardware_t::InstProperty;
+
+  // using event_handler_fun_t = std::function<void(hardware_t &, const event_t &)>;     ///< Type alias for event-handler functions.
+  // using event_dispatcher_fun_t = std::function<void(hardware_t &, const event_t &)>;  ///< Type alias for event-dispatcher functions.
+  // using event_dispatcher_set_t = emp::FunctionSet<void(hardware_t &, const event_t &)>;    ///< Type alias for dispatcher function set type.
 
   /// State of the environment during an evaluation.
   struct Environment {
@@ -83,6 +113,7 @@ protected:
   size_t POP_SIZE;
   // Environment group
   size_t NUM_SIGNAL_RESPONSES;
+  size_t NUM_ENV_CYCLES;
   // Program group
   size_t MIN_FUNC_CNT;
   size_t MAX_FUNC_CNT;
@@ -97,6 +128,8 @@ protected:
   bool setup = false;                       ///< Has this world been setup already?
   emp::Ptr<inst_lib_t> inst_lib;            ///< Manages SignalGP instruction set.
   emp::Ptr<event_lib_t> event_lib;          ///< Manages SignalGP events.
+
+  size_t event_id__env_sig;
 
   emp::Ptr<hardware_t> eval_hardware;       ///< Used to evaluate programs.
 
@@ -113,6 +146,8 @@ protected:
 
   void DoEvaluation();
   void DoSelection();
+
+  void EvaluateOrg(org_t & org);
 
 public:
   AltSignalWorld() {}
@@ -144,6 +179,7 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   POP_SIZE = config.POP_SIZE();
   // environment group
   NUM_SIGNAL_RESPONSES = config.NUM_SIGNAL_RESPONSES();
+  NUM_ENV_CYCLES = config.NUM_ENV_CYCLES();
   // program group
   MIN_FUNC_CNT = config.MIN_FUNC_CNT();
   MAX_FUNC_CNT = config.MAX_FUNC_CNT();
@@ -221,6 +257,13 @@ void AltSignalWorld::InitEventLib() {
   if (!setup) event_lib = emp::NewPtr<event_lib_t>();
   event_lib->Clear();
   // TODO! (after we figure out how evaluation will work)
+  // Setup event: EnvSignal
+  // Args: name, handler_fun, dispatchers, desc
+  event_id__env_sig = event_lib->AddEvent("EnvironmentSignal",
+                                          [this](hardware_t & hw, const base_event_t & e) {
+                                            const event_t & event = static_cast<const event_t&>(e);
+                                            hw.SpawnThreadWithTag(event.GetTag());
+                                          });
 }
 
 void AltSignalWorld::InitPop() {
@@ -244,6 +287,26 @@ void AltSignalWorld::InitPop_Random() {
   }
 }
 
+/// Evaluate entire population.
+void AltSignalWorld::DoEvaluation() {
+  for (size_t org_id = 0; org_id < this->GetSize(); ++org_id) {
+    emp_assert(this->IsOccupied(org_id));
+    EvaluateOrg(this->GetOrg(org_id));
+  }
+}
+
+void AltSignalWorld::EvaluateOrg(org_t & org) {
+  eval_environment.ResetEnv();
+  org.GetPhenotype().Reset();
+  // Ready the hardware! Load organism program, reset the custom hardware component.
+  eval_hardware->SetProgram(org.GetGenome().program);
+  eval_hardware->GetCustomComponent().Reset();
+  // Evaluate organism in the environment!
+  for (size_t cycle = 0; cycle < NUM_ENV_CYCLES; ++cycle) {
+    eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.env_signal_tag));
+    // TODO!
+  }
+}
 // ---- PUBLIC IMPLEMENTATIONS ----
 
 void AltSignalWorld::Setup(const AltSignalConfig & config) {

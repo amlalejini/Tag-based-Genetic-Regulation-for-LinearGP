@@ -11,6 +11,7 @@ EMP_BUILD_CONFIG(AltSignalConfig,
 
   GROUP(ENVIRONMENT_GROUP, "Environment settings"),
     VALUE(NUM_SIGNAL_RESPONSES, size_t, 2, "How many responses are there to the environment signal?"),
+    VALUE(NUM_ENV_CYCLES, size_t, 8, "How many times does the environment cycle?"),
 
   GROUP(PROGRAM_GROUP, "Program settings"),
     VALUE(MIN_FUNC_CNT, size_t, 0, "Minimum number of functions per program."),

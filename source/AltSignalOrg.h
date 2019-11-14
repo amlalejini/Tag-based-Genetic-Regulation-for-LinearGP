@@ -21,6 +21,14 @@ public:
 
   struct AltSignalPhenotype {
     double resources_consumed=0.0;
+    size_t correct_resp_cnt=0;      ///< How many correct responses did organism achieve during evaluation?
+    size_t no_resp_cnt=0;           ///< How many 'no response' updates did organism have during evaluation?
+
+    void Reset() {
+      resources_consumed = 0;
+      correct_resp_cnt = 0;
+      no_resp_cnt = 0;
+    }
   };
 
 protected:
