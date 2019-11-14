@@ -9,6 +9,9 @@ EMP_BUILD_CONFIG(AltSignalConfig,
     VALUE(GENERATIONS, size_t, 100, "How many generations do we evolve things?"),
     VALUE(POP_SIZE, size_t, 100, "How big is our population?"),
 
+  GROUP(ENVIRONMENT_GROUP, "Environment settings"),
+    VALUE(NUM_SIGNAL_RESPONSES, size_t, 2, "How many responses are there to the environment signal?"),
+
   GROUP(PROGRAM_GROUP, "Program settings"),
     VALUE(MIN_FUNC_CNT, size_t, 0, "Minimum number of functions per program."),
     VALUE(MAX_FUNC_CNT, size_t, 32, "Maximum number of functions per program."),

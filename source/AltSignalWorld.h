@@ -3,6 +3,8 @@
  *
  **/
 
+ // TODO - output file showing how world was initialized
+
 #ifndef _ALT_SIGNAL_WORLD_H
 #define _ALT_SIGNAL_WORLD_H
 
@@ -67,13 +69,20 @@ public:
   struct Environment {
     size_t num_states=0;
     size_t cur_state=0;
-    tag_t env_signal=tag_t();
+    tag_t env_signal_tag=tag_t();
+
+    void ResetEnv() { cur_state = 0; }
+    void AdvanceEnv() {
+      if (++cur_state >= num_states) cur_state = 0;
+    }
   };
 
 protected:
   // Default group
   size_t GENERATIONS;
   size_t POP_SIZE;
+  // Environment group
+  size_t NUM_SIGNAL_RESPONSES;
   // Program group
   size_t MIN_FUNC_CNT;
   size_t MAX_FUNC_CNT;
@@ -97,6 +106,7 @@ protected:
   void InitInstLib();
   void InitEventLib();
   void InitHardware();
+  void InitEnvironment();
 
   void InitPop();
   void InitPop_Random();
@@ -132,6 +142,8 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   // default group
   GENERATIONS = config.GENERATIONS();
   POP_SIZE = config.POP_SIZE();
+  // environment group
+  NUM_SIGNAL_RESPONSES = config.NUM_SIGNAL_RESPONSES();
   // program group
   MIN_FUNC_CNT = config.MIN_FUNC_CNT();
   MAX_FUNC_CNT = config.MAX_FUNC_CNT();
@@ -153,6 +165,17 @@ void AltSignalWorld::InitHardware() {
   eval_hardware->SetActiveThreadLimit(MAX_ACTIVE_THREAD_CNT);
   eval_hardware->SetThreadCapacity(MAX_THREAD_CAPACITY);
   emp_assert(eval_hardware->ValidateThreadState());
+}
+
+/// Initialize the environment.
+void AltSignalWorld::InitEnvironment() {
+  eval_environment.num_states = NUM_SIGNAL_RESPONSES;
+  eval_environment.env_signal_tag = emp::BitSet<AltSignalWorldDefs::TAG_LEN>(*random_ptr, 0.5);
+  eval_environment.ResetEnv();
+  std::cout << "--- ENVIRONMENT SETUP ---" << std::endl;
+  std::cout << "Environment tag = ";
+  eval_environment.env_signal_tag.Print();
+  std::cout << std::endl;
 }
 
 /// Create and initialize instruction set with default instructions.
@@ -230,9 +253,10 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
   // Create instruction/event libraries.
   InitInstLib();
   InitEventLib();
-
   // Init evaluation hardware
   InitHardware();
+  // Init evaluation environment
+  InitEnvironment();
 
   this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
 
