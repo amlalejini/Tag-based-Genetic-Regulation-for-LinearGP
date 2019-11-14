@@ -79,17 +79,24 @@ protected:
   size_t MAX_FUNC_CNT;
   size_t MIN_FUNC_INST_CNT;
   size_t MAX_FUNC_INST_CNT;
+  // Hardware group
+  size_t MAX_ACTIVE_THREAD_CNT;
+  size_t MAX_THREAD_CAPACITY;
 
   Environment eval_environment;
 
-  bool setup = false;
-  emp::Ptr<inst_lib_t> inst_lib;
-  emp::Ptr<event_lib_t> event_lib;
+  bool setup = false;                       ///< Has this world been setup already?
+  emp::Ptr<inst_lib_t> inst_lib;            ///< Manages SignalGP instruction set.
+  emp::Ptr<event_lib_t> event_lib;          ///< Manages SignalGP events.
+
+  emp::Ptr<hardware_t> eval_hardware;       ///< Used to evaluate programs.
 
   emp::Signal<void(void)> end_setup_sig;
 
   void InitConfigs(const AltSignalConfig & config);
   void InitInstLib();
+  void InitEventLib();
+  void InitHardware();
 
   void InitPop();
   void InitPop_Random();
@@ -105,6 +112,7 @@ public:
     if (setup) {
       inst_lib.Delete();
       event_lib.Delete();
+      eval_hardware.Delete();
     }
   }
   void Reset();
@@ -121,12 +129,30 @@ public:
 /// Localize configuration parameters (as member variables) from given AltSignalConfig
 /// object.
 void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
+  // default group
   GENERATIONS = config.GENERATIONS();
   POP_SIZE = config.POP_SIZE();
+  // program group
   MIN_FUNC_CNT = config.MIN_FUNC_CNT();
   MAX_FUNC_CNT = config.MAX_FUNC_CNT();
   MIN_FUNC_INST_CNT = config.MIN_FUNC_INST_CNT();
   MAX_FUNC_INST_CNT = config.MAX_FUNC_INST_CNT();
+  // hardware group
+  MAX_ACTIVE_THREAD_CNT = config.MAX_ACTIVE_THREAD_CNT();
+  MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
+}
+
+/// Initialize hardware object.
+void AltSignalWorld::InitHardware() {
+  // If being configured for the first time, create a new hardware object.
+  if (!setup) {
+    eval_hardware = emp::NewPtr<hardware_t>(*random_ptr, inst_lib, event_lib);
+  }
+  // Configure SignalGP CPU
+  eval_hardware->Reset();
+  eval_hardware->SetActiveThreadLimit(MAX_ACTIVE_THREAD_CNT);
+  eval_hardware->SetThreadCapacity(MAX_THREAD_CAPACITY);
+  emp_assert(eval_hardware->ValidateThreadState());
 }
 
 /// Create and initialize instruction set with default instructions.
@@ -167,6 +193,13 @@ void AltSignalWorld::InitInstLib() {
   inst_lib->AddInst("Routine", emp::signalgp::lfp_inst_impl::Inst_Routine<hardware_t, inst_t>, "");
 }
 
+/// Create and initialize event library.
+void AltSignalWorld::InitEventLib() {
+  if (!setup) event_lib = emp::NewPtr<event_lib_t>();
+  event_lib->Clear();
+  // TODO! (after we figure out how evaluation will work)
+}
+
 void AltSignalWorld::InitPop() {
   this->Clear();
   InitPop_Random();
@@ -196,7 +229,12 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
 
   // Create instruction/event libraries.
   InitInstLib();
-  event_lib = emp::NewPtr<event_lib_t>();
+  InitEventLib();
+
+  // Init evaluation hardware
+  InitHardware();
+
+  this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
 
   // How should population be initialized?
   end_setup_sig.AddAction([this]() {
