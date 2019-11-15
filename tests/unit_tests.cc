@@ -12,6 +12,7 @@
 
 #include "AltSignalWorld.h"
 #include "AltSignalConfig.h"
+#include "mutation_utils.h"
 
 TEST_CASE( "Hello World", "[general]" ) {
   std::cout << "Hello tests!" << std::endl;
@@ -78,6 +79,39 @@ TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
 }
 */
 
+TEST_CASE( "LinearFunctionsProgram Mutator" ) {
+  constexpr size_t TAG_WIDTH = 16;
+  constexpr int RANDOM_SEED = 1;
+  using mem_model_t = emp::signalgp::SimpleMemoryModel;
+  using tag_t = emp::BitSet<TAG_WIDTH>;
+  using arg_t = int;
+  using matchbin_t = emp::MatchBin< size_t, emp::HammingMetric<TAG_WIDTH>, emp::RankedSelector<> >;
+  using hardware_t = emp::signalgp::LinearFunctionsProgramSignalGP<mem_model_t,
+                                                                   tag_t,
+                                                                   arg_t,
+                                                                   matchbin_t>;
+
+
+  using inst_t = typename hardware_t::inst_t;
+  using inst_lib_t = typename hardware_t::inst_lib_t;
+  using program_t = typename hardware_t::program_t;
+  using mutator_t = MutatorLinearFunctionsProgram<hardware_t, tag_t, arg_t>;
+
+  inst_lib_t inst_lib;
+  inst_lib.AddInst("Nop-A", [](hardware_t & hw, const inst_t & inst) { ; }, "No operation!");
+  inst_lib.AddInst("Nop-B", [](hardware_t & hw, const inst_t & inst) { ; }, "No operation!");
+  inst_lib.AddInst("Nop-C", [](hardware_t & hw, const inst_t & inst) { ; }, "No operation!");
+  emp::Random random(RANDOM_SEED);
+  mutator_t mutator(inst_lib);
+
+  program_t nop_prog;
+  // for (size_t f = 0; f < 3; ++f) {
+  //   nop_prog.PushFunction();
+  //   for (size_t i = 0; i < 8; ++i) nop_prog.PushInst("Nop");
+  // }
+}
+
+/*
 TEST_CASE( "AltSignalWorld ") {
   AltSignalConfig config;
   config.SEED(2);
@@ -94,3 +128,4 @@ TEST_CASE( "AltSignalWorld ") {
   world.Run();
 
 }
+*/
