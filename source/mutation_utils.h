@@ -181,17 +181,59 @@ public:
   }
 
   /// Apply function duplications to program (per-function).
-  size_t ApplyFuncDup(emp::Random & rnd, program_t & program);
+  size_t ApplyFuncDup(emp::Random & rnd, program_t & program) {
+    size_t mut_cnt = 0;
+    size_t expected_prog_len = program.GetInstCount();
+    // Perform function duplications!
+    size_t orig_func_wall = program.GetSize();
+    for (size_t fID = 0; fID < orig_func_wall; ++fID) {
+      // Should we duplicate this function?
+      if (fID < orig_func_wall &&
+          rnd.P(rate_func_dup) &&
+          (program.GetSize() < prog_func_cnt_range.GetUpper()) &&
+          (expected_prog_len + program[fID].GetSize() <= prog_total_inst))
+      {
+        // Duplicate!
+        program.PushFunction(program[fID]);
+        expected_prog_len += program[fID].GetSize();
+        ++mut_cnt;
+      }
+    }
+    return mut_cnt;
+  }
+
   /// Apply function deletions to program (per-function).
-  size_t ApplyFuncDel(emp::Random & rnd, program_t & program);
+  size_t ApplyFuncDel(emp::Random & rnd, program_t & program) {
+    size_t mut_cnt = 0;
+    size_t expected_prog_len = program.GetInstCount();
+    // Perform function deletions!
+    for (int fID = 0; fID < (int)program.GetSize(); ++fID) {
+      // Should we delete this function?
+      if (rnd.P(rate_func_del) &&
+          program.GetSize() > prog_func_cnt_range.GetLower())
+      {
+        expected_prog_len -= program[(size_t)fID].GetSize();
+        program[(size_t)fID] = program[program.GetSize() - 1];
+        program.PopFunction();
+        ++mut_cnt;
+        fID -= 1;
+        continue;
+      }
+    }
+    return mut_cnt;
+  }
+
   /// Apply function tag bit-flip mutations.
-  size_t ApplyFuncTagBF(emp::Random & rnd, program_t & program);
-
-
-
+  size_t ApplyFuncTagBF(emp::Random & rnd, program_t & program) {
+    size_t mut_cnt = 0;
+    // Perform function tag mutations!
+    for (size_t fID = 0; fID < program.GetSize(); ++fID) {
+      for (tag_t & tag : program[fID].GetTags()) {
+        mut_cnt += ApplyTagBitFlips(rnd, tag, rate_func_tag_bit_flip);
+      }
+    }
+    return mut_cnt;
+  }
 };
-
-  // template<typename Hardware>
-  // class SignalGPMutatorFacade : public SignalGPMutator<Hardware::affinity_width, typename Hardware::trait_t, typename Hardware::matchbin_t> { } ;
 
 #endif
