@@ -175,8 +175,35 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
   REQUIRE(nop_prog.GetSize() == FUNC_CNT_RANGE.GetLower());
   REQUIRE(mutator.VerifyProgram(nop_prog));
 
+  // Generate many random programs, apply mutations, check constraints.
+  mutator.SetRateInstArgSub(0.25);
+  mutator.SetRateInstArgTagBF(0.25);
+  mutator.SetRateInstSub(0.25);
+  mutator.SetRateInstIns(0.25);
+  mutator.SetRateInstDel(0.25);
+  mutator.SetRateSeqSlip(0.25);
+  mutator.SetRateFuncDup(0.25);
+  mutator.SetRateFuncDel(0.25);
+  mutator.SetRateFuncTagBF(0.25);
+  for (size_t i = 0; i < 1000; ++i) {
+    program_t prog(emp::signalgp::GenRandLinearFunctionsProgram<hardware_t, TAG_WIDTH>(
+                                              random, inst_lib,
+                                              1,
+                                              16,
+                                              NUM_FUNC_TAGS,
+                                              FUNC_LEN_RANGE.GetLower(),
+                                              64,
+                                              NUM_INST_TAGS,
+                                              NUM_INST_ARGS,
+                                              ARG_VAL_RANGE.GetLower(),
+                                              ARG_VAL_RANGE.GetUpper()));
+    REQUIRE(mutator.VerifyProgram(prog));
+    for (size_t m = 0; m < 100; ++m) {
+      mutator.ApplyAll(random, prog);
+      REQUIRE(mutator.VerifyProgram(prog));
+    }
+  }
 }
-
 /*
 TEST_CASE( "AltSignalWorld ") {
   AltSignalConfig config;
@@ -193,5 +220,4 @@ TEST_CASE( "AltSignalWorld ") {
   world.Setup(config);
   world.Run();
 
-}
-*/
+}*/

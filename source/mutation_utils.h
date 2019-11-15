@@ -148,8 +148,13 @@ public:
       const uint32_t num_ins = rnd.GetRandBinomial(program[fID].GetSize(), rate_inst_ins);
       emp::vector<size_t> ins_locs;
       if (num_ins > 0) {
-        ins_locs = emp::RandomUIntVector(rnd, num_ins, 0, program[fID].GetSize());
-        std::sort(ins_locs.rbegin(), ins_locs.rend());
+        if (program[fID].GetSize()) {
+          ins_locs = emp::RandomUIntVector(rnd, num_ins, 0, program[fID].GetSize());
+          // std::sort(ins_locs.rbegin(), ins_locs.rend());
+          std::sort(ins_locs.begin(), ins_locs.end(), std::greater<size_t>());
+        } else {
+          ins_locs.resize(num_ins, 0); // If function len is 0, just put all insertions at beginning.
+        }
       }
       size_t read_head = 0;
       while (read_head < program[fID].GetSize()) {
@@ -189,7 +194,7 @@ public:
     size_t expected_prog_len = program.GetInstCount();
     // Perform per-function slip mutations.
     for (size_t fID = 0; fID < program.GetSize(); ++fID) {
-      if (!rnd.P(rate_seq_slip)) continue; // don't do it here
+      if (!rnd.P(rate_seq_slip) || program[fID].GetSize() == 0) continue; // don't do it here
       size_t begin = rnd.GetUInt(program[fID].GetSize());
       size_t end = rnd.GetUInt(program[fID].GetSize());
       const bool dup = begin < end;
@@ -283,16 +288,16 @@ public:
   /// Verify that the given program (prog) is within the constraints associated with this SignalGPMutator object.
   /// Useful for mutator testing.
   bool VerifyProgram(program_t & prog) {
-    if (prog.GetInstCount() > prog_total_inst) return false;
-    if (!prog_func_cnt_range.Valid(prog.GetSize())) return false;
+    if (prog.GetInstCount() > prog_total_inst) { return false; }
+    if (!prog_func_cnt_range.Valid(prog.GetSize())) { return false; }
     for (size_t fID = 0; fID < prog.GetSize(); ++fID) {
-      if (!prog_func_inst_range.Valid(prog[fID].GetSize())) return false;
-      if (prog[fID].GetTags().size() != prog_func_num_tags) return false;
+      if (!prog_func_inst_range.Valid(prog[fID].GetSize())) { return false; }
+      if (prog[fID].GetTags().size() != prog_func_num_tags) { return false; }
       for (size_t iID = 0; iID < prog[fID].GetSize(); ++iID) {
-        if (prog[fID][iID].GetArgs().size() != prog_inst_num_args) return false;
-        if (prog[fID][iID].GetTags().size() != prog_inst_num_tags) return false;
+        if (prog[fID][iID].GetArgs().size() != prog_inst_num_args) { return false; }
+        if (prog[fID][iID].GetTags().size() != prog_inst_num_tags) { return false; }
         for (size_t k = 0; k < prog[fID][iID].GetArgs().size(); ++k) {
-          if (!prog_inst_arg_val_range.Valid(prog[fID][iID].GetArg(k))) return false;
+          if (!prog_inst_arg_val_range.Valid(prog[fID][iID].GetArg(k))) { return false; }
         }
       }
     }

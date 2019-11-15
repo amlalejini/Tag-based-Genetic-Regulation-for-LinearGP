@@ -407,7 +407,7 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
     std::cout << "Initializing population...";
     InitPop();
     std::cout << " Done" << std::endl;
-    this->SetAutoMutate(); // Set to automutate after initializing population!
+    // this->SetAutoMutate(); // Set to automutate after initializing population!
   });
 
   this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
