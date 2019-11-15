@@ -45,11 +45,12 @@ namespace AltSignalWorldDefs {
 
 /// Custom Event type!
 template<size_t W>
-struct Event : emp::signalgp::BaseEvent {
+struct Event : public emp::signalgp::BaseEvent {
   using tag_t = emp::BitSet<W>;
   tag_t tag;
 
-  Event(size_t _id, tag_t _tag) : BaseEvent(_id), tag(_tag) {}
+  Event(size_t _id, tag_t _tag)
+    : BaseEvent(_id), tag(_tag) { ; }
 
   tag_t & GetTag() { return tag; }
   const tag_t & GetTag() const { return tag; }
@@ -63,7 +64,7 @@ struct Event : emp::signalgp::BaseEvent {
 
 /// Custom hardware component for SignalGP.
 struct CustomHardware {
-  int response=-1;
+  int response = -1;
 
   void Reset() {
     response = -1;
@@ -137,6 +138,8 @@ protected:
 
   emp::Signal<void(void)> end_setup_sig;
 
+  size_t best_org_id=0;
+
   void InitConfigs(const AltSignalConfig & config);
   void InitInstLib();
   void InitEventLib();
@@ -148,6 +151,7 @@ protected:
 
   void DoEvaluation();
   void DoSelection();
+  void DoUpdate();
 
   void EvaluateOrg(org_t & org);
 
@@ -162,12 +166,14 @@ public:
       eval_hardware.Delete();
     }
   }
-  void Reset();
 
   /// Setup world!
   void Setup(const AltSignalConfig & config);
 
+  /// Advance world by a single time step (generation).
   void RunStep();
+
+  /// Run world for configured number of generations.
   void Run();
 };
 
@@ -265,6 +271,7 @@ void AltSignalWorld::InitInstLib() {
       for (size_t thread_id : hw.GetActiveThreadIDs()) {
         hw.GetThread(thread_id).SetDead();
       }
+      // emp_assert(hw.ValidateThreadState());
     }, "Set organism response to environment.");
   }
 
@@ -280,6 +287,7 @@ void AltSignalWorld::InitEventLib() {
   event_id__env_sig = event_lib->AddEvent("EnvironmentSignal",
                                           [this](hardware_t & hw, const base_event_t & e) {
                                             const event_t & event = static_cast<const event_t&>(e);
+                                            emp_assert(eval_environment.env_signal_tag == event.GetTag());
                                             hw.SpawnThreadWithTag(event.GetTag());
                                           });
 }
@@ -307,10 +315,29 @@ void AltSignalWorld::InitPop_Random() {
 
 /// Evaluate entire population.
 void AltSignalWorld::DoEvaluation() {
+  best_org_id = 0;
   for (size_t org_id = 0; org_id < this->GetSize(); ++org_id) {
     emp_assert(this->IsOccupied(org_id));
+    // std::cout << "-- Evaluate Organism ("<<org_id<<") --" << std::endl;
     EvaluateOrg(this->GetOrg(org_id));
+    if (CalcFitnessID(org_id) > CalcFitnessID(best_org_id)) best_org_id = org_id;
   }
+}
+
+void AltSignalWorld::DoSelection() {
+  // TODO
+}
+
+void AltSignalWorld::DoUpdate() {
+  // TODO
+  // Log current update, Best fitness
+  const double max_fit = CalcFitnessID(best_org_id);
+  const bool found_sol = GetOrg(best_org_id).GetPhenotype().correct_resp_cnt == NUM_ENV_CYCLES;
+  std::cout << "update: " << this->GetUpdate() << "; ";
+  std::cout << "best score (" << best_org_id << "): " << max_fit << "; ";
+  std::cout << "solution found: " << found_sol << std::endl;
+  // this->Update();
+  // this->ClearCache();
 }
 
 /// Evaluate a single organism.
@@ -318,10 +345,13 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
   eval_environment.ResetEnv();
   org.GetPhenotype().Reset();
   // Ready the hardware! Load organism program, reset the custom hardware component.
+  // eval_hardware->Reset();
   eval_hardware->SetProgram(org.GetGenome().program);
-  eval_hardware->GetCustomComponent().Reset();
+  emp_assert(eval_hardware->ValidateThreadState());
+  emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
   // Evaluate organism in the environment!
   for (size_t cycle = 0; cycle < NUM_ENV_CYCLES; ++cycle) {
+    eval_hardware->GetCustomComponent().Reset();
     eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.env_signal_tag));
     // Step hardware! If at any point there are no active || pending threads, we're done!
     for (size_t step = 0; step < CPU_TIME_PER_ENV_CYCLE; ++step) {
@@ -343,6 +373,7 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
     }
     eval_environment.AdvanceEnv();
   }
+  // std::cout << "Final - resources: "<< org.GetPhenotype().resources_consumed <<" ; correct: "<< org.GetPhenotype().correct_resp_cnt << " ; no resp: " << org.GetPhenotype().no_resp_cnt  << std::endl;
 }
 // ---- PUBLIC IMPLEMENTATIONS ----
 
@@ -359,6 +390,9 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
   InitEnvironment();
 
   this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
+  this->SetFitFun([this](org_t & org) {
+    return org.GetPhenotype().resources_consumed;
+  });
 
   // How should population be initialized?
   end_setup_sig.AddAction([this]() {
@@ -369,6 +403,19 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
 
   end_setup_sig.Trigger();
   setup = true;
+}
+
+void AltSignalWorld::Run() {
+  for (size_t u = 0; u <= GENERATIONS; ++u) {
+    RunStep();
+  }
+}
+
+void AltSignalWorld::RunStep() {
+  // (1) evaluate pop, (2) select parents, (3) update world
+  DoEvaluation();
+  DoSelection();
+  DoUpdate();
 }
 
 #endif
