@@ -19,6 +19,7 @@ public:
   using tag_t = emp::BitSet<TAG_W>;
   using arg_t = int;
   using program_t = emp::signalgp::LinearFunctionsProgram<tag_t, arg_t>;
+  using function_t = typename program_t::function_t;
   using inst_t = typename program_t::inst_t;
   using hardware_t = HARDWARE_T;
   using inst_lib_t = typename HARDWARE_T::inst_lib_t;
@@ -96,7 +97,43 @@ public:
     size_t expected_prog_len = program.GetInstCount();
     // Perform single-instruction insertion/deletions.
     for (size_t fID = 0; fID < program.GetSize(); ++fID) {
-
+      function_t new_function(program[fID].GetTags()); // Copy over tags
+      size_t expected_func_len = program[fID].GetSize();
+      // Compute number and location of insertions.
+      const uint32_t num_ins = rnd.GetRandBinomial(program[fID].GetSize(), rate_inst_ins);
+      emp::vector<size_t> ins_locs;
+      if (num_ins > 0) {
+        ins_locs = emp::RandomUIntVector(rnd, num_ins, 0, program[fID].GetSize());
+        std::sort(ins_locs.rbegin(), ins_locs.rend());
+      }
+      size_t read_head = 0;
+      while (read_head < program[fID].GetSize()) {
+        // Should we insert?
+        if (ins_locs.size() > 0) {
+          if (read_head >= ins_locs.back() &&
+              expected_func_len < prog_func_inst_range.GetUpper() &&
+              expected_prog_len < prog_total_inst)
+          {
+            // Insert a new random instruction.
+            new_function.PushInst(emp::signalgp::GenRandInst<hardware_t, TAG_W>(rnd,inst_lib, prog_inst_num_tags,prog_inst_num_args,prog_inst_arg_val_range.GetLower(),prog_inst_arg_val_range.GetUpper()));
+            ++mut_cnt;
+            ++expected_func_len;
+            ++expected_prog_len;
+            ins_locs.pop_back();
+            continue;
+          }
+        }
+        // Should we delete this instruction?
+        if (rnd.P(rate_inst_del) && expected_func_len > prog_func_inst_range.GetLower()) {
+          ++mut_cnt;
+          --expected_func_len;
+          --expected_prog_len;
+        } else {
+          new_function.PushInst(program[fID][read_head]);
+        }
+        ++read_head;
+      }
+      program[fID] = new_function;
     }
     return mut_cnt;
   }
