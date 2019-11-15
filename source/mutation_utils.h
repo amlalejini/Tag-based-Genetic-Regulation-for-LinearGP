@@ -139,7 +139,47 @@ public:
   }
 
   /// Apply slip mutations to program sequences (per-function instruction sequence).
-  size_t ApplySeqSlips(emp::Random & rnd, program_t & program);
+  size_t ApplySeqSlips(emp::Random & rnd, program_t & program) {
+    size_t mut_cnt =0;
+    size_t expected_prog_len = program.GetInstCount();
+    // Perform per-function slip mutations.
+    for (size_t fID = 0; fID < program.GetSize(); ++fID) {
+      if (!rnd.P(rate_seq_slip)) continue; // don't do it here
+      size_t begin = rnd.GetUInt(program[fID].GetSize());
+      size_t end = rnd.GetUInt(program[fID].GetSize());
+      const bool dup = begin < end;
+      const bool del = begin > end;
+      const int dup_size = (int)end - (int)begin;
+      const int del_size = (int)begin - (int)end;
+      if (dup &&
+          (expected_prog_len + (size_t)dup_size <= prog_total_inst) &&
+          (program[fID].GetSize() + (size_t)dup_size <= prog_func_inst_range.GetUpper()))
+      {
+        // Duplicate begin:end
+        const size_t new_size = program[fID].GetSize() + (size_t)dup_size;
+        function_t new_function(program[fID].GetTags());
+        for (size_t i = 0; i < new_size; ++i) {
+          if (i < end) new_function.PushInst(program[fID][i]);
+          else new_function.PushInst(program[fID][i - (size_t)dup_size]);
+        }
+        program[fID] = new_function;
+        ++mut_cnt;
+        expected_prog_len += (size_t)dup_size;
+      } else if (del && (program[fID].GetSize() - (size_t)del_size) >= prog_func_inst_range.GetLower()) {
+        // Delete end:begin
+        function_t new_function(program[fID].GetTags());
+        for (size_t i = 0; i < end; ++i)
+          new_function.PushInst(program[fID][i]);
+        for (size_t i = begin; i < program[fID].GetSize(); ++i)
+          new_function.PushInst(program[fID][i]);
+        program[fID] = new_function;
+        ++mut_cnt;
+        expected_prog_len -= (size_t)del_size;
+      }
+    }
+   return mut_cnt;
+  }
+
   /// Apply function duplications to program (per-function).
   size_t ApplyFuncDup(emp::Random & rnd, program_t & program);
   /// Apply function deletions to program (per-function).
