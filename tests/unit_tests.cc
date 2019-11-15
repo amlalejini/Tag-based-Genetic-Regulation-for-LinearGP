@@ -122,7 +122,7 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
 
   // Test 0 mutation rate on all functions.
   mutator.SetRateInstArgSub(0.0);
-  mutator.SetRateInstArgTagBF(0.0);
+  mutator.SetRateInstTagBF(0.0);
   mutator.SetRateInstSub(0.0);
   mutator.SetRateInstIns(0.0);
   mutator.SetRateInstDel(0.0);
@@ -177,7 +177,7 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
 
   // Generate many random programs, apply mutations, check constraints.
   mutator.SetRateInstArgSub(0.25);
-  mutator.SetRateInstArgTagBF(0.25);
+  mutator.SetRateInstTagBF(0.25);
   mutator.SetRateInstSub(0.25);
   mutator.SetRateInstIns(0.25);
   mutator.SetRateInstDel(0.25);

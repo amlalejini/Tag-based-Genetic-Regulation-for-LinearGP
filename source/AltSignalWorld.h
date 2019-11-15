@@ -26,7 +26,7 @@
 // Local includes
 #include "AltSignalOrg.h"
 #include "AltSignalConfig.h"
-
+#include "mutation_utils.h"
 
 // TODO - use compile args!
 namespace AltSignalWorldDefs {
@@ -93,6 +93,7 @@ public:
   using inst_lib_t = typename hardware_t::inst_lib_t;
   using inst_t = typename hardware_t::inst_t;
   using inst_prop_t = typename hardware_t::InstProperty;
+  using mutator_t = MutatorLinearFunctionsProgram<hardware_t, tag_t, inst_arg_t>;
 
   // using event_handler_fun_t = std::function<void(hardware_t &, const event_t &)>;     ///< Type alias for event-handler functions.
   // using event_dispatcher_fun_t = std::function<void(hardware_t &, const event_t &)>;  ///< Type alias for event-dispatcher functions.
@@ -126,12 +127,23 @@ protected:
   size_t MAX_THREAD_CAPACITY;
   // Selection group
   size_t TOURNAMENT_SIZE;
+  // Mutation group
+  double MUT_RATE__INST_ARG_SUB;
+  double MUT_RATE__INST_TAG_BF;
+  double MUT_RATE__INST_SUB;
+  double MUT_RATE__INST_INS;
+  double MUT_RATE__INST_DEL;
+  double MUT_RATE__SEQ_SLIP;
+  double MUT_RATE__FUNC_DUP;
+  double MUT_RATE__FUNC_DEL;
+  double MUT_RATE__FUNC_TAG_BF;
 
   Environment eval_environment;
 
   bool setup = false;                       ///< Has this world been setup already?
   emp::Ptr<inst_lib_t> inst_lib;            ///< Manages SignalGP instruction set.
   emp::Ptr<event_lib_t> event_lib;          ///< Manages SignalGP events.
+  emp::Ptr<mutator_t> mutator;
 
   size_t event_id__env_sig;
 
@@ -166,6 +178,7 @@ public:
       inst_lib.Delete();
       event_lib.Delete();
       eval_hardware.Delete();
+      mutator.Delete();
     }
   }
 
@@ -199,6 +212,16 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
   // selection group
   TOURNAMENT_SIZE = config.TOURNAMENT_SIZE();
+  // mutation group
+  MUT_RATE__INST_ARG_SUB = config.MUT_RATE__INST_ARG_SUB();
+  MUT_RATE__INST_TAG_BF = config.MUT_RATE__INST_TAG_BF();
+  MUT_RATE__INST_SUB = config.MUT_RATE__INST_SUB();
+  MUT_RATE__INST_INS = config.MUT_RATE__INST_INS();
+  MUT_RATE__INST_DEL = config.MUT_RATE__INST_DEL();
+  MUT_RATE__SEQ_SLIP = config.MUT_RATE__SEQ_SLIP();
+  MUT_RATE__FUNC_DUP = config.MUT_RATE__FUNC_DUP();
+  MUT_RATE__FUNC_DEL = config.MUT_RATE__FUNC_DEL();
+  MUT_RATE__FUNC_TAG_BF = config.MUT_RATE__FUNC_TAG_BF();
 }
 
 /// Initialize hardware object.
@@ -295,7 +318,29 @@ void AltSignalWorld::InitEventLib() {
 }
 
 void AltSignalWorld::InitMutator() {
-
+  if (!setup) { mutator = emp::NewPtr<mutator_t>(*inst_lib); }
+  // Set program constraints
+  mutator->SetProgFunctionCntRange(FUNC_CNT_RANGE);
+  mutator->SetProgFunctionInstCntRange(FUNC_LEN_RANGE);
+  mutator->SetProgInstArgValueRange({AltSignalWorldDefs::INST_MIN_ARG_VAL, AltSignalWorldDefs::INST_MAX_ARG_VAL});
+  mutator->SetTotalInstLimit(2*FUNC_LEN_RANGE.GetUpper()*FUNC_CNT_RANGE.GetUpper());
+  mutator->SetFuncNumTags(AltSignalWorldDefs::FUNC_NUM_TAGS);
+  mutator->SetInstNumTags(AltSignalWorldDefs::INST_TAG_CNT);
+  mutator->SetInstNumArgs(AltSignalWorldDefs::INST_ARG_CNT);
+  // Set mutation rates
+  mutator->SetRateInstArgSub(MUT_RATE__INST_ARG_SUB);
+  mutator->SetRateInstTagBF(MUT_RATE__INST_TAG_BF);
+  mutator->SetRateInstSub(MUT_RATE__INST_SUB);
+  mutator->SetRateInstIns(MUT_RATE__INST_INS);
+  mutator->SetRateInstDel(MUT_RATE__INST_DEL);
+  mutator->SetRateSeqSlip(MUT_RATE__SEQ_SLIP);
+  mutator->SetRateFuncDup(MUT_RATE__FUNC_DUP);
+  mutator->SetRateFuncDel(MUT_RATE__FUNC_DEL);
+  mutator->SetRateFuncTagBF(MUT_RATE__FUNC_TAG_BF);
+  // Set world mutation function.
+  this->SetMutFun([this](org_t & org, emp::Random & rnd) {
+    return mutator->ApplyAll(rnd, org.GetGenome().program);
+  });
 }
 
 void AltSignalWorld::InitPop() {
@@ -402,7 +447,7 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
     std::cout << "Initializing population...";
     InitPop();
     std::cout << " Done" << std::endl;
-    // this->SetAutoMutate(); // Set to automutate after initializing population!
+    this->SetAutoMutate(); // Set to automutate after initializing population!
   });
 
   this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.

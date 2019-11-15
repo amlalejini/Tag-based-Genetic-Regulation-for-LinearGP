@@ -61,7 +61,7 @@ public:
   void SetInstNumArgs(size_t val) { prog_inst_num_args = val; }
   void SetInstNumTags(size_t val) { prog_inst_num_tags = val; }
   void SetRateInstArgSub(double val) { rate_inst_arg_sub = val; }
-  void SetRateInstArgTagBF(double val) { rate_inst_tag_bit_flip = val; }
+  void SetRateInstTagBF(double val) { rate_inst_tag_bit_flip = val; }
   void SetRateInstSub(double val) { rate_inst_sub = val; }
   void SetRateInstIns(double val) { rate_inst_ins = val; }
   void SetRateInstDel(double val) { rate_inst_del = val; }
@@ -78,7 +78,7 @@ public:
   size_t GetInstNumArgs() const { return prog_inst_num_args; }
   size_t GetInstNumTags() const { return prog_inst_num_tags; }
   double GetRateInstArgSub() const { return rate_inst_arg_sub; }
-  double GetRateInstArgTagBF() const { return rate_inst_tag_bit_flip; }
+  double GetRateInstTagBF() const { return rate_inst_tag_bit_flip; }
   double GetRateInstSub() const { return rate_inst_sub; }
   double GetRateInstIns() const { return rate_inst_ins; }
   double GetRateInstDel() const { return rate_inst_del; }

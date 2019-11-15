@@ -27,6 +27,17 @@ EMP_BUILD_CONFIG(AltSignalConfig,
   GROUP(SELECTION_GROUP, "Selection settings"),
     VALUE(TOURNAMENT_SIZE, size_t, 7, "How big are tournaments when doing tournament selection?"),
 
+  GROUP(MUTATION_GROUP, "Mutation settings"),
+    VALUE(MUT_RATE__INST_ARG_SUB, double, 0.0, "InstArgSub rate"),
+    VALUE(MUT_RATE__INST_TAG_BF, double, 0.0, "InstArgTagBF rate"),
+    VALUE(MUT_RATE__INST_SUB, double, 0.0, "InstSub rate"),
+    VALUE(MUT_RATE__INST_INS, double, 0.0, "InstIns rate"),
+    VALUE(MUT_RATE__INST_DEL, double, 0.0, "InstDel rate"),
+    VALUE(MUT_RATE__SEQ_SLIP, double, 0.0, "SeqSlip rate"),
+    VALUE(MUT_RATE__FUNC_DUP, double, 0.0, "FuncDup rate"),
+    VALUE(MUT_RATE__FUNC_DEL, double, 0.0, "FuncDel rate"),
+    VALUE(MUT_RATE__FUNC_TAG_BF, double, 0.0, "FuncTagBF rate"),
+
   GROUP(DATA_COLLECTION_GROUP, "Data collection settings"),
 )
 
