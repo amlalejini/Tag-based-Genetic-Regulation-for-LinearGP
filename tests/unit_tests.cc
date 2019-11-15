@@ -201,20 +201,17 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
     }
   }
 }
-/*
+
 TEST_CASE( "AltSignalWorld ") {
   AltSignalConfig config;
   config.SEED(2);
-  config.POP_SIZE(100);
-  config.GENERATIONS(10);
+  config.POP_SIZE(1000);
+  config.GENERATIONS(100);
   config.NUM_SIGNAL_RESPONSES(2);
   config.NUM_ENV_CYCLES(4);
   config.CPU_TIME_PER_ENV_CYCLE(64);
-
   emp::Random random(config.SEED());
   AltSignalWorld world(random);
-
   world.Setup(config);
   world.Run();
-
-}*/
+}
