@@ -162,6 +162,19 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
   REQUIRE(copy_prog == nop_prog);
   REQUIRE(mutator.VerifyProgram(nop_prog));
 
+  // Check function duplications.
+  mutator.SetRateFuncDup(1.0);
+  size_t orig_f_cnt = nop_prog.GetSize();
+  mutator.ApplyAll(random, nop_prog);
+  REQUIRE(nop_prog.GetSize() == 2*orig_f_cnt);
+  REQUIRE(mutator.VerifyProgram(nop_prog));
+  // Check function deletions.
+  mutator.SetRateFuncDel(1.0);
+  mutator.SetRateFuncDup(0.0);
+  mutator.ApplyAll(random, nop_prog);
+  REQUIRE(nop_prog.GetSize() == FUNC_CNT_RANGE.GetLower());
+  REQUIRE(mutator.VerifyProgram(nop_prog));
+
 }
 
 /*

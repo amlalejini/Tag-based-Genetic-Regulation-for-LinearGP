@@ -85,6 +85,17 @@ public:
   double GetRateFuncDel() const { return rate_func_del; }
   double GetRateFuncTagBF() const { return rate_func_tag_bit_flip; }
 
+  size_t ApplyAll(emp::Random & rnd, program_t & program) {
+    size_t mut_cnt = 0;
+    mut_cnt += ApplyInstSubs(rnd, program);
+    mut_cnt += ApplyInstInDels(rnd, program);
+    mut_cnt += ApplySeqSlips(rnd, program);
+    mut_cnt += ApplyFuncDup(rnd, program);
+    mut_cnt += ApplyFuncDel(rnd, program);
+    mut_cnt += ApplyFuncTagBF(rnd, program);
+    return mut_cnt;
+  }
+
   /// Apply bit flips to tag @ per-bit rate.
   size_t ApplyTagBitFlips(emp::Random & rnd, tag_t & tag, double rate) {
     size_t mut_cnt = 0;
