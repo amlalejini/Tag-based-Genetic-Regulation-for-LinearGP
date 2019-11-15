@@ -9,6 +9,7 @@
 #include "tools/Random.h"
 #include "tools/MatchBin.h"
 #include "tools/matchbin_utils.h"
+#include "tools/Range.h"
 
 #include "AltSignalWorld.h"
 #include "AltSignalConfig.h"
@@ -91,7 +92,6 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
                                                                    arg_t,
                                                                    matchbin_t>;
 
-
   using inst_t = typename hardware_t::inst_t;
   using inst_lib_t = typename hardware_t::inst_lib_t;
   using program_t = typename hardware_t::program_t;
@@ -104,11 +104,64 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
   emp::Random random(RANDOM_SEED);
   mutator_t mutator(inst_lib);
 
+  emp::Range<int> ARG_VAL_RANGE = {0, 15};
+  emp::Range<size_t> FUNC_LEN_RANGE = {0, 128};
+  emp::Range<size_t> FUNC_CNT_RANGE = {1, 32};
+  size_t MAX_TOTAL_LEN = 1024;
+  size_t NUM_FUNC_TAGS = 1;
+  size_t NUM_INST_TAGS = 1;
+  size_t NUM_INST_ARGS = 3;
+
+  mutator.SetProgFunctionCntRange(FUNC_CNT_RANGE);
+  mutator.SetProgFunctionInstCntRange(FUNC_LEN_RANGE);
+  mutator.SetProgInstArgValueRange(ARG_VAL_RANGE);
+  mutator.SetTotalInstLimit(MAX_TOTAL_LEN);
+  mutator.SetFuncNumTags(NUM_FUNC_TAGS);
+  mutator.SetInstNumTags(NUM_INST_TAGS);
+  mutator.SetInstNumArgs(NUM_INST_ARGS);
+
+  // Test 0 mutation rate on all functions.
+  mutator.SetRateInstArgSub(0.0);
+  mutator.SetRateInstArgTagBF(0.0);
+  mutator.SetRateInstSub(0.0);
+  mutator.SetRateInstIns(0.0);
+  mutator.SetRateInstDel(0.0);
+  mutator.SetRateSeqSlip(0.0);
+  mutator.SetRateFuncDup(0.0);
+  mutator.SetRateFuncDel(0.0);
+  mutator.SetRateFuncTagBF(0.0);
   program_t nop_prog;
-  // for (size_t f = 0; f < 3; ++f) {
-  //   nop_prog.PushFunction();
-  //   for (size_t i = 0; i < 8; ++i) nop_prog.PushInst("Nop");
-  // }
+  size_t num_muts = 0;
+  for (size_t f = 0; f < 3; ++f) {
+    nop_prog.PushFunction(tag_t());
+    for (size_t i = 0; i < 8; ++i) nop_prog.PushInst(inst_lib, "Nop-A", {0, 0, 0}, {tag_t()});
+  }
+  program_t copy_prog(nop_prog);
+  num_muts = mutator.ApplyInstSubs(random, nop_prog);
+  REQUIRE(num_muts == 0);
+  REQUIRE(copy_prog == nop_prog);
+  REQUIRE(mutator.VerifyProgram(nop_prog));
+  num_muts = mutator.ApplyInstInDels(random, nop_prog);
+  REQUIRE(num_muts == 0);
+  REQUIRE(copy_prog == nop_prog);
+  REQUIRE(mutator.VerifyProgram(nop_prog));
+  num_muts = mutator.ApplySeqSlips(random, nop_prog);
+  REQUIRE(num_muts == 0);
+  REQUIRE(copy_prog == nop_prog);
+  REQUIRE(mutator.VerifyProgram(nop_prog));
+  num_muts = mutator.ApplyFuncDup(random, nop_prog);
+  REQUIRE(num_muts == 0);
+  REQUIRE(copy_prog == nop_prog);
+  REQUIRE(mutator.VerifyProgram(nop_prog));
+  num_muts = mutator.ApplyFuncDel(random, nop_prog);
+  REQUIRE(num_muts == 0);
+  REQUIRE(copy_prog == nop_prog);
+  REQUIRE(mutator.VerifyProgram(nop_prog));
+  num_muts = mutator.ApplyFuncTagBF(random, nop_prog);
+  REQUIRE(num_muts == 0);
+  REQUIRE(copy_prog == nop_prog);
+  REQUIRE(mutator.VerifyProgram(nop_prog));
+
 }
 
 /*

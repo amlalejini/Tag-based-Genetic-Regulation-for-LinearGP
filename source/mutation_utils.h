@@ -51,6 +51,40 @@ public:
     : inst_lib(ilib)
   { std::cout << "Hi there" << std::endl; }
 
+  void SetProgFunctionCntRange(const emp::Range<size_t> & val) { prog_func_cnt_range = val; }
+  void SetProgFunctionInstCntRange(const emp::Range<size_t> & val) { prog_func_inst_range = val; }
+  void SetProgInstArgValueRange(const emp::Range<int> & val) { prog_inst_arg_val_range = val; }
+  void SetTotalInstLimit(size_t val) { prog_total_inst = val; }
+  void SetFuncNumTags(size_t val) { prog_func_num_tags = val; }
+  void SetInstNumArgs(size_t val) { prog_inst_num_args = val; }
+  void SetInstNumTags(size_t val) { prog_inst_num_tags = val; }
+  void SetRateInstArgSub(double val) { rate_inst_arg_sub = val; }
+  void SetRateInstArgTagBF(double val) { rate_inst_tag_bit_flip = val; }
+  void SetRateInstSub(double val) { rate_inst_sub = val; }
+  void SetRateInstIns(double val) { rate_inst_ins = val; }
+  void SetRateInstDel(double val) { rate_inst_del = val; }
+  void SetRateSeqSlip(double val) { rate_seq_slip = val; }
+  void SetRateFuncDup(double val) { rate_func_dup = val; }
+  void SetRateFuncDel(double val) { rate_func_del = val; }
+  void SetRateFuncTagBF(double val) { rate_func_tag_bit_flip = val; }
+
+  const emp::Range<size_t> & GetProgFunctionCntRange() const { return prog_func_cnt_range; }
+  const emp::Range<size_t> & GetProgFunctionInstCntRange() const { return prog_func_inst_range; }
+  const emp::Range<int> & GetProgInstArgValueRange() const { return prog_inst_arg_val_range; }
+  size_t GetTotalInstLimit() const { return prog_total_inst; }
+  size_t GetFuncNumTags() const { return prog_func_num_tags; }
+  size_t GetInstNumArgs() const { return prog_inst_num_args; }
+  size_t GetInstNumTags() const { return prog_inst_num_tags; }
+  double GetRateInstArgSub() const { return rate_inst_arg_sub; }
+  double GetRateInstArgTagBF() const { return rate_inst_tag_bit_flip; }
+  double GetRateInstSub() const { return rate_inst_sub; }
+  double GetRateInstIns() const { return rate_inst_ins; }
+  double GetRateInstDel() const { return rate_inst_del; }
+  double GetRateSeqSlip() const { return rate_seq_slip; }
+  double GetRateFuncDup() const { return rate_func_dup; }
+  double GetRateFuncDel() const { return rate_func_del; }
+  double GetRateFuncTagBF() const { return rate_func_tag_bit_flip; }
+
   /// Apply bit flips to tag @ per-bit rate.
   size_t ApplyTagBitFlips(emp::Random & rnd, tag_t & tag, double rate) {
     size_t mut_cnt = 0;
@@ -233,6 +267,25 @@ public:
       }
     }
     return mut_cnt;
+  }
+
+  /// Verify that the given program (prog) is within the constraints associated with this SignalGPMutator object.
+  /// Useful for mutator testing.
+  bool VerifyProgram(program_t & prog) {
+    if (prog.GetInstCount() > prog_total_inst) return false;
+    if (!prog_func_cnt_range.Valid(prog.GetSize())) return false;
+    for (size_t fID = 0; fID < prog.GetSize(); ++fID) {
+      if (!prog_func_inst_range.Valid(prog[fID].GetSize())) return false;
+      if (prog[fID].GetTags().size() != prog_func_num_tags) return false;
+      for (size_t iID = 0; iID < prog[fID].GetSize(); ++iID) {
+        if (prog[fID][iID].GetArgs().size() != prog_inst_num_args) return false;
+        if (prog[fID][iID].GetTags().size() != prog_inst_num_tags) return false;
+        for (size_t k = 0; k < prog[fID][iID].GetArgs().size(); ++k) {
+          if (!prog_inst_arg_val_range.Valid(prog[fID][iID].GetArg(k))) return false;
+        }
+      }
+    }
+    return true;
   }
 };
 
