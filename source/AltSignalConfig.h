@@ -25,6 +25,7 @@ EMP_BUILD_CONFIG(AltSignalConfig,
     VALUE(MAX_THREAD_CAPACITY, size_t, 64, "Maximum capacity for thread memory (pending + active)."),
 
   GROUP(SELECTION_GROUP, "Selection settings"),
+    VALUE(TOURNAMENT_SIZE, size_t, 7, "How big are tournaments when doing tournament selection?"),
 
   GROUP(DATA_COLLECTION_GROUP, "Data collection settings"),
 )

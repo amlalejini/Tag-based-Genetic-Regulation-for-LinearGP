@@ -17,6 +17,7 @@
 #include "tools/string_utils.h"
 #include "control/Signal.h"
 #include "Evolve/World.h"
+#include "Evolve/World_select.h"
 // SignalGP includes
 #include "hardware/SignalGP/impls/SignalGPLinearFunctionsProgram.h"
 #include "hardware/SignalGP/utils/MemoryModel.h"
@@ -125,6 +126,8 @@ protected:
   // Hardware group
   size_t MAX_ACTIVE_THREAD_CNT;
   size_t MAX_THREAD_CAPACITY;
+  // Selection group
+  size_t TOURNAMENT_SIZE;
 
   Environment eval_environment;
 
@@ -145,6 +148,7 @@ protected:
   void InitEventLib();
   void InitHardware();
   void InitEnvironment();
+  void InitMutator();
 
   void InitPop();
   void InitPop_Random();
@@ -197,6 +201,8 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   // hardware group
   MAX_ACTIVE_THREAD_CNT = config.MAX_ACTIVE_THREAD_CNT();
   MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
+  // selection group
+  TOURNAMENT_SIZE = config.TOURNAMENT_SIZE();
 }
 
 /// Initialize hardware object.
@@ -292,6 +298,10 @@ void AltSignalWorld::InitEventLib() {
                                           });
 }
 
+void AltSignalWorld::InitMutator() {
+
+}
+
 void AltSignalWorld::InitPop() {
   this->Clear();
   InitPop_Random();
@@ -325,7 +335,8 @@ void AltSignalWorld::DoEvaluation() {
 }
 
 void AltSignalWorld::DoSelection() {
-  // TODO
+  // Keeping it simple with tournament selection!
+  emp::TournamentSelect(*this, TOURNAMENT_SIZE, POP_SIZE);
 }
 
 void AltSignalWorld::DoUpdate() {
@@ -336,8 +347,8 @@ void AltSignalWorld::DoUpdate() {
   std::cout << "update: " << this->GetUpdate() << "; ";
   std::cout << "best score (" << best_org_id << "): " << max_fit << "; ";
   std::cout << "solution found: " << found_sol << std::endl;
-  // this->Update();
-  // this->ClearCache();
+  this->Update();
+  this->ClearCache();
 }
 
 /// Evaluate a single organism.
@@ -388,17 +399,20 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
   InitHardware();
   // Init evaluation environment
   InitEnvironment();
-
-  this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
-  this->SetFitFun([this](org_t & org) {
-    return org.GetPhenotype().resources_consumed;
-  });
+  // Initialize organism mutators!.
+  InitMutator();
 
   // How should population be initialized?
   end_setup_sig.AddAction([this]() {
     std::cout << "Initializing population...";
     InitPop();
     std::cout << " Done" << std::endl;
+    this->SetAutoMutate(); // Set to automutate after initializing population!
+  });
+
+  this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
+  this->SetFitFun([this](org_t & org) {
+    return org.GetPhenotype().resources_consumed;
   });
 
   end_setup_sig.Trigger();
