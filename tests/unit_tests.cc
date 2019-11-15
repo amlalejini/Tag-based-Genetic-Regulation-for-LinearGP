@@ -188,15 +188,12 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
   for (size_t i = 0; i < 1000; ++i) {
     program_t prog(emp::signalgp::GenRandLinearFunctionsProgram<hardware_t, TAG_WIDTH>(
                                               random, inst_lib,
-                                              1,
-                                              16,
+                                              {1,16},
                                               NUM_FUNC_TAGS,
-                                              FUNC_LEN_RANGE.GetLower(),
-                                              64,
+                                              {0,64},
                                               NUM_INST_TAGS,
                                               NUM_INST_ARGS,
-                                              ARG_VAL_RANGE.GetLower(),
-                                              ARG_VAL_RANGE.GetUpper()));
+                                              ARG_VAL_RANGE));
     REQUIRE(mutator.VerifyProgram(prog));
     for (size_t m = 0; m < 100; ++m) {
       mutator.ApplyAll(random, prog);

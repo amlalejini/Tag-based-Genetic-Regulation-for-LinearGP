@@ -2,6 +2,8 @@
 #define _SIGNALGP_MUTATION_UTILS_H
 
 #include "tools/BitSet.h"
+#include "tools/Random.h"
+#include "tools/random_utils.h"
 #include "tools/Range.h"
 
 ///
@@ -165,7 +167,7 @@ public:
               expected_prog_len < prog_total_inst)
           {
             // Insert a new random instruction.
-            new_function.PushInst(emp::signalgp::GenRandInst<hardware_t, TAG_W>(rnd,inst_lib, prog_inst_num_tags,prog_inst_num_args,prog_inst_arg_val_range.GetLower(),prog_inst_arg_val_range.GetUpper()));
+            new_function.PushInst(emp::signalgp::GenRandInst<hardware_t, TAG_W>(rnd,inst_lib, prog_inst_num_tags, prog_inst_num_args, prog_inst_arg_val_range));
             ++mut_cnt;
             ++expected_func_len;
             ++expected_prog_len;

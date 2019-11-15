@@ -119,10 +119,8 @@ protected:
   size_t NUM_ENV_CYCLES;
   size_t CPU_TIME_PER_ENV_CYCLE;
   // Program group
-  size_t MIN_FUNC_CNT;
-  size_t MAX_FUNC_CNT;
-  size_t MIN_FUNC_INST_CNT;
-  size_t MAX_FUNC_INST_CNT;
+  emp::Range<size_t> FUNC_CNT_RANGE;
+  emp::Range<size_t> FUNC_LEN_RANGE;
   // Hardware group
   size_t MAX_ACTIVE_THREAD_CNT;
   size_t MAX_THREAD_CAPACITY;
@@ -194,10 +192,8 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   NUM_ENV_CYCLES = config.NUM_ENV_CYCLES();
   CPU_TIME_PER_ENV_CYCLE = config.CPU_TIME_PER_ENV_CYCLE();
   // program group
-  MIN_FUNC_CNT = config.MIN_FUNC_CNT();
-  MAX_FUNC_CNT = config.MAX_FUNC_CNT();
-  MIN_FUNC_INST_CNT = config.MIN_FUNC_INST_CNT();
-  MAX_FUNC_INST_CNT = config.MAX_FUNC_INST_CNT();
+  FUNC_CNT_RANGE = {config.MIN_FUNC_CNT(), config.MAX_FUNC_CNT()};
+  FUNC_LEN_RANGE = {config.MIN_FUNC_INST_CNT(), config.MAX_FUNC_INST_CNT()};
   // hardware group
   MAX_ACTIVE_THREAD_CNT = config.MAX_ACTIVE_THREAD_CNT();
   MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
@@ -312,13 +308,12 @@ void AltSignalWorld::InitPop_Random() {
   for (size_t i = 0; i < POP_SIZE; ++i) {
     this->Inject({emp::signalgp::GenRandLinearFunctionsProgram<hardware_t, AltSignalWorldDefs::TAG_LEN>
                                   (*random_ptr, *inst_lib,
-                                   MIN_FUNC_CNT, MAX_FUNC_CNT,
+                                   FUNC_CNT_RANGE,
                                    AltSignalWorldDefs::FUNC_NUM_TAGS,
-                                   MIN_FUNC_INST_CNT, MAX_FUNC_INST_CNT,
+                                   FUNC_LEN_RANGE,
                                    AltSignalWorldDefs::INST_TAG_CNT,
                                    AltSignalWorldDefs::INST_ARG_CNT,
-                                   AltSignalWorldDefs::INST_MIN_ARG_VAL,
-                                   AltSignalWorldDefs::INST_MAX_ARG_VAL)
+                                   {AltSignalWorldDefs::INST_MIN_ARG_VAL,AltSignalWorldDefs::INST_MAX_ARG_VAL})
                   }, 1);
   }
 }
