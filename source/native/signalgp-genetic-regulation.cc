@@ -3,15 +3,33 @@
 //  Released under MIT license; see LICENSE
 
 #include <iostream>
+#include <string>
 
 #include "base/vector.h"
+#include "config/ArgManager.h"
 #include "config/command_line.h"
 
-// This is the main function for the NATIVE version of SignalGP Genetic Regulation.
+#include "../AltSignalWorld.h"
+#include "../AltSignalConfig.h"
 
 int main(int argc, char* argv[])
 {
-  emp::vector<std::string> args = emp::cl::args_to_strings(argc, argv);
+  std::string config_fname = "config.cfg";
+  AltSignalConfig config;
+  auto args = emp::cl::ArgManager(argc, argv);
+  config.Read(config_fname);
+  if (args.ProcessConfigOptions(config, std::cout, config_fname, "config-macros.h") == false) exit(0);
+  if (args.TestUnknown() == false) exit(0); // If there are leftover args, throw an error.
 
-  std::cout << "Hello, world!" << std::endl;
+  // Write to screen how the experiment is configured
+  std::cout << "==============================" << std::endl;
+  std::cout << "|    How am I configured?    |" << std::endl;
+  std::cout << "==============================" << std::endl;
+  config.Write(std::cout);
+  std::cout << "==============================\n" << std::endl;
+
+  emp::Random random(config.SEED());
+  AltSignalWorld world(random);
+  world.Setup(config);
+  world.Run();
 }

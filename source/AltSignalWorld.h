@@ -95,10 +95,6 @@ public:
   using inst_prop_t = typename hardware_t::InstProperty;
   using mutator_t = MutatorLinearFunctionsProgram<hardware_t, tag_t, inst_arg_t>;
 
-  // using event_handler_fun_t = std::function<void(hardware_t &, const event_t &)>;     ///< Type alias for event-handler functions.
-  // using event_dispatcher_fun_t = std::function<void(hardware_t &, const event_t &)>;  ///< Type alias for event-dispatcher functions.
-  // using event_dispatcher_set_t = emp::FunctionSet<void(hardware_t &, const event_t &)>;    ///< Type alias for dispatcher function set type.
-
   /// State of the environment during an evaluation.
   struct Environment {
     size_t num_states=0;
@@ -368,7 +364,6 @@ void AltSignalWorld::DoEvaluation() {
   best_org_id = 0;
   for (size_t org_id = 0; org_id < this->GetSize(); ++org_id) {
     emp_assert(this->IsOccupied(org_id));
-    // std::cout << "-- Evaluate Organism ("<<org_id<<") --" << std::endl;
     EvaluateOrg(this->GetOrg(org_id));
     if (CalcFitnessID(org_id) > CalcFitnessID(best_org_id)) best_org_id = org_id;
   }
@@ -380,7 +375,6 @@ void AltSignalWorld::DoSelection() {
 }
 
 void AltSignalWorld::DoUpdate() {
-  // TODO
   // Log current update, Best fitness
   const double max_fit = CalcFitnessID(best_org_id);
   const bool found_sol = GetOrg(best_org_id).GetPhenotype().correct_resp_cnt == NUM_ENV_CYCLES;
