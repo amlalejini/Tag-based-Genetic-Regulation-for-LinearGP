@@ -116,6 +116,8 @@ protected:
   size_t NUM_ENV_CYCLES;
   size_t CPU_TIME_PER_ENV_CYCLE;
   // Program group
+  bool USE_FUNC_REGULATION;
+  bool USE_GLOBAL_MEMORY;
   emp::Range<size_t> FUNC_CNT_RANGE;
   emp::Range<size_t> FUNC_LEN_RANGE;
   // Hardware group
@@ -201,6 +203,8 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   NUM_ENV_CYCLES = config.NUM_ENV_CYCLES();
   CPU_TIME_PER_ENV_CYCLE = config.CPU_TIME_PER_ENV_CYCLE();
   // program group
+  USE_FUNC_REGULATION = config.USE_FUNC_REGULATION();
+  USE_GLOBAL_MEMORY = config.USE_GLOBAL_MEMORY();
   FUNC_CNT_RANGE = {config.MIN_FUNC_CNT(), config.MAX_FUNC_CNT()};
   FUNC_LEN_RANGE = {config.MIN_FUNC_INST_CNT(), config.MAX_FUNC_INST_CNT()};
   // hardware group
@@ -272,14 +276,42 @@ void AltSignalWorld::InitInstLib() {
   inst_lib->AddInst("SwapMem", emp::signalgp::inst_impl::Inst_SwapMem<hardware_t, inst_t>, "");
   inst_lib->AddInst("InputToWorking", emp::signalgp::inst_impl::Inst_InputToWorking<hardware_t, inst_t>, "");
   inst_lib->AddInst("WorkingToOutput", emp::signalgp::inst_impl::Inst_WorkingToOutput<hardware_t, inst_t>, "");
-  inst_lib->AddInst("WorkingToGlobal", emp::signalgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>, "");
-  inst_lib->AddInst("GlobalToWorking", emp::signalgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>, "");
   inst_lib->AddInst("Fork", emp::signalgp::inst_impl::Inst_Fork<hardware_t, inst_t>, "");
   inst_lib->AddInst("Terminate", emp::signalgp::inst_impl::Inst_Terminate<hardware_t, inst_t>, "");
   inst_lib->AddInst("If", emp::signalgp::lfp_inst_impl::Inst_If<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
   inst_lib->AddInst("While", emp::signalgp::lfp_inst_impl::Inst_While<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
   inst_lib->AddInst("Countdown", emp::signalgp::lfp_inst_impl::Inst_Countdown<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
   inst_lib->AddInst("Routine", emp::signalgp::lfp_inst_impl::Inst_Routine<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Terminal", emp::signalgp::inst_impl::Inst_Terminal<hardware_t, inst_t>, "");
+
+  // If we can use global memory, give programs access. Otherwise, nops.
+  if (USE_GLOBAL_MEMORY) {
+    inst_lib->AddInst("WorkingToGlobal", emp::signalgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>, "");
+    inst_lib->AddInst("GlobalToWorking", emp::signalgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>, "");
+  } else {
+    inst_lib->AddInst("Nop-WorkingToGlobal", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-GlobalToWorking", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+  }
+
+  // if (allow regulation)
+  // If we can use regulation, add instructions. Otherwise, nops.
+  if (USE_FUNC_REGULATION) {
+    inst_lib->AddInst("SetRegulator", emp::signalgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SetOwnRegulator", emp::signalgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("AdjRegulator", emp::signalgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("AdjOwnRegulator", emp::signalgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("ExtRegulator", emp::signalgp::inst_impl::Inst_ExtRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SenseRegulator", emp::signalgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SenseOwnRegulator", emp::signalgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>, "");
+  } else {
+    inst_lib->AddInst("Nop-SetRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SetOwnRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjOwnRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-ExtRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SenseRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SenseOwnRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+  }
 
   // Add response instructions
   for (size_t i = 0; i < NUM_SIGNAL_RESPONSES; ++i) {
@@ -396,7 +428,9 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
   emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
   // Evaluate organism in the environment!
   for (size_t cycle = 0; cycle < NUM_ENV_CYCLES; ++cycle) {
+    eval_hardware->BaseResetState(); // Reset threads every cycle.
     eval_hardware->GetCustomComponent().Reset();
+    emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
     eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.env_signal_tag));
     // Step hardware! If at any point there are no active || pending threads, we're done!
     for (size_t step = 0; step < CPU_TIME_PER_ENV_CYCLE; ++step) {

@@ -15,6 +15,8 @@ EMP_BUILD_CONFIG(AltSignalConfig,
     VALUE(CPU_TIME_PER_ENV_CYCLE, size_t, 128, "How many CPU steps does a SignalGP organism get during an environment cycle?"),
 
   GROUP(PROGRAM_GROUP, "Program settings"),
+    VALUE(USE_FUNC_REGULATION, bool, true, "Do programs have access to function regulation instructions?"),
+    VALUE(USE_GLOBAL_MEMORY, bool, false, "Do programs have access to global memory?"),
     VALUE(MIN_FUNC_CNT, size_t, 0, "Minimum number of functions per program."),
     VALUE(MAX_FUNC_CNT, size_t, 32, "Maximum number of functions per program."),
     VALUE(MIN_FUNC_INST_CNT, size_t, 0, "Minimum number of instructions per function."),

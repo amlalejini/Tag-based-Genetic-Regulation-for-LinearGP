@@ -2,9 +2,10 @@
 PROJECT := signalgp-genetic-regulation
 EMP_DIR := ../Empirical/source
 SGP_DIR := ../signalgp-reimplementation-playground/source
+CEREAL_DIR := ../Empirical/third-party/cereal/include
 
 # Flags to use regardless of compiler
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -I$(EMP_DIR)/ -I./source/ -I$(SGP_DIR)/
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -I$(EMP_DIR)/ -I./source/ -I$(SGP_DIR)/ -I$(CEREAL_DIR)/
 
 # Native compiler information
 CXX_nat := g++-9
