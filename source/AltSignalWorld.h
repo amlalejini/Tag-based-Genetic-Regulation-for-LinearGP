@@ -93,6 +93,8 @@ public:
   using inst_lib_t = typename hardware_t::inst_lib_t;
   using inst_t = typename hardware_t::inst_t;
   using inst_prop_t = typename hardware_t::InstProperty;
+  using program_t = typename hardware_t::program_t;
+  using program_function_t = typename program_t::function_t;
   using mutator_t = MutatorLinearFunctionsProgram<hardware_t, tag_t, inst_arg_t>;
 
   /// State of the environment during an evaluation.
@@ -152,7 +154,14 @@ protected:
 
   emp::Signal<void(void)> end_setup_sig;
 
-  size_t best_org_id=0;
+  emp::Ptr<emp::DataFile> max_fit_file;
+
+  // size_t best_org_id=0;
+
+  /// tracking information for max fitness organism in the population.
+  struct {
+    size_t org_id=0;
+  } max_fit_org_tracker;
 
   void InitConfigs(const AltSignalConfig & config);
   void InitInstLib();
@@ -171,6 +180,11 @@ protected:
 
   void EvaluateOrg(org_t & org);
 
+  // -- Utilities --
+  void PrintProgramSingleLine(const program_t & prog, std::ostream & out);
+  void PrintProgramFunction(const program_function_t & func, std::ostream & out);
+  void PrintProgramInstruction(const inst_t & inst, std::ostream & out);
+
 public:
   AltSignalWorld() {}
   AltSignalWorld(emp::Random & r) : emp::World<org_t>(r) {}
@@ -181,6 +195,7 @@ public:
       event_lib.Delete();
       eval_hardware.Delete();
       mutator.Delete();
+      max_fit_file.Delete();
     }
   }
 
@@ -401,6 +416,13 @@ void AltSignalWorld::InitPop_Random() {
 void AltSignalWorld::InitDataCollection() {
   // todo - make okay to call setup twice!
   emp_assert(!setup);
+  if (setup) {
+    max_fit_file.Delete();
+  }
+  // Some generally useful functions
+  std::function<size_t(void)> get_update = [this]() { return this->GetUpdate(); };
+
+
   // Fitness file
   // Max fitness file (solution should be last line(?))
   // Phylogeny file
@@ -414,18 +436,50 @@ void AltSignalWorld::InitDataCollection() {
   using sys_t = emp::Systematics<org_t, typename org_t::genome_t>;
   emp::Ptr<sys_t> sys_ptr = emp::NewPtr<sys_t>([](const org_t & o) { return o.GetGenome(); });
   AddSystematics(sys_ptr);
+  // TODO
 
   // --- Dominant File ---
+  max_fit_file = emp::NewPtr<emp::DataFile>("./max_fit_org.csv");
+  max_fit_file->AddFun(get_update, "update");
+  max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_tracker.org_id; }, "pop_id");
+  // max_fit_file->AddFun(, "genotype_id");
+  max_fit_file->template AddFun<bool>([this]() {
+    org_t & org = this->GetOrg(max_fit_org_tracker.org_id);
+    return org.GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;
+  }, "solution");
+  max_fit_file->template AddFun<double>([this]() {
+    return this->GetOrg(max_fit_org_tracker.org_id).GetPhenotype().GetResources();
+  }, "score");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_tracker.org_id).GetPhenotype().GetCorrectResponses();
+  }, "num_correct_responses");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_tracker.org_id).GetPhenotype().GetNoResponses();
+  }, "num_no_responses");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_tracker.org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_tracker.org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(max_fit_org_tracker.org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  max_fit_file->PrintHeaderKeys();
 
 }
 
 /// Evaluate entire population.
 void AltSignalWorld::DoEvaluation() {
-  best_org_id = 0;
+  max_fit_org_tracker.org_id = 0;
   for (size_t org_id = 0; org_id < this->GetSize(); ++org_id) {
     emp_assert(this->IsOccupied(org_id));
     EvaluateOrg(this->GetOrg(org_id));
-    if (CalcFitnessID(org_id) > CalcFitnessID(best_org_id)) best_org_id = org_id;
+    if (CalcFitnessID(org_id) > CalcFitnessID(max_fit_org_tracker.org_id)) max_fit_org_tracker.org_id = org_id;
   }
 }
 
@@ -436,13 +490,16 @@ void AltSignalWorld::DoSelection() {
 
 void AltSignalWorld::DoUpdate() {
   // Log current update, Best fitness
-  const double max_fit = CalcFitnessID(best_org_id);
-  const bool found_sol = GetOrg(best_org_id).GetPhenotype().correct_resp_cnt == NUM_ENV_CYCLES;
-  std::cout << "update: " << this->GetUpdate() << "; ";
-  std::cout << "best score (" << best_org_id << "): " << max_fit << "; ";
+  const double max_fit = CalcFitnessID(max_fit_org_tracker.org_id);
+  const bool found_sol = GetOrg(max_fit_org_tracker.org_id).GetPhenotype().correct_resp_cnt == NUM_ENV_CYCLES;
+  std::cout << "update: " << GetUpdate() << "; ";
+  std::cout << "best score (" << max_fit_org_tracker.org_id << "): " << max_fit << "; ";
   std::cout << "solution found: " << found_sol << std::endl;
-  this->Update();
-  this->ClearCache();
+  if (SUMMARY_RESOLUTION) {
+    if (!(GetUpdate() % SUMMARY_RESOLUTION)) max_fit_file->Update();
+  }
+  Update();
+  ClearCache();
 }
 
 /// Evaluate a single organism.
@@ -482,6 +539,53 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
   }
   // std::cout << "Final - resources: "<< org.GetPhenotype().resources_consumed <<" ; correct: "<< org.GetPhenotype().correct_resp_cnt << " ; no resp: " << org.GetPhenotype().no_resp_cnt  << std::endl;
 }
+
+// -- utilities --
+
+void AltSignalWorld::PrintProgramSingleLine(const program_t & prog, std::ostream & out) {
+  out << "[";
+  for (size_t func_id = 0; func_id < prog.GetSize(); ++func_id) {
+    if (func_id) out << ",";
+    PrintProgramFunction(prog[func_id], out);
+  }
+  out << "]";
+}
+
+void AltSignalWorld::PrintProgramFunction(const program_function_t & func, std::ostream & out) {
+  out << "{";
+  // print function tags
+  out << "[";
+  for (size_t tag_id = 0; tag_id < func.GetTags().size(); ++tag_id) {
+    if (tag_id) out << ",";
+    func.GetTag(tag_id).Print(out);
+  }
+  out << "]:";
+  // print instruction sequence
+  out << "[";
+  for (size_t inst_id = 0; inst_id < func.GetSize(); ++inst_id) {
+    if (inst_id) out << ",";
+    PrintProgramInstruction(func[inst_id], out);
+  }
+  out << "]";
+  out << "}";
+}
+
+void AltSignalWorld::PrintProgramInstruction(const inst_t & inst, std::ostream & out) {
+  out << inst_lib->GetName(inst.GetID()) << "[";
+  // print tags
+  for (size_t tag_id = 0; tag_id < inst.GetTags().size(); ++tag_id) {
+    if (tag_id) out << ",";
+    inst.GetTag(tag_id).Print(out);
+  }
+  out << "](";
+  // print args
+  for (size_t arg_id = 0; arg_id < inst.GetArgs().size(); ++arg_id) {
+    if (arg_id) out << ",";
+    out << inst.GetArg(arg_id);
+  }
+  out << ")";
+}
+
 // ---- PUBLIC IMPLEMENTATIONS ----
 
 void AltSignalWorld::Setup(const AltSignalConfig & config) {
@@ -510,6 +614,8 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
   this->SetFitFun([this](org_t & org) {
     return org.GetPhenotype().resources_consumed;
   });
+
+  InitDataCollection();
 
   end_setup_sig.Trigger();
   setup = true;

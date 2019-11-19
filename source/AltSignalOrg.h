@@ -30,6 +30,9 @@ public:
       return program < other.program;
     }
 
+    const program_t & GetProgram() const { return program; }
+    program_t & GetProgram() { return program; }
+
   };
 
   struct AltSignalPhenotype {
@@ -42,6 +45,10 @@ public:
       correct_resp_cnt = 0;
       no_resp_cnt = 0;
     }
+
+    double GetResources() const { return resources_consumed; }
+    size_t GetCorrectResponses() const { return correct_resp_cnt; }
+    size_t GetNoResponses() const { return no_resp_cnt; }
   };
 
 protected:
