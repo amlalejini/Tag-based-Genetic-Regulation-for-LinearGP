@@ -17,6 +17,19 @@ public:
     AltSignalGenome(const program_t & p) : program(p) {}
     AltSignalGenome(const AltSignalGenome &) = default;
     AltSignalGenome(AltSignalGenome &&) = default;
+
+    bool operator==(const AltSignalGenome & other) const {
+      return program == other.program;
+    }
+
+    bool operator!=(const AltSignalGenome & other) const {
+      return !(*this == other);
+    }
+
+    bool operator<(const AltSignalGenome & other) const {
+      return program < other.program;
+    }
+
   };
 
   struct AltSignalPhenotype {

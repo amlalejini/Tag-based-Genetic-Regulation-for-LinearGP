@@ -135,6 +135,9 @@ protected:
   double MUT_RATE__FUNC_DUP;
   double MUT_RATE__FUNC_DEL;
   double MUT_RATE__FUNC_TAG_BF;
+  // Data collection group
+  size_t SUMMARY_RESOLUTION;
+  size_t SNAPSHOT_RESOLUTION;
 
   Environment eval_environment;
 
@@ -157,6 +160,7 @@ protected:
   void InitHardware();
   void InitEnvironment();
   void InitMutator();
+  void InitDataCollection();
 
   void InitPop();
   void InitPop_Random();
@@ -222,6 +226,9 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   MUT_RATE__FUNC_DUP = config.MUT_RATE__FUNC_DUP();
   MUT_RATE__FUNC_DEL = config.MUT_RATE__FUNC_DEL();
   MUT_RATE__FUNC_TAG_BF = config.MUT_RATE__FUNC_TAG_BF();
+  // data collection group
+  SUMMARY_RESOLUTION = config.SUMMARY_RESOLUTION();
+  SNAPSHOT_RESOLUTION = config.SNAPSHOT_RESOLUTION();
 }
 
 /// Initialize hardware object.
@@ -334,7 +341,6 @@ void AltSignalWorld::InitInstLib() {
 void AltSignalWorld::InitEventLib() {
   if (!setup) event_lib = emp::NewPtr<event_lib_t>();
   event_lib->Clear();
-  // TODO! (after we figure out how evaluation will work)
   // Setup event: EnvSignal
   // Args: name, handler_fun, dispatchers, desc
   event_id__env_sig = event_lib->AddEvent("EnvironmentSignal",
@@ -389,6 +395,28 @@ void AltSignalWorld::InitPop_Random() {
                                    {AltSignalWorldDefs::INST_MIN_ARG_VAL,AltSignalWorldDefs::INST_MAX_ARG_VAL})
                   }, 1);
   }
+}
+
+/// Initialize data collection.
+void AltSignalWorld::InitDataCollection() {
+  // todo - make okay to call setup twice!
+  emp_assert(!setup);
+  // Fitness file
+  // Max fitness file (solution should be last line(?))
+  // Phylogeny file
+  //  - mutation distribution from parent
+  // Population snapshot
+
+  // --- Fitness File ---
+  SetupFitnessFile().SetTimingRepeat(SUMMARY_RESOLUTION);
+
+  // --- Systematics tracking ---
+  using sys_t = emp::Systematics<org_t, typename org_t::genome_t>;
+  emp::Ptr<sys_t> sys_ptr = emp::NewPtr<sys_t>([](const org_t & o) { return o.GetGenome(); });
+  AddSystematics(sys_ptr);
+
+  // --- Dominant File ---
+
 }
 
 /// Evaluate entire population.
