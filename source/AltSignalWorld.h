@@ -10,6 +10,9 @@
 
 // C++ std
 #include <functional>
+#include <iostream>
+#include <fstream>
+#include <sys/stat.h>
 // Empirical
 #include "tools/BitSet.h"
 #include "tools/MatchBin.h"
@@ -138,6 +141,7 @@ protected:
   double MUT_RATE__FUNC_DEL;
   double MUT_RATE__FUNC_TAG_BF;
   // Data collection group
+  std::string OUTPUT_DIR;
   size_t SUMMARY_RESOLUTION;
   size_t SNAPSHOT_RESOLUTION;
 
@@ -181,6 +185,7 @@ protected:
   void EvaluateOrg(org_t & org);
 
   // -- Utilities --
+  void DoPopulationSnapshot();
   void PrintProgramSingleLine(const program_t & prog, std::ostream & out);
   void PrintProgramFunction(const program_function_t & func, std::ostream & out);
   void PrintProgramInstruction(const inst_t & inst, std::ostream & out);
@@ -242,6 +247,7 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   MUT_RATE__FUNC_DEL = config.MUT_RATE__FUNC_DEL();
   MUT_RATE__FUNC_TAG_BF = config.MUT_RATE__FUNC_TAG_BF();
   // data collection group
+  OUTPUT_DIR = config.OUTPUT_DIR();
   SUMMARY_RESOLUTION = config.SUMMARY_RESOLUTION();
   SNAPSHOT_RESOLUTION = config.SNAPSHOT_RESOLUTION();
 }
@@ -418,6 +424,10 @@ void AltSignalWorld::InitDataCollection() {
   emp_assert(!setup);
   if (setup) {
     max_fit_file.Delete();
+  } else {
+    mkdir(OUTPUT_DIR.c_str(), ACCESSPERMS);
+    if(OUTPUT_DIR.back() != '/')
+        OUTPUT_DIR += '/';
   }
   // Some generally useful functions
   std::function<size_t(void)> get_update = [this]() { return this->GetUpdate(); };
@@ -430,7 +440,7 @@ void AltSignalWorld::InitDataCollection() {
   // Population snapshot
 
   // --- Fitness File ---
-  SetupFitnessFile().SetTimingRepeat(SUMMARY_RESOLUTION);
+  SetupFitnessFile(OUTPUT_DIR + "/fitness.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
 
   // --- Systematics tracking ---
   using sys_t = emp::Systematics<org_t, typename org_t::genome_t>;
@@ -439,7 +449,7 @@ void AltSignalWorld::InitDataCollection() {
   // TODO
 
   // --- Dominant File ---
-  max_fit_file = emp::NewPtr<emp::DataFile>("./max_fit_org.csv");
+  max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
   max_fit_file->AddFun(get_update, "update");
   max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_tracker.org_id; }, "pop_id");
   // max_fit_file->AddFun(, "genotype_id");
@@ -498,6 +508,11 @@ void AltSignalWorld::DoUpdate() {
   if (SUMMARY_RESOLUTION) {
     if (!(GetUpdate() % SUMMARY_RESOLUTION)) max_fit_file->Update();
   }
+  if (SNAPSHOT_RESOLUTION) {
+    if (!(GetUpdate() % SNAPSHOT_RESOLUTION)) {
+      DoPopulationSnapshot();
+    }
+  }
   Update();
   ClearCache();
 }
@@ -541,6 +556,46 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
 }
 
 // -- utilities --
+void AltSignalWorld::DoPopulationSnapshot() {
+  // Make a new data file for snapshot.
+  emp::DataFile snapshot_file(OUTPUT_DIR + "/pop_" + emp::to_string((int)GetUpdate()) + ".csv");
+  size_t cur_org_id = 0;
+  // Add functions.
+  snapshot_file.AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
+  snapshot_file.AddFun<size_t>([this, &cur_org_id]() { return cur_org_id; }, "pop_id");
+  // max_fit_file->AddFun(, "genotype_id");
+  snapshot_file.AddFun<bool>([this, &cur_org_id]() {
+    org_t & org = this->GetOrg(cur_org_id);
+    return org.GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;
+  }, "solution");
+  snapshot_file.template AddFun<double>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetResources();
+  }, "score");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetCorrectResponses();
+  }, "num_correct_responses");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetNoResponses();
+  }, "num_no_responses");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(cur_org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  snapshot_file.PrintHeaderKeys();
+  for (cur_org_id = 0; cur_org_id < GetSize(); ++cur_org_id) {
+    emp_assert(IsOccupied(cur_org_id));
+    snapshot_file.Update();
+  }
+}
 
 void AltSignalWorld::PrintProgramSingleLine(const program_t & prog, std::ostream & out) {
   out << "[";
