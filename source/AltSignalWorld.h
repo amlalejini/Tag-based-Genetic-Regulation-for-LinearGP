@@ -147,6 +147,7 @@ protected:
   // Default group
   size_t GENERATIONS;
   size_t POP_SIZE;
+  bool STOP_ON_SOLUTION;
   // Environment group
   size_t NUM_SIGNAL_RESPONSES;
   size_t NUM_ENV_CYCLES;
@@ -199,6 +200,7 @@ protected:
   struct {
     size_t org_id=0;
   } max_fit_org_tracker;
+  bool found_solution = false;
 
   void InitConfigs(const AltSignalConfig & config);
   void InitInstLib();
@@ -255,6 +257,7 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
   // default group
   GENERATIONS = config.GENERATIONS();
   POP_SIZE = config.POP_SIZE();
+  STOP_ON_SOLUTION = config.STOP_ON_SOLUTION();
   // environment group
   NUM_SIGNAL_RESPONSES = config.NUM_SIGNAL_RESPONSES();
   NUM_ENV_CYCLES = config.NUM_ENV_CYCLES();
@@ -515,16 +518,16 @@ void AltSignalWorld::InitDataCollection() {
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetFitness());
   }, "fitness", "Taxon fitness");
+  sys_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
+    const bool is_sol = taxon.GetData().GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;
+    return (is_sol) ? "1" : "0";
+  }, "is_solution", "Is this a solution?");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetPhenotype().GetResources());
   }, "resources_collected", "How many resources did most recent member of taxon collect?");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetPhenotype().GetCorrectResponses());
   }, "correct_signal_responses", "How many correct responses did most recent member of taxon give?");
-  sys_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
-    const bool is_sol = taxon.GetData().GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;
-    return (is_sol) ? "1" : "0";
-  }, "is_solution", "Is this a solution?");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetPhenotype().GetNoResponses());
   }, "no_signal_responses", "How many correct responses did most recent member of taxon give?");
@@ -663,20 +666,22 @@ void AltSignalWorld::DoSelection() {
 void AltSignalWorld::DoUpdate() {
   // Log current update, Best fitness
   const double max_fit = CalcFitnessID(max_fit_org_tracker.org_id);
-  const bool found_sol = GetOrg(max_fit_org_tracker.org_id).GetPhenotype().correct_resp_cnt == NUM_ENV_CYCLES;
+  found_solution = GetOrg(max_fit_org_tracker.org_id).GetPhenotype().correct_resp_cnt == NUM_ENV_CYCLES;
   std::cout << "update: " << GetUpdate() << "; ";
   std::cout << "best score (" << max_fit_org_tracker.org_id << "): " << max_fit << "; ";
-  std::cout << "solution found: " << found_sol << std::endl;
+  std::cout << "solution found: " << found_solution << std::endl;
   const size_t cur_update = GetUpdate();
   if (SUMMARY_RESOLUTION) {
-    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS) max_fit_file->Update();
+    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) max_fit_file->Update();
   }
+
   if (SNAPSHOT_RESOLUTION) {
-    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS ) {
+    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) {
       DoPopulationSnapshot();
       if (cur_update) sys_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
     }
   }
+
   Update();
   ClearCache();
 }
@@ -851,6 +856,7 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
 void AltSignalWorld::Run() {
   for (size_t u = 0; u <= GENERATIONS; ++u) {
     RunStep();
+    if (STOP_ON_SOLUTION & found_solution) break;
   }
 }
 
