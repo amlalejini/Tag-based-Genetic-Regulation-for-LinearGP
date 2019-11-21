@@ -94,9 +94,6 @@ public:
     for (auto & pair : mutations) {
       pair.second = 0;
     }
-    for (auto & pair : mutations) {
-      std::cout << "  mutations[" << pair.first << "] = " << pair.second << std::endl;
-    }
   }
 
 };

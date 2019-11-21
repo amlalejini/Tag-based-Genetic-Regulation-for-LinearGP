@@ -402,7 +402,8 @@ void AltSignalWorld::InitMutator() {
   mutator->SetRateFuncTagBF(MUT_RATE__FUNC_TAG_BF);
   // Set world mutation function.
   this->SetMutFun([this](org_t & org, emp::Random & rnd) {
-    org.ResetMutations(); // Reset organism's recorded mutations.
+    org.ResetMutations();                // Reset organism's recorded mutations.
+    mutator->ResetLastMutationTracker(); // Reset mutator mutation tracking.
     const size_t mut_cnt = mutator->ApplyAll(rnd, org.GetGenome().program);
     // Record mutations in organism.
     auto & mut_dist = mutator->GetLastMutations();
@@ -481,11 +482,106 @@ void AltSignalWorld::InitDataCollection() {
       taxon->GetData().RecordMutation(org.GetMutations());
     };
   sys_ptr->OnNew(record_taxon_mut_data);
-
+  // Add snapshot functions
+  // - fitness information (taxon->GetFitness)
+  // - phenotype information
+  //   - res collected, correct resp, no resp
+  // - mutations (counts by type)
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetFitness());
+  }, "fitness", "Taxon fitness");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetPhenotype().GetResources());
+  }, "resources_collected", "How many resources did most recent member of taxon collect?");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetPhenotype().GetCorrectResponses());
+  }, "correct_signal_responses", "How many correct responses did most recent member of taxon give?");
+  sys_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
+    const bool is_sol = taxon.GetData().GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;
+    return (is_sol) ? "1" : "0";
+  }, "is_solution", "Is this a solution?");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetPhenotype().GetNoResponses());
+  }, "no_signal_responses", "How many correct responses did most recent member of taxon give?");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+    if (taxon.GetData().HasMutationType("inst_arg_sub")) {
+      return emp::to_string(taxon.GetData().GetMutationCount("inst_arg_sub"));
+    } else {
+      return "0";
+    }
+  }, "inst_arg_sub_mut_cnt", "How many mutations from parent taxon to this taxon?");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_tag_bit_flip")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_tag_bit_flip"));
+      } else {
+        return "0";
+      }
+    }, "inst_tag_bit_flip_mut_cnt", "Mutation count");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_sub")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_sub"));
+      } else {
+        return "0";
+      }
+    }, "inst_sub_mut_cnt", "Mutation count");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_ins")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_ins"));
+      } else {
+        return "0";
+      }
+    }, "inst_ins_mut_cnt", "Mutation count");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_del")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_del"));
+      } else {
+        return "0";
+      }
+    }, "inst_del_mut_cnt", "Mutation count");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("seq_slip_dup")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("seq_slip_dup"));
+      } else {
+        return "0";
+      }
+    }, "seq_slip_dup_mut_cnt", "Mutation count");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("seq_slip_del")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("seq_slip_del"));
+      } else {
+        return "0";
+      }
+    }, "seq_slip_del_mut_cnt", "Mutation count");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("func_dup")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("func_dup"));
+      } else {
+        return "0";
+      }
+    }, "func_dup_mut_cnt", "Mutation count");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("func_del")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("func_del"));
+      } else {
+        return "0";
+      }
+    }, "func_del_mut_cnt", "Mutation count");
+  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("func_tag_bit_flip")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("func_tag_bit_flip"));
+      } else {
+        return "0";
+      }
+    }, "func_tag_bit_flip_mut_cnt", "Mutation count");
+  sys_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(taxon.GetInfo().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program", "Program representing this taxon");
   AddSystematics(sys_ptr);
   SetupSystematicsFile(0, OUTPUT_DIR + "/systematics.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
-
-  // TODO - configure phylo snapshot functions
 
   // --- Dominant File ---
   max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
@@ -546,12 +642,14 @@ void AltSignalWorld::DoUpdate() {
   std::cout << "update: " << GetUpdate() << "; ";
   std::cout << "best score (" << max_fit_org_tracker.org_id << "): " << max_fit << "; ";
   std::cout << "solution found: " << found_sol << std::endl;
+  const size_t cur_update = GetUpdate();
   if (SUMMARY_RESOLUTION) {
-    if (!(GetUpdate() % SUMMARY_RESOLUTION)) max_fit_file->Update();
+    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS) max_fit_file->Update();
   }
   if (SNAPSHOT_RESOLUTION) {
-    if (!(GetUpdate() % SNAPSHOT_RESOLUTION)) {
+    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS ) {
       DoPopulationSnapshot();
+      if (cur_update) sys_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
     }
   }
   Update();
