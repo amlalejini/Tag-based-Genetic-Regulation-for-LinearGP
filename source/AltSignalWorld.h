@@ -23,6 +23,7 @@
 #include "Evolve/World_select.h"
 // SignalGP includes
 #include "hardware/SignalGP/impls/SignalGPLinearFunctionsProgram.h"
+#include "hardware/SignalGP/utils/LinearFunctionsProgram.h"
 #include "hardware/SignalGP/utils/MemoryModel.h"
 #include "hardware/SignalGP/utils/linear_program_instructions_impls.h"
 #include "hardware/SignalGP/utils/linear_functions_program_instructions_impls.h"
@@ -99,6 +100,11 @@ public:
   using program_t = typename hardware_t::program_t;
   using program_function_t = typename program_t::function_t;
   using mutator_t = MutatorLinearFunctionsProgram<hardware_t, tag_t, inst_arg_t>;
+  using phenotype_t = typename org_t::AltSignalPhenotype;
+
+  using mut_landscape_t = emp::datastruct::mut_landscape_info<phenotype_t>;
+  using systematics_t = emp::Systematics<org_t, typename org_t::genome_t, mut_landscape_t>;
+  using taxon_t = typename systematics_t::taxon_t;
 
   /// State of the environment during an evaluation.
   struct Environment {
@@ -156,9 +162,11 @@ protected:
 
   emp::Ptr<hardware_t> eval_hardware;       ///< Used to evaluate programs.
 
+  emp::Signal<void(size_t)> after_eval_sig; ///< Triggered after organism (ID given by size_t argument) evaluation
   emp::Signal<void(void)> end_setup_sig;
 
   emp::Ptr<emp::DataFile> max_fit_file;
+  emp::Ptr<systematics_t> sys_ptr; ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
 
   // size_t best_org_id=0;
 
@@ -355,7 +363,6 @@ void AltSignalWorld::InitInstLib() {
       // emp_assert(hw.ValidateThreadState());
     }, "Set organism response to environment.");
   }
-
 }
 
 /// Create and initialize event library.
@@ -374,6 +381,7 @@ void AltSignalWorld::InitEventLib() {
 
 void AltSignalWorld::InitMutator() {
   if (!setup) { mutator = emp::NewPtr<mutator_t>(*inst_lib); }
+  mutator->ResetLastMutationTracker();
   // Set program constraints
   mutator->SetProgFunctionCntRange(FUNC_CNT_RANGE);
   mutator->SetProgFunctionInstCntRange(FUNC_LEN_RANGE);
@@ -394,7 +402,22 @@ void AltSignalWorld::InitMutator() {
   mutator->SetRateFuncTagBF(MUT_RATE__FUNC_TAG_BF);
   // Set world mutation function.
   this->SetMutFun([this](org_t & org, emp::Random & rnd) {
-    return mutator->ApplyAll(rnd, org.GetGenome().program);
+    org.ResetMutations(); // Reset organism's recorded mutations.
+    const size_t mut_cnt = mutator->ApplyAll(rnd, org.GetGenome().program);
+    // Record mutations in organism.
+    auto & mut_dist = mutator->GetLastMutations();
+    auto & org_mut_tracker = org.GetMutations();
+    org_mut_tracker["inst_arg_sub"] = mut_dist[mutator_t::MUTATION_TYPES::INST_ARG_SUB];
+    org_mut_tracker["inst_tag_bit_flip"] = mut_dist[mutator_t::MUTATION_TYPES::INST_TAG_BIT_FLIP];
+    org_mut_tracker["inst_sub"] = mut_dist[mutator_t::MUTATION_TYPES::INST_SUB];
+    org_mut_tracker["inst_ins"] = mut_dist[mutator_t::MUTATION_TYPES::INST_INS];
+    org_mut_tracker["inst_del"] = mut_dist[mutator_t::MUTATION_TYPES::INST_DEL];
+    org_mut_tracker["seq_slip_dup"] = mut_dist[mutator_t::MUTATION_TYPES::SEQ_SLIP_DUP];
+    org_mut_tracker["seq_slip_del"] = mut_dist[mutator_t::MUTATION_TYPES::SEQ_SLIP_DEL];
+    org_mut_tracker["func_dup"] = mut_dist[mutator_t::MUTATION_TYPES::FUNC_DUP];
+    org_mut_tracker["func_del"] = mut_dist[mutator_t::MUTATION_TYPES::FUNC_DEL];
+    org_mut_tracker["func_tag_bit_flip"] = mut_dist[mutator_t::MUTATION_TYPES::FUNC_TAG_BIT_FLIP];
+    return mut_cnt;
   });
 }
 
@@ -443,10 +466,26 @@ void AltSignalWorld::InitDataCollection() {
   SetupFitnessFile(OUTPUT_DIR + "/fitness.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
 
   // --- Systematics tracking ---
-  using sys_t = emp::Systematics<org_t, typename org_t::genome_t>;
-  emp::Ptr<sys_t> sys_ptr = emp::NewPtr<sys_t>([](const org_t & o) { return o.GetGenome(); });
+  sys_ptr = emp::NewPtr<systematics_t>([](const org_t & o) { return o.GetGenome(); });
+  // We want to record phenotype information AFTER organism is evaluated.
+  // - for this, we need to find the appropriate taxon post-evaluation
+  after_eval_sig.AddAction([this](size_t pop_id) {
+    emp::Ptr<taxon_t> taxon = sys_ptr->GetTaxonAt(pop_id);
+    taxon->GetData().RecordFitness(this->CalcFitnessID(pop_id));
+    taxon->GetData().RecordPhenotype(this->GetOrg(pop_id).GetPhenotype());
+  });
+  // We want to record mutations when organism is added to the population
+  // - because mutations are applied automatically by this->DoBirth => this->AddOrgAt => sys->OnNew
+  std::function<void(emp::Ptr<taxon_t>, org_t&)> record_taxon_mut_data =
+    [this](emp::Ptr<taxon_t> taxon, org_t & org) {
+      taxon->GetData().RecordMutation(org.GetMutations());
+    };
+  sys_ptr->OnNew(record_taxon_mut_data);
+
   AddSystematics(sys_ptr);
-  // TODO
+  SetupSystematicsFile(0, OUTPUT_DIR + "/systematics.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
+
+  // TODO - configure phylo snapshot functions
 
   // --- Dominant File ---
   max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
@@ -490,6 +529,8 @@ void AltSignalWorld::DoEvaluation() {
     emp_assert(this->IsOccupied(org_id));
     EvaluateOrg(this->GetOrg(org_id));
     if (CalcFitnessID(org_id) > CalcFitnessID(max_fit_org_tracker.org_id)) max_fit_org_tracker.org_id = org_id;
+    // Record phenotype information for this taxon
+    after_eval_sig.Trigger(org_id);
   }
 }
 
@@ -556,6 +597,7 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
 }
 
 // -- utilities --
+
 void AltSignalWorld::DoPopulationSnapshot() {
   // Make a new data file for snapshot.
   emp::DataFile snapshot_file(OUTPUT_DIR + "/pop_" + emp::to_string((int)GetUpdate()) + ".csv");
@@ -654,7 +696,7 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
   InitHardware();
   // Init evaluation environment
   InitEnvironment();
-  // Initialize organism mutators!.
+  // Initialize organism mutators!
   InitMutator();
 
   // How should population be initialized?

@@ -1,6 +1,7 @@
 #ifndef _SIGNALGP_MUTATION_UTILS_H
 #define _SIGNALGP_MUTATION_UTILS_H
 
+#include <unordered_map>
 #include "tools/BitSet.h"
 #include "tools/Random.h"
 #include "tools/random_utils.h"
@@ -26,6 +27,19 @@ public:
   using hardware_t = HARDWARE_T;
   using inst_lib_t = typename HARDWARE_T::inst_lib_t;
 
+  enum class MUTATION_TYPES {
+    INST_ARG_SUB = 0,
+    INST_TAG_BIT_FLIP,
+    INST_SUB,
+    INST_INS,
+    INST_DEL,
+    SEQ_SLIP_DUP,
+    SEQ_SLIP_DEL,
+    FUNC_DUP,
+    FUNC_DEL,
+    FUNC_TAG_BIT_FLIP
+  };
+
 protected:
   // Need an instruction library to know valid
   inst_lib_t & inst_lib;
@@ -48,10 +62,30 @@ protected:
   double rate_func_del=0.0;
   double rate_func_tag_bit_flip=0.0;
 
+  std::unordered_map<MUTATION_TYPES, int> last_mutation_tracker;
+
 public:
   MutatorLinearFunctionsProgram(inst_lib_t & ilib)
     : inst_lib(ilib)
-  { std::cout << "Hi there" << std::endl; }
+  {
+    ResetLastMutationTracker();
+  }
+
+  void ResetLastMutationTracker() {
+    last_mutation_tracker[MUTATION_TYPES::INST_ARG_SUB] = 0;
+    last_mutation_tracker[MUTATION_TYPES::INST_TAG_BIT_FLIP] = 0;
+    last_mutation_tracker[MUTATION_TYPES::INST_SUB] = 0;
+    last_mutation_tracker[MUTATION_TYPES::INST_INS] = 0;
+    last_mutation_tracker[MUTATION_TYPES::INST_DEL] = 0;
+    last_mutation_tracker[MUTATION_TYPES::SEQ_SLIP_DUP] = 0;
+    last_mutation_tracker[MUTATION_TYPES::SEQ_SLIP_DEL] = 0;
+    last_mutation_tracker[MUTATION_TYPES::FUNC_DUP] = 0;
+    last_mutation_tracker[MUTATION_TYPES::FUNC_DEL] = 0;
+    last_mutation_tracker[MUTATION_TYPES::FUNC_TAG_BIT_FLIP] = 0;
+  }
+
+  const std::unordered_map<MUTATION_TYPES, int> & GetLastMutations() const { return last_mutation_tracker; }
+  std::unordered_map<MUTATION_TYPES, int> & GetLastMutations() { return last_mutation_tracker; }
 
   void SetProgFunctionCntRange(const emp::Range<size_t> & val) { prog_func_cnt_range = val; }
   void SetProgFunctionInstCntRange(const emp::Range<size_t> & val) { prog_func_inst_range = val; }
@@ -87,6 +121,8 @@ public:
   double GetRateFuncDel() const { return rate_func_del; }
   double GetRateFuncTagBF() const { return rate_func_tag_bit_flip; }
 
+  /// Applies all mutation operators at current rates.
+  /// Will reset mutation tracking before applying mutations.
   size_t ApplyAll(emp::Random & rnd, program_t & program) {
     size_t mut_cnt = 0;
     mut_cnt += ApplyInstSubs(rnd, program);
@@ -118,11 +154,14 @@ public:
         inst_t & inst = program[fID][iID];
         // Mutate instruction tag(s).
         for (tag_t & tag : inst.GetTags()) {
-          mut_cnt += ApplyTagBitFlips(rnd, tag, rate_inst_tag_bit_flip);
+          const size_t tag_bf_cnt = ApplyTagBitFlips(rnd, tag, rate_inst_tag_bit_flip);
+          mut_cnt += tag_bf_cnt;
+          last_mutation_tracker[MUTATION_TYPES::INST_TAG_BIT_FLIP] += tag_bf_cnt;
         }
         // Mutate instruction operation.
         if (rnd.P(rate_inst_sub)) {
           inst.id = rnd.GetUInt(inst_lib.GetSize());
+          ++last_mutation_tracker[MUTATION_TYPES::INST_SUB];
           ++mut_cnt;
         }
         // Mutate instruction arguments.
@@ -131,6 +170,7 @@ public:
             inst.GetArgs()[k] = rnd.GetInt(prog_inst_arg_val_range.GetLower(),
                                            prog_inst_arg_val_range.GetUpper()+1);
             ++mut_cnt;
+            ++last_mutation_tracker[MUTATION_TYPES::INST_ARG_SUB];
           }
         }
       }
@@ -169,6 +209,7 @@ public:
             // Insert a new random instruction.
             new_function.PushInst(emp::signalgp::GenRandInst<hardware_t, TAG_W>(rnd,inst_lib, prog_inst_num_tags, prog_inst_num_args, prog_inst_arg_val_range));
             ++mut_cnt;
+            ++last_mutation_tracker[MUTATION_TYPES::INST_INS];
             ++expected_func_len;
             ++expected_prog_len;
             ins_locs.pop_back();
@@ -178,6 +219,7 @@ public:
         // Should we delete this instruction?
         if (rnd.P(rate_inst_del) && expected_func_len > prog_func_inst_range.GetLower()) {
           ++mut_cnt;
+          ++last_mutation_tracker[MUTATION_TYPES::INST_DEL];
           --expected_func_len;
           --expected_prog_len;
         } else {
@@ -216,6 +258,7 @@ public:
         }
         program[fID] = new_function;
         ++mut_cnt;
+        ++last_mutation_tracker[MUTATION_TYPES::SEQ_SLIP_DUP];
         expected_prog_len += (size_t)dup_size;
       } else if (del && (program[fID].GetSize() - (size_t)del_size) >= prog_func_inst_range.GetLower()) {
         // Delete end:begin
@@ -226,6 +269,7 @@ public:
           new_function.PushInst(program[fID][i]);
         program[fID] = new_function;
         ++mut_cnt;
+        ++last_mutation_tracker[MUTATION_TYPES::SEQ_SLIP_DEL];
         expected_prog_len -= (size_t)del_size;
       }
     }
@@ -249,6 +293,7 @@ public:
         program.PushFunction(program[fID]);
         expected_prog_len += program[fID].GetSize();
         ++mut_cnt;
+        ++last_mutation_tracker[MUTATION_TYPES::FUNC_DUP];
       }
     }
     return mut_cnt;
@@ -268,6 +313,7 @@ public:
         program[(size_t)fID] = program[program.GetSize() - 1];
         program.PopFunction();
         ++mut_cnt;
+        ++last_mutation_tracker[MUTATION_TYPES::FUNC_DEL];
         fID -= 1;
         continue;
       }
@@ -281,7 +327,9 @@ public:
     // Perform function tag mutations!
     for (size_t fID = 0; fID < program.GetSize(); ++fID) {
       for (tag_t & tag : program[fID].GetTags()) {
-        mut_cnt += ApplyTagBitFlips(rnd, tag, rate_func_tag_bit_flip);
+        const size_t tag_bfs = ApplyTagBitFlips(rnd, tag, rate_func_tag_bit_flip);
+        mut_cnt += tag_bfs;
+        last_mutation_tracker[MUTATION_TYPES::FUNC_TAG_BIT_FLIP] += tag_bfs;
       }
     }
     return mut_cnt;
