@@ -8,11 +8,17 @@
 #ifndef _ALT_SIGNAL_WORLD_H
 #define _ALT_SIGNAL_WORLD_H
 
+// macros courtesy of Matthew Andres Moreno
+#define STRINGVIEWIFY(s) std::string_view(IFY(s))
+#define STRINGIFY(s) IFY(s)
+#define IFY(s) #s
+
 // C++ std
 #include <functional>
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>
+#include <string_view>
 // Empirical
 #include "tools/BitSet.h"
 #include "tools/MatchBin.h"
@@ -42,8 +48,27 @@ namespace AltSignalWorldDefs {
   constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
   // matchbin <VALUE, METRIC, SELECTOR>
   using matchbin_val_t = size_t;                        // Module ID
-  using matchbin_metric_t = emp::StreakMetric<TAG_LEN>; // How should we measure tag similarity?
   using matchbin_selector_t = emp::RankedSelector<>;    // 0% min threshold
+
+  // How should we measure tag similarity?
+  using matchbin_metric_t =
+  #ifdef MATCH_METRIC
+    std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer",
+      emp::SymmetricWrapMetric<TAG_LEN>,
+    std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hamming",
+      emp::HammingMetric<TAG_LEN>,
+    std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hash",
+      emp::HashMetric<TAG_LEN>,
+    std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak",
+      emp::StreakMetric<TAG_LEN>,
+      std::enable_if<false>
+    >::type
+    >::type
+    >::type
+    >::type;
+  #else
+    emp::StreakMetric<TAG_LEN>;
+  #endif
 
   using org_t = AltSignalOrganism<emp::BitSet<TAG_LEN>,int>;
 }
@@ -792,6 +817,13 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
   InitEventLib();
   // Init evaluation hardware
   InitHardware();
+  // Print how matchbin is actually configured.
+  #ifdef MATCH_METRIC
+  // Print matchbin metric
+  std::cout << "Requested MatchBin Metric: " << STRINGVIEWIFY(MATCH_METRIC) << std::endl;
+  #endif
+  std::cout << "Configured MatchBin: " << eval_hardware->GetMatchBin().name() << std::endl;
+
   // Init evaluation environment
   InitEnvironment();
   // Initialize organism mutators!

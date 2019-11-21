@@ -4,8 +4,10 @@ EMP_DIR := ../Empirical/source
 SGP_DIR := ../signalgp-reimplementation-playground/source
 CEREAL_DIR := ../Empirical/third-party/cereal/include
 
+MATCH_METRIC := integer
+
 # Flags to use regardless of compiler
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -I$(EMP_DIR)/ -I./source/ -I$(SGP_DIR)/ -I$(CEREAL_DIR)/
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -I$(EMP_DIR)/ -I./source/ -I$(SGP_DIR)/ -I$(CEREAL_DIR)/ -DMATCH_METRIC=$(MATCH_METRIC)
 
 # Native compiler information
 CXX_nat := g++-9
@@ -36,7 +38,7 @@ debug-web:	$(PROJECT).js
 web-debug:	debug-web
 
 $(PROJECT):	source/native/$(PROJECT).cc
-	$(CXX_nat) $(CFLAGS_nat) source/native/$(PROJECT).cc -o $(PROJECT)
+	$(CXX_nat) $(CFLAGS_nat) source/native/$(PROJECT).cc -o $(PROJECT)_match-metric-$(MATCH_METRIC)
 	@echo To build the web version use: make web
 
 $(PROJECT).js: source/web/$(PROJECT)-web.cc
@@ -48,7 +50,7 @@ serve:
 	python3 -m http.server
 
 clean:
-	rm -f $(PROJECT) web/$(PROJECT).js web/*.js.map web/*.js.map *~ source/*.o web/*.wasm web/*.wast test_debug.out test_optimized.out unit_tests.gcda unit_tests.gcno
+	rm -f $(PROJECT) $(PROJECT)_match-metric-* web/$(PROJECT).js web/*.js.map web/*.js.map *~ source/*.o web/*.wasm web/*.wast test_debug.out test_optimized.out unit_tests.gcda unit_tests.gcno
 	rm -rf test_debug.out.dSYM
 	rm -rf signalgp-genetic-regulation.dSYM
 
