@@ -50,7 +50,7 @@ namespace AltSignalWorldDefs {
   // matchbin <VALUE, METRIC, SELECTOR>
   using matchbin_val_t = size_t;                        // Module ID
   // using matchbin_selector_t = emp::RankedSelector<>;    // 0% min threshold
-  using matchbin_selector_t = emp::RankedSelector<std::ratio<TAG_LEN+(TAG_LEN/2), TAG_LEN>>;    // 25% min threshold
+  using matchbin_selector_t = emp::RankedSelector<std::ratio<TAG_LEN+(TAG_LEN/4), TAG_LEN>>;    // 25% min threshold
   // using matchbin_selector_t = emp::RankedSelector<std::ratio<TAG_LEN+(TAG_LEN/2), TAG_LEN>>;    // 50% min threshold
 
   // How should we measure tag similarity?
