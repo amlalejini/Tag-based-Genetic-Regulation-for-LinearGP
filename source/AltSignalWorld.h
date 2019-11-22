@@ -19,6 +19,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <string_view>
+#include <limits>
 // Empirical
 #include "tools/BitSet.h"
 #include "tools/MatchBin.h"
@@ -48,7 +49,9 @@ namespace AltSignalWorldDefs {
   constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
   // matchbin <VALUE, METRIC, SELECTOR>
   using matchbin_val_t = size_t;                        // Module ID
-  using matchbin_selector_t = emp::RankedSelector<>;    // 0% min threshold
+  // using matchbin_selector_t = emp::RankedSelector<>;    // 0% min threshold
+  using matchbin_selector_t = emp::RankedSelector<std::ratio<TAG_LEN+(TAG_LEN/25), TAG_LEN>>;    // 25% min threshold
+  // using matchbin_selector_t = emp::RankedSelector<std::ratio<TAG_LEN+(TAG_LEN/2), TAG_LEN>>;    // 50% min threshold
 
   // How should we measure tag similarity?
   using matchbin_metric_t =

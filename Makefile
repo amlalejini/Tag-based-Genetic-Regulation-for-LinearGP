@@ -4,7 +4,7 @@ EMP_DIR := ../Empirical/source
 SGP_DIR := ../signalgp-reimplementation-playground/source
 CEREAL_DIR := ../Empirical/third-party/cereal/include
 
-MATCH_METRIC := integer
+MATCH_METRIC := streak
 
 # Flags to use regardless of compiler
 CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -I$(EMP_DIR)/ -I./source/ -I$(SGP_DIR)/ -I$(CEREAL_DIR)/ -DMATCH_METRIC=$(MATCH_METRIC)
