@@ -10,7 +10,7 @@
 ########## Command Lines to Run ##########
 
 DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/mut-rate-exps
-CONFIG_DIR=
+CONFIG_DIR=/mnt/home/lalejini/devo_ws/signalgp-genetic-regulation/hpcc/mut-rate-exps/configs
 
 ##################################
 # Setup random seed info
@@ -197,7 +197,10 @@ module load GCC/9.1.0-2.32;
 
 mkdir -p ${RUN_DIR}
 cd ${RUN_DIR}
-cp -R ${CONFIG_DIR}/* .
+cp ${CONFIG_DIR}/config.cfg .
+cp ${CONFIG_DIR}/${EXEC} .
 
 echo "./${EXEC} -SEED ${SEED} -GENERATIONS ${GENERATIONS} -SUMMARY_RESOLUTION ${SUMMARY_RESOLUTION} -SNAPSHOT_RESOLUTION ${SNAPSHOT_RESOLUTION} -NUM_SIGNAL_RESPONSES ${NUM_SIGNAL_RESPONSES} -NUM_ENV_CYCLES ${NUM_ENV_CYCLES} -MUT_RATE__INST_TAG_BF ${MUT_RATE__INST_TAG_BF} -MUT_RATE__FUNC_TAG_BF ${MUT_RATE__FUNC_TAG_BF}" > ./cmd.txt
 ./${EXEC} -SEED ${SEED} -GENERATIONS ${GENERATIONS} -SUMMARY_RESOLUTION ${SUMMARY_RESOLUTION} -SNAPSHOT_RESOLUTION ${SNAPSHOT_RESOLUTION} -NUM_SIGNAL_RESPONSES ${NUM_SIGNAL_RESPONSES} -NUM_ENV_CYCLES ${NUM_ENV_CYCLES} -MUT_RATE__INST_TAG_BF ${MUT_RATE__INST_TAG_BF} -MUT_RATE__FUNC_TAG_BF ${MUT_RATE__FUNC_TAG_BF} > run.log
+
+rm ./${EXEC}
