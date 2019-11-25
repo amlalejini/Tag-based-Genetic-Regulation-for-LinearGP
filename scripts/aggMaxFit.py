@@ -7,6 +7,10 @@ import argparse, os, copy, errno, csv, re
 
 
 key_settings = [
+    "SEED",
+    "mbin_selector",
+    "mbin_metric",
+    "mbin_thresh",
     "NUM_SIGNAL_RESPONSES",
     "NUM_ENV_CYCLES",
     "USE_FUNC_REGULATION",
@@ -61,116 +65,69 @@ def extract_settings(log_path):
             settings[key] = val
     return settings
 
-
-'''
 def main():
     parser = argparse.ArgumentParser(description="Data aggregation script.")
-    parser.add_argument("data_directory", type=str, help="Target experiment directory.")
-    parser.add_argument("dump_directory", type=str, help="Where to dump this?")
-    parser.add_argument("-u", "--update", type=int, help="max update to look for solutions")
-
+    parser.add_argument("--data", type=str, nargs="+", help="Where should we pull data (one or more locations)?")
+    parser.add_argument("--dump", type=str, help="Where to dump this?", default=".")
+    parser.add_argument("--out_fname", type=str, help="What should we call the output file?", default="max_fit_orgs.csv")
     args = parser.parse_args()
-
-    data_directory = args.data_directory
-    dump = args.dump_directory
-
-    print("Pulling smallest network solutions from all runs in {}".format(data_directory))
-
-    mkdir_p(dump)
-
-    # Get a list of all runs
-    runs = [d for d in os.listdir(data_directory) if d.strip("PROBLEM_").split("__")[0] in problem_whitelist]
-    runs.sort()
-
-    if args.update != None:
-        update = args.update
-        print("Looking for best solutions from update {} or earlier.".format(update))
-
-        solutions_content = "treatment,run_id,problem,arg_type,arg_mut_rate,tag_rand_rate,mem_searching,solution_found,solution_length,update_found,update_first_solution_found,program\n"
-
-        for run in runs:
-            print("Run: {}".format(run))
-            run_dir = os.path.join(data_directory, run)
-            run_id = run.split("__")[-1]
-            run = "__".join(run.split("__")[:-1])
-            treatment = run
-            run_sols = os.path.join(run_dir, "output", "solutions.csv")
-
-            problem = run.strip("PROBLEM_").split("__")[0]
-
-            arg_type = None
-            for thing in arg_types:
-                if thing in treatment: arg_type = arg_types[thing]
-            if arg_type == None:
-                print("Unrecognized arg type! Exiting.")
-                exit()
-
-            arg_mut_rate = None
-            for thing in mut_rates:
-                if thing in treatment: arg_mut_rate = mut_rates[thing]
-            if arg_mut_rate == None:
-                print("Unrecognized arg mut rate! Exiting.")
-                exit()
-
-            tag_rand_rate = None
-            for thing in tag_rand_rates:
-                if thing in treatment: tag_rand_rate = tag_rand_rates[thing]
-            if tag_rand_rate == None:
-                tag_rand_rate = "NONE"
-                print("Failed to figure out tag randomization rate!")
-
-            run_log_fpath = os.path.join(run_dir, "run.log")
-            with open(run_log_fpath, "r") as logfp:
-                log_content = logfp.read()
-
-            mem_searching = None
-            if "set PROGRAM_ARGUMENTS_TYPE_SEARCH 0" in log_content:
-                mem_searching = "0"
-            else:
-                mem_searching = "1"
-
-            file_content = None
-            with open(run_sols, "r") as fp:
-                file_content = fp.read().strip().split("\n")
-
-            header = file_content[0].split(",")
-            header_lu = {header[i].strip():i for i in range(0, len(header))}
-            file_content = file_content[1:]
-
-            solutions = [l for l in csv.reader(file_content, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)]
-            # Add smallest solution to smallest solution doc
-            min_program = None
-            sol_found = False
-            if len(solutions) > 0:
-                # Find the smallest program
-                for i in range(0, len(solutions)):
-                    sol_update = int(solutions[i][header_lu["update"]])
-                    if sol_update > update: continue
-                    if min_program == None:
-                        min_program = i
-                        sol_found = True
-                    elif float(solutions[i][header_lu["program_len"]]) < float(solutions[min_program][header_lu["program_len"]]):
-                        min_program = i
-                        sol_found = True
-
-            if sol_found:
-                # Record timing info about first solution
-                update_first_sol = solutions[0][header_lu["update"]]
-                # Record info about smallest solution
-                min_sol = solutions[min_program]
-                program_len = min_sol[header_lu["program_len"]]
-                update_found = min_sol[header_lu["update"]]
-                program = min_sol[header_lu["program"]]
-            else:
-                update_first_sol = "NONE"
-                program_len = "NONE"
-                update_found = "NONE"
-                program = "NONE"
-            # "treatment,run_id,problem,uses_cohorts,solution_found,solution_length,update_found,program\n"
-            solutions_content += ",".join(map(str,[treatment, run_id, problem, arg_type, arg_mut_rate, tag_rand_rate, mem_searching, sol_found, program_len, update_found, update_first_sol, '"{}"'.format(program)])) + "\n"
-        with open(os.path.join(dump, "min_programs__update_{}.csv".format(update)), "w") as fp:
-            fp.write(solutions_content)
-'''
+    data_dirs = args.data
+    dump_dir = args.dump
+    dump_fname = args.out_fname
+    # Are all data directories for real?
+    if any([not os.path.exists(loc) for loc in data_dirs]):
+        print("Unable to locate all data directories. Able to locate:", {loc: os.path.exists(loc) for loc in data_dirs})
+        exit(-1)
+    # Aggregate a list of all runs
+    run_dirs = [os.path.join(data_dir, run_dir) for data_dir in data_dirs for run_dir in os.listdir(data_dir) if "__SEED_" in run_dir]
+    print(f"Found {len(run_dirs)} run directories.")
+    header_set = set() # Use this to guarantee all organism file headers match.
+    # For each run, aggregate max fitness organism information.
+    max_fits = []
+    for run in run_dirs:
+        log_path = os.path.join(run, "run.log")
+        if not os.path.exists(log_path):
+            print(f"Failed to find run.log ({log_path})")
+            exit(-1)
+        max_fit_path = os.path.join(run, "output", "max_fit_org.csv")
+        if not os.path.exists(max_fit_path):
+            print(f"Failed to find max_fit_org.csv ({max_fit_path})")
+            exit(-1)
+        # Extract run settings.
+        run_settings = extract_settings(log_path)
+        # Find highest fitness organism for this run.
+        content = None
+        with open(max_fit_path, "r") as fp:
+            content = fp.read().strip().split("\n")
+        header = content[0].split(",")
+        header_lu = {header[i].strip():i for i in range(0, len(header))}
+        content = content[1:]
+        orgs = [l for l in csv.reader(content, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)]
+        if len(orgs) < 1:
+            print(f"Where 'dem fit organisms at? ({max_fit_path})")
+            exit(-1)
+        # Find the best organism
+        best_org_id = 0
+        for i in range(len(orgs)):
+            if orgs[i][header_lu["score"]] > orgs[best_org_id][header_lu["score"]]:
+                best_org_id = i
+        # Guarantee header uniqueness
+        header_set.add(",".join([key for key in key_settings] + header))
+        if len(header_set) > 1:
+            print(f"Header mismatch! ({max_fit_path})")
+            exit(-1)
+        # Build organism line.
+        # - do some special processing on program entry
+        orgs[best_org_id][header_lu["program"]] = f"\"{orgs[best_org_id][header_lu['program']]}\""
+        max_fits.append([run_settings[key] for key in key_settings] + orgs[best_org_id])
+    # Output header + max_fit orgs
+    out_content = list(header_set)[0] + "\n" # Should be guaranteed to be length 1!
+    out_content += "\n".join([",".join(line) for line in max_fits])
+    mkdir_p(dump_dir)
+    with open(os.path.join(dump_dir, dump_fname), "w") as fp:
+        fp.write(out_content)
+    print(f"Done! Output written to {os.path.join(dump_dir, dump_fname)}")
 
 if __name__ == "__main__":
-    extract_settings("./run.log")
+    # extract_settings("./run.log")
+    main()
