@@ -19,7 +19,7 @@ key_settings = [
     "MUT_RATE__FUNC_TAG_BF"
 ]
 
-possible_metrics = ["hamming", "streak", "integer", "hash"]
+possible_metrics = ["hamming", "streak", "symmetric wrap", "hash"]
 possible_selectors = ["ranked"]
 
 def mkdir_p(path):
@@ -85,7 +85,7 @@ def main():
     # For each run, aggregate max fitness organism information.
     max_fits = []
     for run in run_dirs:
-        print(f"Extracting from {run}...")
+        print(f"Extracting from {run}")
         log_path = os.path.join(run, "run.log")
         if not os.path.exists(log_path):
             print(f"Failed to find run.log ({log_path})")
