@@ -85,6 +85,7 @@ def main():
     # For each run, aggregate max fitness organism information.
     max_fits = []
     for run in run_dirs:
+        print(f"Extracting from {run}...")
         log_path = os.path.join(run, "run.log")
         if not os.path.exists(log_path):
             print(f"Failed to find run.log ({log_path})")
