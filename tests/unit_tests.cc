@@ -19,9 +19,9 @@ TEST_CASE( "Hello World", "[general]" ) {
   std::cout << "Hello tests!" << std::endl;
 }
 
-/*
+
 TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
-  constexpr size_t TAG_WIDTH = 16;
+  constexpr size_t TAG_WIDTH = 4;
   using tag_t = emp::BitSet<TAG_WIDTH>;
   emp::HammingMetric<TAG_WIDTH> hamming_metric;
   emp::Random random(2);
@@ -39,18 +39,39 @@ TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
 
   emp::MatchBin<size_t,
                 emp::HammingMetric<TAG_WIDTH>,
-                emp::RankedSelector<std::ratio<TAG_WIDTH+(TAG_WIDTH/2), TAG_WIDTH>>
-               > matchbin_1(random); // 50% min threshold
+                emp::RankedSelector<std::ratio<TAG_WIDTH+(TAG_WIDTH/4), TAG_WIDTH>>
+               > matchbin_75(random); // 75% min threshold
 
+  emp::MatchBin<size_t,
+                emp::HammingMetric<TAG_WIDTH>,
+                emp::RankedSelector<std::ratio<TAG_WIDTH+(TAG_WIDTH/2), TAG_WIDTH>>
+               > matchbin_50(random); // 50% min threshold
+
+  emp::MatchBin<size_t,
+                emp::HammingMetric<TAG_WIDTH>,
+                emp::RankedSelector<std::ratio<TAG_WIDTH+(3*(TAG_WIDTH)/4), TAG_WIDTH>>
+               > matchbin_25(random); // 25% min threshold
+
+  emp::MatchBin<size_t,
+                emp::HammingMetric<TAG_WIDTH>,
+                emp::RankedSelector<std::ratio<TAG_WIDTH, TAG_WIDTH>>
+               > matchbin_100(random); // 100% min threshold
+  // matches by target
   for (size_t i = 0; i < tags.size(); ++i) {
     std::cout << "=== i = " << i << " ===" << std::endl;
     // Clear the matchbins.
     matchbin_0.Clear();
-    matchbin_1.Clear();
+    matchbin_25.Clear();
+    matchbin_50.Clear();
+    matchbin_75.Clear();
+    matchbin_100.Clear();
     emp::vector<size_t> matches;
     // Add focal tag to matchbin.
     matchbin_0.Set(i, tags[i], i);
-    matchbin_1.Set(i, tags[i], i);
+    matchbin_25.Set(i, tags[i], i);
+    matchbin_50.Set(i, tags[i], i);
+    matchbin_75.Set(i, tags[i], i);
+    matchbin_100.Set(i, tags[i], i);
     std::cout << "Focal tag = "; tags[i].Print(); std::cout << std::endl;
     // Does 0000 match with focal tag?
     std::cout << "Matchbin 0" << std::endl;
@@ -64,8 +85,41 @@ TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
       std::cout << " DID NOT MATCH WITH "; tags[i].Print();
       std::cout << std::endl;
     }
-    std::cout << "Matchbin 1" << std::endl;
-    matches = matchbin_1.Match(tags[0], 1);
+    std::cout << "Matchbin 25" << std::endl;
+    matches = matchbin_25.Match(tags[0], 1);
+    if (matches.size()) {
+      std::cout << "  "; tags[0].Print();
+      std::cout << " matched with "; tags[i].Print();
+      std::cout << std::endl;
+    } else {
+      std::cout << "  "; tags[0].Print();
+      std::cout << " DID NOT MATCH WITH "; tags[i].Print();
+      std::cout << std::endl;
+    }
+    std::cout << "Matchbin 50" << std::endl;
+    matches = matchbin_50.Match(tags[0], 1);
+    if (matches.size()) {
+      std::cout << "  "; tags[0].Print();
+      std::cout << " matched with "; tags[i].Print();
+      std::cout << std::endl;
+    } else {
+      std::cout << "  "; tags[0].Print();
+      std::cout << " DID NOT MATCH WITH "; tags[i].Print();
+      std::cout << std::endl;
+    }
+    std::cout << "Matchbin 75" << std::endl;
+    matches = matchbin_75.Match(tags[0], 1);
+    if (matches.size()) {
+      std::cout << "  "; tags[0].Print();
+      std::cout << " matched with "; tags[i].Print();
+      std::cout << std::endl;
+    } else {
+      std::cout << "  "; tags[0].Print();
+      std::cout << " DID NOT MATCH WITH "; tags[i].Print();
+      std::cout << std::endl;
+    }
+    std::cout << "Matchbin 100" << std::endl;
+    matches = matchbin_100.Match(tags[0], 1);
     if (matches.size()) {
       std::cout << "  "; tags[0].Print();
       std::cout << " matched with "; tags[i].Print();
@@ -78,7 +132,7 @@ TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
   }
 
 }
-*/
+
 
 TEST_CASE( "LinearFunctionsProgram Mutator" ) {
   constexpr size_t TAG_WIDTH = 16;
