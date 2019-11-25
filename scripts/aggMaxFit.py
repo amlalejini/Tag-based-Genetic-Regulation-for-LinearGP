@@ -80,6 +80,8 @@ def main():
         exit(-1)
     # Aggregate a list of all runs
     run_dirs = [os.path.join(data_dir, run_dir) for data_dir in data_dirs for run_dir in os.listdir(data_dir) if "__SEED_" in run_dir]
+    # sort run directories by seed to make easier on the eyes
+    run_dirs.sort(key=lambda x : int(x.split("_")[-1]))
     print(f"Found {len(run_dirs)} run directories.")
     header_set = set() # Use this to guarantee all organism file headers match.
     # For each run, aggregate max fitness organism information.
@@ -110,7 +112,7 @@ def main():
         # Find the best organism
         best_org_id = 0
         for i in range(len(orgs)):
-            if orgs[i][header_lu["score"]] > orgs[best_org_id][header_lu["score"]]:
+            if float(orgs[i][header_lu["score"]]) > float(orgs[best_org_id][header_lu["score"]]):
                 best_org_id = i
         # Guarantee header uniqueness
         header_set.add(",".join([key for key in key_settings] + header))
