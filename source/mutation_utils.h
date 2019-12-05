@@ -21,7 +21,7 @@ class MutatorLinearFunctionsProgram<HARDWARE_T, emp::BitSet<TAG_W>, int> {
 public:
   using tag_t = emp::BitSet<TAG_W>;
   using arg_t = int;
-  using program_t = emp::signalgp::LinearFunctionsProgram<tag_t, arg_t>;
+  using program_t = sgp::LinearFunctionsProgram<tag_t, arg_t>;
   using function_t = typename program_t::function_t;
   using inst_t = typename program_t::inst_t;
   using hardware_t = HARDWARE_T;
@@ -207,7 +207,7 @@ public:
               expected_prog_len < prog_total_inst)
           {
             // Insert a new random instruction.
-            new_function.PushInst(emp::signalgp::GenRandInst<hardware_t, TAG_W>(rnd,inst_lib, prog_inst_num_tags, prog_inst_num_args, prog_inst_arg_val_range));
+            new_function.PushInst(sgp::GenRandInst<hardware_t, TAG_W>(rnd,inst_lib, prog_inst_num_tags, prog_inst_num_args, prog_inst_arg_val_range));
             ++mut_cnt;
             ++last_mutation_tracker[MUTATION_TYPES::INST_INS];
             ++expected_func_len;

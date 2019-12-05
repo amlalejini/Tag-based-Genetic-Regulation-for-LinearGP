@@ -74,12 +74,14 @@ namespace AltSignalWorldDefs {
     emp::StreakMetric<TAG_LEN>;
   #endif
 
+  using matchbin_regulator_t = emp::AdditiveCountdownRegulator<>;
+
   using org_t = AltSignalOrganism<emp::BitSet<TAG_LEN>,int>;
 }
 
 /// Custom Event type!
 template<size_t W>
-struct Event : public emp::signalgp::BaseEvent {
+struct Event : public sgp::BaseEvent {
   using tag_t = emp::BitSet<W>;
   tag_t tag;
 
@@ -113,9 +115,10 @@ public:
 
   using matchbin_t = emp::MatchBin<AltSignalWorldDefs::matchbin_val_t,
                                    AltSignalWorldDefs::matchbin_metric_t,
-                                   AltSignalWorldDefs::matchbin_selector_t>;
-  using mem_model_t = emp::signalgp::SimpleMemoryModel;
-  using hardware_t = emp::signalgp::LinearFunctionsProgramSignalGP<mem_model_t,
+                                   AltSignalWorldDefs::matchbin_selector_t,
+                                   AltSignalWorldDefs::matchbin_regulator_t>;
+  using mem_model_t = sgp::SimpleMemoryModel;
+  using hardware_t = sgp::LinearFunctionsProgramSignalGP<mem_model_t,
                                                                   tag_t,
                                                                   inst_arg_t,
                                                                   matchbin_t,
@@ -296,7 +299,7 @@ void AltSignalWorld::InitConfigs(const AltSignalConfig & config) {
 void AltSignalWorld::InitHardware() {
   // If being configured for the first time, create a new hardware object.
   if (!setup) {
-    eval_hardware = emp::NewPtr<hardware_t>(*random_ptr, inst_lib, event_lib);
+    eval_hardware = emp::NewPtr<hardware_t>(*random_ptr, *inst_lib, *event_lib);
   }
   // Configure SignalGP CPU
   eval_hardware->Reset();
@@ -321,64 +324,64 @@ void AltSignalWorld::InitInstLib() {
   if (!setup) inst_lib = emp::NewPtr<inst_lib_t>();
   inst_lib->Clear(); // Reset the instruction library
   inst_lib->AddInst("Nop", [](hardware_t & hw, const inst_t & inst) { ; }, "No operation!");
-  inst_lib->AddInst("Inc", emp::signalgp::inst_impl::Inst_Inc<hardware_t, inst_t>, "Increment!");
-  inst_lib->AddInst("Dec", emp::signalgp::inst_impl::Inst_Dec<hardware_t, inst_t>, "Decrement!");
-  inst_lib->AddInst("Not", emp::signalgp::inst_impl::Inst_Not<hardware_t, inst_t>, "Logical not of ARG[0]");
-  inst_lib->AddInst("Add", emp::signalgp::inst_impl::Inst_Add<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Sub", emp::signalgp::inst_impl::Inst_Sub<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Mult", emp::signalgp::inst_impl::Inst_Mult<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Div", emp::signalgp::inst_impl::Inst_Div<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Mod", emp::signalgp::inst_impl::Inst_Mod<hardware_t, inst_t>, "");
-  inst_lib->AddInst("TestEqu", emp::signalgp::inst_impl::Inst_TestEqu<hardware_t, inst_t>, "");
-  inst_lib->AddInst("TestNEqu", emp::signalgp::inst_impl::Inst_TestNEqu<hardware_t, inst_t>, "");
-  inst_lib->AddInst("TestLess", emp::signalgp::inst_impl::Inst_TestLess<hardware_t, inst_t>, "");
-  inst_lib->AddInst("TestLessEqu", emp::signalgp::inst_impl::Inst_TestLessEqu<hardware_t, inst_t>, "");
-  inst_lib->AddInst("TestGreater", emp::signalgp::inst_impl::Inst_TestGreater<hardware_t, inst_t>, "");
-  inst_lib->AddInst("TestGreaterEqu", emp::signalgp::inst_impl::Inst_TestGreaterEqu<hardware_t, inst_t>, "");
-  inst_lib->AddInst("SetMem", emp::signalgp::inst_impl::Inst_SetMem<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Close", emp::signalgp::inst_impl::Inst_Close<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_CLOSE});
-  inst_lib->AddInst("Break", emp::signalgp::inst_impl::Inst_Break<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Call", emp::signalgp::inst_impl::Inst_Call<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Return", emp::signalgp::inst_impl::Inst_Return<hardware_t, inst_t>, "");
-  inst_lib->AddInst("CopyMem", emp::signalgp::inst_impl::Inst_CopyMem<hardware_t, inst_t>, "");
-  inst_lib->AddInst("SwapMem", emp::signalgp::inst_impl::Inst_SwapMem<hardware_t, inst_t>, "");
-  inst_lib->AddInst("InputToWorking", emp::signalgp::inst_impl::Inst_InputToWorking<hardware_t, inst_t>, "");
-  inst_lib->AddInst("WorkingToOutput", emp::signalgp::inst_impl::Inst_WorkingToOutput<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Fork", emp::signalgp::inst_impl::Inst_Fork<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Terminate", emp::signalgp::inst_impl::Inst_Terminate<hardware_t, inst_t>, "");
-  inst_lib->AddInst("If", emp::signalgp::lfp_inst_impl::Inst_If<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
-  inst_lib->AddInst("While", emp::signalgp::lfp_inst_impl::Inst_While<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
-  inst_lib->AddInst("Countdown", emp::signalgp::lfp_inst_impl::Inst_Countdown<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
-  inst_lib->AddInst("Routine", emp::signalgp::lfp_inst_impl::Inst_Routine<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Terminal", emp::signalgp::inst_impl::Inst_Terminal<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Inc", sgp::inst_impl::Inst_Inc<hardware_t, inst_t>, "Increment!");
+  inst_lib->AddInst("Dec", sgp::inst_impl::Inst_Dec<hardware_t, inst_t>, "Decrement!");
+  inst_lib->AddInst("Not", sgp::inst_impl::Inst_Not<hardware_t, inst_t>, "Logical not of ARG[0]");
+  inst_lib->AddInst("Add", sgp::inst_impl::Inst_Add<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Sub", sgp::inst_impl::Inst_Sub<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Mult", sgp::inst_impl::Inst_Mult<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Div", sgp::inst_impl::Inst_Div<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Mod", sgp::inst_impl::Inst_Mod<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestEqu", sgp::inst_impl::Inst_TestEqu<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestNEqu", sgp::inst_impl::Inst_TestNEqu<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestLess", sgp::inst_impl::Inst_TestLess<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestLessEqu", sgp::inst_impl::Inst_TestLessEqu<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestGreater", sgp::inst_impl::Inst_TestGreater<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestGreaterEqu", sgp::inst_impl::Inst_TestGreaterEqu<hardware_t, inst_t>, "");
+  inst_lib->AddInst("SetMem", sgp::inst_impl::Inst_SetMem<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Close", sgp::inst_impl::Inst_Close<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_CLOSE});
+  inst_lib->AddInst("Break", sgp::inst_impl::Inst_Break<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Call", sgp::inst_impl::Inst_Call<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Return", sgp::inst_impl::Inst_Return<hardware_t, inst_t>, "");
+  inst_lib->AddInst("CopyMem", sgp::inst_impl::Inst_CopyMem<hardware_t, inst_t>, "");
+  inst_lib->AddInst("SwapMem", sgp::inst_impl::Inst_SwapMem<hardware_t, inst_t>, "");
+  inst_lib->AddInst("InputToWorking", sgp::inst_impl::Inst_InputToWorking<hardware_t, inst_t>, "");
+  inst_lib->AddInst("WorkingToOutput", sgp::inst_impl::Inst_WorkingToOutput<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Fork", sgp::inst_impl::Inst_Fork<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Terminate", sgp::inst_impl::Inst_Terminate<hardware_t, inst_t>, "");
+  inst_lib->AddInst("If", sgp::lfp_inst_impl::Inst_If<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
+  inst_lib->AddInst("While", sgp::lfp_inst_impl::Inst_While<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
+  inst_lib->AddInst("Countdown", sgp::lfp_inst_impl::Inst_Countdown<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
+  inst_lib->AddInst("Routine", sgp::lfp_inst_impl::Inst_Routine<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t>, "");
 
   // If we can use global memory, give programs access. Otherwise, nops.
   if (USE_GLOBAL_MEMORY) {
-    inst_lib->AddInst("WorkingToGlobal", emp::signalgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>, "");
-    inst_lib->AddInst("GlobalToWorking", emp::signalgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>, "");
+    inst_lib->AddInst("WorkingToGlobal", sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>, "");
+    inst_lib->AddInst("GlobalToWorking", sgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>, "");
   } else {
-    inst_lib->AddInst("Nop-WorkingToGlobal", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
-    inst_lib->AddInst("Nop-GlobalToWorking", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-WorkingToGlobal", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
 
   // if (allow regulation)
   // If we can use regulation, add instructions. Otherwise, nops.
   if (USE_FUNC_REGULATION) {
-    inst_lib->AddInst("SetRegulator", emp::signalgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("SetOwnRegulator", emp::signalgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("AdjRegulator", emp::signalgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("AdjOwnRegulator", emp::signalgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("ExtRegulator", emp::signalgp::inst_impl::Inst_ExtRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("SenseRegulator", emp::signalgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("SenseOwnRegulator", emp::signalgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SetRegulator", sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SetOwnRegulator", sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("AdjRegulator", sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("AdjOwnRegulator", sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("ExtRegulator", sgp::inst_impl::Inst_ExtRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SenseRegulator", sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SenseOwnRegulator", sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>, "");
   } else {
-    inst_lib->AddInst("Nop-SetRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
-    inst_lib->AddInst("Nop-SetOwnRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
-    inst_lib->AddInst("Nop-AdjRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
-    inst_lib->AddInst("Nop-AdjOwnRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
-    inst_lib->AddInst("Nop-ExtRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
-    inst_lib->AddInst("Nop-SenseRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
-    inst_lib->AddInst("Nop-SenseOwnRegulator", emp::signalgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SetRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SetOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-ExtRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SenseRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SenseOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
 
   // Add response instructions
@@ -462,7 +465,7 @@ void AltSignalWorld::InitPop() {
 /// Initialize population with randomly generated orgranisms.
 void AltSignalWorld::InitPop_Random() {
   for (size_t i = 0; i < POP_SIZE; ++i) {
-    this->Inject({emp::signalgp::GenRandLinearFunctionsProgram<hardware_t, AltSignalWorldDefs::TAG_LEN>
+    this->Inject({sgp::GenRandLinearFunctionsProgram<hardware_t, AltSignalWorldDefs::TAG_LEN>
                                   (*random_ptr, *inst_lib,
                                    FUNC_CNT_RANGE,
                                    AltSignalWorldDefs::FUNC_NUM_TAGS,
@@ -701,7 +704,7 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
   emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
   // Evaluate organism in the environment!
   for (size_t cycle = 0; cycle < NUM_ENV_CYCLES; ++cycle) {
-    eval_hardware->BaseResetState(); // Reset threads every cycle.
+    eval_hardware->ResetBaseHardwareState(); // Reset threads every cycle.
     eval_hardware->GetCustomComponent().Reset();
     emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
     eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.env_signal_tag));

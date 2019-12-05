@@ -14,7 +14,7 @@ class AltSignalOrganism {
 public:
   struct AltSignalGenome;
 
-  using program_t = emp::signalgp::LinearFunctionsProgram<TAG_T, INST_ARG_T>;
+  using program_t = sgp::LinearFunctionsProgram<TAG_T, INST_ARG_T>;
   using genome_t = AltSignalGenome;
 
   struct AltSignalGenome {

@@ -35,26 +35,31 @@ TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
   // Create a couple of match bins!
   emp::MatchBin<size_t,
                 emp::HammingMetric<TAG_WIDTH>,
-                emp::RankedSelector<>> matchbin_0(random); // 0% min threshold
+                emp::RankedSelector<>,
+                emp::AdditiveCountdownRegulator<> > matchbin_0(random); // 0% min threshold
 
   emp::MatchBin<size_t,
                 emp::HammingMetric<TAG_WIDTH>,
-                emp::RankedSelector<std::ratio<TAG_WIDTH+(TAG_WIDTH/4), TAG_WIDTH>>
+                emp::RankedSelector<std::ratio<TAG_WIDTH+(TAG_WIDTH/4), TAG_WIDTH>>,
+                emp::AdditiveCountdownRegulator<>
                > matchbin_75(random); // 75% min threshold
 
   emp::MatchBin<size_t,
                 emp::HammingMetric<TAG_WIDTH>,
-                emp::RankedSelector<std::ratio<TAG_WIDTH+(TAG_WIDTH/2), TAG_WIDTH>>
+                emp::RankedSelector<std::ratio<TAG_WIDTH+(TAG_WIDTH/2), TAG_WIDTH>>,
+                emp::AdditiveCountdownRegulator<>
                > matchbin_50(random); // 50% min threshold
 
   emp::MatchBin<size_t,
                 emp::HammingMetric<TAG_WIDTH>,
-                emp::RankedSelector<std::ratio<TAG_WIDTH+(3*(TAG_WIDTH)/4), TAG_WIDTH>>
+                emp::RankedSelector<std::ratio<TAG_WIDTH+(3*(TAG_WIDTH)/4), TAG_WIDTH>>,
+                emp::AdditiveCountdownRegulator<>
                > matchbin_25(random); // 25% min threshold
 
   emp::MatchBin<size_t,
                 emp::HammingMetric<TAG_WIDTH>,
-                emp::RankedSelector<std::ratio<TAG_WIDTH, TAG_WIDTH>>
+                emp::RankedSelector<std::ratio<TAG_WIDTH, TAG_WIDTH>>,
+                emp::AdditiveCountdownRegulator<>
                > matchbin_100(random); // 100% min threshold
   // matches by target
   for (size_t i = 0; i < tags.size(); ++i) {
@@ -137,14 +142,17 @@ TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
 TEST_CASE( "LinearFunctionsProgram Mutator" ) {
   constexpr size_t TAG_WIDTH = 16;
   constexpr int RANDOM_SEED = 1;
-  using mem_model_t = emp::signalgp::SimpleMemoryModel;
+  using mem_model_t = sgp::SimpleMemoryModel;
   using tag_t = emp::BitSet<TAG_WIDTH>;
   using arg_t = int;
-  using matchbin_t = emp::MatchBin< size_t, emp::HammingMetric<TAG_WIDTH>, emp::RankedSelector<> >;
-  using hardware_t = emp::signalgp::LinearFunctionsProgramSignalGP<mem_model_t,
-                                                                   tag_t,
-                                                                   arg_t,
-                                                                   matchbin_t>;
+  using matchbin_t = emp::MatchBin< size_t,
+                                    emp::HammingMetric<TAG_WIDTH>,
+                                    emp::RankedSelector<>,
+                                    emp::AdditiveCountdownRegulator<> >;
+  using hardware_t = sgp::LinearFunctionsProgramSignalGP<mem_model_t,
+                                                          tag_t,
+                                                          arg_t,
+                                                          matchbin_t>;
 
   using inst_t = typename hardware_t::inst_t;
   using inst_lib_t = typename hardware_t::inst_lib_t;
@@ -240,7 +248,7 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
   mutator.SetRateFuncDel(0.25);
   mutator.SetRateFuncTagBF(0.25);
   for (size_t i = 0; i < 1000; ++i) {
-    program_t prog(emp::signalgp::GenRandLinearFunctionsProgram<hardware_t, TAG_WIDTH>(
+    program_t prog(sgp::GenRandLinearFunctionsProgram<hardware_t, TAG_WIDTH>(
                                               random, inst_lib,
                                               {1,16},
                                               NUM_FUNC_TAGS,

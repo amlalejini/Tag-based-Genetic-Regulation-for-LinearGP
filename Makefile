@@ -1,13 +1,14 @@
 # Project-specific settings
 PROJECT := signalgp-genetic-regulation
 EMP_DIR := ../Empirical/source
-SGP_DIR := ../signalgp-reimplementation-playground/source
+SGP_DIR := ../SignalGP/source
 CEREAL_DIR := ../Empirical/third-party/cereal/include
 
-MATCH_METRIC := streak
+MATCH_METRIC := hamming
 
 # Flags to use regardless of compiler
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -I$(EMP_DIR)/ -I./source/ -I$(SGP_DIR)/ -I$(CEREAL_DIR)/ -DMATCH_METRIC=$(MATCH_METRIC)
+CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/ -I$(CEREAL_DIR)/
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) $(CFLAGS_includes)
 
 # Native compiler information
 CXX_nat := g++-9
@@ -50,9 +51,9 @@ serve:
 	python3 -m http.server
 
 clean:
+	rm -rf signalgp-genetic-regulation_*.dSYM
 	rm -f $(PROJECT) $(PROJECT)_match-metric-* web/$(PROJECT).js web/*.js.map web/*.js.map *~ source/*.o web/*.wasm web/*.wast test_debug.out test_optimized.out unit_tests.gcda unit_tests.gcno
 	rm -rf test_debug.out.dSYM
-	rm -rf signalgp-genetic-regulation.dSYM
 
 test: clean
 test: tests/unit_tests.cc
