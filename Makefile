@@ -4,9 +4,12 @@ EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
 # CEREAL_DIR := ../Empirical/third-party/cereal/include
 
-MATCH_METRIC := hamming     # Options: hamming, integer, streak, hash
-MATCH_THRESH := 25          # Options: 0, 25, 50, 75
-MATCH_REG := mult           # Options: add, mult
+# Match metric options: hamming, integer, streak, hash
+MATCH_METRIC := hamming
+# MATCH_THRESH options: 0, 25, 50, 75
+MATCH_THRESH := 25
+# MATCH_REG options: add, mult
+MATCH_REG := mult
 EXEC_NAME := $(PROJECT)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)_reg-$(MATCH_REG)
 
 # Flags to use regardless of compiler

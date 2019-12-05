@@ -54,7 +54,9 @@ namespace AltSignalWorldDefs {
   #ifndef MATCH_REG
   #define MATCH_REG add
   #endif
-
+  #ifndef MATCH_METRIC
+  #define MATCH_METRIC streak
+  #endif
   using matchbin_val_t = size_t;                        // Module ID
   // What match threshold should we use?
   using matchbin_selector_t =
@@ -90,8 +92,6 @@ namespace AltSignalWorldDefs {
     >::type
     >::type
     >::type;
-  #else
-    emp::StreakMetric<TAG_LEN>;
   #endif
 
   using matchbin_regulator_t =
@@ -257,6 +257,7 @@ protected:
 
   // -- Utilities --
   void DoPopulationSnapshot();
+  void DoWorldConfigSnapshot(const AltSignalConfig & config);
   void PrintProgramSingleLine(const program_t & prog, std::ostream & out);
   void PrintProgramFunction(const program_function_t & func, std::ostream & out);
   void PrintProgramInstruction(const inst_t & inst, std::ostream & out);
@@ -803,6 +804,17 @@ void AltSignalWorld::DoPopulationSnapshot() {
   }
 }
 
+void AltSignalWorld::DoWorldConfigSnapshot(const AltSignalConfig & config) {
+  // TODO - finish writing this function!
+  // Print matchbin metric
+  std::cout << "Requested MatchBin Metric: " << STRINGVIEWIFY(MATCH_METRIC) << std::endl;
+  std::cout << "Requested MatchBin Match Thresh: " << STRINGVIEWIFY(MATCH_THRESH) << std::endl;
+  std::cout << "Requested MatchBin Regulator: " << STRINGVIEWIFY(MATCH_REG) << std::endl;
+  for (const auto & entry : config) {
+    std::cout << entry.first << " = " <<  emp::to_string(entry.second->GetValue()) << std::endl;
+  }
+}
+
 void AltSignalWorld::PrintProgramSingleLine(const program_t & prog, std::ostream & out) {
   out << "[";
   for (size_t func_id = 0; func_id < prog.GetSize(); ++func_id) {
@@ -852,19 +864,14 @@ void AltSignalWorld::PrintProgramInstruction(const inst_t & inst, std::ostream &
 void AltSignalWorld::Setup(const AltSignalConfig & config) {
   // Localize configuration parameters.
   InitConfigs(config);
+  DoWorldConfigSnapshot(config);
 
   // Create instruction/event libraries.
   InitInstLib();
   InitEventLib();
   // Init evaluation hardware
   InitHardware();
-  // Print how matchbin is actually configured.
-  #ifdef MATCH_METRIC
-  // Print matchbin metric
-  std::cout << "Requested MatchBin Metric: " << STRINGVIEWIFY(MATCH_METRIC) << std::endl;
-  #endif
-  std::cout << "Configured MatchBin: " << eval_hardware->GetMatchBin().name() << std::endl;
-
+  std::cout << "Configured Hardware MatchBin: " << eval_hardware->GetMatchBin().name() << std::endl;
   // Init evaluation environment
   InitEnvironment();
   // Initialize organism mutators!
