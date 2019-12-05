@@ -4,13 +4,14 @@ EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
 # CEREAL_DIR := ../Empirical/third-party/cereal/include
 
-MATCH_METRIC := hamming
-MATCH_THRESH := 25
-EXEC_NAME := $(PROJECT)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)
+MATCH_METRIC := hamming     # Options: hamming, integer, streak, hash
+MATCH_THRESH := 25          # Options: 0, 25, 50, 75
+MATCH_REG := mult           # Options: add, mult
+EXEC_NAME := $(PROJECT)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)_reg-$(MATCH_REG)
 
 # Flags to use regardless of compiler
 CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/ -I$(CEREAL_DIR)/
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) $(CFLAGS_includes)
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) $(CFLAGS_includes)
 
 # Native compiler information
 CXX_nat := g++-9

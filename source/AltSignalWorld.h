@@ -51,6 +51,10 @@ namespace AltSignalWorldDefs {
   #ifndef MATCH_THRESH
   #define MATCH_THRESH 0
   #endif
+  #ifndef MATCH_REG
+  #define MATCH_REG add
+  #endif
+
   using matchbin_val_t = size_t;                        // Module ID
   // What match threshold should we use?
   using matchbin_selector_t =
@@ -69,6 +73,7 @@ namespace AltSignalWorldDefs {
     >::type
     >::type;
   #endif
+
   // How should we measure tag similarity?
   using matchbin_metric_t =
   #ifdef MATCH_METRIC
@@ -89,7 +94,16 @@ namespace AltSignalWorldDefs {
     emp::StreakMetric<TAG_LEN>;
   #endif
 
-  using matchbin_regulator_t = emp::AdditiveCountdownRegulator<>;
+  using matchbin_regulator_t =
+  #ifdef MATCH_REG
+    std::conditional<STRINGVIEWIFY(MATCH_REG) == "add",
+      emp::AdditiveCountdownRegulator<>,
+    std::conditional<STRINGVIEWIFY(MATCH_REG) == "mult",
+      emp::MultiplicativeCountdownRegulator<>,
+      std::enable_if<false>
+    >::type
+    >::type;
+  #endif
 
   using org_t = AltSignalOrganism<emp::BitSet<TAG_LEN>,int>;
 }
