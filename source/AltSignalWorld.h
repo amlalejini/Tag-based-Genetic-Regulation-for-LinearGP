@@ -47,13 +47,28 @@ namespace AltSignalWorldDefs {
   constexpr size_t FUNC_NUM_TAGS = 1; // How many tags are associated with each function in a program?
   constexpr int INST_MIN_ARG_VAL = 0; // Minimum argument value?
   constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
-  // matchbin <VALUE, METRIC, SELECTOR>
+  // matchbin <VALUE, METRIC, SELECTOR, REGULATOR>
+  #ifndef MATCH_THRESH
+  #define MATCH_THRESH 0
+  #endif
   using matchbin_val_t = size_t;                        // Module ID
-  // using matchbin_selector_t = emp::RankedSelector<std::ratio<TAG_LEN+(TAG_LEN/4), TAG_LEN>>;    // 75% min similarity threshold
-  // using matchbin_selector_t = emp::RankedSelector<std::ratio<TAG_LEN+(TAG_LEN/2), TAG_LEN>>;    // 50% min similarity threshold
-  using matchbin_selector_t = emp::RankedSelector<std::ratio<TAG_LEN+(3*(TAG_LEN/4)), TAG_LEN>>;    // 25% min threshold
-  // using matchbin_selector_t = emp::RankedSelector<>;    // 0% min threshold
-
+  // What match threshold should we use?
+  using matchbin_selector_t =
+  #ifdef MATCH_THRESH
+    std::conditional<STRINGVIEWIFY(MATCH_THRESH) == "0",
+      emp::RankedSelector<>,
+    std::conditional<STRINGVIEWIFY(MATCH_THRESH) == "25",
+      emp::RankedSelector<std::ratio<TAG_LEN+(3*(TAG_LEN/4)), TAG_LEN>>,
+    std::conditional<STRINGVIEWIFY(MATCH_THRESH) == "50",
+      emp::RankedSelector<std::ratio<TAG_LEN+(TAG_LEN/2), TAG_LEN>>,
+    std::conditional<STRINGVIEWIFY(MATCH_THRESH) == "75",
+      emp::RankedSelector<std::ratio<TAG_LEN+(TAG_LEN/4), TAG_LEN>>,
+      std::enable_if<false>
+    >::type
+    >::type
+    >::type
+    >::type;
+  #endif
   // How should we measure tag similarity?
   using matchbin_metric_t =
   #ifdef MATCH_METRIC

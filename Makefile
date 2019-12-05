@@ -5,10 +5,12 @@ SGP_DIR := ../SignalGP/source
 # CEREAL_DIR := ../Empirical/third-party/cereal/include
 
 MATCH_METRIC := hamming
+MATCH_THRESH := 25
+EXEC_NAME := $(PROJECT)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)
 
 # Flags to use regardless of compiler
 CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/ -I$(CEREAL_DIR)/
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) $(CFLAGS_includes)
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) $(CFLAGS_includes)
 
 # Native compiler information
 CXX_nat := g++-9
@@ -39,7 +41,7 @@ debug-web:	$(PROJECT).js
 web-debug:	debug-web
 
 $(PROJECT):	source/native/$(PROJECT).cc
-	$(CXX_nat) $(CFLAGS_nat) source/native/$(PROJECT).cc -o $(PROJECT)_match-metric-$(MATCH_METRIC)
+	$(CXX_nat) $(CFLAGS_nat) source/native/$(PROJECT).cc -o $(EXEC_NAME)
 	@echo To build the web version use: make web
 
 $(PROJECT).js: source/web/$(PROJECT)-web.cc
