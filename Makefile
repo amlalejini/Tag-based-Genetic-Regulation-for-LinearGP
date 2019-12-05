@@ -2,7 +2,7 @@
 PROJECT := signalgp-genetic-regulation
 EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
-CEREAL_DIR := ../Empirical/third-party/cereal/include
+# CEREAL_DIR := ../Empirical/third-party/cereal/include
 
 MATCH_METRIC := hamming
 
