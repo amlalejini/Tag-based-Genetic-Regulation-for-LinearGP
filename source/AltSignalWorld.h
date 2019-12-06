@@ -248,6 +248,7 @@ protected:
 
   void InitPop();
   void InitPop_Random();
+  void InitPop_Hardcoded();
 
   void DoEvaluation();
   void DoSelection();
@@ -490,6 +491,23 @@ void AltSignalWorld::InitMutator() {
 void AltSignalWorld::InitPop() {
   this->Clear();
   InitPop_Random();
+  // InitPop_Hardcoded();
+}
+
+void AltSignalWorld::InitPop_Hardcoded() {
+  program_t program;
+  program.PushInst(*inst_lib, "SetMem", {2, 2, 0}, {tag_t()});
+  program.PushInst(*inst_lib, "GlobalToWorking", {0, 0, 0}, {tag_t()});
+  program.PushInst(*inst_lib, "Mod", {0, 2, 1}, {tag_t()});
+  program.PushInst(*inst_lib, "Inc", {0, 0, 0}, {tag_t()});
+  program.PushInst(*inst_lib, "WorkingToGlobal", {0, 0, 0}, {tag_t()});
+  program.PushInst(*inst_lib, "If", {1, 0, 0}, {tag_t()});
+  program.PushInst(*inst_lib, "Response-1", {0, 0, 0}, {tag_t()});
+  program.PushInst(*inst_lib, "Close", {0, 0, 0}, {tag_t()});
+  program.PushInst(*inst_lib, "Response-0", {0, 0, 0}, {tag_t()});
+  for (size_t i = 0; i < POP_SIZE; ++i) {
+    this->Inject({program}, 1);
+  }
 }
 
 /// Initialize population with randomly generated orgranisms.

@@ -5,7 +5,7 @@ SGP_DIR := ../SignalGP/source
 # CEREAL_DIR := ../Empirical/third-party/cereal/include
 
 # Match metric options: hamming, integer, streak, hash
-MATCH_METRIC := hamming
+MATCH_METRIC := streak
 # MATCH_THRESH options: 0, 25, 50, 75
 MATCH_THRESH := 25
 # MATCH_REG options: add, mult
