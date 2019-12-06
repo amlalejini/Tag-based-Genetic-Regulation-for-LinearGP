@@ -805,13 +805,58 @@ void AltSignalWorld::DoPopulationSnapshot() {
 }
 
 void AltSignalWorld::DoWorldConfigSnapshot(const AltSignalConfig & config) {
-  // TODO - finish writing this function!
   // Print matchbin metric
   std::cout << "Requested MatchBin Metric: " << STRINGVIEWIFY(MATCH_METRIC) << std::endl;
   std::cout << "Requested MatchBin Match Thresh: " << STRINGVIEWIFY(MATCH_THRESH) << std::endl;
   std::cout << "Requested MatchBin Regulator: " << STRINGVIEWIFY(MATCH_REG) << std::endl;
+  // Make a new data file for snapshot.
+  emp::DataFile snapshot_file(OUTPUT_DIR + "/run_config.csv");
+  std::function<std::string()> get_cur_param;
+  std::function<std::string()> get_cur_value;
+  snapshot_file.template AddFun<std::string>([&get_cur_param]() -> std::string { return get_cur_param(); }, "parameter");
+  snapshot_file.template AddFun<std::string>([&get_cur_value]() -> std::string { return get_cur_value(); }, "value");
+  snapshot_file.PrintHeaderKeys();  // param, value
+  // matchbin metric
+  get_cur_param = []() { return "matchbin_metric"; };
+  get_cur_value = []() { return emp::to_string(STRINGVIEWIFY(MATCH_METRIC)); };
+  snapshot_file.Update();
+  // matchbin threshold
+  get_cur_param = []() { return "matchbin_thresh"; };
+  get_cur_value = []() { return emp::to_string(STRINGVIEWIFY(MATCH_THRESH)); };
+  snapshot_file.Update();
+  // matchbin regulator
+  get_cur_param = []() { return "matchbin_regulator"; };
+  get_cur_value = []() { return emp::to_string(STRINGVIEWIFY(MATCH_REG)); };
+  snapshot_file.Update();
+  // TAG_LEN
+  get_cur_param = []() { return "TAG_LEN"; };
+  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::TAG_LEN); };
+  snapshot_file.Update();
+  // INST_TAG_CNT
+  get_cur_param = []() { return "INST_TAG_CNT"; };
+  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_TAG_CNT); };
+  snapshot_file.Update();
+  // INST_ARG_CNT
+  get_cur_param = []() { return "INST_ARG_CNT"; };
+  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_ARG_CNT); };
+  snapshot_file.Update();
+  // FUNC_NUM_TAGS
+  get_cur_param = []() { return "FUNC_NUM_TAGS"; };
+  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::FUNC_NUM_TAGS); };
+  snapshot_file.Update();
+  // INST_MIN_ARG_VAL
+  get_cur_param = []() { return "INST_MIN_ARG_VAL"; };
+  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_MIN_ARG_VAL); };
+  snapshot_file.Update();
+  // INST_MAX_ARG_VAL
+  get_cur_param = []() { return "INST_MAX_ARG_VAL"; };
+  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_MAX_ARG_VAL); };
+  snapshot_file.Update();
   for (const auto & entry : config) {
-    std::cout << entry.first << " = " <<  emp::to_string(entry.second->GetValue()) << std::endl;
+    // std::cout << entry.first << " = " <<  emp::to_string(entry.second->GetValue()) << std::endl;
+    get_cur_param = [&entry]() { return entry.first; };
+    get_cur_value = [&entry]() { return emp::to_string(entry.second->GetValue()); };
+    snapshot_file.Update();
   }
 }
 
