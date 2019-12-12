@@ -402,17 +402,23 @@ void AltSignalWorld::InitInstLib() {
     inst_lib->AddInst("SetOwnRegulator", sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>, "");
     inst_lib->AddInst("AdjRegulator", sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>, "");
     inst_lib->AddInst("AdjOwnRegulator", sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("ExtRegulator", sgp::inst_impl::Inst_ExtRegulator<hardware_t, inst_t>, "");
     inst_lib->AddInst("SenseRegulator", sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>, "");
     inst_lib->AddInst("SenseOwnRegulator", sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("IncRegulator", sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("IncOwnRegulator", sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("DecRegulator", sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("DecOwnRegulator", sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>, "");
   } else {
     inst_lib->AddInst("Nop-SetRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SetOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-AdjRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-AdjOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
-    inst_lib->AddInst("Nop-ExtRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SenseRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SenseOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-IncRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-IncOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-DecRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-DecOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
 
   // Add response instructions
@@ -871,7 +877,6 @@ void AltSignalWorld::DoWorldConfigSnapshot(const AltSignalConfig & config) {
   get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_MAX_ARG_VAL); };
   snapshot_file.Update();
   for (const auto & entry : config) {
-    // std::cout << entry.first << " = " <<  emp::to_string(entry.second->GetValue()) << std::endl;
     get_cur_param = [&entry]() { return entry.first; };
     get_cur_value = [&entry]() { return emp::to_string(entry.second->GetValue()); };
     snapshot_file.Update();
