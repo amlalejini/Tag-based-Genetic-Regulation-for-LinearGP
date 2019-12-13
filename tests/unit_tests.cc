@@ -15,6 +15,9 @@
 #include "AltSignalConfig.h"
 #include "mutation_utils.h"
 
+#include "MCRegWorld.h"
+#include "MCRegConfig.h"
+
 TEST_CASE( "Hello World", "[general]" ) {
   std::cout << "Hello tests!" << std::endl;
 }
@@ -264,6 +267,7 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
   }
 }
 
+/*
 TEST_CASE( "AltSignalWorld ") {
   AltSignalConfig config;
   config.SEED(2);
@@ -276,4 +280,19 @@ TEST_CASE( "AltSignalWorld ") {
   AltSignalWorld world(random);
   world.Setup(config);
   world.Run();
+}
+*/
+
+TEST_CASE( "MCRegWorld ") {
+  MCRegConfig config;
+  config.SEED(2);
+  config.POP_SIZE(1000);
+  config.GENERATIONS(100);
+  // config.NUM_SIGNAL_RESPONSES(2);
+  // config.NUM_ENV_CYCLES(4);
+  // config.CPU_TIME_PER_ENV_CYCLE(64);
+  emp::Random random(config.SEED());
+  MCRegWorld world(random);
+  // world.Setup(config);
+  // world.Run();
 }

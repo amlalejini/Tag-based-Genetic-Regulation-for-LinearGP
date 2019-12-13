@@ -3,15 +3,16 @@
  *
  **/
 
- // TODO - output file showing how world was initialized
-
 #ifndef _ALT_SIGNAL_WORLD_H
 #define _ALT_SIGNAL_WORLD_H
 
 // macros courtesy of Matthew Andres Moreno
+#ifndef SGP_REG_EXP_MACROS
 #define STRINGVIEWIFY(s) std::string_view(IFY(s))
 #define STRINGIFY(s) IFY(s)
 #define IFY(s) #s
+#define SGP_REG_EXP_MACROS
+#endif
 
 // C++ std
 #include <functional>
@@ -38,6 +39,7 @@
 #include "AltSignalOrg.h"
 #include "AltSignalConfig.h"
 #include "mutation_utils.h"
+#include "Event.h"
 
 // TODO - use compile args!
 namespace AltSignalWorldDefs {
@@ -108,24 +110,24 @@ namespace AltSignalWorldDefs {
   using org_t = AltSignalOrganism<emp::BitSet<TAG_LEN>,int>;
 }
 
-/// Custom Event type!
-template<size_t W>
-struct Event : public sgp::BaseEvent {
-  using tag_t = emp::BitSet<W>;
-  tag_t tag;
+// /// Custom Event type!
+// template<size_t W>
+// struct Event : public sgp::BaseEvent {
+//   using tag_t = emp::BitSet<W>;
+//   tag_t tag;
 
-  Event(size_t _id, tag_t _tag)
-    : BaseEvent(_id), tag(_tag) { ; }
+//   Event(size_t _id, tag_t _tag)
+//     : BaseEvent(_id), tag(_tag) { ; }
 
-  tag_t & GetTag() { return tag; }
-  const tag_t & GetTag() const { return tag; }
+//   tag_t & GetTag() { return tag; }
+//   const tag_t & GetTag() const { return tag; }
 
-  void Print(std::ostream & os) const {
-    os << "{id:" << GetID() << ",tag:";
-    tag.Print(os);
-    os << "}";
-  }
-};
+//   void Print(std::ostream & os) const {
+//     os << "{id:" << GetID() << ",tag:";
+//     tag.Print(os);
+//     os << "}";
+//   }
+// };
 
 /// Custom hardware component for SignalGP.
 struct CustomHardware {
