@@ -22,7 +22,7 @@ TEST_CASE( "Hello World", "[general]" ) {
   std::cout << "Hello tests!" << std::endl;
 }
 
-
+/*
 TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
   constexpr size_t TAG_WIDTH = 4;
   using tag_t = emp::BitSet<TAG_WIDTH>;
@@ -140,8 +140,9 @@ TEST_CASE( "Figuring Out Ranked Selector Thresholds", "[general]" ) {
   }
 
 }
+*/
 
-
+/*
 TEST_CASE( "LinearFunctionsProgram Mutator" ) {
   constexpr size_t TAG_WIDTH = 16;
   constexpr int RANDOM_SEED = 1;
@@ -266,6 +267,7 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
     }
   }
 }
+*/
 
 /*
 TEST_CASE( "AltSignalWorld ") {
@@ -293,6 +295,6 @@ TEST_CASE( "MCRegWorld ") {
   // config.CPU_TIME_PER_ENV_CYCLE(64);
   emp::Random random(config.SEED());
   MCRegWorld world(random);
-  // world.Setup(config);
+  world.Setup(config);
   // world.Run();
 }

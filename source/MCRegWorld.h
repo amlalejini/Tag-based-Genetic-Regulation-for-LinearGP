@@ -115,6 +115,7 @@ public:
   using tag_t = emp::BitSet<MCRegWorldDefs::TAG_LEN>;
   using inst_arg_t = int;
   using org_t = MCRegOrganism<tag_t,inst_arg_t>;
+  using config_t = MCRegConfig;
 
   using matchbin_t = emp::MatchBin<MCRegWorldDefs::matchbin_val_t,
                                    MCRegWorldDefs::matchbin_metric_t,
@@ -160,6 +161,10 @@ protected:
   size_t GENERATIONS;
   size_t POP_SIZE;
   bool STOP_ON_SOLUTION;
+  // Output group
+  std::string OUTPUT_DIR;
+  size_t SUMMARY_RESOLUTION;
+  size_t SNAPSHOT_RESOLUTION;
 
   Environment eval_environment;
 
@@ -178,7 +183,7 @@ protected:
 
   bool found_solution = false;
 
-  void InitConfigs(const MCRegConfig & config);
+  void InitConfigs(const config_t & config);
   void InitInstLib();
   void InitEventLib();
   void InitHardware();
@@ -198,7 +203,7 @@ protected:
 
   // -- utilities --
   void DoPopulationSnapshot();
-  // void DoWorldConfigSnapshot();
+  void DoWorldConfigSnapshot(const config_t & config);
 
 public:
   MCRegWorld(emp::Random & r) : emp::World<org_t>(r) {}
@@ -210,7 +215,7 @@ public:
   }
 
   /// Setup world!
-  void Setup(const MCRegConfig & config);
+  void Setup(const config_t & config);
 
   /// Advance the world by a single time step (generation)
   void RunStep();
@@ -219,9 +224,80 @@ public:
   void Run();
 };
 
+// ----- Utilities -----
+
+void MCRegWorld::InitConfigs(const config_t & config) {
+  // default group
+  GENERATIONS = config.GENERATIONS();
+  POP_SIZE = config.POP_SIZE();
+  STOP_ON_SOLUTION = config.STOP_ON_SOLUTION();
+  // output group
+  OUTPUT_DIR = config.OUTPUT_DIR();
+  SUMMARY_RESOLUTION = config.SUMMARY_RESOLUTION();
+  SNAPSHOT_RESOLUTION = config.SNAPSHOT_RESOLUTION();
+}
+
+void MCRegWorld::DoWorldConfigSnapshot(const config_t & config) {
+  // Print matchbin metric
+  std::cout << "Requested MatchBin Metric: " << STRINGVIEWIFY(MATCH_METRIC) << std::endl;
+  std::cout << "Requested MatchBin Match Thresh: " << STRINGVIEWIFY(MATCH_THRESH) << std::endl;
+  std::cout << "Requested MatchBin Regulator: " << STRINGVIEWIFY(MATCH_REG) << std::endl;
+  // Make a new data file for snapshot.
+  emp::DataFile snapshot_file(OUTPUT_DIR + "/run_config.csv");
+  std::function<std::string()> get_cur_param;
+  std::function<std::string()> get_cur_value;
+  snapshot_file.template AddFun<std::string>([&get_cur_param]() -> std::string { return get_cur_param(); }, "parameter");
+  snapshot_file.template AddFun<std::string>([&get_cur_value]() -> std::string { return get_cur_value(); }, "value");
+  snapshot_file.PrintHeaderKeys();  // param, value
+  // matchbin metric
+  get_cur_param = []() { return "matchbin_metric"; };
+  get_cur_value = []() { return emp::to_string(STRINGVIEWIFY(MATCH_METRIC)); };
+  snapshot_file.Update();
+  // matchbin threshold
+  get_cur_param = []() { return "matchbin_thresh"; };
+  get_cur_value = []() { return emp::to_string(STRINGVIEWIFY(MATCH_THRESH)); };
+  snapshot_file.Update();
+  // matchbin regulator
+  get_cur_param = []() { return "matchbin_regulator"; };
+  get_cur_value = []() { return emp::to_string(STRINGVIEWIFY(MATCH_REG)); };
+  snapshot_file.Update();
+  // TAG_LEN
+  get_cur_param = []() { return "TAG_LEN"; };
+  get_cur_value = []() { return emp::to_string(MCRegWorldDefs::TAG_LEN); };
+  snapshot_file.Update();
+  // INST_TAG_CNT
+  get_cur_param = []() { return "INST_TAG_CNT"; };
+  get_cur_value = []() { return emp::to_string(MCRegWorldDefs::INST_TAG_CNT); };
+  snapshot_file.Update();
+  // INST_ARG_CNT
+  get_cur_param = []() { return "INST_ARG_CNT"; };
+  get_cur_value = []() { return emp::to_string(MCRegWorldDefs::INST_ARG_CNT); };
+  snapshot_file.Update();
+  // FUNC_NUM_TAGS
+  get_cur_param = []() { return "FUNC_NUM_TAGS"; };
+  get_cur_value = []() { return emp::to_string(MCRegWorldDefs::FUNC_NUM_TAGS); };
+  snapshot_file.Update();
+  // INST_MIN_ARG_VAL
+  get_cur_param = []() { return "INST_MIN_ARG_VAL"; };
+  get_cur_value = []() { return emp::to_string(MCRegWorldDefs::INST_MIN_ARG_VAL); };
+  snapshot_file.Update();
+  // INST_MAX_ARG_VAL
+  get_cur_param = []() { return "INST_MAX_ARG_VAL"; };
+  get_cur_value = []() { return emp::to_string(MCRegWorldDefs::INST_MAX_ARG_VAL); };
+  snapshot_file.Update();
+  for (const auto & entry : config) {
+    get_cur_param = [&entry]() { return entry.first; };
+    get_cur_value = [&entry]() { return emp::to_string(entry.second->GetValue()); };
+    snapshot_file.Update();
+  }
+}
+
 // ----- PUBLIC IMPLEMENTATIONS -----
 void MCRegWorld::Setup(const MCRegConfig & config) {
-  // todo
+  // Localize configuration parameters.
+  InitConfigs(config);
+  DoWorldConfigSnapshot(config);
+  // -- bookmark --
 }
 
 #endif

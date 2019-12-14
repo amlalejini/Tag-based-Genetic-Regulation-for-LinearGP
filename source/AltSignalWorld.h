@@ -110,25 +110,6 @@ namespace AltSignalWorldDefs {
   using org_t = AltSignalOrganism<emp::BitSet<TAG_LEN>,int>;
 }
 
-// /// Custom Event type!
-// template<size_t W>
-// struct Event : public sgp::BaseEvent {
-//   using tag_t = emp::BitSet<W>;
-//   tag_t tag;
-
-//   Event(size_t _id, tag_t _tag)
-//     : BaseEvent(_id), tag(_tag) { ; }
-
-//   tag_t & GetTag() { return tag; }
-//   const tag_t & GetTag() const { return tag; }
-
-//   void Print(std::ostream & os) const {
-//     os << "{id:" << GetID() << ",tag:";
-//     tag.Print(os);
-//     os << "}";
-//   }
-// };
-
 /// Custom hardware component for SignalGP.
 struct CustomHardware {
   int response = -1;

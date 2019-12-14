@@ -10,6 +10,10 @@ EMP_BUILD_CONFIG(MCRegConfig,
     VALUE(POP_SIZE, size_t, 100, "How big is our population?"),
     VALUE(STOP_ON_SOLUTION, bool, true, "Should we stop run on solution?"),
 
+  GROUP(DATA_COLLECTION_GROUP, "Data collection settings"),
+    VALUE(OUTPUT_DIR, std::string, "output", "where should we dump output?"),
+    VALUE(SUMMARY_RESOLUTION, size_t, 10, "How often should we output summary statistics?"),
+    VALUE(SNAPSHOT_RESOLUTION, size_t, 100, "How often should we snapshot the population?"),
 )
 
 #endif
