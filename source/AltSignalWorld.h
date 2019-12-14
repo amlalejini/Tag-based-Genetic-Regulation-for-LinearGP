@@ -131,10 +131,10 @@ public:
                                    AltSignalWorldDefs::matchbin_regulator_t>;
   using mem_model_t = sgp::SimpleMemoryModel;
   using hardware_t = sgp::LinearFunctionsProgramSignalGP<mem_model_t,
-                                                                  tag_t,
-                                                                  inst_arg_t,
-                                                                  matchbin_t,
-                                                                  CustomHardware>;
+                                                          tag_t,
+                                                          inst_arg_t,
+                                                          matchbin_t,
+                                                          CustomHardware>;
   using event_lib_t = typename hardware_t::event_lib_t;
   using base_event_t = typename hardware_t::event_t;
   using event_t = Event<AltSignalWorldDefs::TAG_LEN>;

@@ -62,8 +62,8 @@ public:
   };
 
   using hardware_t = sgp::LinearFunctionsProgramSignalGP<HW_MEMORY_MODEL_T,
-                                                         HW_INST_ARG_T,
                                                          HW_TAG_T,
+                                                         HW_INST_ARG_T,
                                                          HW_MATCHBIN_T,
                                                          CellHardware>;
   using event_lib_t = typename hardware_t::event_lib_t;
@@ -98,6 +98,25 @@ public:
     BuildNeighborLookup();
   }
 
+  /// Reset cellular hardware for each cell in deme.
+  void ResetCells() {
+    for (hardware_t & cell : cells) {
+      cell.Reset();
+      cell.GetCustomComponent().Reset();
+      emp_assert(cell.ValidateThreadState());
+    }
+  }
+
+  // todo - Configure Hardware function
+  void ConfigureCells(size_t max_active_threads, size_t max_thread_capacity) {
+    for (hardware_t & cell : cells) {
+      cell.SetActiveThreadLimit(max_active_threads);
+      cell.SetThreadCapacity(max_thread_capacity);
+      emp_assert(cell.ValidateThreadState());
+    }
+  }
+
+
   /// Get cell capacity of deme
   size_t GetSize() const { return cells.size(); }
 
@@ -120,7 +139,6 @@ public:
 
   // todo - Advance (by a number of steps)
   // todo - SingleAdvance()
-  // todo - Configure Hardware function
 
   /// Given a Facing direction, return a representative string (useful for debugging)
   std::string FacingToStr(Facing dir) const;

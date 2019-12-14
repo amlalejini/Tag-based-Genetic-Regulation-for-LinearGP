@@ -161,6 +161,30 @@ protected:
   size_t GENERATIONS;
   size_t POP_SIZE;
   bool STOP_ON_SOLUTION;
+  // Program group
+  bool USE_FUNC_REGULATION;
+  bool USE_GLOBAL_MEMORY;
+  size_t MIN_FUNC_CNT;
+  size_t MAX_FUNC_CNT;
+  size_t MIN_FUNC_INST_CNT;
+  size_t MAX_FUNC_INST_CNT;
+  // Hardware group
+  size_t DEME_WIDTH;
+  size_t DEME_HEIGHT;
+  size_t MAX_ACTIVE_THREAD_CNT;
+  size_t MAX_THREAD_CAPACITY;
+  // Selection group
+  size_t TOURNAMENT_SIZE;
+  // Mutation group
+  double MUT_RATE__INST_ARG_SUB;
+  double MUT_RATE__INST_TAG_BF;
+  double MUT_RATE__INST_SUB;
+  double MUT_RATE__INST_INS;
+  double MUT_RATE__INST_DEL;
+  double MUT_RATE__SEQ_SLIP;
+  double MUT_RATE__FUNC_DUP;
+  double MUT_RATE__FUNC_DEL;
+  double MUT_RATE__FUNC_TAG_BF;
   // Output group
   std::string OUTPUT_DIR;
   size_t SUMMARY_RESOLUTION;
@@ -182,6 +206,9 @@ protected:
   emp::Ptr<systematics_t> systematics_ptr;  ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
 
   bool found_solution = false;
+
+  size_t event_id__propagule_sig=0;
+  size_t event_id__response_sig=0;
 
   void InitConfigs(const config_t & config);
   void InitInstLib();
@@ -210,7 +237,9 @@ public:
 
   ~MCRegWorld() {
     if (setup) {
-      // TODO
+      inst_lib.Delete();
+      event_lib.Delete();
+      eval_deme.Delete();
     }
   }
 
@@ -231,10 +260,137 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   GENERATIONS = config.GENERATIONS();
   POP_SIZE = config.POP_SIZE();
   STOP_ON_SOLUTION = config.STOP_ON_SOLUTION();
+  // program group
+  USE_FUNC_REGULATION = config.USE_FUNC_REGULATION();
+  USE_GLOBAL_MEMORY = config.USE_GLOBAL_MEMORY();
+  MIN_FUNC_CNT = config.MIN_FUNC_CNT();
+  MAX_FUNC_CNT = config.MAX_FUNC_CNT();
+  MIN_FUNC_INST_CNT = config.MIN_FUNC_INST_CNT();
+  MAX_FUNC_INST_CNT = config.MAX_FUNC_INST_CNT();
+  // hardware group
+  DEME_WIDTH = config.DEME_WIDTH();
+  DEME_HEIGHT = config.DEME_HEIGHT();
+  MAX_ACTIVE_THREAD_CNT = config.MAX_ACTIVE_THREAD_CNT();
+  MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
+  // selection group
+  TOURNAMENT_SIZE = config.TOURNAMENT_SIZE();
+  // mutation group
+  MUT_RATE__INST_ARG_SUB = config.MUT_RATE__INST_ARG_SUB();
+  MUT_RATE__INST_TAG_BF = config.MUT_RATE__INST_TAG_BF();
+  MUT_RATE__INST_SUB = config.MUT_RATE__INST_SUB();
+  MUT_RATE__INST_INS = config.MUT_RATE__INST_INS();
+  MUT_RATE__INST_DEL = config.MUT_RATE__INST_DEL();
+  MUT_RATE__SEQ_SLIP = config.MUT_RATE__SEQ_SLIP();
+  MUT_RATE__FUNC_DUP = config.MUT_RATE__FUNC_DUP();
+  MUT_RATE__FUNC_DEL = config.MUT_RATE__FUNC_DEL();
+  MUT_RATE__FUNC_TAG_BF = config.MUT_RATE__FUNC_TAG_BF();
   // output group
   OUTPUT_DIR = config.OUTPUT_DIR();
   SUMMARY_RESOLUTION = config.SUMMARY_RESOLUTION();
   SNAPSHOT_RESOLUTION = config.SNAPSHOT_RESOLUTION();
+}
+
+void MCRegWorld::InitInstLib() {
+  if (!setup) inst_lib = emp::NewPtr<inst_lib_t>();
+  inst_lib->Clear(); // Reset the instruction library
+  inst_lib->AddInst("Nop", [](hardware_t & hw, const inst_t & inst) { ; }, "No operation!");
+  inst_lib->AddInst("Inc", sgp::inst_impl::Inst_Inc<hardware_t, inst_t>, "Increment!");
+  inst_lib->AddInst("Dec", sgp::inst_impl::Inst_Dec<hardware_t, inst_t>, "Decrement!");
+  inst_lib->AddInst("Not", sgp::inst_impl::Inst_Not<hardware_t, inst_t>, "Logical not of ARG[0]");
+  inst_lib->AddInst("Add", sgp::inst_impl::Inst_Add<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Sub", sgp::inst_impl::Inst_Sub<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Mult", sgp::inst_impl::Inst_Mult<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Div", sgp::inst_impl::Inst_Div<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Mod", sgp::inst_impl::Inst_Mod<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestEqu", sgp::inst_impl::Inst_TestEqu<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestNEqu", sgp::inst_impl::Inst_TestNEqu<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestLess", sgp::inst_impl::Inst_TestLess<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestLessEqu", sgp::inst_impl::Inst_TestLessEqu<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestGreater", sgp::inst_impl::Inst_TestGreater<hardware_t, inst_t>, "");
+  inst_lib->AddInst("TestGreaterEqu", sgp::inst_impl::Inst_TestGreaterEqu<hardware_t, inst_t>, "");
+  inst_lib->AddInst("SetMem", sgp::inst_impl::Inst_SetMem<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Close", sgp::inst_impl::Inst_Close<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_CLOSE});
+  inst_lib->AddInst("Break", sgp::inst_impl::Inst_Break<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Call", sgp::inst_impl::Inst_Call<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Return", sgp::inst_impl::Inst_Return<hardware_t, inst_t>, "");
+  inst_lib->AddInst("CopyMem", sgp::inst_impl::Inst_CopyMem<hardware_t, inst_t>, "");
+  inst_lib->AddInst("SwapMem", sgp::inst_impl::Inst_SwapMem<hardware_t, inst_t>, "");
+  inst_lib->AddInst("InputToWorking", sgp::inst_impl::Inst_InputToWorking<hardware_t, inst_t>, "");
+  inst_lib->AddInst("WorkingToOutput", sgp::inst_impl::Inst_WorkingToOutput<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Fork", sgp::inst_impl::Inst_Fork<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Terminate", sgp::inst_impl::Inst_Terminate<hardware_t, inst_t>, "");
+  inst_lib->AddInst("If", sgp::lfp_inst_impl::Inst_If<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
+  inst_lib->AddInst("While", sgp::lfp_inst_impl::Inst_While<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
+  inst_lib->AddInst("Countdown", sgp::lfp_inst_impl::Inst_Countdown<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
+  inst_lib->AddInst("Routine", sgp::lfp_inst_impl::Inst_Routine<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t>, "");
+  // If we can use global memory, give programs access. Otherwise, nops.
+  if (USE_GLOBAL_MEMORY) {
+    inst_lib->AddInst("WorkingToGlobal", sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>, "");
+    inst_lib->AddInst("GlobalToWorking", sgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>, "");
+  } else {
+    inst_lib->AddInst("Nop-WorkingToGlobal", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+  }
+  // If we can use regulation, add instructions. Otherwise, nops.
+  if (USE_FUNC_REGULATION) {
+    inst_lib->AddInst("SetRegulator", sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SetOwnRegulator", sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("AdjRegulator", sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("AdjOwnRegulator", sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SenseRegulator", sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SenseOwnRegulator", sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("IncRegulator", sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("IncOwnRegulator", sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("DecRegulator", sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("DecOwnRegulator", sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>, "");
+  } else {
+    inst_lib->AddInst("Nop-SetRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SetOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SenseRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SenseOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-IncRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-IncOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-DecRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-DecOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+  }
+  // TODO - add deme instructions
+  // TODO - add response-phase instructions
+  // TODO - add messaging instructions
+}
+
+void MCRegWorld::InitEventLib() {
+  if (!setup) event_lib = emp::NewPtr<event_lib_t>();
+  event_lib->Clear();
+  // Args: name, handler_fun, dispatchers, desc
+  // Setup event: Cell Response Signal
+  event_id__propagule_sig = event_lib->AddEvent("PropaguleSignal",
+                                          [this](hardware_t & hw, const base_event_t & e) {
+                                            const event_t & event = static_cast<const event_t&>(e);
+                                            emp_assert(eval_environment.propagule_start_tag == event.GetTag());
+                                            hw.SpawnThreadWithTag(event.GetTag());
+                                          });
+  event_id__response_sig = event_lib->AddEvent("ResponseSignal",
+                                          [this](hardware_t & hw, const base_event_t & e) {
+                                            const event_t & event = static_cast<const event_t&>(e);
+                                            emp_assert(eval_environment.response_signal_tag == event.GetTag());
+                                            hw.SpawnThreadWithTag(event.GetTag());
+                                          });
+  // TODO - setup messaging events
+
+}
+
+void MCRegWorld::InitHardware() {
+  // If being configured for the first time, create a new hardware object.
+  if (!setup) {
+    // todo - width, height
+    eval_deme = emp::NewPtr<deme_t>(DEME_WIDTH, DEME_HEIGHT,
+                                    *random_ptr, *inst_lib, *event_lib);
+  }
+  eval_deme->ResetCells();
+  eval_deme->ConfigureCells(MAX_ACTIVE_THREAD_CNT, MAX_THREAD_CAPACITY);
 }
 
 void MCRegWorld::DoWorldConfigSnapshot(const config_t & config) {
@@ -297,6 +453,12 @@ void MCRegWorld::Setup(const MCRegConfig & config) {
   // Localize configuration parameters.
   InitConfigs(config);
   DoWorldConfigSnapshot(config);
+
+  // Create instruction/event libraries.
+  InitInstLib();
+  InitEventLib();
+  // Init evaluation hardware (eval_deme)
+  InitHardware();
   // -- bookmark --
 }
 
