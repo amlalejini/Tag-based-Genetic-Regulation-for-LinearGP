@@ -164,10 +164,12 @@ protected:
   // Program group
   bool USE_FUNC_REGULATION;
   bool USE_GLOBAL_MEMORY;
-  size_t MIN_FUNC_CNT;
-  size_t MAX_FUNC_CNT;
-  size_t MIN_FUNC_INST_CNT;
-  size_t MAX_FUNC_INST_CNT;
+  emp::Range<size_t> FUNC_CNT_RANGE;
+  emp::Range<size_t> FUNC_LEN_RANGE;
+  // size_t MIN_FUNC_CNT;
+  // size_t MAX_FUNC_CNT;
+  // size_t MIN_FUNC_INST_CNT;
+  // size_t MAX_FUNC_INST_CNT;
   // Hardware group
   size_t DEME_WIDTH;
   size_t DEME_HEIGHT;
@@ -240,6 +242,7 @@ public:
       inst_lib.Delete();
       event_lib.Delete();
       eval_deme.Delete();
+      mutator.Delete();
     }
   }
 
@@ -263,10 +266,8 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   // program group
   USE_FUNC_REGULATION = config.USE_FUNC_REGULATION();
   USE_GLOBAL_MEMORY = config.USE_GLOBAL_MEMORY();
-  MIN_FUNC_CNT = config.MIN_FUNC_CNT();
-  MAX_FUNC_CNT = config.MAX_FUNC_CNT();
-  MIN_FUNC_INST_CNT = config.MIN_FUNC_INST_CNT();
-  MAX_FUNC_INST_CNT = config.MAX_FUNC_INST_CNT();
+  FUNC_CNT_RANGE = {config.MIN_FUNC_CNT(), config.MAX_FUNC_CNT()};
+  FUNC_LEN_RANGE = {config.MIN_FUNC_INST_CNT(), config.MAX_FUNC_INST_CNT()};
   // hardware group
   DEME_WIDTH = config.DEME_WIDTH();
   DEME_HEIGHT = config.DEME_HEIGHT();
@@ -385,12 +386,101 @@ void MCRegWorld::InitEventLib() {
 void MCRegWorld::InitHardware() {
   // If being configured for the first time, create a new hardware object.
   if (!setup) {
-    // todo - width, height
     eval_deme = emp::NewPtr<deme_t>(DEME_WIDTH, DEME_HEIGHT,
                                     *random_ptr, *inst_lib, *event_lib);
   }
   eval_deme->ResetCells();
   eval_deme->ConfigureCells(MAX_ACTIVE_THREAD_CNT, MAX_THREAD_CAPACITY);
+  // todo - any extra configuration we need to do for evaluation!
+}
+
+void MCRegWorld::InitEnvironment() {
+  // Setup environment signal tags
+  emp::vector<tag_t> env_bitsets(emp::RandomBitSets<MCRegWorldDefs::TAG_LEN>(*random_ptr, 2, true));
+  emp_assert(env_bitsets.size() == 2);
+  eval_environment.propagule_start_tag = env_bitsets[0];
+  eval_environment.response_signal_tag = env_bitsets[1];
+  eval_environment.ResetEnv();
+}
+
+void MCRegWorld::InitMutator() {
+  // Setup mutator
+  if (!setup) { mutator = emp::NewPtr<mutator_t>(*inst_lib); }
+  mutator->ResetLastMutationTracker();
+  // Set program constraints
+  mutator->SetProgFunctionCntRange(FUNC_CNT_RANGE);
+  mutator->SetProgFunctionInstCntRange(FUNC_LEN_RANGE);
+  mutator->SetProgInstArgValueRange({AltSignalWorldDefs::INST_MIN_ARG_VAL, AltSignalWorldDefs::INST_MAX_ARG_VAL});
+  mutator->SetTotalInstLimit(2*FUNC_LEN_RANGE.GetUpper()*FUNC_CNT_RANGE.GetUpper());
+  mutator->SetFuncNumTags(AltSignalWorldDefs::FUNC_NUM_TAGS);
+  mutator->SetInstNumTags(AltSignalWorldDefs::INST_TAG_CNT);
+  mutator->SetInstNumArgs(AltSignalWorldDefs::INST_ARG_CNT);
+  // Set mutation rates
+  mutator->SetRateInstArgSub(MUT_RATE__INST_ARG_SUB);
+  mutator->SetRateInstTagBF(MUT_RATE__INST_TAG_BF);
+  mutator->SetRateInstSub(MUT_RATE__INST_SUB);
+  mutator->SetRateInstIns(MUT_RATE__INST_INS);
+  mutator->SetRateInstDel(MUT_RATE__INST_DEL);
+  mutator->SetRateSeqSlip(MUT_RATE__SEQ_SLIP);
+  mutator->SetRateFuncDup(MUT_RATE__FUNC_DUP);
+  mutator->SetRateFuncDel(MUT_RATE__FUNC_DEL);
+  mutator->SetRateFuncTagBF(MUT_RATE__FUNC_TAG_BF);
+  // Set world mutation function.
+  this->SetMutFun([this](org_t & org, emp::Random & rnd) {
+    org.ResetMutations();                // Reset organism's recorded mutations.
+    mutator->ResetLastMutationTracker(); // Reset mutator mutation tracking.
+    const size_t mut_cnt = mutator->ApplyAll(rnd, org.GetGenome().program);
+    // Record mutations in organism.
+    auto & mut_dist = mutator->GetLastMutations();
+    auto & org_mut_tracker = org.GetMutations();
+    org_mut_tracker["inst_arg_sub"] = mut_dist[mutator_t::MUTATION_TYPES::INST_ARG_SUB];
+    org_mut_tracker["inst_tag_bit_flip"] = mut_dist[mutator_t::MUTATION_TYPES::INST_TAG_BIT_FLIP];
+    org_mut_tracker["inst_sub"] = mut_dist[mutator_t::MUTATION_TYPES::INST_SUB];
+    org_mut_tracker["inst_ins"] = mut_dist[mutator_t::MUTATION_TYPES::INST_INS];
+    org_mut_tracker["inst_del"] = mut_dist[mutator_t::MUTATION_TYPES::INST_DEL];
+    org_mut_tracker["seq_slip_dup"] = mut_dist[mutator_t::MUTATION_TYPES::SEQ_SLIP_DUP];
+    org_mut_tracker["seq_slip_del"] = mut_dist[mutator_t::MUTATION_TYPES::SEQ_SLIP_DEL];
+    org_mut_tracker["func_dup"] = mut_dist[mutator_t::MUTATION_TYPES::FUNC_DUP];
+    org_mut_tracker["func_del"] = mut_dist[mutator_t::MUTATION_TYPES::FUNC_DEL];
+    org_mut_tracker["func_tag_bit_flip"] = mut_dist[mutator_t::MUTATION_TYPES::FUNC_TAG_BIT_FLIP];
+    return mut_cnt;
+  });
+}
+
+void MCRegWorld::InitPop() {
+  this->Clear();
+  InitPop_Random();
+}
+
+/// Initialize the population with randomly generated organisms
+void MCRegWorld::InitPop_Random() {
+  for (size_t i = 0; i < POP_SIZE; ++i) {
+    this->Inject({sgp::GenRandLinearFunctionsProgram<hardware_t, MCRegWorldDefs::TAG_LEN>
+                                  (*random_ptr, *inst_lib,
+                                   FUNC_CNT_RANGE,
+                                   MCRegWorldDefs::FUNC_NUM_TAGS,
+                                   FUNC_LEN_RANGE,
+                                   MCRegWorldDefs::INST_TAG_CNT,
+                                   MCRegWorldDefs::INST_ARG_CNT,
+                                   {MCRegWorldDefs::INST_MIN_ARG_VAL,MCRegWorldDefs::INST_MAX_ARG_VAL})
+                  }, 1);
+  }
+}
+
+void MCRegWorld::InitDataCollection() {
+  emp_assert(!setup);
+  if (setup) {
+    max_fit_file.Delete();
+  } else {
+    mkdir(OUTPUT_DIR.c_str(), ACCESSPERMS);
+    if(OUTPUT_DIR.back() != '/')
+        OUTPUT_DIR += '/';
+  }
+  std::function<size_t(void)> get_update = [this]() { return this->GetUpdate(); };
+  // -- Setup the fitness file --
+  SetupFitnessFile(OUTPUT_DIR + "/fitness.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
+  // -- Systematics tracking --
+  // --bookmark--
 }
 
 void MCRegWorld::DoWorldConfigSnapshot(const config_t & config) {
@@ -441,6 +531,24 @@ void MCRegWorld::DoWorldConfigSnapshot(const config_t & config) {
   get_cur_param = []() { return "INST_MAX_ARG_VAL"; };
   get_cur_value = []() { return emp::to_string(MCRegWorldDefs::INST_MAX_ARG_VAL); };
   snapshot_file.Update();
+  // environment response phase signal
+  get_cur_param = []() { return "environment_response_tag"; };
+  get_cur_value = [this]() {
+    std::ostringstream stream;
+    eval_environment.response_signal_tag.Print(stream);
+    return stream.str();
+  };
+  snapshot_file.Update();
+  // propagule signal
+  get_cur_param = []() { return "environment_propagule_tag"; };
+  get_cur_value = [this]() {
+    std::ostringstream stream;
+    eval_environment.propagule_start_tag.Print(stream);
+    return stream.str();
+  };
+  snapshot_file.Update();
+
+  // configuration parameters
   for (const auto & entry : config) {
     get_cur_param = [&entry]() { return entry.first; };
     get_cur_value = [&entry]() { return emp::to_string(entry.second->GetValue()); };
@@ -452,14 +560,33 @@ void MCRegWorld::DoWorldConfigSnapshot(const config_t & config) {
 void MCRegWorld::Setup(const MCRegConfig & config) {
   // Localize configuration parameters.
   InitConfigs(config);
-  DoWorldConfigSnapshot(config);
 
   // Create instruction/event libraries.
   InitInstLib();
   InitEventLib();
-  // Init evaluation hardware (eval_deme)
+  // Initialize evaluation hardware (eval_deme)
   InitHardware();
-  // -- bookmark --
+  if (eval_deme->GetSize()) {
+    std::cout << "Configured hardware matchbin: " << eval_deme->GetCell(0).GetMatchBin().name() << std::endl;
+  } else {
+    std::cout << "Initialized hardware, but evaluation deme has no cells!" << std::endl;
+  }
+  // Initialize the evaluation environment
+  InitEnvironment();
+  // Initialize the organism mutator!
+  InitMutator();
+  // How should the population be initialized?
+  end_setup_sig.AddAction([this]() {
+    std::cout << "Initializing population...";
+    InitPop();
+    std::cout << " Done" << std::endl;
+    this->SetAutoMutate(); // Set to automutate after initializing population!
+  });
+  // Initialize data collection
+  InitDataCollection();
+  DoWorldConfigSnapshot(config);
+  end_setup_sig.Trigger(); // Trigger events to happen at end of world setup
+  setup = true;
 }
 
 #endif
