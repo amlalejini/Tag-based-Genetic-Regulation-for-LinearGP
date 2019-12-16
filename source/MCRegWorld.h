@@ -270,7 +270,7 @@ public:
 
 /// Evaluate a single organism.
 void MCRegWorld::EvaluateOrg(org_t & org) {
-  std::cout << "==== EVALUATE ORG ====" << std::endl;
+  // std::cout << "==== EVALUATE ORG ====" << std::endl;
   // Reset the environment.
   eval_environment.ResetEnv();
   // Set environment to development phase
@@ -278,8 +278,8 @@ void MCRegWorld::EvaluateOrg(org_t & org) {
   // Reset organism's phenotype.
   org.GetPhenotype().Reset();
   // Ready the evaluation hardware (deme)
-  eval_deme->ActivatePropagule(program_t(), PROPAGULE_SIZE, CLUMPY_PROPAGULES);
-  eval_deme->PrintActive();
+  eval_deme->ActivatePropagule(org.GetGenome().program, PROPAGULE_SIZE, CLUMPY_PROPAGULES);
+  // eval_deme->PrintActive();
   // Evaluate developmental phase
   //  - Note: propagule cells have already received a 'start' event for the development phase
   for (size_t step = 0; step < DEVELOPMENT_PHASE_CPU_TIME; ++step) {
@@ -307,7 +307,7 @@ void MCRegWorld::EvaluateOrg(org_t & org) {
   }
   org.GetPhenotype().num_unique_resp = unique_responses.size();
   org.GetPhenotype().resources_consumed = org.GetPhenotype().num_unique_resp * org.GetPhenotype().num_resp;
-  eval_deme->PrintResponses();
+  // eval_deme->PrintResponses();
 }
 
 void MCRegWorld::DoEvaluation() {
@@ -319,6 +319,40 @@ void MCRegWorld::DoEvaluation() {
     // Record the phenotype information for this taxon.
     after_eval_sig.Trigger(org_id);
   }
+}
+
+void MCRegWorld::DoSelection() {
+  // Keeping it simple with tournament selection!
+  emp::TournamentSelect(*this, TOURNAMENT_SIZE, POP_SIZE);
+}
+
+void MCRegWorld::DoUpdate() {
+  // Log current update, best fitness found this generation
+  const double max_fit = CalcFitnessID(max_fit_org_id);
+  found_solution = GetOrg(max_fit_org_id).GetPhenotype().GetResourcesConsumed() == MAX_RESPONSE_SCORE;
+  std::cout << "update: " << GetUpdate() << "; ";
+  std::cout << "best score (" << max_fit_org_id << "): " << max_fit << "; ";
+  std::cout << "solution found: " << found_solution << std::endl;
+  const size_t cur_update = GetUpdate();
+  if (SUMMARY_RESOLUTION) {
+    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) max_fit_file->Update();
+  }
+  if (SNAPSHOT_RESOLUTION) {
+    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) {
+      DoPopulationSnapshot();
+      if (cur_update) systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+    }
+  }
+
+  // --- For debugging => eval best org again w/prints ---
+  std::cout << "Best Org details:" << std::endl;
+  EvaluateOrg(this->GetOrg(max_fit_org_id));
+  eval_deme->PrintActive();
+  eval_deme->PrintResponses();
+  std::cout << "=====================" << std::endl;
+
+  Update();
+  ClearCache();
 }
 
 void MCRegWorld::InitConfigs(const config_t & config) {
@@ -427,7 +461,28 @@ void MCRegWorld::InitInstLib() {
     inst_lib->AddInst("Nop-DecOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
   // TODO - add deme instructions
-  // TODO - add response-phase instructions
+  //   - repro
+  //   - actuation (rotation); rot to empty
+  //   - sense dir
+  //   - sense facing empty
+  //
+  // Add response-phase instructions
+  for (size_t i = 0; i < NUM_RESPONSE_TYPES; ++i) {
+    inst_lib->AddInst("Response-" + emp::to_string(i), [this, i](hardware_t & hw, const inst_t & inst) {
+      // Not allowed to response in development phase!
+      if (eval_environment.GetPhase() != ENV_STATE::RESPONSE) return;
+      // Mark response on hardware
+      hw.GetCustomComponent().SetResponse((int)i);
+      // Remove all pending threads.
+      hw.RemoveAllPendingThreads();
+      // Mark all active threads as dead.
+      for (size_t thread_id : hw.GetActiveThreadIDs()) {
+        hw.GetThread(thread_id).SetDead();
+      }
+      // Clear event queue!
+      hw.ClearEventQueue();
+    }, "Set cell response if in response phase.");
+  }
   // TODO - add messaging instructions
 }
 
@@ -714,6 +769,50 @@ void MCRegWorld::InitDataCollection() {
   max_fit_file->PrintHeaderKeys();
 }
 
+void MCRegWorld::DoPopulationSnapshot() {
+  // Make a new data file for snapshot.
+  emp::DataFile snapshot_file(OUTPUT_DIR + "/pop_" + emp::to_string((int)GetUpdate()) + ".csv");
+  size_t cur_org_id = 0;
+  // Add functions.
+  snapshot_file.AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
+  snapshot_file.AddFun<size_t>([this, &cur_org_id]() { return cur_org_id; }, "pop_id");
+  // max_fit_file->AddFun(, "genotype_id");
+  snapshot_file.AddFun<bool>([this, &cur_org_id]() {
+    org_t & org = this->GetOrg(cur_org_id);
+    return org.GetPhenotype().GetResourcesConsumed() == MAX_RESPONSE_SCORE;
+  }, "solution");
+  snapshot_file.template AddFun<double>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetResourcesConsumed();
+  }, "score");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetUniqueResponseCnt();
+  }, "unique_responses");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetResponseCnt();
+  }, "total_responses");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetActiveCellCnt();
+  }, "active_cell_cnt");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(cur_org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  snapshot_file.PrintHeaderKeys();
+  for (cur_org_id = 0; cur_org_id < GetSize(); ++cur_org_id) {
+    emp_assert(IsOccupied(cur_org_id));
+    snapshot_file.Update();
+  }
+}
+
 void MCRegWorld::DoWorldConfigSnapshot(const config_t & config) {
   // Print matchbin metric
   std::cout << "Requested MatchBin Metric: " << STRINGVIEWIFY(MATCH_METRIC) << std::endl;
@@ -836,8 +935,8 @@ void MCRegWorld::Run() {
 void MCRegWorld::RunStep() {
   // (1) evaluate population, (2) select parents, (3) update world
   DoEvaluation();
-  // DoSelection();
-  // DoUpdate();
+  DoSelection();
+  DoUpdate();
 }
 
 void MCRegWorld::PrintProgramSingleLine(const program_t & prog, std::ostream & out) {
