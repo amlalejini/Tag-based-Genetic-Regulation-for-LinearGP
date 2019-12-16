@@ -45,6 +45,7 @@ public:
     size_t num_unique_resp=0;
     size_t num_resp=0;
     size_t num_active_cells=0;
+    // todo - add development pattern!
 
     void Reset() {
       resources_consumed=0.0;
@@ -78,6 +79,11 @@ public:
                       o.num_resp,
                       o.num_active_cells);
     }
+
+    double GetResourcesConsumed() const { return resources_consumed; }
+    size_t GetUniqueResponseCnt() const { return num_unique_resp; }
+    size_t GetResponseCnt() const { return num_resp; }
+    size_t GetActiveCellCnt() const { return num_active_cells; }
 
   };
 

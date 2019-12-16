@@ -161,18 +161,18 @@ protected:
   size_t GENERATIONS;
   size_t POP_SIZE;
   bool STOP_ON_SOLUTION;
+  // Environment group
+  size_t NUM_RESPONSE_TYPES;
   // Program group
   bool USE_FUNC_REGULATION;
   bool USE_GLOBAL_MEMORY;
   emp::Range<size_t> FUNC_CNT_RANGE;
   emp::Range<size_t> FUNC_LEN_RANGE;
-  // size_t MIN_FUNC_CNT;
-  // size_t MAX_FUNC_CNT;
-  // size_t MIN_FUNC_INST_CNT;
-  // size_t MAX_FUNC_INST_CNT;
   // Hardware group
   size_t DEME_WIDTH;
   size_t DEME_HEIGHT;
+  size_t PROPAGULE_SIZE;
+  std::string PROPAGULE_LAYOUT;
   size_t MAX_ACTIVE_THREAD_CNT;
   size_t MAX_THREAD_CAPACITY;
   // Selection group
@@ -207,7 +207,10 @@ protected:
   emp::Ptr<emp::DataFile> max_fit_file;
   emp::Ptr<systematics_t> systematics_ptr;  ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
 
-  bool found_solution = false;
+  bool found_solution = false;              ///< Have we stumbled onto a 'solution' yet?
+  double MAX_RESPONSE_SCORE=0;              ///< What is the maximum score an organism can achieve?
+  size_t max_fit_org_id=0;                  ///< What is the most fit organism ID for this generation?
+  bool CLUMPY_PROPAGULES=false;
 
   size_t event_id__propagule_sig=0;
   size_t event_id__response_sig=0;
@@ -254,15 +257,48 @@ public:
 
   /// Run world for configured number of generations
   void Run();
+
+  // -- printing utilities --
+  void PrintProgramSingleLine(const program_t & prog, std::ostream & out);
+  void PrintProgramFunction(const program_function_t & func, std::ostream & out);
+  void PrintProgramInstruction(const inst_t & inst, std::ostream & out);
 };
 
 // ----- Utilities -----
+
+/// Evaluate a single organism.
+void MCRegWorld::EvaluateOrg(org_t & org) {
+  // Reset the environment.
+  eval_environment.ResetEnv();
+  // Reset organism's phenotype.
+  org.GetPhenotype().Reset();
+  // Ready the evaluation hardware (deme)
+  eval_deme->ActivatePropagule(*random_ptr, program_t(), PROPAGULE_SIZE, CLUMPY_PROPAGULES);
+  eval_deme->PrintActive();
+
+  exit(-1);
+  // Evaluate developmental phase
+  // Evaluate response phase
+}
+
+void MCRegWorld::DoEvaluation() {
+  max_fit_org_id = 0;
+  for (size_t org_id = 0; org_id < this->GetSize(); ++org_id) {
+    emp_assert(this->IsOccupied(org_id));
+    EvaluateOrg(this->GetOrg(org_id)); // Each organism can be evaluated independently of other organisms
+    if (CalcFitnessID(org_id) > CalcFitnessID(max_fit_org_id)) max_fit_org_id = org_id;
+    // Record the phenotype information for this taxon.
+    after_eval_sig.Trigger(org_id);
+  }
+}
 
 void MCRegWorld::InitConfigs(const config_t & config) {
   // default group
   GENERATIONS = config.GENERATIONS();
   POP_SIZE = config.POP_SIZE();
   STOP_ON_SOLUTION = config.STOP_ON_SOLUTION();
+  // environment group
+  NUM_RESPONSE_TYPES = config.NUM_RESPONSE_TYPES();
   // program group
   USE_FUNC_REGULATION = config.USE_FUNC_REGULATION();
   USE_GLOBAL_MEMORY = config.USE_GLOBAL_MEMORY();
@@ -271,6 +307,8 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   // hardware group
   DEME_WIDTH = config.DEME_WIDTH();
   DEME_HEIGHT = config.DEME_HEIGHT();
+  PROPAGULE_SIZE = config.PROPAGULE_SIZE();
+  PROPAGULE_LAYOUT = config.PROPAGULE_LAYOUT();
   MAX_ACTIVE_THREAD_CNT = config.MAX_ACTIVE_THREAD_CNT();
   MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
   // selection group
@@ -388,7 +426,16 @@ void MCRegWorld::InitHardware() {
   if (!setup) {
     eval_deme = emp::NewPtr<deme_t>(DEME_WIDTH, DEME_HEIGHT,
                                     *random_ptr, *inst_lib, *event_lib);
+    // Configure OnPropaguleActivate
+    eval_deme->OnPropaguleActivate([this](hardware_t & hw) {
+      // Queue an event!
+      hw.QueueEvent(event_t(event_id__propagule_sig, eval_environment.propagule_start_tag));
+      hw.GetCustomComponent().SetFacing(deme_t::Facing::N);
+    });
+    // todo - on deme repro
   }
+  emp_assert(PROPAGULE_LAYOUT == "random" || PROPAGULE_LAYOUT == "clumpy");
+  CLUMPY_PROPAGULES = (PROPAGULE_LAYOUT == "clumpy");
   eval_deme->ResetCells();
   eval_deme->ConfigureCells(MAX_ACTIVE_THREAD_CNT, MAX_THREAD_CAPACITY);
   // todo - any extra configuration we need to do for evaluation!
@@ -480,7 +527,160 @@ void MCRegWorld::InitDataCollection() {
   // -- Setup the fitness file --
   SetupFitnessFile(OUTPUT_DIR + "/fitness.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
   // -- Systematics tracking --
-  // --bookmark--
+  systematics_ptr = emp::NewPtr<systematics_t>([](const org_t & o) { return o.GetGenome(); });
+  // We want to record phenotype information AFTER organism is evaluated.
+  // - for this, we need to find the appropriate taxon post-evaluation
+  after_eval_sig.AddAction([this](size_t pop_id) {
+    emp::Ptr<taxon_t> taxon = systematics_ptr->GetTaxonAt(pop_id);
+    taxon->GetData().RecordFitness(this->CalcFitnessID(pop_id));
+    taxon->GetData().RecordPhenotype(this->GetOrg(pop_id).GetPhenotype());
+  });
+  // We want to record mutations when organism is added to the population
+  // - because mutations are applied automatically by this->DoBirth => this->AddOrgAt => sys->OnNew
+  std::function<void(emp::Ptr<taxon_t>, org_t&)> record_taxon_mut_data =
+    [this](emp::Ptr<taxon_t> taxon, org_t & org) {
+      taxon->GetData().RecordMutation(org.GetMutations());
+    };
+  systematics_ptr->OnNew(record_taxon_mut_data);
+  // Add snapshot functions
+  // - fitness information (taxon->GetFitness)
+  // - phenotype information
+  //   - res collected, correct resp, no resp
+  // - mutations (counts by type)
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetFitness());
+  }, "fitness", "Taxon fitness");
+  systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
+    const phenotype_t & phen = taxon.GetData().GetPhenotype();
+    const bool is_sol = (phen.num_unique_resp * phen.num_resp) == MAX_RESPONSE_SCORE;
+    return (is_sol) ? "1" : "0";
+  }, "is_solution", "Is this a solution?");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetPhenotype().GetResourcesConsumed());
+  }, "resources_collected", "How many resources did most recent member of taxon collect?");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetPhenotype().GetUniqueResponseCnt());
+  }, "unique_responses", "How many unique responses did deme exhibit?");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetPhenotype().GetResponseCnt());
+  }, "total_responses", "How many total responses did deme produce?");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetPhenotype().GetActiveCellCnt());
+  }, "active_cell_cnt", "How many active cells in deme after development?");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+    if (taxon.GetData().HasMutationType("inst_arg_sub")) {
+      return emp::to_string(taxon.GetData().GetMutationCount("inst_arg_sub"));
+    } else {
+      return "0";
+    }
+  }, "inst_arg_sub_mut_cnt", "How many mutations from parent taxon to this taxon?");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_tag_bit_flip")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_tag_bit_flip"));
+      } else {
+        return "0";
+      }
+    }, "inst_tag_bit_flip_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_sub")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_sub"));
+      } else {
+        return "0";
+      }
+    }, "inst_sub_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_ins")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_ins"));
+      } else {
+        return "0";
+      }
+    }, "inst_ins_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_del")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_del"));
+      } else {
+        return "0";
+      }
+    }, "inst_del_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("seq_slip_dup")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("seq_slip_dup"));
+      } else {
+        return "0";
+      }
+    }, "seq_slip_dup_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("seq_slip_del")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("seq_slip_del"));
+      } else {
+        return "0";
+      }
+    }, "seq_slip_del_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("func_dup")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("func_dup"));
+      } else {
+        return "0";
+      }
+    }, "func_dup_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("func_del")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("func_del"));
+      } else {
+        return "0";
+      }
+    }, "func_del_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("func_tag_bit_flip")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("func_tag_bit_flip"));
+      } else {
+        return "0";
+      }
+    }, "func_tag_bit_flip_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(taxon.GetInfo().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program", "Program representing this taxon");
+  AddSystematics(systematics_ptr);
+  SetupSystematicsFile(0, OUTPUT_DIR + "/systematics.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
+  // -- Dominant file --
+  max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
+  max_fit_file->AddFun(get_update, "update");
+  max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_id; }, "pop_id");
+  max_fit_file->template AddFun<bool>([this]() {
+    const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
+    const bool is_sol = (phen.num_unique_resp * phen.num_resp) == MAX_RESPONSE_SCORE;
+    return (is_sol) ? "1" : "0";
+  }, "solution");
+  max_fit_file->template AddFun<double>([this]() {
+    return this->GetOrg(max_fit_org_id).GetPhenotype().GetResourcesConsumed();
+  }, "score");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_id).GetPhenotype().GetUniqueResponseCnt();
+  }, "unique_responses");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_id).GetPhenotype().GetResponseCnt();
+  }, "total_responses");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_id).GetPhenotype().GetActiveCellCnt();
+  }, "active_cell_cnt");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(max_fit_org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  max_fit_file->PrintHeaderKeys();
 }
 
 void MCRegWorld::DoWorldConfigSnapshot(const config_t & config) {
@@ -582,11 +782,75 @@ void MCRegWorld::Setup(const MCRegConfig & config) {
     std::cout << " Done" << std::endl;
     this->SetAutoMutate(); // Set to automutate after initializing population!
   });
+  this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
+  this->SetFitFun([this](org_t & org) {
+    return org.GetPhenotype().resources_consumed;
+  });
+  MAX_RESPONSE_SCORE = (DEME_WIDTH * DEME_HEIGHT) * NUM_RESPONSE_TYPES;
+  std::cout << "Maximum possible score in this environment = " << MAX_RESPONSE_SCORE << std::endl;
   // Initialize data collection
   InitDataCollection();
   DoWorldConfigSnapshot(config);
   end_setup_sig.Trigger(); // Trigger events to happen at end of world setup
   setup = true;
+}
+
+void MCRegWorld::Run() {
+  for (size_t u = 0; u <= GENERATIONS; ++u) {
+    RunStep();
+    if (STOP_ON_SOLUTION & found_solution) break;
+  }
+}
+
+void MCRegWorld::RunStep() {
+  // (1) evaluate population, (2) select parents, (3) update world
+  DoEvaluation();
+  // DoSelection();
+  // DoUpdate();
+}
+
+void MCRegWorld::PrintProgramSingleLine(const program_t & prog, std::ostream & out) {
+  out << "[";
+  for (size_t func_id = 0; func_id < prog.GetSize(); ++func_id) {
+    if (func_id) out << ",";
+    PrintProgramFunction(prog[func_id], out);
+  }
+  out << "]";
+}
+
+void MCRegWorld::PrintProgramFunction(const program_function_t & func, std::ostream & out) {
+  out << "{";
+  // print function tags
+  out << "[";
+  for (size_t tag_id = 0; tag_id < func.GetTags().size(); ++tag_id) {
+    if (tag_id) out << ",";
+    func.GetTag(tag_id).Print(out);
+  }
+  out << "]:";
+  // print instruction sequence
+  out << "[";
+  for (size_t inst_id = 0; inst_id < func.GetSize(); ++inst_id) {
+    if (inst_id) out << ",";
+    PrintProgramInstruction(func[inst_id], out);
+  }
+  out << "]";
+  out << "}";
+}
+
+void MCRegWorld::PrintProgramInstruction(const inst_t & inst, std::ostream & out) {
+  out << inst_lib->GetName(inst.GetID()) << "[";
+  // print tags
+  for (size_t tag_id = 0; tag_id < inst.GetTags().size(); ++tag_id) {
+    if (tag_id) out << ",";
+    inst.GetTag(tag_id).Print(out);
+  }
+  out << "](";
+  // print args
+  for (size_t arg_id = 0; arg_id < inst.GetArgs().size(); ++arg_id) {
+    if (arg_id) out << ",";
+    out << inst.GetArg(arg_id);
+  }
+  out << ")";
 }
 
 #endif

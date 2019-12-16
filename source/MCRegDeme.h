@@ -1,8 +1,12 @@
 #ifndef _MC_REG_DEME_H
 #define _MC_REG_DEME_H
 
+#include <ostream>
 // Empirical includes
+#include "base/vector.h"
 #include "tools/math.h"
+#include "tools/random_utils.h"
+#include "tools/vector_utils.h"
 // SignalGP includes
 #include "hardware/SignalGP/impls/SignalGPLinearFunctionsProgram.h"
 
@@ -40,6 +44,8 @@ public:
     void SetCellID(size_t id) { cell_id = id; }
 
     bool IsActive() const { return active; }
+    void SetActive() { active = true; }
+    void SetInactive() { active = false; }
 
     Facing GetFacing() const { return cell_facing; }
     void SetFacing(Facing facing) { cell_facing = facing; }
@@ -68,6 +74,7 @@ public:
                                                          CellHardware>;
   using event_lib_t = typename hardware_t::event_lib_t;
   using inst_lib_t = typename hardware_t::inst_lib_t;
+  using program_t = typename hardware_t::program_t;
 
 protected:
   size_t width;   ///< Width of deme grid
@@ -77,11 +84,26 @@ protected:
   emp::vector<hardware_t> cells;       ///< Toroidal grid of hardware units
   emp::vector<size_t> cell_schedule;   ///< Order to execute cells
 
+  emp::Signal<void(hardware_t &)> on_propagule_activate_sig; ///< Triggered when a cell is activated as a propagule
+  emp::Signal<void(hardware_t &)> on_repro_activate_sig;     ///< Triggered when a cell is activated after reproduction event
+
   /// Build neighbor lookup (according to current width and height)
   void BuildNeighborLookup();
 
   /// Calculate the neighbor ID of the cell (specified by id) in a particular direction
   size_t CalcNeighbor(size_t id, Facing dir) const;
+
+  void ActivatePropaguleClumpy(emp::Random & random, const program_t & prog, size_t prop_size);
+  void ActivatePropaguleRandom(emp::Random & random, const program_t & prog, size_t prop_size);
+
+  /// WARNING: Should never call this with cell_id that has already been activated!
+  void ActivateCell(size_t cell_id, const program_t & prog) {
+    emp_assert(!emp::Has(cell_schedule, cell_id));
+    emp_assert(!IsActive(cell_id));
+    cells[cell_id].SetProgram(prog);
+    cells[cell_id].GetCustomComponent().SetActive();
+    cell_schedule.emplace_back(cell_id);
+  }
 
 public:
   MCRegDeme(size_t _width, size_t _height, emp::Random & _random,
@@ -93,7 +115,6 @@ public:
     for (size_t i = 0; i < width*height; ++i) {
       cells.emplace_back(random, ilib, elib);
       cells.back().GetCustomComponent().SetCellID(i);
-
     }
     BuildNeighborLookup();
   }
@@ -105,6 +126,7 @@ public:
       cell.GetCustomComponent().Reset();
       emp_assert(cell.ValidateThreadState());
     }
+    cell_schedule.clear();
   }
 
   // todo - Configure Hardware function
@@ -116,6 +138,18 @@ public:
     }
   }
 
+  /// Activate deme by activating propagule cells
+  /// Note, this will reset deme state
+  void ActivatePropagule(emp::Random & random,
+                         const program_t & prog,
+                         size_t prop_size=1,
+                         bool clumpy=true)
+  {
+    ResetCells(); // Reset
+    // Todo - if prop_size == deme_size, don't do anything complicated!
+    if (clumpy) ActivatePropaguleClumpy(random, prog, prop_size);
+    else ActivatePropaguleRandom(random, prog, prop_size);
+  }
 
   /// Get cell capacity of deme
   size_t GetSize() const { return cells.size(); }
@@ -129,6 +163,9 @@ public:
   /// Given x,y coordinate, return cell ID
   size_t GetCellID(size_t x, size_t y) const { return (y * width) + x; }
 
+  /// Given a cell ID and facing (of that cell), return the appropriate neighboring cell ID
+  size_t GetNeighboringCellID(size_t id, Facing dir) const { return neighbor_lookup[id*NUM_DIRECTIONS + (size_t)dir]; }
+
   /// Get cell at position ID (outsource bounds checking to emp::vector)
   hardware_t & GetCell(size_t id) { return cells[id]; }
 
@@ -137,13 +174,34 @@ public:
 
   emp::vector<hardware_t> & GetCells() { return cells; }
 
+  /// Is a cell at a particular location active?
+  bool IsActive(size_t id) const { return cells[id].GetCustomComponent().IsActive(); }
+
   // todo - Advance (by a number of steps)
   // todo - SingleAdvance()
+  void OnPropaguleActivate(const std::function<void(hardware_t &)> & fun) {
+    on_propagule_activate_sig.AddAction(fun);
+  }
+
+  void OnReproActivate(const std::function<void(hardware_t &)> & fun) {
+    on_repro_activate_sig.AddAction(fun);
+  }
 
   /// Given a Facing direction, return a representative string (useful for debugging)
   std::string FacingToStr(Facing dir) const;
+
   /// Print the deme's neighbor map! (useful for debugging)
   void PrintNeighborMap(std::ostream & os=std::cout) const;
+
+  /// Print which cells are active in deme (useful for debugging)
+  void PrintActive(std::ostream & os=std::cout) {
+    os << "-- Deme Active/Inactive --\n";
+    for (size_t y = 0; y < height; ++y) {
+      for (size_t x = 0; x < width; ++x) {
+        os << (int)IsActive(GetCellID(x,y)) << " ";
+      } os << "\n";
+    }
+  }
 };
 
 template<typename HW_MEMORY_MODEL_T,typename HW_TAG_T,typename HW_INST_ARG_T,typename HW_MATCHBIN_T>
@@ -197,6 +255,51 @@ size_t MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::CalcNe
   return GetCellID(facing_x, facing_y);
 }
 
+template<typename HW_MEMORY_MODEL_T,typename HW_TAG_T,typename HW_INST_ARG_T,typename HW_MATCHBIN_T>
+void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::ActivatePropaguleClumpy(emp::Random & random,
+                                                                                                const program_t & prog,
+                                                                                                size_t prop_size)
+{
+  emp_assert(prop_size < cells.size(), "Cannot activate propagule with more cells than there is space.", prop_size, cells.size());
+  size_t cell_id = random.GetUInt(0, cells.size());  // Where should we start clump activate?
+  size_t prop_cnt = 0;                               // Track the number of cells activated so far.
+  Facing dir = Facing::N;
+  while (prop_cnt < prop_size) {
+    if (!IsActive(cell_id)) {
+      prop_cnt += 1;
+      // TODO activate propagule!
+      // Load program
+      ActivateCell(cell_id, prog);
+      emp_assert(IsActive(cell_id));
+      on_propagule_activate_sig.Trigger(cells[cell_id]);
+    } else {
+      Facing r_dir = Dir[(dir + 2) % NUM_DIRECTIONS]; // Want to use 90 degree turns here (thus, +2 instead of +1)
+      size_t r_id = GetNeighboringCellID(cell_id, r_dir);
+      if (!IsActive(r_id)) {
+        dir = r_dir; cell_id = r_id;
+      } else {
+        cell_id = GetNeighboringCellID(cell_id, dir);
+      }
+    }
+  }
+}
+
+template<typename HW_MEMORY_MODEL_T,typename HW_TAG_T,typename HW_INST_ARG_T,typename HW_MATCHBIN_T>
+void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::ActivatePropaguleRandom(emp::Random & random,
+                                                                                                const program_t & prog,
+                                                                                                size_t prop_size)
+{
+  // Active deme randomly
+  for (size_t i = 0; i < GetSize(); ++i) cell_schedule.emplace_back(i);
+  emp::Shuffle(random, cell_schedule);
+  cell_schedule.resize(prop_size);
+  for (size_t id : cell_schedule) {
+    // Activate cell @ id
+    ActivateCell(id, prog);
+    emp_assert(IsActive(id));
+    on_propagule_activate_sig.Trigger(cells[id]);
+  }
+}
 
 /// Given a Facing direction, return a representative string (useful for debugging)
 template<typename HW_MEMORY_MODEL_T,typename HW_TAG_T,typename HW_INST_ARG_T,typename HW_MATCHBIN_T>

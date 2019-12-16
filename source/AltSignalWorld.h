@@ -659,7 +659,6 @@ void AltSignalWorld::InitDataCollection() {
   max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
   max_fit_file->AddFun(get_update, "update");
   max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_tracker.org_id; }, "pop_id");
-  // max_fit_file->AddFun(, "genotype_id");
   max_fit_file->template AddFun<bool>([this]() {
     org_t & org = this->GetOrg(max_fit_org_tracker.org_id);
     return org.GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;

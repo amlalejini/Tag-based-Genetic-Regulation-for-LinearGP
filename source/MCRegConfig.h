@@ -11,6 +11,7 @@ EMP_BUILD_CONFIG(MCRegConfig,
     VALUE(STOP_ON_SOLUTION, bool, true, "Should we stop run on solution?"),
 
   GROUP(ENVIRONMENT_GROUP, "Environment settings"),
+    VALUE(NUM_RESPONSE_TYPES, size_t, 4, "How many possible response types are there?"),
 
   GROUP(PROGRAM_GROUP, "Program settings"),
     VALUE(USE_FUNC_REGULATION, bool, true, "Do programs have access to function regulation instructions?"),
@@ -23,6 +24,8 @@ EMP_BUILD_CONFIG(MCRegConfig,
   GROUP(HARDWARE_GROUP, "Virtual hardware settings"),
     VALUE(DEME_WIDTH, size_t, 4, "How many columns of cells are in a deme?"),
     VALUE(DEME_HEIGHT, size_t, 4, "How many rows of cells are in a deme?"),
+    VALUE(PROPAGULE_SIZE, size_t, 1, "How many cells get activated as propagule?"),
+    VALUE(PROPAGULE_LAYOUT, std::string, "random", "How are propagules configured on activation?\n  'random': activated cells are randomly selected\n  'clumpy': activated cells are in a clump"),
     VALUE(MAX_ACTIVE_THREAD_CNT, size_t, 32, "How many threads can be simultaneously running (active)?"),
     VALUE(MAX_THREAD_CAPACITY, size_t, 64, "Maximum capacity for thread memory (pending + active)."),
 
