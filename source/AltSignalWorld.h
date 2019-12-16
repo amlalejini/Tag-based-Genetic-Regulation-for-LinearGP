@@ -859,6 +859,15 @@ void AltSignalWorld::DoWorldConfigSnapshot(const AltSignalConfig & config) {
   get_cur_param = []() { return "INST_MAX_ARG_VAL"; };
   get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_MAX_ARG_VAL); };
   snapshot_file.Update();
+  // environment signal
+  get_cur_param = []() { return "environment_signal_tag"; };
+  get_cur_value = [this]() {
+    std::ostringstream stream;
+    eval_environment.env_signal_tag.Print(stream);
+    return stream.str();
+  };
+  snapshot_file.Update();
+
   for (const auto & entry : config) {
     get_cur_param = [&entry]() { return entry.first; };
     get_cur_value = [&entry]() { return emp::to_string(entry.second->GetValue()); };
@@ -915,7 +924,6 @@ void AltSignalWorld::PrintProgramInstruction(const inst_t & inst, std::ostream &
 void AltSignalWorld::Setup(const AltSignalConfig & config) {
   // Localize configuration parameters.
   InitConfigs(config);
-  DoWorldConfigSnapshot(config);
 
   // Create instruction/event libraries.
   InitInstLib();
@@ -943,6 +951,7 @@ void AltSignalWorld::Setup(const AltSignalConfig & config) {
 
   InitDataCollection();
 
+  DoWorldConfigSnapshot(config);
   end_setup_sig.Trigger();
   setup = true;
 }
