@@ -163,6 +163,8 @@ protected:
   bool STOP_ON_SOLUTION;
   // Environment group
   size_t NUM_RESPONSE_TYPES;
+  size_t DEVELOPMENT_PHASE_CPU_TIME;
+  size_t RESPONSE_PHASE_CPU_TIME;
   // Program group
   bool USE_FUNC_REGULATION;
   bool USE_GLOBAL_MEMORY;
@@ -268,17 +270,44 @@ public:
 
 /// Evaluate a single organism.
 void MCRegWorld::EvaluateOrg(org_t & org) {
+  std::cout << "==== EVALUATE ORG ====" << std::endl;
   // Reset the environment.
   eval_environment.ResetEnv();
+  // Set environment to development phase
+  eval_environment.SetPhase(ENV_STATE::DEVELOPMENT);
   // Reset organism's phenotype.
   org.GetPhenotype().Reset();
   // Ready the evaluation hardware (deme)
-  eval_deme->ActivatePropagule(*random_ptr, program_t(), PROPAGULE_SIZE, CLUMPY_PROPAGULES);
+  eval_deme->ActivatePropagule(program_t(), PROPAGULE_SIZE, CLUMPY_PROPAGULES);
   eval_deme->PrintActive();
-
-  exit(-1);
   // Evaluate developmental phase
+  //  - Note: propagule cells have already received a 'start' event for the development phase
+  for (size_t step = 0; step < DEVELOPMENT_PHASE_CPU_TIME; ++step) {
+    if (!eval_deme->SingleAdvance()) break;
+  }
+  // TODO - do we want to kill all cell activity before the response phase?
   // Evaluate response phase
+  eval_environment.SetPhase(ENV_STATE::RESPONSE);
+  // - Queue environment response phase event on all active cells
+  for (hardware_t & cell_hw : eval_deme->GetCells()) {
+    if (!cell_hw.GetCustomComponent().IsActive()) continue;
+    cell_hw.QueueEvent(event_t(event_id__response_sig, eval_environment.response_signal_tag));
+  }
+  for (size_t step = 0; step < RESPONSE_PHASE_CPU_TIME; ++step) {
+    if (!eval_deme->SingleAdvance()) break;
+  }
+  // Update org's phenotype
+  std::unordered_set<size_t> unique_responses;
+  for (hardware_t & cell_hw : eval_deme->GetCells()) {
+    if (!cell_hw.GetCustomComponent().IsActive()) continue;
+    org.GetPhenotype().num_active_cells += 1;
+    if (cell_hw.GetCustomComponent().response == -1) continue;
+    org.GetPhenotype().num_resp += 1;
+    unique_responses.emplace(cell_hw.GetCustomComponent().GetResponse());
+  }
+  org.GetPhenotype().num_unique_resp = unique_responses.size();
+  org.GetPhenotype().resources_consumed = org.GetPhenotype().num_unique_resp * org.GetPhenotype().num_resp;
+  eval_deme->PrintResponses();
 }
 
 void MCRegWorld::DoEvaluation() {
@@ -299,6 +328,8 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   STOP_ON_SOLUTION = config.STOP_ON_SOLUTION();
   // environment group
   NUM_RESPONSE_TYPES = config.NUM_RESPONSE_TYPES();
+  DEVELOPMENT_PHASE_CPU_TIME = config.DEVELOPMENT_PHASE_CPU_TIME();
+  RESPONSE_PHASE_CPU_TIME = config.RESPONSE_PHASE_CPU_TIME();
   // program group
   USE_FUNC_REGULATION = config.USE_FUNC_REGULATION();
   USE_GLOBAL_MEMORY = config.USE_GLOBAL_MEMORY();

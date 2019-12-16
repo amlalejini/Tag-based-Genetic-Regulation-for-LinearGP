@@ -12,6 +12,8 @@ EMP_BUILD_CONFIG(MCRegConfig,
 
   GROUP(ENVIRONMENT_GROUP, "Environment settings"),
     VALUE(NUM_RESPONSE_TYPES, size_t, 4, "How many possible response types are there?"),
+    VALUE(DEVELOPMENT_PHASE_CPU_TIME, size_t, 32, "How many CPU cycles do we evaluate demes in this environment phase?"),
+    VALUE(RESPONSE_PHASE_CPU_TIME, size_t, 32, "How many CPU cycles do we evaluate demes in this environment phase?"),
 
   GROUP(PROGRAM_GROUP, "Program settings"),
     VALUE(USE_FUNC_REGULATION, bool, true, "Do programs have access to function regulation instructions?"),

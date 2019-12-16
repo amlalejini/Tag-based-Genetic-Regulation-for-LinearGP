@@ -288,13 +288,14 @@ TEST_CASE( "AltSignalWorld ") {
 TEST_CASE( "MCRegWorld ") {
   MCRegConfig config;
   config.SEED(2);
-  config.POP_SIZE(1000);
-  config.GENERATIONS(100);
-  // config.NUM_SIGNAL_RESPONSES(2);
-  // config.NUM_ENV_CYCLES(4);
-  // config.CPU_TIME_PER_ENV_CYCLE(64);
+  config.POP_SIZE(10);
+  config.GENERATIONS(1);
+  config.DEME_WIDTH(16);
+  config.DEME_HEIGHT(16);
+  config.PROPAGULE_SIZE(10);
+  config.PROPAGULE_LAYOUT("clumpy");
   emp::Random random(config.SEED());
   MCRegWorld world(random);
   world.Setup(config);
-  // world.Run();
+  world.Run();
 }

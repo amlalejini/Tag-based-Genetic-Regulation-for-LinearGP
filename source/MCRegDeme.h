@@ -30,6 +30,7 @@ public:
   struct CellHardware {
     size_t cell_id=0;
     bool active=false;
+    bool new_born=false;
     int response=-1;
     Facing cell_facing=Facing::N;
 
@@ -38,10 +39,14 @@ public:
       response=-1;
       active=false;
       cell_facing=Facing::N;
+      new_born=false;
     }
 
     size_t GetCellID() const { return cell_id; }
     void SetCellID(size_t id) { cell_id = id; }
+
+    int GetResponse() const { return response; }
+    void SetResponse(int val) { response = val; }
 
     bool IsActive() const { return active; }
     void SetActive() { active = true; }
@@ -49,6 +54,8 @@ public:
 
     Facing GetFacing() const { return cell_facing; }
     void SetFacing(Facing facing) { cell_facing = facing; }
+
+    bool IsNewBorn() const { return new_born; }
 
     /// Rotate cell facing clockwise
     Facing RotateCW(int rot=1) {
@@ -93,8 +100,8 @@ protected:
   /// Calculate the neighbor ID of the cell (specified by id) in a particular direction
   size_t CalcNeighbor(size_t id, Facing dir) const;
 
-  void ActivatePropaguleClumpy(emp::Random & random, const program_t & prog, size_t prop_size);
-  void ActivatePropaguleRandom(emp::Random & random, const program_t & prog, size_t prop_size);
+  void ActivatePropaguleClumpy(const program_t & prog, size_t prop_size);
+  void ActivatePropaguleRandom(const program_t & prog, size_t prop_size);
 
   /// WARNING: Should never call this with cell_id that has already been activated!
   void ActivateCell(size_t cell_id, const program_t & prog) {
@@ -140,15 +147,14 @@ public:
 
   /// Activate deme by activating propagule cells
   /// Note, this will reset deme state
-  void ActivatePropagule(emp::Random & random,
-                         const program_t & prog,
+  void ActivatePropagule(const program_t & prog,
                          size_t prop_size=1,
                          bool clumpy=true)
   {
     ResetCells(); // Reset
     // Todo - if prop_size == deme_size, don't do anything complicated!
-    if (clumpy) ActivatePropaguleClumpy(random, prog, prop_size);
-    else ActivatePropaguleRandom(random, prog, prop_size);
+    if (clumpy) ActivatePropaguleClumpy(prog, prop_size);
+    else ActivatePropaguleRandom(prog, prop_size);
   }
 
   /// Get cell capacity of deme
@@ -177,8 +183,30 @@ public:
   /// Is a cell at a particular location active?
   bool IsActive(size_t id) const { return cells[id].GetCustomComponent().IsActive(); }
 
-  // todo - Advance (by a number of steps)
   // todo - SingleAdvance()
+  bool SingleAdvance() {
+    // Advance cells in a random order.
+    emp::Shuffle(random, cell_schedule);
+    for (size_t i = 0; i < cell_schedule.size(); ++i) {
+      const size_t cell_id = cell_schedule[i];
+      emp_assert(IsActive(cell_id));
+      hardware_t & cell_hw = cells[cell_id];
+      // If this cell was just 'born', don't run it. Update birth status (so it will run next time)
+      if (cell_hw.GetCustomComponent().IsNewBorn()) {
+        cell_hw.GetCustomComponent().new_born = false;
+        continue;
+      }
+      cell_hw.SingleProcess();
+    }
+    bool executing = false;
+    for (size_t cell_id : cell_schedule) {
+      hardware_t & cell_hw = cells[cell_id];
+      if (cell_hw.GetCustomComponent().IsNewBorn()) cell_hw.GetCustomComponent().new_born = false;
+      executing = (bool)cell_hw.GetNumActiveThreads() || (bool)cell_hw.GetNumPendingThreads() || (bool)cell_hw.GetNumQueuedEvents();
+    }
+    return executing;
+  }
+
   void OnPropaguleActivate(const std::function<void(hardware_t &)> & fun) {
     on_propagule_activate_sig.AddAction(fun);
   }
@@ -199,6 +227,20 @@ public:
     for (size_t y = 0; y < height; ++y) {
       for (size_t x = 0; x < width; ++x) {
         os << (int)IsActive(GetCellID(x,y)) << " ";
+      } os << "\n";
+    }
+  }
+
+  void PrintResponses(std::ostream & os=std::cout) {
+    os << "-- Deme Active/Inactive --\n";
+    for (size_t y = 0; y < height; ++y) {
+      for (size_t x = 0; x < width; ++x) {
+        const int resp = GetCell(GetCellID(x,y)).GetCustomComponent().GetResponse();
+        if (resp < 0) {
+          os << resp << " ";
+        } else {
+          os << " " << resp << " ";
+        }
       } os << "\n";
     }
   }
@@ -256,8 +298,7 @@ size_t MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::CalcNe
 }
 
 template<typename HW_MEMORY_MODEL_T,typename HW_TAG_T,typename HW_INST_ARG_T,typename HW_MATCHBIN_T>
-void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::ActivatePropaguleClumpy(emp::Random & random,
-                                                                                                const program_t & prog,
+void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::ActivatePropaguleClumpy(const program_t & prog,
                                                                                                 size_t prop_size)
 {
   emp_assert(prop_size < cells.size(), "Cannot activate propagule with more cells than there is space.", prop_size, cells.size());
@@ -285,8 +326,7 @@ void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::Activate
 }
 
 template<typename HW_MEMORY_MODEL_T,typename HW_TAG_T,typename HW_INST_ARG_T,typename HW_MATCHBIN_T>
-void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::ActivatePropaguleRandom(emp::Random & random,
-                                                                                                const program_t & prog,
+void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::ActivatePropaguleRandom(const program_t & prog,
                                                                                                 size_t prop_size)
 {
   // Active deme randomly
