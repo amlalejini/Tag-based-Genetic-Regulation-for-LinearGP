@@ -4,6 +4,7 @@
 
 // Standard includes
 #include <ostream>
+#include <unordered_map>
 // Empirical includes
 #include "tools/BitSet.h"
 // SignalGP includes
@@ -26,6 +27,20 @@ struct Event : public sgp::BaseEvent {
     tag.Print(os);
     os << "}";
   }
+};
+
+/// Custom Event type!
+template<size_t W>
+struct MessageEvent : public Event<W> {
+  using tag_t = typename Event<W>::tag_t;
+  using data_t = std::unordered_map<int, double>;
+  data_t data;
+
+  MessageEvent(size_t _id, tag_t _tag, const data_t & _data=data_t())
+    : Event<W>(_id, _tag), data(_data) { ; }
+
+  data_t & GetData() { return data; }
+  const data_t & GetData() const { return data; }
 };
 
 #endif

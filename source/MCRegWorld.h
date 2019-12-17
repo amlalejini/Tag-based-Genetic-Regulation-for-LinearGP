@@ -128,6 +128,7 @@ public:
   using event_lib_t = typename hardware_t::event_lib_t;
   using base_event_t = typename hardware_t::event_t;
   using event_t = Event<MCRegWorldDefs::TAG_LEN>;
+  using msg_event_t = MessageEvent<MCRegWorldDefs::TAG_LEN>;
   using inst_lib_t = typename hardware_t::inst_lib_t;
   using inst_t = typename hardware_t::inst_t;
   using inst_prop_t = typename hardware_t::InstProperty;
@@ -203,7 +204,6 @@ protected:
   emp::Ptr<event_lib_t> event_lib;
   emp::Ptr<mutator_t> mutator;
 
-  // TODO - Eval HW set
   emp::Ptr<deme_t> eval_deme;                ///< used to evaluate demes
   emp::Signal<void(size_t)> after_eval_sig;  ///< Triggered after organism (pop id given as argument) evaluation
   emp::Signal<void(void)> end_setup_sig;
@@ -219,6 +219,8 @@ protected:
   size_t event_id__propagule_sig=0;
   size_t event_id__response_sig=0;
   size_t event_id__birth_sig=0;
+  size_t event_id__send_msg=0;
+  // size_t event_id__broadcast_msg=0;
 
   void InitConfigs(const config_t & config);
   void InitInstLib();
@@ -301,10 +303,10 @@ void MCRegWorld::EvaluateOrg(org_t & org) {
   for (size_t step = 0; step < DEVELOPMENT_PHASE_CPU_TIME; ++step) {
     if (!eval_deme->SingleAdvance()) break;
   }
-  // TODO - do we want to kill all cell activity before the response phase?
   // Evaluate response phase
   eval_environment.SetPhase(ENV_STATE::RESPONSE);
   // - Queue environment response phase event on all active cells
+  // - Kill all cell activity before the response phase
   for (hardware_t & cell_hw : eval_deme->GetCells()) {
     if (!cell_hw.GetCustomComponent().IsActive()) continue;
     // Remove all pending threads.
@@ -495,7 +497,7 @@ void MCRegWorld::InitInstLib() {
     inst_lib->AddInst("Nop-DecRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-DecOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
-  // TODO - add deme instructions
+  // Add deme instructions
   //   - repro
   inst_lib->AddInst("Reproduce", [this](hardware_t & hw, const inst_t & inst) {
     // Reproduction is only allowed in development phase
@@ -560,7 +562,12 @@ void MCRegWorld::InitInstLib() {
       hw.ClearEventQueue();
     }, "Set cell response if in response phase.");
   }
-  // TODO - add messaging instructions
+  // Add messaging instructions
+  inst_lib->AddInst("SendMsg", [this](hardware_t & hw, const inst_t & inst) {
+    auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
+    auto & mem_state = call_state.GetMemory();
+    hw.TriggerEvent(msg_event_t(event_id__send_msg, inst.GetTag(0), mem_state.GetOutputMemory()));
+  });
 }
 
 void MCRegWorld::InitEventLib() {
@@ -569,24 +576,43 @@ void MCRegWorld::InitEventLib() {
   // Args: name, handler_fun, dispatchers, desc
   // Setup event: Cell Response Signal
   event_id__propagule_sig = event_lib->AddEvent("PropaguleSignal",
-                                          [this](hardware_t & hw, const base_event_t & e) {
-                                            const event_t & event = static_cast<const event_t&>(e);
-                                            emp_assert(eval_environment.propagule_start_tag == event.GetTag());
-                                            hw.SpawnThreadWithTag(event.GetTag());
-                                          });
+    [this](hardware_t & hw, const base_event_t & e) {
+      const event_t & event = static_cast<const event_t&>(e);
+      emp_assert(eval_environment.propagule_start_tag == event.GetTag());
+      hw.SpawnThreadWithTag(event.GetTag());
+    });
   event_id__birth_sig = event_lib->AddEvent("BirthSignal",
-                                          [this](hardware_t & hw, const base_event_t & e) {
-                                            const event_t & event = static_cast<const event_t&>(e);
-                                            hw.SpawnThreadWithTag(event.GetTag());
-                                          });
+    [this](hardware_t & hw, const base_event_t & e) {
+      const event_t & event = static_cast<const event_t&>(e);
+      hw.SpawnThreadWithTag(event.GetTag());
+    });
   event_id__response_sig = event_lib->AddEvent("ResponseSignal",
-                                          [this](hardware_t & hw, const base_event_t & e) {
-                                            const event_t & event = static_cast<const event_t&>(e);
-                                            emp_assert(eval_environment.response_signal_tag == event.GetTag());
-                                            hw.SpawnThreadWithTag(event.GetTag());
-                                          });
-  // TODO - setup messaging events
-
+    [this](hardware_t & hw, const base_event_t & e) {
+      const event_t & event = static_cast<const event_t&>(e);
+      emp_assert(eval_environment.response_signal_tag == event.GetTag());
+      hw.SpawnThreadWithTag(event.GetTag());
+    });
+  //Setup messaging events
+  event_id__send_msg = event_lib->AddEvent("SendMessage",
+    [this](hardware_t & hw, const base_event_t & e) {
+      const msg_event_t & event = static_cast<const msg_event_t&>(e);
+      auto thread_id = hw.SpawnThreadWithTag(event.GetTag());
+      if (thread_id && event.GetData().size()) {
+        // If message resulted in thread being spawned, load message into local working space.
+        auto & thread = hw.GetThread(thread_id.value());
+        auto & call_state = thread.GetExecState().GetTopCallState();
+        auto & mem_state = call_state.GetMemory();
+        for (auto mem : event.GetData()) { mem_state.SetWorking(mem.first, mem.second); }
+      }
+    });
+  event_lib->RegisterDispatchFun(event_id__send_msg, [this](hardware_t & hw, const base_event_t & e) {
+    const msg_event_t & event = static_cast<const msg_event_t&>(e); // NOTE: we need to queue event as a msg_event_t to not have things explode!
+    const size_t sender_id = hw.GetCustomComponent().GetCellID();
+    deme_t::Facing sender_dir = hw.GetCustomComponent().GetFacing();
+    const size_t facing_id = eval_deme->GetNeighboringCellID(sender_id, sender_dir);
+    // if facing position is active, queue event.
+    if (eval_deme->IsActive(facing_id)) eval_deme->GetCell(facing_id).QueueEvent(event);
+  });
 }
 
 void MCRegWorld::InitHardware() {
@@ -606,9 +632,7 @@ void MCRegWorld::InitHardware() {
       const auto parent_facing = parent_hw.GetCustomComponent().GetFacing();
       const auto face_parent = deme_t::Dir[(parent_facing + (deme_t::NUM_DIRECTIONS / 2)) % deme_t::NUM_DIRECTIONS];
       offspring_hw.GetCustomComponent().SetFacing(face_parent);
-      // std::cout << eval_deme->FacingToStr(face_parent) << "=>";
-      // std::cout << eval_deme->FacingToStr(parent_facing) << std::endl;
-      // Todo - maybe copy regulation over
+      // Inherit regulation from parent
       if (EPIGENETIC_INHERITANCE) {
          offspring_hw.GetMatchBin().ImprintRegulators(parent_hw.GetMatchBin());
         // TODO - check epigenetic inheritance!
@@ -1008,8 +1032,8 @@ void MCRegWorld::Setup(const MCRegConfig & config) {
     this->SetAutoMutate(); // Set to automutate after initializing population!
   });
   this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
-  this->SetFitFun([this](org_t & org) { // TODO - fix fitness function!
-    return org.GetPhenotype().resources_consumed;
+  this->SetFitFun([this](org_t & org) {
+    return org.GetPhenotype().GetResources();
   });
   const size_t num_cells = (DEME_WIDTH * DEME_HEIGHT);
   emp_assert(NUM_RESPONSE_TYPES != 0);
