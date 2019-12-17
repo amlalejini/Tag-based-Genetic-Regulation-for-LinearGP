@@ -287,12 +287,16 @@ TEST_CASE( "AltSignalWorld ") {
 
 TEST_CASE( "MCRegWorld ") {
   MCRegConfig config;
-  config.SEED(3);
-  config.POP_SIZE(250);
+  config.SEED(4);
+  config.POP_SIZE(100);
   config.GENERATIONS(100);
-  config.DEME_WIDTH(4);
-  config.DEME_HEIGHT(4);
-  config.PROPAGULE_SIZE(4);
+  config.DEME_WIDTH(5);
+  config.DEME_HEIGHT(5);
+  config.PROPAGULE_SIZE(1);
+  config.NUM_RESPONSE_TYPES(5);
+  config.DEVELOPMENT_PHASE_CPU_TIME(128);
+  config.RESPONSE_PHASE_CPU_TIME(64);
+  config.EPIGENETIC_INHERITANCE(true);
   config.PROPAGULE_LAYOUT("clumpy");
   emp::Random random(config.SEED());
   MCRegWorld world(random);

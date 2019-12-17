@@ -1,5 +1,5 @@
 # Project-specific settings
-PROJECT := signalgp-genetic-regulation
+PROJECT := mc-reg-exp
 EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
 # CEREAL_DIR := ../Empirical/third-party/cereal/include
@@ -13,7 +13,7 @@ MATCH_REG := mult
 EXEC_NAME := $(PROJECT)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)_reg-$(MATCH_REG)
 
 # Flags to use regardless of compiler
-CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/ -I$(CEREAL_DIR)/
+CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/
 CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) $(CFLAGS_includes)
 
 # Native compiler information

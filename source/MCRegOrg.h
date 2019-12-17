@@ -45,13 +45,16 @@ public:
     size_t num_unique_resp=0;
     size_t num_resp=0;
     size_t num_active_cells=0;
+    emp::vector<size_t> response_cnts; ///< Response counts by type.
     // todo - add development pattern!
 
-    void Reset() {
+    void Reset(size_t response_types_cnt=1) {
       resources_consumed=0.0;
       num_unique_resp=0;
       num_resp=0;
       num_active_cells=0;
+      response_cnts.resize(response_types_cnt);
+      for (size_t i = 0; i < response_cnts.size(); ++i) response_cnts[i] = 0;
     }
 
     bool operator==(const MCRegPhenotype & o) const {
@@ -84,6 +87,7 @@ public:
     size_t GetUniqueResponseCnt() const { return num_unique_resp; }
     size_t GetResponseCnt() const { return num_resp; }
     size_t GetActiveCellCnt() const { return num_active_cells; }
+    emp::vector<size_t> & GetResponsesByType() { return response_cnts; }
 
   };
 

@@ -250,12 +250,12 @@ public:
   }
 
   void PrintResponses(std::ostream & os=std::cout) {
-    os << "-- Deme Active/Inactive --\n";
+    os << "-- Deme Responses --\n";
     for (size_t y = 0; y < height; ++y) {
       for (size_t x = 0; x < width; ++x) {
         const int resp = GetCell(GetCellID(x,y)).GetCustomComponent().GetResponse();
         if (resp < 0) {
-          os << resp << " ";
+          os << " N ";
         } else {
           os << " " << resp << " ";
         }
@@ -320,7 +320,9 @@ void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::Activate
                                                                                                 size_t prop_size)
 {
   emp_assert(prop_size < cells.size(), "Cannot activate propagule with more cells than there is space.", prop_size, cells.size());
-  size_t cell_id = random.GetUInt(0, cells.size());  // Where should we start clump activate?
+  // size_t cell_id = random.GetUInt(0, cells.size());  // Where should we start clump activate?
+  size_t cell_id = (width * height) / 2;
+  emp_assert(cell_id < cells.size());
   size_t prop_cnt = 0;                               // Track the number of cells activated so far.
   Facing dir = Facing::N;
   while (prop_cnt < prop_size) {
