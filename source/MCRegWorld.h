@@ -177,6 +177,7 @@ protected:
   std::string PROPAGULE_LAYOUT;
   size_t MAX_ACTIVE_THREAD_CNT;
   size_t MAX_THREAD_CAPACITY;
+  bool EPIGENETIC_INHERITANCE;
   // Selection group
   size_t TOURNAMENT_SIZE;
   // Mutation group
@@ -216,6 +217,7 @@ protected:
 
   size_t event_id__propagule_sig=0;
   size_t event_id__response_sig=0;
+  size_t event_id__birth_sig=0;
 
   void InitConfigs(const config_t & config);
   void InitInstLib();
@@ -376,6 +378,7 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   PROPAGULE_LAYOUT = config.PROPAGULE_LAYOUT();
   MAX_ACTIVE_THREAD_CNT = config.MAX_ACTIVE_THREAD_CNT();
   MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
+  EPIGENETIC_INHERITANCE = config.EPIGENETIC_INHERITANCE();
   // selection group
   TOURNAMENT_SIZE = config.TOURNAMENT_SIZE();
   // mutation group
@@ -462,9 +465,31 @@ void MCRegWorld::InitInstLib() {
   }
   // TODO - add deme instructions
   //   - repro
-  //   - actuation (rotation); rot to empty
-  //   - sense dir
-  //   - sense facing empty
+  inst_lib->AddInst("Reproduce", [this](hardware_t & hw, const inst_t & inst) {
+    // Reproduction is only allowed in development phase
+    if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
+    // Get cell_id, facing
+    const size_t cell_id = hw.GetCustomComponent().GetCellID();
+    const auto cell_facing = hw.GetCustomComponent().GetFacing();
+    const size_t facing_id = eval_deme->GetNeighboringCellID(cell_id, cell_facing);
+    // If cell in front of us is active, bail out.
+    if (eval_deme->IsActive(facing_id)) return;
+    // If we're here, this cell is facing an empty cell && we're in the development phase.
+    eval_deme->DoReproduction(facing_id, cell_id);
+    // If we're here, cells[facing_id] is 'new born', queue repro event!
+    eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, inst.GetTag(0)));
+  }, "Executing this instruction triggers reproduction.");
+  //   - actuation (rotation)
+  inst_lib->AddInst("RotateCW", [this](hardware_t & hw, const inst_t & inst) {
+    hw.GetCustomComponent().RotateCW();
+  }, "Rotate cell 45 degrees in clockwise direction.");
+  inst_lib->AddInst("RotateCCW", [this](hardware_t & hw, const inst_t & inst) {
+    hw.GetCustomComponent().RotateCCW();
+  }, "Rotate cell 45 degrees in counter-clockwise direction.");
+  //   - TODO - rot to empty
+  //   - TODO - sense dir
+  //   - TODO - sense facing empty
+
   //
   // Add response-phase instructions
   for (size_t i = 0; i < NUM_RESPONSE_TYPES; ++i) {
@@ -497,6 +522,11 @@ void MCRegWorld::InitEventLib() {
                                             emp_assert(eval_environment.propagule_start_tag == event.GetTag());
                                             hw.SpawnThreadWithTag(event.GetTag());
                                           });
+  event_id__birth_sig = event_lib->AddEvent("BirthSignal",
+                                          [this](hardware_t & hw, const base_event_t & e) {
+                                            const event_t & event = static_cast<const event_t&>(e);
+                                            hw.SpawnThreadWithTag(event.GetTag());
+                                          });
   event_id__response_sig = event_lib->AddEvent("ResponseSignal",
                                           [this](hardware_t & hw, const base_event_t & e) {
                                             const event_t & event = static_cast<const event_t&>(e);
@@ -518,7 +548,20 @@ void MCRegWorld::InitHardware() {
       hw.QueueEvent(event_t(event_id__propagule_sig, eval_environment.propagule_start_tag));
       hw.GetCustomComponent().SetFacing(deme_t::Facing::N);
     });
-    // todo - on deme repro
+    // Configure on reproduction event
+    eval_deme->OnReproActivate([this](hardware_t & offspring_hw, hardware_t & parent_hw) {
+      // Face parent
+      const auto parent_facing = parent_hw.GetCustomComponent().GetFacing();
+      const auto face_parent = deme_t::Dir[(parent_facing + (deme_t::NUM_DIRECTIONS / 2)) % deme_t::NUM_DIRECTIONS];
+      offspring_hw.GetCustomComponent().SetFacing(face_parent);
+      // std::cout << eval_deme->FacingToStr(face_parent) << "=>";
+      // std::cout << eval_deme->FacingToStr(parent_facing) << std::endl;
+      // Todo - maybe copy regulation over
+      if (EPIGENETIC_INHERITANCE) {
+         offspring_hw.GetMatchBin().ImprintRegulators(parent_hw.GetMatchBin());
+        // TODO - check epigenetic inheritance!
+      }
+    });
   }
   emp_assert(PROPAGULE_LAYOUT == "random" || PROPAGULE_LAYOUT == "clumpy");
   CLUMPY_PROPAGULES = (PROPAGULE_LAYOUT == "clumpy");
@@ -913,7 +956,7 @@ void MCRegWorld::Setup(const MCRegConfig & config) {
     this->SetAutoMutate(); // Set to automutate after initializing population!
   });
   this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
-  this->SetFitFun([this](org_t & org) {
+  this->SetFitFun([this](org_t & org) { // TODO - fix fitness function!
     return org.GetPhenotype().resources_consumed;
   });
   MAX_RESPONSE_SCORE = (DEME_WIDTH * DEME_HEIGHT) * NUM_RESPONSE_TYPES;

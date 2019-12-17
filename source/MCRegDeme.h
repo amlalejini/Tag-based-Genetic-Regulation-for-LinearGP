@@ -63,6 +63,7 @@ public:
       const size_t new_dir = (size_t)emp::Mod(cur_dir+rot, (int)MCRegDeme::NUM_DIRECTIONS);
       emp_assert(new_dir < MCRegDeme::NUM_DIRECTIONS);
       cell_facing = MCRegDeme::Dir[new_dir];
+      return cell_facing;
     }
 
     /// Rotate cell facing counter-clockwise
@@ -71,6 +72,7 @@ public:
       const size_t new_dir = (size_t)emp::Mod(cur_dir-rot, (int)MCRegDeme::NUM_DIRECTIONS);
       emp_assert(new_dir < MCRegDeme::NUM_DIRECTIONS);
       cell_facing = MCRegDeme::Dir[new_dir];
+      return cell_facing;
     }
   };
 
@@ -91,8 +93,8 @@ protected:
   emp::vector<hardware_t> cells;       ///< Toroidal grid of hardware units
   emp::vector<size_t> cell_schedule;   ///< Order to execute cells
 
-  emp::Signal<void(hardware_t &)> on_propagule_activate_sig; ///< Triggered when a cell is activated as a propagule
-  emp::Signal<void(hardware_t &)> on_repro_activate_sig;     ///< Triggered when a cell is activated after reproduction event
+  emp::Signal<void(hardware_t &)> on_propagule_activate_sig;              ///< Triggered when a cell is activated as a propagule
+  emp::Signal<void(hardware_t & /*offspring hw*/, hardware_t & /*parent hw*/)> on_repro_activate_sig;     ///< Triggered when a cell is activated after reproduction event
 
   /// Build neighbor lookup (according to current width and height)
   void BuildNeighborLookup();
@@ -103,13 +105,16 @@ protected:
   void ActivatePropaguleClumpy(const program_t & prog, size_t prop_size);
   void ActivatePropaguleRandom(const program_t & prog, size_t prop_size);
 
-  /// WARNING: Should never call this with cell_id that has already been activated!
+  /// Activate cell and schedule (if it is going from an inactive => active state)
   void ActivateCell(size_t cell_id, const program_t & prog) {
-    emp_assert(!emp::Has(cell_schedule, cell_id));
-    emp_assert(!IsActive(cell_id));
+    emp_assert( (IsActive(cell_id) && emp::Has(cell_schedule, cell_id)) || (!IsActive(cell_id) && !emp::Has(cell_schedule, cell_id)) );
     cells[cell_id].SetProgram(prog);
+    if (IsActive(cell_id)) {
+      cells[cell_id].GetCustomComponent().Reset();
+    } else {
+      cell_schedule.emplace_back(cell_id);
+    }
     cells[cell_id].GetCustomComponent().SetActive();
-    cell_schedule.emplace_back(cell_id);
   }
 
 public:
@@ -207,11 +212,24 @@ public:
     return executing;
   }
 
+  /// Do reproduction from offspring cell id ==> parent cell id
+  void DoReproduction(size_t offspring_cell_id, size_t parent_cell_id) {
+    emp_assert(IsActive(parent_cell_id));
+    // Activate offspring cell with program of parent cell.
+    ActivateCell(offspring_cell_id, cells[parent_cell_id].GetProgram());
+    // Set offspring to new_born status (it will not execute this step)
+    cells[offspring_cell_id].GetCustomComponent().new_born = true;
+    // Assert that offspring is indeed active now
+    emp_assert(IsActive(offspring_cell_id));
+    // Trigger on repro signal
+    on_repro_activate_sig.Trigger(cells[offspring_cell_id], cells[parent_cell_id]);
+  }
+
   void OnPropaguleActivate(const std::function<void(hardware_t &)> & fun) {
     on_propagule_activate_sig.AddAction(fun);
   }
 
-  void OnReproActivate(const std::function<void(hardware_t &)> & fun) {
+  void OnReproActivate(const std::function<void(hardware_t & /*offspring hw*/, hardware_t & /*parent hw*/)> & fun) {
     on_repro_activate_sig.AddAction(fun);
   }
 
