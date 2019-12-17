@@ -293,6 +293,16 @@ void MCRegWorld::EvaluateOrg(org_t & org) {
   // - Queue environment response phase event on all active cells
   for (hardware_t & cell_hw : eval_deme->GetCells()) {
     if (!cell_hw.GetCustomComponent().IsActive()) continue;
+    // Remove all pending threads.
+    cell_hw.RemoveAllPendingThreads();
+    // Mark all active threads as dead.
+    for (size_t thread_id : cell_hw.GetActiveThreadIDs()) {
+      cell_hw.GetThread(thread_id).SetDead();
+    }
+    // Clear event queue!
+    cell_hw.ClearEventQueue();
+    cell_hw.SingleProcess(); // Execute to clean up dead threads
+    emp_assert(cell_hw.GetNumActiveThreads() == 0 || cell_hw.GetNumPendingThreads() == 0 || cell_hw.GetNumQueuedEvents() == 0);
     cell_hw.QueueEvent(event_t(event_id__response_sig, eval_environment.response_signal_tag));
   }
   for (size_t step = 0; step < RESPONSE_PHASE_CPU_TIME; ++step) {
@@ -486,11 +496,31 @@ void MCRegWorld::InitInstLib() {
   inst_lib->AddInst("RotateCCW", [this](hardware_t & hw, const inst_t & inst) {
     hw.GetCustomComponent().RotateCCW();
   }, "Rotate cell 45 degrees in counter-clockwise direction.");
-  //   - TODO - rot to empty
-  //   - TODO - sense dir
-  //   - TODO - sense facing empty
-
-  //
+  //   - rot to empty
+  inst_lib->AddInst("RotateToEmpty", [this](hardware_t & hw, const inst_t & inst) {
+    const deme_t::Facing cur_facing = hw.GetCustomComponent().GetFacing();
+    const size_t cell_id = hw.GetCustomComponent().GetCellID();
+    for (size_t i = 0; i < deme_t::NUM_DIRECTIONS + 1; ++i) {
+      const deme_t::Facing next_dir = deme_t::Dir[((size_t)cur_facing + i) % deme_t::NUM_DIRECTIONS];
+      if (!eval_deme->IsActive(eval_deme->GetNeighboringCellID(cell_id, next_dir))) {
+        hw.GetCustomComponent().SetFacing(next_dir);
+        break;
+      }
+    }
+  }, "Rotate cell to next empty cell (if there is one).");
+  //   - sense current dir
+  inst_lib->AddInst("GetDir", [](hardware_t & hw, const inst_t & inst) {
+    auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
+    call_state.GetMemory().SetWorking(inst.GetArg(0), (double)hw.GetCustomComponent().GetFacing());
+  }, "WorkingMemory[arg0] = Facing Direction");
+  //   - sense facing empty
+  inst_lib->AddInst("IsNeighborEmpty", [this](hardware_t & hw, const inst_t & inst) {
+    auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
+    const size_t cell_id = hw.GetCustomComponent().GetCellID();
+    const deme_t::Facing cell_facing = hw.GetCustomComponent().GetFacing();
+    const size_t neighbor_id = eval_deme->GetNeighboringCellID(cell_id, cell_facing);
+    call_state.GetMemory().SetWorking(inst.GetArg(0), (double)eval_deme->IsActive(neighbor_id));
+  }, "WorkingMemory[arg0] = IsActive(faced neighbor)");
   // Add response-phase instructions
   for (size_t i = 0; i < NUM_RESPONSE_TYPES; ++i) {
     inst_lib->AddInst("Response-" + emp::to_string(i), [this, i](hardware_t & hw, const inst_t & inst) {
