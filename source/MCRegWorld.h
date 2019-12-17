@@ -638,11 +638,11 @@ void MCRegWorld::InitMutator() {
   // Set program constraints
   mutator->SetProgFunctionCntRange(FUNC_CNT_RANGE);
   mutator->SetProgFunctionInstCntRange(FUNC_LEN_RANGE);
-  mutator->SetProgInstArgValueRange({AltSignalWorldDefs::INST_MIN_ARG_VAL, AltSignalWorldDefs::INST_MAX_ARG_VAL});
+  mutator->SetProgInstArgValueRange({MCRegWorldDefs::INST_MIN_ARG_VAL, MCRegWorldDefs::INST_MAX_ARG_VAL});
   mutator->SetTotalInstLimit(2*FUNC_LEN_RANGE.GetUpper()*FUNC_CNT_RANGE.GetUpper());
-  mutator->SetFuncNumTags(AltSignalWorldDefs::FUNC_NUM_TAGS);
-  mutator->SetInstNumTags(AltSignalWorldDefs::INST_TAG_CNT);
-  mutator->SetInstNumArgs(AltSignalWorldDefs::INST_ARG_CNT);
+  mutator->SetFuncNumTags(MCRegWorldDefs::FUNC_NUM_TAGS);
+  mutator->SetInstNumTags(MCRegWorldDefs::INST_TAG_CNT);
+  mutator->SetInstNumArgs(MCRegWorldDefs::INST_ARG_CNT);
   // Set mutation rates
   mutator->SetRateInstArgSub(MUT_RATE__INST_ARG_SUB);
   mutator->SetRateInstTagBF(MUT_RATE__INST_TAG_BF);
