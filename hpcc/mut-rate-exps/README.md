@@ -8,7 +8,7 @@ metrics.
 - Function regulation: all runs
 - Environment
   - NUM_SIGNAL_RESPONSES: 2, 4, 8, 16
-  - NUM_ENV_CYCLES: 4*NUM_SIGNAL_RESPONSES
+  - NUM_ENV_CYCLES: 2*NUM_SIGNAL_RESPONSES
 - Replicates? 30
 
 ## Conclusion
