@@ -1,8 +1,8 @@
 # Project-specific settings
-PROJECT := mc-reg-exp
+# PROJECT := mc-reg-exp
+PROJECT := alt-signal-exp
 EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
-# CEREAL_DIR := ../Empirical/third-party/cereal/include
 
 # Match metric options: hamming, integer, streak, hash
 MATCH_METRIC := streak
