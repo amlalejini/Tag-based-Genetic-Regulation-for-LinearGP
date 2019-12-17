@@ -377,16 +377,15 @@ void MCRegWorld::DoUpdate() {
   }
 
   // --- For debugging => eval best org again w/prints ---
-  std::cout << "Best Org details:" << std::endl;
-  EvaluateOrg(this->GetOrg(max_fit_org_id));
-  eval_deme->PrintActive();
-  eval_deme->PrintResponses();
-  std::cout << "score = " << this->GetOrg(max_fit_org_id).GetPhenotype().resources_consumed << std::endl;
-  std::cout << "num active = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_active_cells << std::endl;
-  std::cout << "num unique = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_unique_resp << std::endl;
-  std::cout << "num resp = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_resp << std::endl;
-  std::cout << "=====================" << std::endl;
-
+  // std::cout << "Best Org details:" << std::endl;
+  // EvaluateOrg(this->GetOrg(max_fit_org_id));
+  // eval_deme->PrintActive();
+  // eval_deme->PrintResponses();
+  // std::cout << "score = " << this->GetOrg(max_fit_org_id).GetPhenotype().resources_consumed << std::endl;
+  // std::cout << "num active = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_active_cells << std::endl;
+  // std::cout << "num unique = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_unique_resp << std::endl;
+  // std::cout << "num resp = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_resp << std::endl;
+  // std::cout << "=====================" << std::endl;
   Update();
   ClearCache();
 }
@@ -769,6 +768,16 @@ void MCRegWorld::InitDataCollection() {
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetPhenotype().GetResponseCnt());
   }, "total_responses", "How many total responses did deme produce?");
+  systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < taxon.GetData().GetPhenotype().response_cnts.size(); ++i) {
+      if (i) stream << ",";
+      stream << taxon.GetData().GetPhenotype().response_cnts[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "responses");
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetPhenotype().GetActiveCellCnt());
   }, "active_cell_cnt", "How many active cells in deme after development?");
@@ -869,6 +878,16 @@ void MCRegWorld::InitDataCollection() {
   max_fit_file->template AddFun<size_t>([this]() {
     return this->GetOrg(max_fit_org_id).GetPhenotype().GetResponseCnt();
   }, "total_responses");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < this->GetOrg(max_fit_org_id).GetPhenotype().response_cnts.size(); ++i) {
+      if (i) stream << ",";
+      stream << this->GetOrg(max_fit_org_id).GetPhenotype().response_cnts[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "responses");
   max_fit_file->template AddFun<size_t>([this]() {
     return this->GetOrg(max_fit_org_id).GetPhenotype().GetActiveCellCnt();
   }, "active_cell_cnt");
@@ -909,6 +928,16 @@ void MCRegWorld::DoPopulationSnapshot() {
   snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
     return this->GetOrg(cur_org_id).GetPhenotype().GetResponseCnt();
   }, "total_responses");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < this->GetOrg(cur_org_id).GetPhenotype().response_cnts.size(); ++i) {
+      if (i) stream << ",";
+      stream << this->GetOrg(cur_org_id).GetPhenotype().response_cnts[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "responses");
   snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
     return this->GetOrg(cur_org_id).GetPhenotype().GetActiveCellCnt();
   }, "active_cell_cnt");
@@ -1033,7 +1062,7 @@ void MCRegWorld::Setup(const MCRegConfig & config) {
   });
   this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
   this->SetFitFun([this](org_t & org) {
-    return org.GetPhenotype().GetResources();
+    return org.GetPhenotype().GetResourcesConsumed();
   });
   const size_t num_cells = (DEME_WIDTH * DEME_HEIGHT);
   emp_assert(NUM_RESPONSE_TYPES != 0);
