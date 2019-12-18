@@ -284,7 +284,7 @@ TEST_CASE( "AltSignalWorld ") {
   world.Run();
 }
 */
-
+/*
 TEST_CASE( "MCRegWorld ") {
   MCRegConfig config;
   config.SEED(4);
@@ -302,4 +302,35 @@ TEST_CASE( "MCRegWorld ") {
   MCRegWorld world(random);
   world.Setup(config);
   world.Run();
+}
+*/
+
+TEST_CASE ( "BitSet Hashing" ) {
+  constexpr size_t W = 64;
+  using tag_t = emp::BitSet<W>;
+  emp::vector<tag_t> bitsets(100);
+  emp::Random random(1);
+  // Randomize all the bitsets
+  for (auto & val : bitsets) {
+    val.Randomize(random);
+  }
+  // Create duplicates of each bitset
+  size_t orig_size = bitsets.size();
+  for (size_t i = 0; i < orig_size; ++i) {
+    bitsets.emplace_back(bitsets[i]);
+  }
+  // Store bitsets in sets
+  std::unordered_set<tag_t> set1;
+  std::unordered_set<tag_t> set2;
+  std::unordered_map<tag_t, size_t> map3;
+  for (size_t i = 0; i < bitsets.size(); ++i) {
+    set1.emplace(bitsets[i]);
+    set2.emplace(bitsets[i]);
+    if (!emp::Has(map3, bitsets[i])) {
+      map3[bitsets[i]] = 1;
+    }
+  }
+  REQUIRE(set1.size() == set2.size());
+  REQUIRE(map3.size() == set1.size());
+  REQUIRE(map3.size() == set2.size());
 }
