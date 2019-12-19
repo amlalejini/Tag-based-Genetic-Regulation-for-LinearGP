@@ -169,6 +169,7 @@ public:
     size_t num_states=0;
     size_t cur_state=0;
     emp::vector<tag_t> env_state_tags;
+    emp::vector<size_t> env_schedule;
 
     void ResetEnv() {
       cur_state = 0;
@@ -226,6 +227,7 @@ protected:
   size_t event_id__env_sig;
 
   emp::Ptr<hardware_t> eval_hardware;       ///< Used to evaluate programs.
+  emp::vector<phenotype_t> trial_phenotypes; ///< Used to track phenotypes across organism evaluation trials.
 
   emp::Signal<void(size_t)> after_eval_sig; ///< Triggered after organism (ID given by size_t argument) evaluation
   emp::Signal<void(void)> end_setup_sig;    ///< Triggered at end of world setup.
@@ -235,6 +237,7 @@ protected:
 
   size_t max_fit_org_id=0;
   double MAX_SCORE=0.0;
+  bool found_solution=false;
 
   void InitConfigs(const config_t & config);
   void InitInstLib();
@@ -443,11 +446,16 @@ void ChgEnvWorld::InitEnvironment() {
   emp_assert(eval_environment.env_state_tags.size() == NUM_ENV_STATES);
   std::cout << "--- ENVIRONMENT SETUP ---" << std::endl;
   for (size_t i = 0; i < NUM_ENV_STATES; ++i) {
+    eval_environment.env_schedule.emplace_back(i);
     std::cout << "  Environment tag " << i << ": ";
     eval_environment.env_state_tags[i].Print();
     std::cout << std::endl;
   }
   eval_environment.ResetEnv();
+  trial_phenotypes.resize(EVAL_TRIAL_CNT);
+  for (phenotype_t & phen : trial_phenotypes) {
+    phen.Reset();
+  }
 }
 
 void ChgEnvWorld::InitMutator() {
@@ -714,27 +722,27 @@ void ChgEnvWorld::DoWorldConfigSnapshot(const config_t & config) {
   snapshot_file.Update();
   // TAG_LEN
   get_cur_param = []() { return "TAG_LEN"; };
-  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::TAG_LEN); };
+  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::TAG_LEN); };
   snapshot_file.Update();
   // INST_TAG_CNT
   get_cur_param = []() { return "INST_TAG_CNT"; };
-  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_TAG_CNT); };
+  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::INST_TAG_CNT); };
   snapshot_file.Update();
   // INST_ARG_CNT
   get_cur_param = []() { return "INST_ARG_CNT"; };
-  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_ARG_CNT); };
+  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::INST_ARG_CNT); };
   snapshot_file.Update();
   // FUNC_NUM_TAGS
   get_cur_param = []() { return "FUNC_NUM_TAGS"; };
-  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::FUNC_NUM_TAGS); };
+  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::FUNC_NUM_TAGS); };
   snapshot_file.Update();
   // INST_MIN_ARG_VAL
   get_cur_param = []() { return "INST_MIN_ARG_VAL"; };
-  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_MIN_ARG_VAL); };
+  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::INST_MIN_ARG_VAL); };
   snapshot_file.Update();
   // INST_MAX_ARG_VAL
   get_cur_param = []() { return "INST_MAX_ARG_VAL"; };
-  get_cur_value = []() { return emp::to_string(AltSignalWorldDefs::INST_MAX_ARG_VAL); };
+  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::INST_MAX_ARG_VAL); };
   snapshot_file.Update();
   // environment signal
   get_cur_param = []() { return "env_state_tags"; };
@@ -754,6 +762,99 @@ void ChgEnvWorld::DoWorldConfigSnapshot(const config_t & config) {
     get_cur_value = [&entry]() { return emp::to_string(entry.second->GetValue()); };
     snapshot_file.Update();
   }
+}
+
+void ChgEnvWorld::EvaluateOrg(org_t & org) {
+  // Evaluate org NUM_TRIALS times, keep worst phenotype.
+  // Reset organism phenotype.
+  org.GetPhenotype().Reset();
+  // Ready the hardware!
+  eval_hardware->SetProgram(org.GetGenome().program);
+  size_t min_trial_id = 0;
+  for (size_t trial_id = 0; trial_id < EVAL_TRIAL_CNT; ++trial_id) {
+    emp_assert(trial_id < trial_phenotypes.size());
+    // Reset trial phenotype
+    phenotype_t & trial_phen = trial_phenotypes[trial_id];
+    trial_phen.Reset();
+    // reset the environment
+    eval_environment.ResetEnv();
+    // shuffle environment schedule for this trial
+    emp::Shuffle(*random_ptr, eval_environment.env_schedule);
+    // reset hardware matchbin between trials
+    eval_hardware->ResetMatchBin();
+    // Evaluate the organism in the environment.
+    for (size_t env_update = 0; env_update < NUM_ENV_UPDATES; ++env_update) {
+      // Reset the hardware!
+      eval_hardware->ResetHardwareState();
+      eval_hardware->GetCustomComponent().Reset();
+      emp_assert(eval_hardware->ValidateThreadState());
+      emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
+      emp_assert(eval_hardware->GetNumQueuedEvents() == 0);
+      // Select a random environment.
+      emp_assert(env_update % NUM_ENV_STATES < eval_environment.env_schedule.size());
+      emp_assert(eval_environment.env_schedule[env_update % NUM_ENV_STATES] < eval_environment.env_state_tags.size());
+      eval_environment.cur_state = eval_environment.env_schedule[env_update % NUM_ENV_STATES]; //random_ptr->GetUInt(0, NUM_ENV_STATES);
+      eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.GetCurEnvTag()));
+      // Step the hardware! If at any point, there are not active || pending threads, we're done!
+      for (size_t step = 0; step < CPU_CYCLES_PER_ENV_UPDATE; ++step) {
+        eval_hardware->SingleProcess();
+        if (!( eval_hardware->GetNumActiveThreads() || eval_hardware->GetNumPendingThreads() )) break;
+      }
+      // Did the hardware match, miss, or not respond to environment signal?
+      if (eval_hardware->GetCustomComponent().HasResponse()) {
+        trial_phen.env_matches += (size_t)(eval_hardware->GetCustomComponent().GetResponse() == (int)eval_environment.cur_state);
+        trial_phen.env_misses += (size_t)(eval_hardware->GetCustomComponent().GetResponse() != (int)eval_environment.cur_state);
+      } else {
+        trial_phen.no_responses += 1;
+      }
+    }
+    trial_phen.score = (double)trial_phen.env_matches; // Score = number of times organism matched environment.
+    if (trial_phen.GetScore() < trial_phenotypes[min_trial_id].GetScore()) {
+      min_trial_id = trial_id;
+    }
+  }
+  // Organism phenotype = min trial phenotype
+  org.GetPhenotype().env_matches = trial_phenotypes[min_trial_id].env_matches;
+  org.GetPhenotype().env_misses = trial_phenotypes[min_trial_id].env_misses;
+  org.GetPhenotype().no_responses = trial_phenotypes[min_trial_id].no_responses;
+  org.GetPhenotype().score = trial_phenotypes[min_trial_id].score;
+}
+
+void ChgEnvWorld::DoEvaluation() {
+  max_fit_org_id = 0;
+  for (size_t org_id = 0; org_id < this->GetSize(); ++org_id) {
+    emp_assert(this->IsOccupied(org_id));
+    EvaluateOrg(this->GetOrg(org_id));
+    if (CalcFitnessID(org_id) > CalcFitnessID(max_fit_org_id)) max_fit_org_id = org_id;
+    // Record phenotype information for this taxon
+    after_eval_sig.Trigger(org_id);
+  }
+}
+
+void ChgEnvWorld::DoSelection() {
+  // Keeping it simple with tournament selection!
+  emp::TournamentSelect(*this, TOURNAMENT_SIZE, POP_SIZE);
+}
+
+void ChgEnvWorld::DoUpdate() {
+  // Log current update, Best fitness
+  const double max_fit = CalcFitnessID(max_fit_org_id);
+  found_solution = IsSolution(GetOrg(max_fit_org_id).GetPhenotype());
+  std::cout << "update: " << GetUpdate() << "; ";
+  std::cout << "best score (" << max_fit_org_id << "): " << max_fit << "; ";
+  std::cout << "solution found: " << found_solution << std::endl;
+  const size_t cur_update = GetUpdate();
+  if (SUMMARY_RESOLUTION) {
+    if ( !(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution) ) max_fit_file->Update();
+  }
+  if (SNAPSHOT_RESOLUTION) {
+    if ( !(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution) ) {
+      // DoPopulationSnapshot();
+      if (cur_update) systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+    }
+  }
+  Update();
+  ClearCache();
 }
 
 void ChgEnvWorld::PrintProgramSingleLine(const program_t & prog, std::ostream & out) {
@@ -835,5 +936,18 @@ void ChgEnvWorld::Setup(const config_t & config) {
   setup = true;
 }
 
+void ChgEnvWorld::Run() {
+  for (size_t u = 0; u <= GENERATIONS; ++u) {
+    RunStep();
+    if (STOP_ON_SOLUTION & found_solution) break;
+  }
+}
+
+void ChgEnvWorld::RunStep() {
+  // (1) evaluate pop, (2) select parents, (3) update world
+  DoEvaluation();
+  DoSelection();
+  DoUpdate();
+}
 
 #endif

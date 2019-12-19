@@ -352,5 +352,5 @@ TEST_CASE( "ChgEnvWorld ") {
   emp::Random random(config.SEED());
   ChgEnvWorld world(random);
   world.Setup(config);
-  // world.Run();
+  world.Run();
 }
