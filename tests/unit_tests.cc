@@ -11,12 +11,16 @@
 #include "tools/matchbin_utils.h"
 #include "tools/Range.h"
 
+#include "mutation_utils.h"
+
 #include "AltSignalWorld.h"
 #include "AltSignalConfig.h"
-#include "mutation_utils.h"
 
 #include "MCRegWorld.h"
 #include "MCRegConfig.h"
+
+#include "ChgEnvConfig.h"
+#include "ChgEnvWorld.h"
 
 TEST_CASE( "Hello World", "[general]" ) {
   std::cout << "Hello tests!" << std::endl;
@@ -270,41 +274,6 @@ TEST_CASE( "LinearFunctionsProgram Mutator" ) {
 */
 
 /*
-TEST_CASE( "AltSignalWorld ") {
-  AltSignalConfig config;
-  config.SEED(2);
-  config.POP_SIZE(1000);
-  config.GENERATIONS(100);
-  config.NUM_SIGNAL_RESPONSES(2);
-  config.NUM_ENV_CYCLES(4);
-  config.CPU_TIME_PER_ENV_CYCLE(64);
-  emp::Random random(config.SEED());
-  AltSignalWorld world(random);
-  world.Setup(config);
-  world.Run();
-}
-*/
-/*
-TEST_CASE( "MCRegWorld ") {
-  MCRegConfig config;
-  config.SEED(4);
-  config.POP_SIZE(100);
-  config.GENERATIONS(100);
-  config.DEME_WIDTH(5);
-  config.DEME_HEIGHT(5);
-  config.PROPAGULE_SIZE(1);
-  config.NUM_RESPONSE_TYPES(5);
-  config.DEVELOPMENT_PHASE_CPU_TIME(128);
-  config.RESPONSE_PHASE_CPU_TIME(64);
-  config.EPIGENETIC_INHERITANCE(true);
-  config.PROPAGULE_LAYOUT("clumpy");
-  emp::Random random(config.SEED());
-  MCRegWorld world(random);
-  world.Setup(config);
-  world.Run();
-}
-*/
-
 TEST_CASE ( "BitSet Hashing" ) {
   constexpr size_t W = 64;
   using tag_t = emp::BitSet<W>;
@@ -333,4 +302,55 @@ TEST_CASE ( "BitSet Hashing" ) {
   REQUIRE(set1.size() == set2.size());
   REQUIRE(map3.size() == set1.size());
   REQUIRE(map3.size() == set2.size());
+}
+*/
+
+/*
+TEST_CASE( "AltSignalWorld ") {
+  AltSignalConfig config;
+  config.SEED(2);
+  config.POP_SIZE(100);
+  config.GENERATIONS(10);
+  config.NUM_SIGNAL_RESPONSES(2);
+  config.NUM_ENV_CYCLES(4);
+  config.CPU_TIME_PER_ENV_CYCLE(64);
+  emp::Random random(config.SEED());
+  AltSignalWorld world(random);
+  world.Setup(config);
+  world.Run();
+}
+
+
+TEST_CASE( "MCRegWorld ") {
+  MCRegConfig config;
+  config.SEED(4);
+  config.POP_SIZE(100);
+  config.GENERATIONS(10);
+  config.DEME_WIDTH(5);
+  config.DEME_HEIGHT(5);
+  config.PROPAGULE_SIZE(1);
+  config.NUM_RESPONSE_TYPES(5);
+  config.DEVELOPMENT_PHASE_CPU_TIME(128);
+  config.RESPONSE_PHASE_CPU_TIME(64);
+  config.EPIGENETIC_INHERITANCE(true);
+  config.PROPAGULE_LAYOUT("clumpy");
+  emp::Random random(config.SEED());
+  MCRegWorld world(random);
+  world.Setup(config);
+  world.Run();
+}
+*/
+
+TEST_CASE( "ChgEnvWorld ") {
+  ChgEnvConfig config;
+  config.SEED(2);
+  config.POP_SIZE(100);
+  config.GENERATIONS(10);
+  config.NUM_ENV_STATES(2);
+  config.NUM_ENV_UPDATES(4);
+  config.CPU_CYCLES_PER_ENV_UPDATE(32);
+  emp::Random random(config.SEED());
+  ChgEnvWorld world(random);
+  world.Setup(config);
+  // world.Run();
 }

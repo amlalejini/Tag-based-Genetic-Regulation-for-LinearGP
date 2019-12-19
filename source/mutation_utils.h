@@ -7,6 +7,8 @@
 #include "tools/random_utils.h"
 #include "tools/Range.h"
 
+#include "hardware/SignalGP/utils/LinearFunctionsProgram.h"
+
 ///
 template<typename HARDWARE_T, typename TAG_T, typename ARGUMENT_T>
 class MutatorLinearFunctionsProgram {
