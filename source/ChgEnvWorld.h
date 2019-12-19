@@ -764,6 +764,50 @@ void ChgEnvWorld::DoWorldConfigSnapshot(const config_t & config) {
   }
 }
 
+void ChgEnvWorld::DoPopulationSnapshot() {
+  // Make a new data file for snapshot.
+  emp::DataFile snapshot_file(OUTPUT_DIR + "/pop_" + emp::to_string((int)GetUpdate()) + ".csv");
+  size_t cur_org_id = 0;
+  // Add functions.
+  snapshot_file.AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
+  snapshot_file.AddFun<size_t>([this, &cur_org_id]() { return cur_org_id; }, "pop_id");
+  // max_fit_file->AddFun(, "genotype_id");
+  snapshot_file.AddFun<bool>([this, &cur_org_id]() {
+    org_t & org = this->GetOrg(cur_org_id);
+    return this->IsSolution(org.GetPhenotype());
+  }, "solution");
+  snapshot_file.template AddFun<double>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetScore();
+  }, "score");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetEnvMatches();
+  }, "env_matches");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetEnvMisses();
+  }, "env_misses");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetNoResponses();
+  }, "no_responses");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(cur_org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  snapshot_file.PrintHeaderKeys();
+  for (cur_org_id = 0; cur_org_id < GetSize(); ++cur_org_id) {
+    emp_assert(IsOccupied(cur_org_id));
+    snapshot_file.Update();
+  }
+}
+
 void ChgEnvWorld::EvaluateOrg(org_t & org) {
   // Evaluate org NUM_TRIALS times, keep worst phenotype.
   // Reset organism phenotype.
@@ -849,7 +893,7 @@ void ChgEnvWorld::DoUpdate() {
   }
   if (SNAPSHOT_RESOLUTION) {
     if ( !(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution) ) {
-      // DoPopulationSnapshot();
+      DoPopulationSnapshot();
       if (cur_update) systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
     }
   }

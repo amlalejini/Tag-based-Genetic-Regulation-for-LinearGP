@@ -1,11 +1,12 @@
 # Project-specific settings
 # PROJECT := mc-reg-exp
-PROJECT := alt-signal-exp
+# PROJECT := alt-signal-exp
+PROJECT := chg-env-exp
 EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
 
 # Match metric options: hamming, integer, streak, hash
-MATCH_METRIC := streak
+MATCH_METRIC := integer
 # MATCH_THRESH options: 0, 25, 50, 75
 MATCH_THRESH := 25
 # MATCH_REG options: add, mult
@@ -57,7 +58,7 @@ serve:
 	python3 -m http.server
 
 clean:
-	rm -rf signalgp-genetic-regulation_*.dSYM
+	rm -rf $(PROJECT)_*.dSYM
 	rm -f $(PROJECT) $(PROJECT)_match-metric-* web/$(PROJECT).js web/*.js.map web/*.js.map *~ source/*.o web/*.wasm web/*.wast test_debug.out test_optimized.out unit_tests.gcda unit_tests.gcno
 	rm -rf test_debug.out.dSYM
 
