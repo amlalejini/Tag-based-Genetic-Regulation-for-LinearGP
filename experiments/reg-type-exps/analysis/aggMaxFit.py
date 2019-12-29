@@ -9,9 +9,8 @@ csv.field_size_limit(sys.maxsize)
 
 key_settings = [
     "SEED",
-    "mbin_selector",
-    "mbin_metric",
-    "mbin_thresh",
+    "matchbin_metric",
+    "matchbin_thresh",
     "matchbin_regulator",
     "TAG_LEN",
     "NUM_SIGNAL_RESPONSES",
