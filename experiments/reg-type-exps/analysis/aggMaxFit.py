@@ -3,7 +3,9 @@ Script: aggMaxFit.py
 For each run, grab the maximum fitness organism at end of run.
 '''
 
-import argparse, os, copy, errno, csv, re
+import argparse, os, copy, errno, csv, re, sys
+
+csv.field_size_limit(sys.maxsize)
 
 key_settings = [
     "SEED",
