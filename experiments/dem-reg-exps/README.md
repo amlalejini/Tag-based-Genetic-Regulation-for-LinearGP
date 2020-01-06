@@ -15,6 +15,7 @@ Environments:
       - replicates - 50
       - regulation - multiplicative
       - matching - streak
+      - match thresh - 25%
       - tag width (2) - 64, 128 (limited cross section)
       - selector - ranked
       - Mutation rates - (same as reg-type-exps)
@@ -48,3 +49,11 @@ Environments:
       - Mutation rates - (same as reg-type-exps)
       - NUM_SIGNAL_RESPONSES (num envs) - 2, 4, 8, 16, 32
       - Organism Functionality - Regulation only, Memory only, Memory + Regulation, No memory + No regulation
+
+## Runs
+
+- Alternating Signal Environment
+  - [ ] alt-sig-envs-2
+  - [ ] alt-sig-envs-4
+  - [ ] alt-sig-envs-8
+  - [ ] alt-sig-envs-16
