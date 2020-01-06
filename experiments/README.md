@@ -14,3 +14,11 @@ add vs multiplicative regulator experiment (to pick one to use going forward).
 Look at multiplicative vs additive module regulation to decide which to use going forward.
 
 [See experiment readme for more details.](./reg-type-exps/)
+
+## Demonstrating regulation experiment
+
+Goal: Demonstrate function regulation in SignalGP
+
+[See experiment readme for more details.](./dem-reg-exps/)
+
+## Exploring tag-matching metrics
