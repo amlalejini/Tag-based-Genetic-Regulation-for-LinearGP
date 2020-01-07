@@ -756,7 +756,7 @@ void MCRegWorld::InitDataCollection() {
   }, "fitness", "Taxon fitness");
   systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
     const phenotype_t & phen = taxon.GetData().GetPhenotype();
-    const bool is_sol = phen.resources_consumed >= MAX_RESPONSE_SCORE;
+    const bool is_sol = phen.GetResourcesConsumed() >= MAX_RESPONSE_SCORE;
     return (is_sol) ? "1" : "0";
   }, "is_solution", "Is this a solution?");
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
@@ -865,9 +865,10 @@ void MCRegWorld::InitDataCollection() {
   max_fit_file->AddFun(get_update, "update");
   max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_id; }, "pop_id");
   max_fit_file->template AddFun<bool>([this]() {
+    // org.GetPhenotype().GetResourcesConsumed() >= MAX_RESPONSE_SCORE
     const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
-    const bool is_sol = phen.resources_consumed >= MAX_RESPONSE_SCORE;
-    return (is_sol) ? "1" : "0";
+    const bool is_sol = phen.GetResourcesConsumed() >= MAX_RESPONSE_SCORE;
+    return is_sol;
   }, "solution");
   max_fit_file->template AddFun<double>([this]() {
     return this->GetOrg(max_fit_org_id).GetPhenotype().GetResourcesConsumed();
