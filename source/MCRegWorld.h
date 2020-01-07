@@ -599,9 +599,12 @@ void MCRegWorld::InitEventLib() {
       if (thread_id && event.GetData().size()) {
         // If message resulted in thread being spawned, load message into local working space.
         auto & thread = hw.GetThread(thread_id.value());
-        auto & call_state = thread.GetExecState().GetTopCallState();
-        auto & mem_state = call_state.GetMemory();
-        for (auto mem : event.GetData()) { mem_state.SetWorking(mem.first, mem.second); }
+        // Wait, wait. Does this thread have calls on the call stack?
+        if (thread.GetExecState().call_stack.size()) {
+          auto & call_state = thread.GetExecState().GetTopCallState();
+          auto & mem_state = call_state.GetMemory();
+          for (auto mem : event.GetData()) { mem_state.SetWorking(mem.first, mem.second); }
+        }
       }
     });
   event_lib->RegisterDispatchFun(event_id__send_msg, [this](hardware_t & hw, const base_event_t & e) {
