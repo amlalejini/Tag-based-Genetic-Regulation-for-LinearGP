@@ -350,10 +350,11 @@ void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::Activate
                                                                                                 size_t prop_size)
 {
   // Active deme randomly
-  for (size_t i = 0; i < GetSize(); ++i) cell_schedule.emplace_back(i);
-  emp::Shuffle(random, cell_schedule);
-  cell_schedule.resize(prop_size);
-  for (size_t id : cell_schedule) {
+  emp::vector<size_t> prop_ids(GetSize());
+  for (size_t i = 0; i < GetSize(); ++i) prop_ids[i] = i;
+  emp::Shuffle(random, prop_ids);
+  prop_ids.resize(prop_size);
+  for (size_t id : prop_ids) {
     // Activate cell @ id
     ActivateCell(id, prog);
     emp_assert(IsActive(id));
