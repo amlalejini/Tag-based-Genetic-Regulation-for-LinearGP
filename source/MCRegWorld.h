@@ -532,7 +532,7 @@ void MCRegWorld::InitInstLib() {
     }
   }, "Rotate cell to next empty cell (if there is one).");
   //   - sense current dir
-  inst_lib->AddInst("GetDir", [](hardware_t & hw, const inst_t & inst) {
+  inst_lib->AddInst("GetDir", [this](hardware_t & hw, const inst_t & inst) {
     if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
     auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
     call_state.GetMemory().SetWorking(inst.GetArg(0), (double)hw.GetCustomComponent().GetFacing());
