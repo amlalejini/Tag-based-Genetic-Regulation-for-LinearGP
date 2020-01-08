@@ -2,7 +2,7 @@
 ########## Define Resources Needed with SBATCH Lines ##########
 
 #SBATCH --time=72:00:00           # limit of wall clock time - how long the job will run (same as -t)
-#SBATCH --array=1-150
+#SBATCH --array=1-200
 #SBATCH --mem=8G                  # memory required per node - amount of memory (in bytes)
 #SBATCH --job-name mc-10x10         # you can give your job a name for easier identification (same as -J)
 #SBATCH --account=devolab
@@ -14,7 +14,7 @@ CONFIG_DIR=/mnt/home/lalejini/devo_ws/signalgp-genetic-regulation/experiments/de
 
 ##################################
 # Setup random seed info
-PROBLEM_SEED_OFFSET=22000
+PROBLEM_SEED_OFFSET=32000
 SEED=$((SLURM_ARRAY_TASK_ID + PROBLEM_SEED_OFFSET))
 
 ##################################
@@ -29,9 +29,9 @@ REGULATOR_TYPE=mult
 DEME_WIDTH=10
 DEME_HEIGHT=10
 NUM_RESPONSE_TYPES=10
-DEVELOPMENT_PHASE_CPU_TIME=512
+DEVELOPMENT_PHASE_CPU_TIME=256
 
-GENERATIONS=5000
+GENERATIONS=1000
 POP_SIZE=500
 SUMMARY_RESOLUTION=100
 SNAPSHOT_RESOLUTION=${GENERATIONS}
@@ -55,6 +55,9 @@ FUNC_REG_1__MEM_0__STOP=$(($TREATMENT_ID*$REPLICATES + $REPLICATES))
 FUNC_REG_0__MEM_0__START=$((1+$TREATMENT_ID*$REPLICATES))
 FUNC_REG_0__MEM_0__STOP=$(($TREATMENT_ID*$REPLICATES + $REPLICATES))
 ((TREATMENT_ID++))
+FUNC_REG_1__MEM_1__START=$((1+$TREATMENT_ID*$REPLICATES))
+FUNC_REG_1__MEM_1__STOP=$(($TREATMENT_ID*$REPLICATES + $REPLICATES))
+((TREATMENT_ID++))
 
 if [ ${SLURM_ARRAY_TASK_ID} -ge ${FUNC_REG_0__MEM_1__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${FUNC_REG_0__MEM_1__STOP} ] ; then
   USE_FUNC_REGULATION=0
@@ -65,6 +68,9 @@ elif [ ${SLURM_ARRAY_TASK_ID} -ge ${FUNC_REG_1__MEM_0__START} ] && [ ${SLURM_ARR
 elif [ ${SLURM_ARRAY_TASK_ID} -ge ${FUNC_REG_0__MEM_0__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${FUNC_REG_0__MEM_0__STOP} ] ; then
   USE_FUNC_REGULATION=0
   USE_GLOBAL_MEMORY=0
+elif [ ${SLURM_ARRAY_TASK_ID} -ge ${FUNC_REG_1__MEM_1__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${FUNC_REG_1__MEM_1__STOP} ] ; then
+  USE_FUNC_REGULATION=1
+  USE_GLOBAL_MEMORY=1
 else
  echo "run ${SEED} failed to launch" >> ${DATA_DIR}/failed_to_launch.txt
 fi
