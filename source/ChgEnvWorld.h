@@ -89,7 +89,10 @@ namespace ChgEnvWorldDefs {
       emp::HashMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak",
       emp::StreakMetric<TAG_LEN>,
-      std::enable_if<false>
+    std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak-exact",
+      emp::ExactDualStreakMetric<TAG_LEN>,
+    std::enable_if<false>
+    >::type
     >::type
     >::type
     >::type
