@@ -563,6 +563,7 @@ void MCRegWorld::InitInstLib() {
   }
   // Add messaging instructions
   inst_lib->AddInst("SendMsg", [this](hardware_t & hw, const inst_t & inst) {
+    if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
     auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
     auto & mem_state = call_state.GetMemory();
     hw.TriggerEvent(msg_event_t(event_id__send_msg, inst.GetTag(0), mem_state.GetOutputMemory()));
