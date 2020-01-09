@@ -343,6 +343,7 @@ void MCRegDeme<HW_MEMORY_MODEL_T,HW_TAG_T,HW_INST_ARG_T,HW_MATCHBIN_T>::Activate
       }
     }
   }
+
 }
 
 template<typename HW_MEMORY_MODEL_T,typename HW_TAG_T,typename HW_INST_ARG_T,typename HW_MATCHBIN_T>
