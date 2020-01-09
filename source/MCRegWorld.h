@@ -539,6 +539,7 @@ void MCRegWorld::InitInstLib() {
   }, "WorkingMemory[arg0] = Facing Direction");
   //   - sense facing empty
   inst_lib->AddInst("IsNeighborEmpty", [this](hardware_t & hw, const inst_t & inst) {
+    if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
     auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
     const size_t cell_id = hw.GetCustomComponent().GetCellID();
     const deme_t::Facing cell_facing = hw.GetCustomComponent().GetFacing();
