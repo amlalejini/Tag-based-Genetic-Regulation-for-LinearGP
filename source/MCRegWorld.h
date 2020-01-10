@@ -647,7 +647,7 @@ void MCRegWorld::InitHardware() {
   emp_assert(PROPAGULE_LAYOUT == "random" || PROPAGULE_LAYOUT == "clumpy");
   CLUMPY_PROPAGULES = (PROPAGULE_LAYOUT == "clumpy");
   eval_deme->ResetCells();
-  eval_deme->ConfigureCells(MAX_ACTIVE_THREAD_CNT, MAX_THREAD_CAPACITY);
+  eval_deme->ConfigureCells(MAX_ACTIVE_THREAD_CNT, MAX_THREAD_CAPACITY, false);
   // todo - any extra configuration we need to do for evaluation!
 }
 

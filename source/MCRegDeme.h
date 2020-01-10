@@ -142,10 +142,13 @@ public:
   }
 
   // todo - Configure Hardware function
-  void ConfigureCells(size_t max_active_threads, size_t max_thread_capacity) {
+  void ConfigureCells(size_t max_active_threads,
+                      size_t max_thread_capacity,
+                      bool use_thread_priority=true) {
     for (hardware_t & cell : cells) {
       cell.SetActiveThreadLimit(max_active_threads);
       cell.SetThreadCapacity(max_thread_capacity);
+      cell.SetThreadPriorityUse(use_thread_priority);
       emp_assert(cell.ValidateThreadState());
     }
   }
