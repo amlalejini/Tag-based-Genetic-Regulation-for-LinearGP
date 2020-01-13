@@ -1,5 +1,5 @@
 ---
-title: "Demonstrating Genetic Regulation in SignalGP - Alternating Signal Environment"
+title: "Demonstrating Genetic Regulation in SignalGP - Simple Changing Environment"
 output: 
   pdf_document:
     toc: true
@@ -23,12 +23,12 @@ library(cowplot)  # (Wilke, 2018)
 
 
 ```{r}
-data_loc <- "../data/alt_sig_max_fit.csv"
+data_loc <- "../data/chg_env_max_fit.csv"
 data <- read.csv(data_loc, na.strings="NONE")
 
 data$matchbin_thresh <- factor(data$matchbin_thresh,
                                      levels=c(0, 25, 50, 75))
-data$NUM_SIGNAL_RESPONSES <- factor(data$NUM_SIGNAL_RESPONSES,
+data$NUM_ENV_STATES <- factor(data$NUM_ENV_STATES,
                                      levels=c(2, 4, 8, 16, 32))
 
 get_con <- function(reg, mem) {
@@ -52,8 +52,8 @@ data$condition <- factor(data$condition, levels=c("regulation", "memory", "none"
 # SEED mbin_metric mbin_thresh NUM_SIGNAL_RESPONSES MUT_RATE__FUNC_TAG_BF score
 ggplot(data, aes(x=condition, y=score)) +
   geom_boxplot() +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES, scales="free_y") +
-  ggsave("dem-reg-alt-sig-scores.pdf", width=16, height=8)
+  facet_wrap(~ NUM_ENV_STATES, scales="free_y") +
+  ggsave("dem-reg-chg-env-scores.png", width=16, height=8)
 ```
 
 ```{r}
@@ -61,6 +61,6 @@ ggplot(data, aes(x=condition, y=score)) +
 ggplot(data, aes(x=condition, y=solution, fill=condition)) +
   geom_bar(stat="identity") +
   ylim(0, 50) +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES) +
-  ggsave("dem-reg-alt-sig-solutions.pdf", width=16, height=8)
+  facet_wrap(~ NUM_ENV_STATES) +
+  ggsave("dem-reg-chg-env-solutions.png", width=16, height=8)
 ```
