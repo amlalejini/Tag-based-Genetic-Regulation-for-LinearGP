@@ -165,6 +165,8 @@ protected:
   bool STOP_ON_SOLUTION;
   // Environment group
   size_t NUM_RESPONSE_TYPES;
+  bool CUSTOM_MAX_RESPONSE_CNT;
+  size_t MAX_RESPONSE_CNT;
   size_t DEVELOPMENT_PHASE_CPU_TIME;
   size_t RESPONSE_PHASE_CPU_TIME;
   // Program group
@@ -212,6 +214,7 @@ protected:
   emp::Ptr<systematics_t> systematics_ptr;  ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
 
   bool found_solution = false;              ///< Have we stumbled onto a 'solution' yet?
+  int MAX_SINGLE_RESPONSE_CREDIT=0;
   double MAX_RESPONSE_SCORE=0;              ///< What is the maximum score an organism can achieve?
   size_t max_fit_org_id=0;                  ///< What is the most fit organism ID for this generation?
   bool CLUMPY_PROPAGULES=false;
@@ -249,9 +252,9 @@ protected:
     phenotype_t & phen = org.GetPhenotype();
     emp::vector<size_t> & responses = phen.GetResponsesByType();
     double score = 0;
-    const int max_credit = (int)((DEME_WIDTH * DEME_HEIGHT) / NUM_RESPONSE_TYPES);
+    // const int max_credit = (int)((DEME_WIDTH * DEME_HEIGHT) / NUM_RESPONSE_TYPES);
     for (size_t i = 0; i < responses.size(); ++i) {
-      score += std::min(max_credit, (int)responses[i]);
+      score += std::min(MAX_SINGLE_RESPONSE_CREDIT, (int)responses[i]);
     }
     return score + org.GetPhenotype().num_active_cells;
   }
@@ -397,6 +400,8 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   STOP_ON_SOLUTION = config.STOP_ON_SOLUTION();
   // environment group
   NUM_RESPONSE_TYPES = config.NUM_RESPONSE_TYPES();
+  CUSTOM_MAX_RESPONSE_CNT = config.CUSTOM_MAX_RESPONSE_CNT();
+  MAX_RESPONSE_CNT = config.MAX_RESPONSE_CNT();
   DEVELOPMENT_PHASE_CPU_TIME = config.DEVELOPMENT_PHASE_CPU_TIME();
   RESPONSE_PHASE_CPU_TIME = config.RESPONSE_PHASE_CPU_TIME();
   // program group
@@ -1072,8 +1077,9 @@ void MCRegWorld::Setup(const MCRegConfig & config) {
     return org.GetPhenotype().GetResourcesConsumed();
   });
   const size_t num_cells = (DEME_WIDTH * DEME_HEIGHT);
-  emp_assert(NUM_RESPONSE_TYPES != 0);
-  MAX_RESPONSE_SCORE = num_cells + ((int)(num_cells / NUM_RESPONSE_TYPES) * NUM_RESPONSE_TYPES);
+  emp_assert(NUM_RESPONSE_TYPES > 0);
+  MAX_SINGLE_RESPONSE_CREDIT = (CUSTOM_MAX_RESPONSE_CNT) ? (int)MAX_RESPONSE_CNT : (int)(num_cells / NUM_RESPONSE_TYPES);
+  MAX_RESPONSE_SCORE = num_cells + (MAX_SINGLE_RESPONSE_CREDIT * NUM_RESPONSE_TYPES);
   std::cout << "Maximum possible score in this environment = " << MAX_RESPONSE_SCORE << std::endl;
   // Initialize data collection
   InitDataCollection();

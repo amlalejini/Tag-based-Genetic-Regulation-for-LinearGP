@@ -12,6 +12,8 @@ EMP_BUILD_CONFIG(MCRegConfig,
 
   GROUP(ENVIRONMENT_GROUP, "Environment settings"),
     VALUE(NUM_RESPONSE_TYPES, size_t, 4, "How many possible response types are there?"),
+    VALUE(CUSTOM_MAX_RESPONSE_CNT, bool, false, "Should we evenly divide max response score or use the parameter 'MAX_RESPONSE_CNT' as max response count that gets scored?"),
+    VALUE(MAX_RESPONSE_CNT, size_t, 4, "What is the maximum score that can be awarded for "),
     VALUE(DEVELOPMENT_PHASE_CPU_TIME, size_t, 32, "How many CPU cycles do we evaluate demes in this environment phase?"),
     VALUE(RESPONSE_PHASE_CPU_TIME, size_t, 32, "How many CPU cycles do we evaluate demes in this environment phase?"),
 
