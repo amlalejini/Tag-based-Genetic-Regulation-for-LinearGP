@@ -53,7 +53,7 @@ data$condition <- factor(data$condition, levels=c("regulation", "memory", "none"
 ggplot(data, aes(x=condition, y=score)) +
   geom_boxplot() +
   facet_wrap(~ NUM_SIGNAL_RESPONSES, scales="free_y") +
-  ggsave("dem-reg-alt-sig-scores.pdf", width=16, height=8)
+  ggsave("dem-reg-alt-sig-scores.png", width=16, height=8)
 ```
 
 ```{r}
@@ -62,5 +62,5 @@ ggplot(data, aes(x=condition, y=solution, fill=condition)) +
   geom_bar(stat="identity") +
   ylim(0, 50) +
   facet_wrap(~ NUM_SIGNAL_RESPONSES) +
-  ggsave("dem-reg-alt-sig-solutions.pdf", width=16, height=8)
+  ggsave("dem-reg-alt-sig-solutions.png", width=16, height=8)
 ```
