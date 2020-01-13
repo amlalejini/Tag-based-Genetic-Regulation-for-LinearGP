@@ -13,13 +13,18 @@ key_settings = [
     "matchbin_thresh",
     "matchbin_regulator",
     "TAG_LEN",
-    "NUM_SIGNAL_RESPONSES",
-    "NUM_ENV_CYCLES",
     "USE_FUNC_REGULATION",
     "USE_GLOBAL_MEMORY",
     "MUT_RATE__INST_TAG_BF",
     "MUT_RATE__FUNC_TAG_BF",
-    "CPU_TIME_PER_ENV_CYCLE"
+    "DEME_WIDTH",
+    "DEME_HEIGHT",
+    "NUM_RESPONSE_TYPES",
+    "DEVELOPMENT_PHASE_CPU_TIME",
+    "RESPONSE_PHASE_CPU_TIME",
+    "PROPAGULE_SIZE",
+    "PROPAGULE_LAYOUT",
+    "EPIGENETIC_INHERITANCE"
 ]
 
 possible_metrics = ["hamming", "streak", "symmetric wrap", "hash"]
@@ -94,20 +99,21 @@ def main():
         if len(orgs) < 1:
             print(f"Where 'dem fit organisms at? ({max_fit_path})")
             exit(-1)
-        # Find the best organism
-        best_org_id = 0
-        for i in range(len(orgs)):
-            if float(orgs[i][header_lu["score"]]) > float(orgs[best_org_id][header_lu["score"]]):
-                best_org_id = i
+        # Use final evolved organism
+        best_org_id = -1
+        # for i in range(len(orgs)):
+        #     if float(orgs[i][header_lu["score"]]) > float(orgs[best_org_id][header_lu["score"]]):
+        #         best_org_id = i
         # Guarantee header uniqueness
-        header_set.add(",".join([key for key in key_settings] + header))
+        header_set.add(",".join([key for key in key_settings] + ["DEME_SIZE"] + header))
         if len(header_set) > 1:
             print(f"Header mismatch! ({max_fit_path})")
             exit(-1)
         # Build organism line.
         # - do some special processing on program entry
         orgs[best_org_id][header_lu["program"]] = f"\"{orgs[best_org_id][header_lu['program']]}\""
-        max_fits.append([run_settings[key] for key in key_settings] + orgs[best_org_id])
+        deme_size = int(run_settings["DEME_HEIGHT"]) * int(run_settings["DEME_WIDTH"])
+        max_fits.append([run_settings[key] for key in key_settings] + [str(deme_size)] + orgs[best_org_id])
     # Output header + max_fit orgs
     out_content = list(header_set)[0] + "\n" # Should be guaranteed to be length 1!
     out_content += "\n".join([",".join(line) for line in max_fits])
@@ -117,5 +123,4 @@ def main():
     print(f"Done! Output written to {os.path.join(dump_dir, dump_fname)}")
 
 if __name__ == "__main__":
-    # extract_settings("./run.log")
     main()

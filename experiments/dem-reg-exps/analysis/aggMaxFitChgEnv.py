@@ -13,13 +13,13 @@ key_settings = [
     "matchbin_thresh",
     "matchbin_regulator",
     "TAG_LEN",
-    "NUM_SIGNAL_RESPONSES",
-    "NUM_ENV_CYCLES",
     "USE_FUNC_REGULATION",
     "USE_GLOBAL_MEMORY",
     "MUT_RATE__INST_TAG_BF",
     "MUT_RATE__FUNC_TAG_BF",
-    "CPU_TIME_PER_ENV_CYCLE"
+    "NUM_ENV_STATES",
+    "NUM_ENV_UPDATES",
+    "CPU_CYCLES_PER_ENV_UPDATE"
 ]
 
 possible_metrics = ["hamming", "streak", "symmetric wrap", "hash"]
