@@ -36,6 +36,7 @@ EMP_BUILD_CONFIG(MCRegConfig,
 
   GROUP(SELECTION_GROUP, "Selection settings"),
     VALUE(TOURNAMENT_SIZE, size_t, 7, "How big are tournaments when doing tournament selection?"),
+    VALUE(SCORE_RESPONSE_TYPE_SPREAD, bool, false, "Should we take into account the spread of each response type while scoring?"),
 
   GROUP(MUTATION_GROUP, "Mutation settings"),
     VALUE(MUT_RATE__INST_ARG_SUB, double, 0.005, "InstArgSub rate"),

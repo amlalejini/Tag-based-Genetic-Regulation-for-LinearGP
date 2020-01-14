@@ -2,6 +2,7 @@
 #define MC_REG_DIGITAL_ORGANISM_H
 
 #include <tuple>
+#include <utility>
 
 // New signalgp includes
 #include "hardware/SignalGP/utils/LinearFunctionsProgram.h"
@@ -41,31 +42,41 @@ public:
   };
 
   struct MCRegPhenotype {
-    double resources_consumed=0.0;
+    using loc_t = std::pair<size_t, size_t>;
+    double score=0.0;
     size_t num_unique_resp=0;
     size_t num_resp=0;
     size_t num_active_cells=0;
-    emp::vector<size_t> response_cnts; ///< Response counts by type.
+    emp::vector<size_t> response_cnts;                ///< Response counts by type.
+    emp::vector< emp::vector<loc_t> > response_locs;    ///< Response locations by type
     // todo - add development pattern!
 
     void Reset(size_t response_types_cnt=1) {
-      resources_consumed=0.0;
+      score=0.0;
       num_unique_resp=0;
       num_resp=0;
       num_active_cells=0;
       response_cnts.resize(response_types_cnt);
-      for (size_t i = 0; i < response_cnts.size(); ++i) response_cnts[i] = 0;
+      response_locs.resize(response_types_cnt);
+      for (size_t i = 0; i < response_cnts.size(); ++i) {
+        response_locs[i].clear();
+        response_cnts[i] = 0;
+      }
     }
 
     bool operator==(const MCRegPhenotype & o) const {
-      return std::tie(resources_consumed,
+      return std::tie(score,
                       num_unique_resp,
                       num_resp,
-                      num_active_cells) ==
-             std::tie(o.resources_consumed,
+                      num_active_cells,
+                      response_cnts,
+                      response_locs) ==
+             std::tie(o.score,
                       o.num_unique_resp,
                       o.num_resp,
-                      o.num_active_cells);
+                      o.num_active_cells,
+                      o.response_cnts,
+                      o.response_locs);
     }
 
     bool operator!=(const MCRegPhenotype & o) const {
@@ -73,17 +84,21 @@ public:
     }
 
     bool operator<(const MCRegPhenotype & o) const {
-      return std::tie(resources_consumed,
+      return std::tie(score,
                       num_unique_resp,
                       num_resp,
-                      num_active_cells) <
-             std::tie(o.resources_consumed,
+                      num_active_cells,
+                      response_cnts,
+                      response_locs) <
+             std::tie(o.score,
                       o.num_unique_resp,
                       o.num_resp,
-                      o.num_active_cells);
+                      o.num_active_cells,
+                      o.response_cnts,
+                      o.response_locs);
     }
 
-    double GetResourcesConsumed() const { return resources_consumed; }
+    double GetScore() const { return score; }
     size_t GetUniqueResponseCnt() const { return num_unique_resp; }
     size_t GetResponseCnt() const { return num_resp; }
     size_t GetActiveCellCnt() const { return num_active_cells; }

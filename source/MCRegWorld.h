@@ -111,6 +111,29 @@ namespace MCRegWorldDefs {
   using org_t = MCRegOrganism<emp::BitSet<TAG_LEN>,int>;
 }
 
+/*
+  def dist(x1,y1, x2,y2):
+    dx = abs(x1 - x2)
+    dy = abs(y1 - y2)
+    if (dx > WIDTH/2):
+        dx = WIDTH - dx
+    if (dy > HEIGHT/2):
+        dy = HEIGHT - dy
+    return dx+dy - min(dx, dy)
+  */
+struct Point2D {
+  int x=0;
+  int y=0;
+  Point2D(int _x=0, int _y=0) : x(_x), y(_y) { ; }
+};
+double DiagonalDistance(Point2D a, Point2D b, int max_w, int max_h) {
+  int dx = emp::Abs(a.x - b.x);
+  int dy = emp::Abs(a.y - b.y);
+  if (dx > max_w / 2) { dx = max_w - dx; }
+  if (dy > max_h / 2) { dy = max_h - dy; }
+  return dx+dy - std::min(dx, dy);
+}
+
 class MCRegWorld : public emp::World<MCRegWorldDefs::org_t> {
 public:
   using tag_t = emp::BitSet<MCRegWorldDefs::TAG_LEN>;
@@ -184,6 +207,7 @@ protected:
   bool EPIGENETIC_INHERITANCE;
   // Selection group
   size_t TOURNAMENT_SIZE;
+  bool SCORE_RESPONSE_TYPE_SPREAD;
   // Mutation group
   double MUT_RATE__INST_ARG_SUB;
   double MUT_RATE__INST_TAG_BF;
@@ -334,15 +358,22 @@ void MCRegWorld::EvaluateOrg(org_t & org) {
     if (!cell_hw.GetCustomComponent().IsActive()) continue;
     org.GetPhenotype().num_active_cells += 1;   // Increment phenotype's number of active cells.
     // If cell had no response, continue.
-    if (cell_hw.GetCustomComponent().response == -1) continue;
+    if (cell_hw.GetCustomComponent().response < 0) {
+      emp_assert(cell_hw.GetCustomComponent().response == -1);
+      continue;
+    }
     emp_assert(cell_hw.GetCustomComponent().GetResponse() >= 0
                && (size_t)cell_hw.GetCustomComponent().GetResponse() < org.GetPhenotype().GetResponsesByType().size());
-    org.GetPhenotype().response_cnts[(size_t)cell_hw.GetCustomComponent().GetResponse()] += 1;
+    const int response = cell_hw.GetCustomComponent().GetResponse();
+    size_t cell_x = eval_deme->GetCellX(cell_hw.GetCustomComponent().GetCellID());
+    size_t cell_y = eval_deme->GetCellY(cell_hw.GetCustomComponent().GetCellID());
+    org.GetPhenotype().response_cnts[(size_t)response] += 1;
     org.GetPhenotype().num_resp += 1;
-    unique_responses.emplace(cell_hw.GetCustomComponent().GetResponse());
+    unique_responses.emplace(response);
+    org.GetPhenotype().response_locs[(size_t)response].emplace_back( cell_x, cell_y );
   }
   org.GetPhenotype().num_unique_resp = unique_responses.size();
-  org.GetPhenotype().resources_consumed = ScoreOrgPhenotype(org);
+  org.GetPhenotype().score = ScoreOrgPhenotype(org);
 }
 
 void MCRegWorld::DoEvaluation() {
@@ -364,7 +395,7 @@ void MCRegWorld::DoSelection() {
 void MCRegWorld::DoUpdate() {
   // Log current update, best fitness found this generation
   const double max_fit = CalcFitnessID(max_fit_org_id);
-  found_solution = GetOrg(max_fit_org_id).GetPhenotype().GetResourcesConsumed() >= MAX_RESPONSE_SCORE;
+  found_solution = GetOrg(max_fit_org_id).GetPhenotype().GetScore() >= MAX_RESPONSE_SCORE;
   std::cout << "update: " << GetUpdate() << "; ";
   std::cout << "best score (" << max_fit_org_id << "): " << max_fit << "; ";
   std::cout << "solution found: " << found_solution << std::endl;
@@ -384,7 +415,7 @@ void MCRegWorld::DoUpdate() {
   // EvaluateOrg(this->GetOrg(max_fit_org_id));
   // eval_deme->PrintActive();
   // eval_deme->PrintResponses();
-  // std::cout << "score = " << this->GetOrg(max_fit_org_id).GetPhenotype().resources_consumed << std::endl;
+  // std::cout << "score = " << this->GetOrg(max_fit_org_id).GetPhenotype().score << std::endl;
   // std::cout << "num active = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_active_cells << std::endl;
   // std::cout << "num unique = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_unique_resp << std::endl;
   // std::cout << "num resp = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_resp << std::endl;
@@ -419,6 +450,7 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   EPIGENETIC_INHERITANCE = config.EPIGENETIC_INHERITANCE();
   // selection group
   TOURNAMENT_SIZE = config.TOURNAMENT_SIZE();
+  SCORE_RESPONSE_TYPE_SPREAD = config.SCORE_RESPONSE_TYPE_SPREAD();
   // mutation group
   MUT_RATE__INST_ARG_SUB = config.MUT_RATE__INST_ARG_SUB();
   MUT_RATE__INST_TAG_BF = config.MUT_RATE__INST_TAG_BF();
@@ -767,12 +799,12 @@ void MCRegWorld::InitDataCollection() {
   }, "fitness", "Taxon fitness");
   systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
     const phenotype_t & phen = taxon.GetData().GetPhenotype();
-    const bool is_sol = phen.GetResourcesConsumed() >= MAX_RESPONSE_SCORE;
+    const bool is_sol = phen.GetScore() >= MAX_RESPONSE_SCORE;
     return (is_sol) ? "1" : "0";
   }, "is_solution", "Is this a solution?");
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
-    return emp::to_string(taxon.GetData().GetPhenotype().GetResourcesConsumed());
-  }, "resources_collected", "How many resources did most recent member of taxon collect?");
+    return emp::to_string(taxon.GetData().GetPhenotype().GetScore());
+  }, "score", "What score did the most recent member of this taxon achieve?");
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetPhenotype().GetUniqueResponseCnt());
   }, "unique_responses", "How many unique responses did deme exhibit?");
@@ -876,13 +908,12 @@ void MCRegWorld::InitDataCollection() {
   max_fit_file->AddFun(get_update, "update");
   max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_id; }, "pop_id");
   max_fit_file->template AddFun<bool>([this]() {
-    // org.GetPhenotype().GetResourcesConsumed() >= MAX_RESPONSE_SCORE
     const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
-    const bool is_sol = phen.GetResourcesConsumed() >= MAX_RESPONSE_SCORE;
+    const bool is_sol = phen.GetScore() >= MAX_RESPONSE_SCORE;
     return is_sol;
   }, "solution");
   max_fit_file->template AddFun<double>([this]() {
-    return this->GetOrg(max_fit_org_id).GetPhenotype().GetResourcesConsumed();
+    return this->GetOrg(max_fit_org_id).GetPhenotype().GetScore();
   }, "score");
   max_fit_file->template AddFun<size_t>([this]() {
     return this->GetOrg(max_fit_org_id).GetPhenotype().GetUniqueResponseCnt();
@@ -929,10 +960,10 @@ void MCRegWorld::DoPopulationSnapshot() {
   // max_fit_file->AddFun(, "genotype_id");
   snapshot_file.AddFun<bool>([this, &cur_org_id]() {
     org_t & org = this->GetOrg(cur_org_id);
-    return org.GetPhenotype().GetResourcesConsumed() >= MAX_RESPONSE_SCORE;
+    return org.GetPhenotype().GetScore() >= MAX_RESPONSE_SCORE;
   }, "solution");
   snapshot_file.template AddFun<double>([this, &cur_org_id]() {
-    return this->GetOrg(cur_org_id).GetPhenotype().GetResourcesConsumed();
+    return this->GetOrg(cur_org_id).GetPhenotype().GetScore();
   }, "score");
   snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
     return this->GetOrg(cur_org_id).GetPhenotype().GetUniqueResponseCnt();
@@ -1074,7 +1105,7 @@ void MCRegWorld::Setup(const MCRegConfig & config) {
   });
   this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
   this->SetFitFun([this](org_t & org) {
-    return org.GetPhenotype().GetResourcesConsumed();
+    return org.GetPhenotype().GetScore();
   });
   const size_t num_cells = (DEME_WIDTH * DEME_HEIGHT);
   emp_assert(NUM_RESPONSE_TYPES > 0);
