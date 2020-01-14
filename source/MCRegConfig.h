@@ -33,6 +33,7 @@ EMP_BUILD_CONFIG(MCRegConfig,
     VALUE(MAX_ACTIVE_THREAD_CNT, size_t, 32, "How many threads can be simultaneously running (active)?"),
     VALUE(MAX_THREAD_CAPACITY, size_t, 64, "Maximum capacity for thread memory (pending + active)."),
     VALUE(EPIGENETIC_INHERITANCE, bool, false, "Do cells pass on matchbin regulation to (within-multi-cell) offspring?"),
+    VALUE(USE_RANDOM_CELL_SCHEDULING, bool, true, "Are cells in a deme executed in random order?"),
 
   GROUP(SELECTION_GROUP, "Selection settings"),
     VALUE(TOURNAMENT_SIZE, size_t, 7, "How big are tournaments when doing tournament selection?"),

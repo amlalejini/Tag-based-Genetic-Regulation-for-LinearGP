@@ -88,6 +88,7 @@ public:
 protected:
   size_t width;   ///< Width of deme grid
   size_t height;  ///< Height of deme grid
+  bool random_scheduling=true;
   emp::Random & random;
   emp::vector<size_t> neighbor_lookup; ///< Lookup table for neighbors
   emp::vector<hardware_t> cells;       ///< Toroidal grid of hardware units
@@ -191,10 +192,14 @@ public:
   /// Is a cell at a particular location active?
   bool IsActive(size_t id) const { return cells[id].GetCustomComponent().IsActive(); }
 
+  bool IsRandomScheduling() const { return random_scheduling; }
+
+  void SetRandomScheduling(bool val=true) { random_scheduling = val; }
+
   // todo - SingleAdvance()
   bool SingleAdvance() {
     // Advance cells in a random order.
-    emp::Shuffle(random, cell_schedule);
+    if (random_scheduling) { emp::Shuffle(random, cell_schedule); }
     for (size_t i = 0; i < cell_schedule.size(); ++i) {
       const size_t cell_id = cell_schedule[i];
       emp_assert(IsActive(cell_id));

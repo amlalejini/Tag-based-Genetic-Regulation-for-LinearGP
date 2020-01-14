@@ -205,6 +205,7 @@ protected:
   size_t MAX_ACTIVE_THREAD_CNT;
   size_t MAX_THREAD_CAPACITY;
   bool EPIGENETIC_INHERITANCE;
+  bool USE_RANDOM_CELL_SCHEDULING;
   // Selection group
   size_t TOURNAMENT_SIZE;
   bool SCORE_RESPONSE_TYPE_SPREAD;
@@ -448,6 +449,7 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   MAX_ACTIVE_THREAD_CNT = config.MAX_ACTIVE_THREAD_CNT();
   MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
   EPIGENETIC_INHERITANCE = config.EPIGENETIC_INHERITANCE();
+  USE_RANDOM_CELL_SCHEDULING = config.USE_RANDOM_CELL_SCHEDULING();
   // selection group
   TOURNAMENT_SIZE = config.TOURNAMENT_SIZE();
   SCORE_RESPONSE_TYPE_SPREAD = config.SCORE_RESPONSE_TYPE_SPREAD();
@@ -676,13 +678,14 @@ void MCRegWorld::InitHardware() {
       offspring_hw.GetCustomComponent().SetFacing(face_parent);
       // Inherit regulation from parent
       if (EPIGENETIC_INHERITANCE) {
-         offspring_hw.GetMatchBin().ImprintRegulators(parent_hw.GetMatchBin());
+        offspring_hw.GetMatchBin().ImprintRegulators(parent_hw.GetMatchBin());
         // TODO - check epigenetic inheritance!
       }
     });
   }
   emp_assert(PROPAGULE_LAYOUT == "random" || PROPAGULE_LAYOUT == "clumpy");
   CLUMPY_PROPAGULES = (PROPAGULE_LAYOUT == "clumpy");
+  eval_deme->SetRandomScheduling(USE_RANDOM_CELL_SCHEDULING);
   eval_deme->ResetCells();
   eval_deme->ConfigureCells(MAX_ACTIVE_THREAD_CNT, MAX_THREAD_CAPACITY, false);
   // todo - any extra configuration we need to do for evaluation!
