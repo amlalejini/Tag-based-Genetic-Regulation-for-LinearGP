@@ -125,6 +125,8 @@ struct Point2D {
   int x=0;
   int y=0;
   Point2D(int _x=0, int _y=0) : x(_x), y(_y) { ; }
+  Point2D(const std::pair<size_t, size_t> & pair) : x((int)pair.first), y((int)pair.second) { ; }
+  Point2D(const std::pair<int, int> & pair) : x(pair.first), y(pair.second) { ; }
 };
 double DiagonalDistance(Point2D a, Point2D b, int max_w, int max_h) {
   int dx = emp::Abs(a.x - b.x);
@@ -185,7 +187,7 @@ protected:
   // Default group
   size_t GENERATIONS;
   size_t POP_SIZE;
-  bool STOP_ON_SOLUTION;
+  // bool STOP_ON_SOLUTION;
   // Environment group
   size_t NUM_RESPONSE_TYPES;
   bool CUSTOM_MAX_RESPONSE_CNT;
@@ -238,9 +240,9 @@ protected:
   emp::Ptr<emp::DataFile> max_fit_file;
   emp::Ptr<systematics_t> systematics_ptr;  ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
 
-  bool found_solution = false;              ///< Have we stumbled onto a 'solution' yet?
-  int MAX_SINGLE_RESPONSE_CREDIT=0;
-  double MAX_RESPONSE_SCORE=0;              ///< What is the maximum score an organism can achieve?
+  // bool found_solution = false;              ///< Have we stumbled onto a 'solution' yet?
+  size_t MAX_SINGLE_RESPONSE_CREDIT=0;      ///< What is the maximum number of responses of a particular type that an organism can get credit for?
+  // double MAX_RESPONSE_SCORE=0;              ///< What is the maximum score an organism can achieve?
   size_t max_fit_org_id=0;                  ///< What is the most fit organism ID for this generation?
   bool CLUMPY_PROPAGULES=false;
 
@@ -274,14 +276,63 @@ protected:
 
   /// Centralized place for calculating organism score given filled out phenotype.
   double ScoreOrgPhenotype(org_t & org) {
+    return (SCORE_RESPONSE_TYPE_SPREAD) ? ScoreOrgPhenotype_ClumpyClump(org) : ScoreOrgPhenotype_Simple(org);
+  }
+
+  double ScoreOrgPhenotype_Simple(org_t & org) {
     phenotype_t & phen = org.GetPhenotype();
     emp::vector<size_t> & responses = phen.GetResponsesByType();
     double score = 0;
-    // const int max_credit = (int)((DEME_WIDTH * DEME_HEIGHT) / NUM_RESPONSE_TYPES);
     for (size_t i = 0; i < responses.size(); ++i) {
-      score += std::min(MAX_SINGLE_RESPONSE_CREDIT, (int)responses[i]);
+      score += std::min(MAX_SINGLE_RESPONSE_CREDIT, responses[i]);
     }
     return score + org.GetPhenotype().num_active_cells;
+  }
+
+  double ScoreOrgPhenotype_ClumpyClump(org_t & org) {
+    // std::cout << "Clumpy!" << std::endl;
+    using loc_t = std::pair<size_t, size_t>;
+    phenotype_t & phen = org.GetPhenotype();
+    emp::vector< emp::vector<loc_t> > & locs_by_response = phen.response_locs;
+    double score = 0;
+    // Compute maximum distance between two cells (used for scaling)
+    const double max_dx = DEME_WIDTH / 2;
+    const double max_dy = DEME_HEIGHT / 2;
+    const double max_dist = max_dx + max_dy - std::min(max_dx, max_dy); // Diagonal distance
+    const size_t num_active = org.GetPhenotype().num_active_cells;
+    emp_assert(max_dist != 0);
+    // std::cout << "Max dist = " << max_dist << std::endl;
+    // For each cell type (i.e., response type), calculate pairwise distances.
+    emp::vector< emp::vector<double> > pairwise_distances(NUM_RESPONSE_TYPES);
+    for (size_t cell_type = 0; cell_type < NUM_RESPONSE_TYPES; ++cell_type) {
+      // How many cells of this type are there?
+      emp_assert(phen.response_cnts[cell_type] == locs_by_response[cell_type].size(), "Number of number of locations for a particular cell type =/= recorded number of that cell type");
+      const size_t num_cells = phen.response_cnts[cell_type];
+      double modifier = 0.0;
+      if (num_cells > 1) {
+        const size_t num_pairs = ((num_cells * num_cells) - num_cells) / 2;
+        for (size_t i = 0; i < num_cells; ++i) {
+          const loc_t & cell_i = locs_by_response[cell_type][i];
+          for (size_t j = i+1; j < num_cells; ++j) {
+            const loc_t & cell_j = locs_by_response[cell_type][j];
+            // Calculate distance between cell i and cell j (scaled between 0 and 1)
+            // 0 (maximally distant) <====> 1 (adjacent)
+            const double dist = DiagonalDistance({cell_i}, {cell_j}, DEME_WIDTH, DEME_HEIGHT);
+            const double dist_scaled = 1 - (dist / max_dist);
+            pairwise_distances[cell_type].emplace_back(dist);
+            modifier += dist_scaled;
+          }
+        }
+        emp_assert(pairwise_distances[cell_type].size() == num_pairs);
+        emp_assert(num_pairs > 0);
+        modifier /= num_pairs;
+      }
+      phen.clumpyness_ratings[cell_type] = modifier;
+      // std::cout << "Setting this phenotype's modifier for cell type " << cell_type << " = " << modifier << std::endl;
+      // for each cell type, we add min(goal number of cells, actual num of cells) * (clumpy modifier + 1)
+      score += std::min(MAX_SINGLE_RESPONSE_CREDIT, num_cells) * (modifier + 1);
+    }
+    return score + num_active;
   }
 
 public:
@@ -309,6 +360,7 @@ public:
   void PrintProgramSingleLine(const program_t & prog, std::ostream & out);
   void PrintProgramFunction(const program_function_t & func, std::ostream & out);
   void PrintProgramInstruction(const inst_t & inst, std::ostream & out);
+  void PrintResponseLocationsSingleLine(const phenotype_t & phen, std::ostream & out);
 };
 
 // ----- Utilities -----
@@ -396,16 +448,16 @@ void MCRegWorld::DoSelection() {
 void MCRegWorld::DoUpdate() {
   // Log current update, best fitness found this generation
   const double max_fit = CalcFitnessID(max_fit_org_id);
-  found_solution = GetOrg(max_fit_org_id).GetPhenotype().GetScore() >= MAX_RESPONSE_SCORE;
+  // found_solution = GetOrg(max_fit_org_id).GetPhenotype().GetScore() >= MAX_RESPONSE_SCORE;
   std::cout << "update: " << GetUpdate() << "; ";
-  std::cout << "best score (" << max_fit_org_id << "): " << max_fit << "; ";
-  std::cout << "solution found: " << found_solution << std::endl;
+  std::cout << "best score (" << max_fit_org_id << "): " << max_fit << std::endl;;
+  // std::cout << "solution found: " << found_solution << std::endl;
   const size_t cur_update = GetUpdate();
   if (SUMMARY_RESOLUTION) {
-    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) max_fit_file->Update();
+    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS /* || (STOP_ON_SOLUTION & found_solution)*/ ) max_fit_file->Update();
   }
   if (SNAPSHOT_RESOLUTION) {
-    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) {
+    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS /* || (STOP_ON_SOLUTION & found_solution)*/) {
       DoPopulationSnapshot();
       if (cur_update) systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
     }
@@ -429,7 +481,7 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   // default group
   GENERATIONS = config.GENERATIONS();
   POP_SIZE = config.POP_SIZE();
-  STOP_ON_SOLUTION = config.STOP_ON_SOLUTION();
+  // STOP_ON_SOLUTION = config.STOP_ON_SOLUTION();
   // environment group
   NUM_RESPONSE_TYPES = config.NUM_RESPONSE_TYPES();
   CUSTOM_MAX_RESPONSE_CNT = config.CUSTOM_MAX_RESPONSE_CNT();
@@ -800,11 +852,11 @@ void MCRegWorld::InitDataCollection() {
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetFitness());
   }, "fitness", "Taxon fitness");
-  systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
-    const phenotype_t & phen = taxon.GetData().GetPhenotype();
-    const bool is_sol = phen.GetScore() >= MAX_RESPONSE_SCORE;
-    return (is_sol) ? "1" : "0";
-  }, "is_solution", "Is this a solution?");
+  // systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
+  //   const phenotype_t & phen = taxon.GetData().GetPhenotype();
+  //   const bool is_sol = phen.GetScore() >= MAX_RESPONSE_SCORE;
+  //   return (is_sol) ? "1" : "0";
+  // }, "is_solution", "Is this a solution?");
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetPhenotype().GetScore());
   }, "score", "What score did the most recent member of this taxon achieve?");
@@ -824,6 +876,24 @@ void MCRegWorld::InitDataCollection() {
     stream << "]\"";
     return stream.str();
   }, "responses");
+  systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < taxon.GetData().GetPhenotype().clumpyness_ratings.size(); ++i) {
+      if (i) stream << ",";
+      stream << taxon.GetData().GetPhenotype().clumpyness_ratings[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "clumpy_ratings");
+  systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
+    std::ostringstream stream;
+    const phenotype_t & phen = taxon.GetData().GetPhenotype();
+    stream << "\"";
+    this->PrintResponseLocationsSingleLine(phen, stream);
+    stream << "\"";
+    return stream.str();
+  }, "response_locs");
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetPhenotype().GetActiveCellCnt());
   }, "active_cell_cnt", "How many active cells in deme after development?");
@@ -910,11 +980,11 @@ void MCRegWorld::InitDataCollection() {
   max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
   max_fit_file->AddFun(get_update, "update");
   max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_id; }, "pop_id");
-  max_fit_file->template AddFun<bool>([this]() {
-    const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
-    const bool is_sol = phen.GetScore() >= MAX_RESPONSE_SCORE;
-    return is_sol;
-  }, "solution");
+  // max_fit_file->template AddFun<bool>([this]() {
+  //   const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
+  //   const bool is_sol = phen.GetScore() >= MAX_RESPONSE_SCORE;
+  //   return is_sol;
+  // }, "solution");
   max_fit_file->template AddFun<double>([this]() {
     return this->GetOrg(max_fit_org_id).GetPhenotype().GetScore();
   }, "score");
@@ -934,6 +1004,24 @@ void MCRegWorld::InitDataCollection() {
     stream << "]\"";
     return stream.str();
   }, "responses");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < this->GetOrg(max_fit_org_id).GetPhenotype().clumpyness_ratings.size(); ++i) {
+      if (i) stream << ",";
+      stream << this->GetOrg(max_fit_org_id).GetPhenotype().clumpyness_ratings[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "clumpy_ratings");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
+    stream << "\"";
+    this->PrintResponseLocationsSingleLine(phen, stream);
+    stream << "\"";
+    return stream.str();
+  }, "response_locs");
   max_fit_file->template AddFun<size_t>([this]() {
     return this->GetOrg(max_fit_org_id).GetPhenotype().GetActiveCellCnt();
   }, "active_cell_cnt");
@@ -961,10 +1049,10 @@ void MCRegWorld::DoPopulationSnapshot() {
   snapshot_file.AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
   snapshot_file.AddFun<size_t>([this, &cur_org_id]() { return cur_org_id; }, "pop_id");
   // max_fit_file->AddFun(, "genotype_id");
-  snapshot_file.AddFun<bool>([this, &cur_org_id]() {
-    org_t & org = this->GetOrg(cur_org_id);
-    return org.GetPhenotype().GetScore() >= MAX_RESPONSE_SCORE;
-  }, "solution");
+  // snapshot_file.AddFun<bool>([this, &cur_org_id]() {
+  //   org_t & org = this->GetOrg(cur_org_id);
+  //   return org.GetPhenotype().GetScore() >= MAX_RESPONSE_SCORE;
+  // }, "solution");
   snapshot_file.template AddFun<double>([this, &cur_org_id]() {
     return this->GetOrg(cur_org_id).GetPhenotype().GetScore();
   }, "score");
@@ -984,6 +1072,24 @@ void MCRegWorld::DoPopulationSnapshot() {
     stream << "]\"";
     return stream.str();
   }, "responses");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < this->GetOrg(cur_org_id).GetPhenotype().clumpyness_ratings.size(); ++i) {
+      if (i) stream << ",";
+      stream << this->GetOrg(cur_org_id).GetPhenotype().clumpyness_ratings[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "clumpy_ratings");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    const phenotype_t & phen = this->GetOrg(cur_org_id).GetPhenotype();
+    stream << "\"";
+    this->PrintResponseLocationsSingleLine(phen, stream);
+    stream << "\"";
+    return stream.str();
+  }, "response_locs");
   snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
     return this->GetOrg(cur_org_id).GetPhenotype().GetActiveCellCnt();
   }, "active_cell_cnt");
@@ -1112,9 +1218,9 @@ void MCRegWorld::Setup(const MCRegConfig & config) {
   });
   const size_t num_cells = (DEME_WIDTH * DEME_HEIGHT);
   emp_assert(NUM_RESPONSE_TYPES > 0);
-  MAX_SINGLE_RESPONSE_CREDIT = (CUSTOM_MAX_RESPONSE_CNT) ? (int)MAX_RESPONSE_CNT : (int)(num_cells / NUM_RESPONSE_TYPES);
-  MAX_RESPONSE_SCORE = num_cells + (MAX_SINGLE_RESPONSE_CREDIT * NUM_RESPONSE_TYPES);
-  std::cout << "Maximum possible score in this environment = " << MAX_RESPONSE_SCORE << std::endl;
+  MAX_SINGLE_RESPONSE_CREDIT = (CUSTOM_MAX_RESPONSE_CNT) ? MAX_RESPONSE_CNT : (num_cells / NUM_RESPONSE_TYPES);
+  // MAX_RESPONSE_SCORE = num_cells + (MAX_SINGLE_RESPONSE_CREDIT * NUM_RESPONSE_TYPES);
+  // std::cout << "Maximum possible score in this environment = " << MAX_RESPONSE_SCORE << std::endl;
   // Initialize data collection
   InitDataCollection();
   DoWorldConfigSnapshot(config);
@@ -1125,7 +1231,7 @@ void MCRegWorld::Setup(const MCRegConfig & config) {
 void MCRegWorld::Run() {
   for (size_t u = 0; u <= GENERATIONS; ++u) {
     RunStep();
-    if (STOP_ON_SOLUTION & found_solution) break;
+    // if (STOP_ON_SOLUTION & found_solution) break;
   }
 }
 
@@ -1134,6 +1240,20 @@ void MCRegWorld::RunStep() {
   DoEvaluation();
   DoSelection();
   DoUpdate();
+}
+
+void MCRegWorld::PrintResponseLocationsSingleLine(const phenotype_t & phen, std::ostream & stream) {
+  stream << "[";
+  for (size_t i = 0; i < phen.response_locs.size(); ++i) {
+    if (i) stream << ";";
+    stream << "[";
+    for (size_t l = 0; l < phen.response_locs[i].size(); ++l) {
+      if (l) stream << ",";
+      stream << "(" << phen.response_locs[i][l].first << "," << phen.response_locs[i][l].second << ")";
+    }
+    stream << "]";
+  }
+  stream << "]";
 }
 
 void MCRegWorld::PrintProgramSingleLine(const program_t & prog, std::ostream & out) {

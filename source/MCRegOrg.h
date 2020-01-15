@@ -48,8 +48,8 @@ public:
     size_t num_resp=0;
     size_t num_active_cells=0;
     emp::vector<size_t> response_cnts;                ///< Response counts by type.
-    emp::vector< emp::vector<loc_t> > response_locs;    ///< Response locations by type
-    // todo - add development pattern!
+    emp::vector< emp::vector<loc_t> > response_locs;  ///< Response locations by type
+    emp::vector<double> clumpyness_ratings;           ///< By type. Higher is clumpy-er.
 
     void Reset(size_t response_types_cnt=1) {
       score=0.0;
@@ -58,9 +58,11 @@ public:
       num_active_cells=0;
       response_cnts.resize(response_types_cnt);
       response_locs.resize(response_types_cnt);
+      clumpyness_ratings.resize(response_types_cnt);
       for (size_t i = 0; i < response_cnts.size(); ++i) {
         response_locs[i].clear();
         response_cnts[i] = 0;
+        clumpyness_ratings[i] = 0.0;
       }
     }
 
@@ -70,13 +72,15 @@ public:
                       num_resp,
                       num_active_cells,
                       response_cnts,
-                      response_locs) ==
+                      response_locs,
+                      clumpyness_ratings) ==
              std::tie(o.score,
                       o.num_unique_resp,
                       o.num_resp,
                       o.num_active_cells,
                       o.response_cnts,
-                      o.response_locs);
+                      o.response_locs,
+                      o.clumpyness_ratings);
     }
 
     bool operator!=(const MCRegPhenotype & o) const {
@@ -89,13 +93,15 @@ public:
                       num_resp,
                       num_active_cells,
                       response_cnts,
-                      response_locs) <
+                      response_locs,
+                      clumpyness_ratings) <
              std::tie(o.score,
                       o.num_unique_resp,
                       o.num_resp,
                       o.num_active_cells,
                       o.response_cnts,
-                      o.response_locs);
+                      o.response_locs,
+                      o.clumpyness_ratings);
     }
 
     double GetScore() const { return score; }
