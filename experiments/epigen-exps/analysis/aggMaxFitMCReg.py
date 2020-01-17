@@ -130,6 +130,8 @@ def main():
         # - do some special processing on program entry
         orgs[best_org_id][header_lu["program"]] = f"\"{orgs[best_org_id][header_lu['program']]}\""
         orgs[best_org_id][header_lu["responses"]] = f"\"{orgs[best_org_id][header_lu['responses']]}\""
+        orgs[best_org_id][header_lu["clumpy_ratings"]] = f"\"{orgs[best_org_id][header_lu['clumpy_ratings']]}\""
+        orgs[best_org_id][header_lu["response_locs"]] = f"\"{orgs[best_org_id][header_lu['response_locs']]}\""
         deme_size = int(run_settings["DEME_HEIGHT"]) * int(run_settings["DEME_WIDTH"])
         max_fits.append([run_settings[key] for key in key_settings] + [str(deme_size)] + orgs[best_org_id])
     # Output header + max_fit orgs
