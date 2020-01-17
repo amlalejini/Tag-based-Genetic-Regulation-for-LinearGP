@@ -100,12 +100,14 @@ def main():
             print(f"Where 'dem fit organisms at? ({max_fit_path})")
             exit(-1)
         # Use final evolved organism
-        best_org_id = -1
-        # best_org_id = 0
-        # for i in range(len(orgs)):
+        # best_org_id = -1
+        best_org_id = 0
+        for i in range(len(orgs)):
             # if float(orgs[i][header_lu["score"]]) > float(orgs[best_org_id][header_lu["score"]]):
-            # if int(orgs[i][header_lu["update"]]) == 400:
+            best_org_id = i
+            if int(orgs[i][header_lu["update"]]) == 500:
                 # best_org_id = i
+                break
         # Guarantee header uniqueness
         header_set.add(",".join([key for key in key_settings] + ["DEME_SIZE"] + header))
         if len(header_set) > 1:
