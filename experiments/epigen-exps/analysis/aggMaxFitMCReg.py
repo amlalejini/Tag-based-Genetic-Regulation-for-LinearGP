@@ -128,12 +128,12 @@ def main():
             exit(-1)
         # Build organism line.
         # - do some special processing on program entry
+        clumpy_score = sum( map( float, orgs[best_org_id][header_lu['clumpy_ratings']].strip("[]").split(",") ) )
         orgs[best_org_id][header_lu["program"]] = f"\"{orgs[best_org_id][header_lu['program']]}\""
         orgs[best_org_id][header_lu["responses"]] = f"\"{orgs[best_org_id][header_lu['responses']]}\""
         orgs[best_org_id][header_lu["clumpy_ratings"]] = f"\"{orgs[best_org_id][header_lu['clumpy_ratings']]}\""
         orgs[best_org_id][header_lu["response_locs"]] = f"\"{orgs[best_org_id][header_lu['response_locs']]}\""
         deme_size = int(run_settings["DEME_HEIGHT"]) * int(run_settings["DEME_WIDTH"])
-        clumpy_score = sum(map(float, orgs[best_org_id][header_lu['clumpy_ratings']]))
         max_fits.append([run_settings[key] for key in key_settings] + [str(deme_size), str(clumpy_score)] + orgs[best_org_id])
     # Output header + max_fit orgs
     out_content = list(header_set)[0] + "\n" # Should be guaranteed to be length 1!
