@@ -122,7 +122,7 @@ def main():
                 if int(orgs[i][header_lu["update"]]) >= pull_update:
                     break
         # Guarantee header uniqueness
-        header_set.add(",".join([key for key in key_settings] + ["DEME_SIZE"] + header))
+        header_set.add(",".join([key for key in key_settings] + ["DEME_SIZE", "CLUMPY_SCORE"] + header))
         if len(header_set) > 1:
             print(f"Header mismatch! ({max_fit_path})")
             exit(-1)
@@ -133,7 +133,8 @@ def main():
         orgs[best_org_id][header_lu["clumpy_ratings"]] = f"\"{orgs[best_org_id][header_lu['clumpy_ratings']]}\""
         orgs[best_org_id][header_lu["response_locs"]] = f"\"{orgs[best_org_id][header_lu['response_locs']]}\""
         deme_size = int(run_settings["DEME_HEIGHT"]) * int(run_settings["DEME_WIDTH"])
-        max_fits.append([run_settings[key] for key in key_settings] + [str(deme_size)] + orgs[best_org_id])
+        clumpy_score = sum(map(float, orgs[best_org_id][header_lu['clumpy_ratings']]))
+        max_fits.append([run_settings[key] for key in key_settings] + [str(deme_size), str(clumpy_score)] + orgs[best_org_id])
     # Output header + max_fit orgs
     out_content = list(header_set)[0] + "\n" # Should be guaranteed to be length 1!
     out_content += "\n".join([",".join(line) for line in max_fits])
