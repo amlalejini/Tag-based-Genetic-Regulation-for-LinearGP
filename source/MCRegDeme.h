@@ -95,7 +95,7 @@ protected:
   emp::vector<size_t> cell_schedule;   ///< Order to execute cells
 
   emp::Signal<void(hardware_t &)> on_propagule_activate_sig;              ///< Triggered when a cell is activated as a propagule
-  emp::Signal<void(hardware_t & /*offspring hw*/, hardware_t & /*parent hw*/)> on_repro_activate_sig;     ///< Triggered when a cell is activated after reproduction event
+  emp::Signal<void(hardware_t & /*offspring hw*/, hardware_t & /*parent hw*/, bool /* imprint? */)> on_repro_activate_sig;     ///< Triggered when a cell is activated after reproduction event
 
   /// Build neighbor lookup (according to current width and height)
   void BuildNeighborLookup();
@@ -187,6 +187,11 @@ public:
   /// Get const cell at position ID (outsource bounds checking to emp::vector)
   const hardware_t & GetCell(size_t id) const { return cells[id]; }
 
+  /// Get cell response
+  int GetCellResponse(size_t id) const {
+    return cells[id].GetCustomComponent().GetResponse();
+  }
+
   emp::vector<hardware_t> & GetCells() { return cells; }
 
   /// Is a cell at a particular location active?
@@ -221,7 +226,7 @@ public:
   }
 
   /// Do reproduction from offspring cell id ==> parent cell id
-  void DoReproduction(size_t offspring_cell_id, size_t parent_cell_id) {
+  void DoReproduction(size_t offspring_cell_id, size_t parent_cell_id, bool imprint_regulators=false) {
     emp_assert(IsActive(parent_cell_id));
     // Activate offspring cell with program of parent cell.
     ActivateCell(offspring_cell_id, cells[parent_cell_id].GetProgram());
@@ -230,14 +235,14 @@ public:
     // Assert that offspring is indeed active now
     emp_assert(IsActive(offspring_cell_id));
     // Trigger on repro signal
-    on_repro_activate_sig.Trigger(cells[offspring_cell_id], cells[parent_cell_id]);
+    on_repro_activate_sig.Trigger(cells[offspring_cell_id], cells[parent_cell_id], imprint_regulators);
   }
 
   void OnPropaguleActivate(const std::function<void(hardware_t &)> & fun) {
     on_propagule_activate_sig.AddAction(fun);
   }
 
-  void OnReproActivate(const std::function<void(hardware_t & /*offspring hw*/, hardware_t & /*parent hw*/)> & fun) {
+  void OnReproActivate(const std::function<void(hardware_t & /*offspring hw*/, hardware_t & /*parent hw*/, bool /*imprint?*/)> & fun) {
     on_repro_activate_sig.AddAction(fun);
   }
 

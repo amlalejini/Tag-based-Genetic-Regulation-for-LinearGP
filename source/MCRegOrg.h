@@ -50,12 +50,14 @@ public:
     emp::vector<size_t> response_cnts;                ///< Response counts by type.
     emp::vector< emp::vector<loc_t> > response_locs;  ///< Response locations by type
     emp::vector<double> clumpyness_ratings;           ///< By type. Higher is clumpy-er.
+    emp::vector< loc_t > active_cells;
 
     void Reset(size_t response_types_cnt=1) {
       score=0.0;
       num_unique_resp=0;
       num_resp=0;
       num_active_cells=0;
+      active_cells.clear();
       response_cnts.resize(response_types_cnt);
       response_locs.resize(response_types_cnt);
       clumpyness_ratings.resize(response_types_cnt);

@@ -166,6 +166,8 @@ public:
   using systematics_t = emp::Systematics<org_t, typename org_t::genome_t, mut_landscape_t>;
   using taxon_t = typename systematics_t::taxon_t;
 
+  enum class SCORE_MODE {SIMPLE, NEIGHBORS, DISTANCES};
+
   /// State of the environment during an evaluation
   enum class ENV_STATE { DEVELOPMENT, RESPONSE };
   struct Environment {
@@ -190,8 +192,6 @@ protected:
   // bool STOP_ON_SOLUTION;
   // Environment group
   size_t NUM_RESPONSE_TYPES;
-  bool CUSTOM_MAX_RESPONSE_CNT;
-  size_t MAX_RESPONSE_CNT;
   size_t DEVELOPMENT_PHASE_CPU_TIME;
   size_t RESPONSE_PHASE_CPU_TIME;
   // Program group
@@ -210,7 +210,9 @@ protected:
   bool USE_RANDOM_CELL_SCHEDULING;
   // Selection group
   size_t TOURNAMENT_SIZE;
-  bool SCORE_RESPONSE_TYPE_SPREAD;
+  SCORE_MODE SCORE_RESPONSE_MODE;
+  bool CUSTOM_MAX_RESPONSE_CNT;   /// Only relevant for simple and distances fitness functions
+  size_t MAX_RESPONSE_CNT;        /// same as above
   // Mutation group
   double MUT_RATE__INST_ARG_SUB;
   double MUT_RATE__INST_TAG_BF;
@@ -276,7 +278,15 @@ protected:
 
   /// Centralized place for calculating organism score given filled out phenotype.
   double ScoreOrgPhenotype(org_t & org) {
-    return (SCORE_RESPONSE_TYPE_SPREAD) ? ScoreOrgPhenotype_ClumpyClump(org) : ScoreOrgPhenotype_Simple(org);
+    if (SCORE_RESPONSE_MODE == SCORE_MODE::SIMPLE) {
+      return ScoreOrgPhenotype_Simple(org);
+    } else if (SCORE_RESPONSE_MODE == SCORE_MODE::NEIGHBORS) {
+      return ScoreOrgPhenotype_NeighborMultiplier(org);
+    } else if (SCORE_RESPONSE_MODE == SCORE_MODE::DISTANCES) {
+      return ScoreOrgPhenotype_ClumpyClump(org);
+    } else {
+      return 0.0;
+    }
   }
 
   double ScoreOrgPhenotype_Simple(org_t & org) {
@@ -289,6 +299,7 @@ protected:
     return score + org.GetPhenotype().num_active_cells;
   }
 
+  /// Uses pairwise distance among like-cells to adjust score (in favor of clumpier cell-types)
   double ScoreOrgPhenotype_ClumpyClump(org_t & org) {
     // std::cout << "Clumpy!" << std::endl;
     using loc_t = std::pair<size_t, size_t>;
@@ -333,6 +344,35 @@ protected:
       score += std::min(MAX_SINGLE_RESPONSE_CREDIT, num_cells) * (modifier + 1);
     }
     return score + num_active;
+  }
+
+  /// use number of neighbors
+  /// Each cell's contribution is score *= [(sum_for_each_cell: [1 (for that cell) + num like neighbors]) + 1 (no matter what)] for each response type
+  /// GROSSNESS NOTE: this assumes eval deme is in state right after evaluation for this org...
+  ///   => this is what happens when you add functionality post-hoc...
+  double ScoreOrgPhenotype_NeighborMultiplier(org_t & org) {
+    double score = 1.0;
+    phenotype_t & phen = org.GetPhenotype();
+    for (size_t resp_id = 0; resp_id < NUM_RESPONSE_TYPES; ++resp_id) {
+      double multiplier = 1.0;
+      for (const auto & loc : phen.response_locs[resp_id]) {
+        const size_t cell_id = eval_deme->GetCellID(loc.first, loc.second);
+        emp_assert(eval_deme->IsActive(cell_id));
+        emp_assert(eval_deme->GetCellResponse(cell_id) == (int)resp_id);
+        // for each neighbor, count same-types
+        size_t like_neighbor_cnt = 1; // Count yourself as a 'neighbor'
+        for (size_t dir = 0; dir < deme_t::NUM_DIRECTIONS; ++dir) {
+          const size_t neighbor_id = eval_deme->GetNeighboringCellID(cell_id, deme_t::Dir[dir]);
+          if (eval_deme->IsActive(neighbor_id) && eval_deme->GetCellResponse(neighbor_id) == (int)resp_id) {
+            like_neighbor_cnt += 1;
+          }
+        }
+        multiplier += like_neighbor_cnt;
+      }
+      phen.clumpyness_ratings[resp_id] = multiplier - 1;
+      score *= multiplier;
+    }
+    return score;
   }
 
 public:
@@ -504,7 +544,17 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   USE_RANDOM_CELL_SCHEDULING = config.USE_RANDOM_CELL_SCHEDULING();
   // selection group
   TOURNAMENT_SIZE = config.TOURNAMENT_SIZE();
-  SCORE_RESPONSE_TYPE_SPREAD = config.SCORE_RESPONSE_TYPE_SPREAD();
+  // SCORE_RESPONSE_TYPE_SPREAD = config.SCORE_RESPONSE_TYPE_SPREAD();
+  if (config.SCORE_RESPONSE_MODE() == "simple") {
+    SCORE_RESPONSE_MODE = SCORE_MODE::SIMPLE;
+  } else if (config.SCORE_RESPONSE_MODE() == "neighbors") {
+    SCORE_RESPONSE_MODE = SCORE_MODE::NEIGHBORS;
+  } else if (config.SCORE_RESPONSE_MODE() == "distances") {
+    SCORE_RESPONSE_MODE = SCORE_MODE::DISTANCES;
+  } else {
+    std::cout << "Unknown SCORE_RESPONSE_MODE (" << config.SCORE_RESPONSE_MODE() << ")" <<std::endl;
+    exit(-1);
+  }
   // mutation group
   MUT_RATE__INST_ARG_SUB = config.MUT_RATE__INST_ARG_SUB();
   MUT_RATE__INST_TAG_BF = config.MUT_RATE__INST_TAG_BF();
@@ -599,10 +649,26 @@ void MCRegWorld::InitInstLib() {
     // If cell in front of us is active, bail out.
     if (eval_deme->IsActive(facing_id)) return;
     // If we're here, this cell is facing an empty cell && we're in the development phase.
-    eval_deme->DoReproduction(facing_id, cell_id);
+    eval_deme->DoReproduction(facing_id, cell_id, EPIGENETIC_INHERITANCE);
     // If we're here, cells[facing_id] is 'new born', queue repro event!
     eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, inst.GetTag(0)));
   }, "Executing this instruction triggers reproduction.");
+
+  // inst_lib->AddInst("Reproduce", [this](hardware_t & hw, const inst_t & inst) {
+  //   // Reproduction is only allowed in development phase
+  //   if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
+  //   // Get cell_id, facing
+  //   const size_t cell_id = hw.GetCustomComponent().GetCellID();
+  //   const auto cell_facing = hw.GetCustomComponent().GetFacing();
+  //   const size_t facing_id = eval_deme->GetNeighboringCellID(cell_id, cell_facing);
+  //   // If cell in front of us is active, bail out.
+  //   if (eval_deme->IsActive(facing_id)) return;
+  //   // If we're here, this cell is facing an empty cell && we're in the development phase.
+  //   eval_deme->DoReproduction(facing_id, cell_id, false);
+  //   // If we're here, cells[facing_id] is 'new born', queue repro event!
+  //   eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, inst.GetTag(0)));
+  // }, "Executing this instruction triggers reproduction.");
+
   //   - actuation (rotation)
   inst_lib->AddInst("RotateCW", [this](hardware_t & hw, const inst_t & inst) {
     hw.GetCustomComponent().RotateCW();
@@ -723,13 +789,13 @@ void MCRegWorld::InitHardware() {
       hw.GetCustomComponent().SetFacing(deme_t::Facing::N);
     });
     // Configure on reproduction event
-    eval_deme->OnReproActivate([this](hardware_t & offspring_hw, hardware_t & parent_hw) {
+    eval_deme->OnReproActivate([this](hardware_t & offspring_hw, hardware_t & parent_hw, bool imprint_regulators) {
       // Face parent
       const auto parent_facing = parent_hw.GetCustomComponent().GetFacing();
       const auto face_parent = deme_t::Dir[(parent_facing + (deme_t::NUM_DIRECTIONS / 2)) % deme_t::NUM_DIRECTIONS];
       offspring_hw.GetCustomComponent().SetFacing(face_parent);
       // Inherit regulation from parent
-      if (EPIGENETIC_INHERITANCE) {
+      if (imprint_regulators) {
         offspring_hw.GetMatchBin().ImprintRegulators(parent_hw.GetMatchBin());
         // TODO - check epigenetic inheritance!
       }
