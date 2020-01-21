@@ -29,7 +29,10 @@ key_settings = [
     "EPIGENETIC_INHERITANCE",
     "MAX_ACTIVE_THREAD_CNT",
     "USE_RANDOM_CELL_SCHEDULING",
-    "SCORE_RESPONSE_TYPE_SPREAD"
+    "FIXED_REPRO_TAG",
+    "ALLOW_MESSAGING",
+    "SCORE_RESPONSE_MODE"
+    # "SCORE_RESPONSE_TYPE_SPREAD"
 ]
 
 possible_metrics = ["hamming", "streak", "symmetric wrap", "hash"]
