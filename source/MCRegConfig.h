@@ -31,11 +31,12 @@ EMP_BUILD_CONFIG(MCRegConfig,
     VALUE(MAX_THREAD_CAPACITY, size_t, 64, "Maximum capacity for thread memory (pending + active)."),
     VALUE(EPIGENETIC_INHERITANCE, bool, false, "Do cells pass on matchbin regulation to (within-multi-cell) offspring?"),
     VALUE(USE_RANDOM_CELL_SCHEDULING, bool, true, "Are cells in a deme executed in random order?"),
+    VALUE(FIXED_REPRO_TAG, bool, false, "Should repro tag be pulled from instruction or be fixed?"),
+    VALUE(ALLOW_MESSAGING, bool, true, "Should organisms be allowed to send/receive messages?"),
 
   GROUP(SELECTION_GROUP, "Selection settings"),
     VALUE(TOURNAMENT_SIZE, size_t, 7, "How big are tournaments when doing tournament selection?"),
     VALUE(SCORE_RESPONSE_MODE, std::string, "simple", "Options: [simple, neighbors, distances]"),
-    // VALUE(SCORE_RESPONSE_TYPE_SPREAD, bool, false, "Should we take into account the spread of each response type while scoring?"),
     VALUE(CUSTOM_MAX_RESPONSE_CNT, bool, false, "Should we evenly divide max response score or use the parameter 'MAX_RESPONSE_CNT' as max response count that gets scored?"),
     VALUE(MAX_RESPONSE_CNT, size_t, 4, "What is the maximum score that can be awarded for "),
 

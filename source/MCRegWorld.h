@@ -208,6 +208,8 @@ protected:
   size_t MAX_THREAD_CAPACITY;
   bool EPIGENETIC_INHERITANCE;
   bool USE_RANDOM_CELL_SCHEDULING;
+  bool FIXED_REPRO_TAG;
+  bool ALLOW_MESSAGING;
   // Selection group
   size_t TOURNAMENT_SIZE;
   SCORE_MODE SCORE_RESPONSE_MODE;
@@ -449,6 +451,9 @@ void MCRegWorld::EvaluateOrg(org_t & org) {
   for (hardware_t & cell_hw : eval_deme->GetCells()) {
     // If cell is inactive, continue.
     if (!cell_hw.GetCustomComponent().IsActive()) continue;
+    const size_t cell_x = eval_deme->GetCellX(cell_hw.GetCustomComponent().GetCellID());
+    const size_t cell_y = eval_deme->GetCellY(cell_hw.GetCustomComponent().GetCellID());
+    org.GetPhenotype().active_cells.emplace_back(cell_x, cell_y);
     org.GetPhenotype().num_active_cells += 1;   // Increment phenotype's number of active cells.
     // If cell had no response, continue.
     if (cell_hw.GetCustomComponent().response < 0) {
@@ -458,8 +463,6 @@ void MCRegWorld::EvaluateOrg(org_t & org) {
     emp_assert(cell_hw.GetCustomComponent().GetResponse() >= 0
                && (size_t)cell_hw.GetCustomComponent().GetResponse() < org.GetPhenotype().GetResponsesByType().size());
     const int response = cell_hw.GetCustomComponent().GetResponse();
-    size_t cell_x = eval_deme->GetCellX(cell_hw.GetCustomComponent().GetCellID());
-    size_t cell_y = eval_deme->GetCellY(cell_hw.GetCustomComponent().GetCellID());
     org.GetPhenotype().response_cnts[(size_t)response] += 1;
     org.GetPhenotype().num_resp += 1;
     unique_responses.emplace(response);
@@ -502,17 +505,6 @@ void MCRegWorld::DoUpdate() {
       if (cur_update) systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
     }
   }
-
-  // --- For debugging => eval best org again w/prints ---
-  // std::cout << "Best Org details:" << std::endl;
-  // EvaluateOrg(this->GetOrg(max_fit_org_id));
-  // eval_deme->PrintActive();
-  // eval_deme->PrintResponses();
-  // std::cout << "score = " << this->GetOrg(max_fit_org_id).GetPhenotype().score << std::endl;
-  // std::cout << "num active = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_active_cells << std::endl;
-  // std::cout << "num unique = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_unique_resp << std::endl;
-  // std::cout << "num resp = " << this->GetOrg(max_fit_org_id).GetPhenotype().num_resp << std::endl;
-  // std::cout << "=====================" << std::endl;
   Update();
   ClearCache();
 }
@@ -542,6 +534,8 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
   EPIGENETIC_INHERITANCE = config.EPIGENETIC_INHERITANCE();
   USE_RANDOM_CELL_SCHEDULING = config.USE_RANDOM_CELL_SCHEDULING();
+  FIXED_REPRO_TAG = config.FIXED_REPRO_TAG();
+  ALLOW_MESSAGING = config.ALLOW_MESSAGING();
   // selection group
   TOURNAMENT_SIZE = config.TOURNAMENT_SIZE();
   // SCORE_RESPONSE_TYPE_SPREAD = config.SCORE_RESPONSE_TYPE_SPREAD();
@@ -639,36 +633,37 @@ void MCRegWorld::InitInstLib() {
   }
   // Add deme instructions
   //   - repro
-  inst_lib->AddInst("Reproduce", [this](hardware_t & hw, const inst_t & inst) {
-    // Reproduction is only allowed in development phase
-    if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
-    // Get cell_id, facing
-    const size_t cell_id = hw.GetCustomComponent().GetCellID();
-    const auto cell_facing = hw.GetCustomComponent().GetFacing();
-    const size_t facing_id = eval_deme->GetNeighboringCellID(cell_id, cell_facing);
-    // If cell in front of us is active, bail out.
-    if (eval_deme->IsActive(facing_id)) return;
-    // If we're here, this cell is facing an empty cell && we're in the development phase.
-    eval_deme->DoReproduction(facing_id, cell_id, EPIGENETIC_INHERITANCE);
-    // If we're here, cells[facing_id] is 'new born', queue repro event!
-    eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, inst.GetTag(0)));
-  }, "Executing this instruction triggers reproduction.");
-
-  // inst_lib->AddInst("Reproduce", [this](hardware_t & hw, const inst_t & inst) {
-  //   // Reproduction is only allowed in development phase
-  //   if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
-  //   // Get cell_id, facing
-  //   const size_t cell_id = hw.GetCustomComponent().GetCellID();
-  //   const auto cell_facing = hw.GetCustomComponent().GetFacing();
-  //   const size_t facing_id = eval_deme->GetNeighboringCellID(cell_id, cell_facing);
-  //   // If cell in front of us is active, bail out.
-  //   if (eval_deme->IsActive(facing_id)) return;
-  //   // If we're here, this cell is facing an empty cell && we're in the development phase.
-  //   eval_deme->DoReproduction(facing_id, cell_id, false);
-  //   // If we're here, cells[facing_id] is 'new born', queue repro event!
-  //   eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, inst.GetTag(0)));
-  // }, "Executing this instruction triggers reproduction.");
-
+  if (FIXED_REPRO_TAG) {
+    inst_lib->AddInst("Reproduce-FixedTag", [this](hardware_t & hw, const inst_t & inst) {
+      // Reproduction is only allowed in development phase
+      if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
+      // Get cell_id, facing
+      const size_t cell_id = hw.GetCustomComponent().GetCellID();
+      const auto cell_facing = hw.GetCustomComponent().GetFacing();
+      const size_t facing_id = eval_deme->GetNeighboringCellID(cell_id, cell_facing);
+      // If cell in front of us is active, bail out.
+      if (eval_deme->IsActive(facing_id)) return;
+      // If we're here, this cell is facing an empty cell && we're in the development phase.
+      eval_deme->DoReproduction(facing_id, cell_id, EPIGENETIC_INHERITANCE);
+      // If we're here, cells[facing_id] is 'new born', queue repro event!
+      eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, eval_environment.propagule_start_tag));
+    }, "Executing this instruction triggers reproduction.");
+  } else {
+    inst_lib->AddInst("Reproduce", [this](hardware_t & hw, const inst_t & inst) {
+      // Reproduction is only allowed in development phase
+      if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
+      // Get cell_id, facing
+      const size_t cell_id = hw.GetCustomComponent().GetCellID();
+      const auto cell_facing = hw.GetCustomComponent().GetFacing();
+      const size_t facing_id = eval_deme->GetNeighboringCellID(cell_id, cell_facing);
+      // If cell in front of us is active, bail out.
+      if (eval_deme->IsActive(facing_id)) return;
+      // If we're here, this cell is facing an empty cell && we're in the development phase.
+      eval_deme->DoReproduction(facing_id, cell_id, EPIGENETIC_INHERITANCE);
+      // If we're here, cells[facing_id] is 'new born', queue repro event!
+      eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, inst.GetTag(0)));
+    }, "Executing this instruction triggers reproduction.");
+  }
   //   - actuation (rotation)
   inst_lib->AddInst("RotateCW", [this](hardware_t & hw, const inst_t & inst) {
     hw.GetCustomComponent().RotateCW();
@@ -688,12 +683,14 @@ void MCRegWorld::InitInstLib() {
       }
     }
   }, "Rotate cell to next empty cell (if there is one).");
+
   //   - sense current dir
   inst_lib->AddInst("GetDir", [this](hardware_t & hw, const inst_t & inst) {
     if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
     auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
     call_state.GetMemory().SetWorking(inst.GetArg(0), (double)hw.GetCustomComponent().GetFacing());
   }, "WorkingMemory[arg0] = Facing Direction");
+
   //   - sense facing empty
   inst_lib->AddInst("IsNeighborEmpty", [this](hardware_t & hw, const inst_t & inst) {
     if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
@@ -703,6 +700,7 @@ void MCRegWorld::InitInstLib() {
     const size_t neighbor_id = eval_deme->GetNeighboringCellID(cell_id, cell_facing);
     call_state.GetMemory().SetWorking(inst.GetArg(0), (double)eval_deme->IsActive(neighbor_id));
   }, "WorkingMemory[arg0] = IsActive(faced neighbor)");
+
   // Add response-phase instructions
   for (size_t i = 0; i < NUM_RESPONSE_TYPES; ++i) {
     inst_lib->AddInst("Response-" + emp::to_string(i), [this, i](hardware_t & hw, const inst_t & inst) {
@@ -720,13 +718,19 @@ void MCRegWorld::InitInstLib() {
       hw.ClearEventQueue();
     }, "Set cell response if in response phase.");
   }
+
   // Add messaging instructions
-  inst_lib->AddInst("SendMsg", [this](hardware_t & hw, const inst_t & inst) {
-    if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
-    auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
-    auto & mem_state = call_state.GetMemory();
-    hw.TriggerEvent(msg_event_t(event_id__send_msg, inst.GetTag(0), mem_state.GetOutputMemory()));
-  });
+  if (ALLOW_MESSAGING) {
+    inst_lib->AddInst("SendMsg", [this](hardware_t & hw, const inst_t & inst) {
+      if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
+      auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
+      auto & mem_state = call_state.GetMemory();
+      hw.TriggerEvent(msg_event_t(event_id__send_msg, inst.GetTag(0), mem_state.GetOutputMemory()));
+    });
+  } else {
+    inst_lib->AddInst("SendMsg-Nop", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>);
+  }
+
 }
 
 void MCRegWorld::InitEventLib() {
@@ -963,6 +967,17 @@ void MCRegWorld::InitDataCollection() {
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetPhenotype().GetActiveCellCnt());
   }, "active_cell_cnt", "How many active cells in deme after development?");
+  systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
+    std::ostringstream stream;
+    const phenotype_t & phen = taxon.GetData().GetPhenotype();
+    stream << "\"[";
+    for (size_t i = 0; i < phen.active_cells.size(); ++i) {
+      if (i) stream << ",";
+      stream << "(" << phen.active_cells[i].first << "," << phen.active_cells[i].second << ")";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "active_cell_locs");
   systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
     if (taxon.GetData().HasMutationType("inst_arg_sub")) {
       return emp::to_string(taxon.GetData().GetMutationCount("inst_arg_sub"));
@@ -1046,11 +1061,6 @@ void MCRegWorld::InitDataCollection() {
   max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
   max_fit_file->AddFun(get_update, "update");
   max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_id; }, "pop_id");
-  // max_fit_file->template AddFun<bool>([this]() {
-  //   const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
-  //   const bool is_sol = phen.GetScore() >= MAX_RESPONSE_SCORE;
-  //   return is_sol;
-  // }, "solution");
   max_fit_file->template AddFun<double>([this]() {
     return this->GetOrg(max_fit_org_id).GetPhenotype().GetScore();
   }, "score");
@@ -1091,6 +1101,17 @@ void MCRegWorld::InitDataCollection() {
   max_fit_file->template AddFun<size_t>([this]() {
     return this->GetOrg(max_fit_org_id).GetPhenotype().GetActiveCellCnt();
   }, "active_cell_cnt");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
+    stream << "\"[";
+    for (size_t i = 0; i < phen.active_cells.size(); ++i) {
+      if (i) stream << ",";
+      stream << "(" << phen.active_cells[i].first << "," << phen.active_cells[i].second << ")";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "active_cell_locs");
   max_fit_file->template AddFun<size_t>([this]() {
     return this->GetOrg(max_fit_org_id).GetGenome().GetProgram().GetSize();
   }, "num_modules");
@@ -1114,11 +1135,6 @@ void MCRegWorld::DoPopulationSnapshot() {
   // Add functions.
   snapshot_file.AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
   snapshot_file.AddFun<size_t>([this, &cur_org_id]() { return cur_org_id; }, "pop_id");
-  // max_fit_file->AddFun(, "genotype_id");
-  // snapshot_file.AddFun<bool>([this, &cur_org_id]() {
-  //   org_t & org = this->GetOrg(cur_org_id);
-  //   return org.GetPhenotype().GetScore() >= MAX_RESPONSE_SCORE;
-  // }, "solution");
   snapshot_file.template AddFun<double>([this, &cur_org_id]() {
     return this->GetOrg(cur_org_id).GetPhenotype().GetScore();
   }, "score");
@@ -1159,6 +1175,17 @@ void MCRegWorld::DoPopulationSnapshot() {
   snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
     return this->GetOrg(cur_org_id).GetPhenotype().GetActiveCellCnt();
   }, "active_cell_cnt");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    const phenotype_t & phen = this->GetOrg(cur_org_id).GetPhenotype();
+    stream << "\"[";
+    for (size_t i = 0; i < phen.active_cells.size(); ++i) {
+      if (i) stream << ",";
+      stream << "(" << phen.active_cells[i].first << "," << phen.active_cells[i].second << ")";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "active_cell_locs");
   snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
     return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetSize();
   }, "num_modules");
