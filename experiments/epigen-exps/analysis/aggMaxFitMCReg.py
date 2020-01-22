@@ -136,6 +136,7 @@ def main():
         orgs[best_org_id][header_lu["responses"]] = f"\"{orgs[best_org_id][header_lu['responses']]}\""
         orgs[best_org_id][header_lu["clumpy_ratings"]] = f"\"{orgs[best_org_id][header_lu['clumpy_ratings']]}\""
         orgs[best_org_id][header_lu["response_locs"]] = f"\"{orgs[best_org_id][header_lu['response_locs']]}\""
+        orgs[best_org_id][header_lu["active_cell_locs"]] = f"\"{orgs[best_org_id][header_lu['active_cell_locs']]}\""
         deme_size = int(run_settings["DEME_HEIGHT"]) * int(run_settings["DEME_WIDTH"])
         max_fits.append([run_settings[key] for key in key_settings] + [str(deme_size), str(clumpy_score)] + orgs[best_org_id])
     # Output header + max_fit orgs
