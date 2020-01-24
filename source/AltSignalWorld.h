@@ -82,13 +82,13 @@ namespace AltSignalWorldDefs {
   using matchbin_metric_t =
   #ifdef MATCH_METRIC
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer",
-      emp::UnifMod<emp::ExactDualStreakMetric<TAG_LEN>>,
+      emp::UnifMod<emp::SymmetricWrapMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hamming",
-      emp::UnifMod<emp::ExactDualStreakMetric<TAG_LEN>>,
+      emp::UnifMod<emp::HammingMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hash",
-      emp::UnifMod<emp::ExactDualStreakMetric<TAG_LEN>>,
+      emp::UnifMod<emp::HashMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak",
-      emp::UnifMod<emp::ExactDualStreakMetric<TAG_LEN>>,
+      emp::UnifMod<emp::StreakMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak-exact",
       emp::UnifMod<emp::ExactDualStreakMetric<TAG_LEN>>,
     std::enable_if<false>
