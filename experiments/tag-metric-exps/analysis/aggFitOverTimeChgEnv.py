@@ -12,13 +12,13 @@ key_settings = [
     "matchbin_thresh",
     "matchbin_regulator",
     "TAG_LEN",
-    "NUM_SIGNAL_RESPONSES",
-    "NUM_ENV_CYCLES",
     "USE_FUNC_REGULATION",
     "USE_GLOBAL_MEMORY",
     "MUT_RATE__INST_TAG_BF",
     "MUT_RATE__FUNC_TAG_BF",
-    "CPU_TIME_PER_ENV_CYCLE"
+    "NUM_ENV_STATES",
+    "NUM_ENV_UPDATES",
+    "CPU_CYCLES_PER_ENV_UPDATE"
 ]
 
 possible_metrics = ["hamming", "streak", "symmetric wrap", "hash"]
@@ -94,8 +94,6 @@ def main():
     # sort run directories by seed to make easier on the eyes
     run_dirs.sort(key=lambda x : int(x.split("_")[-1]))
     print(f"Found {len(run_dirs)} run directories.")
-    header_set = set() # Use this to guarantee all organism file headers match.
-
     header = ",".join([key for key in key_settings] + ["score", "update"])
     out_content = header + "\n"
     # For each run, extract fitness over time
