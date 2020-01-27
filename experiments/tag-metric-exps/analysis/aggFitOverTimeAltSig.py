@@ -57,6 +57,7 @@ def extract_runlog_FOT(fpath, max_update, resolution=1):
     content = content.split("\n")
     # For each line in the log, collect printed updata/best scores
     values = []
+    final_score = {"update":None, "score":None}
     for line in content:
         if line[:6] == "update":
             line = line.split(";")
@@ -64,13 +65,14 @@ def extract_runlog_FOT(fpath, max_update, resolution=1):
             score = float(line[1].split(":")[-1].strip())
             if update % resolution == 0:
                 values.append({"update":update, "score":score})
+            final_score["update"] = update
+            final_score["score"] = score
     # If run stopped early (e.g., solution found, smear final score to end)
     if (values[-1]["update"] < max_update):
         cur_update = values[-1]["update"]
-        final_score = values[-1]["score"]
         cur_update += resolution
         while cur_update <= max_update:
-            values.append({"update":cur_update, "score":final_score})
+            values.append({"update":cur_update, "score":final_score["score"]})
             cur_update += resolution
     return values
 
