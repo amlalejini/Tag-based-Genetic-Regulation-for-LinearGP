@@ -184,6 +184,17 @@ public:
     }
   };
 
+  /// Struct used as intermediary for printing/outputting SignalGP hardware state
+  struct HardwareStatePrintInfo {
+    std::string global_mem_str="";
+    size_t num_modules=0;
+    emp::vector<double> module_regulator_states;
+    emp::vector<size_t> module_regulator_timers;
+    // module values here
+    size_t num_active_threads=0;
+    std::string thread_state_str="";
+  };
+
 protected:
   // Default group
   size_t GENERATIONS;
@@ -242,6 +253,9 @@ protected:
   double MAX_SCORE=0.0;
   bool found_solution=false;
 
+  bool KO_REGULATION=false;
+  bool KO_GLOBAL_MEMORY=false;
+
   void InitConfigs(const config_t & config);
   void InitInstLib();
   void InitEventLib();
@@ -259,6 +273,10 @@ protected:
   void DoUpdate();
 
   void EvaluateOrg(org_t & org);
+
+  void AnalyzeOrg(const org_t & org, size_t org_id=0);
+  void TraceOrganism(const org_t & org, size_t org_id=0);
+  HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
 
   // -- Utilities --
   void DoPopulationSnapshot();
@@ -867,6 +885,253 @@ void ChgEnvWorld::EvaluateOrg(org_t & org) {
   org.GetPhenotype().score = trial_phenotypes[min_trial_id].score;
 }
 
+/// Analyze organism
+void ChgEnvWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
+  ////////////////////////////////////////////////
+  // (1) Does this organism's genotype perform equivalently across independent evaluations?
+  // Make a new test organism from input org.
+  emp::vector<org_t> test_orgs;
+  for (size_t i = 0; i < 3; ++i) {
+    test_orgs.emplace_back(org);
+  }
+  // Evaluate each test org.
+  for (org_t & test_org : test_orgs) {
+    EvaluateOrg(test_org);
+  }
+  // Did this organism's phenotype change across runs?
+  bool consistent_performance = true;
+  for (size_t i = 0; i < test_orgs.size(); ++i) {
+    for (size_t j = i; j < test_orgs.size(); ++j) {
+      if (test_orgs[i].GetPhenotype() != test_orgs[j].GetPhenotype()) {
+        consistent_performance = false;
+        break;
+      }
+    }
+    if (!consistent_performance) break;
+  }
+  ////////////////////////////////////////////////
+  // (2) Run a full trace of this organism.
+  TraceOrganism(org, org_id);
+  ////////////////////////////////////////////////
+  // (3) Run with knockouts
+  //     - ko memory
+  // KO_GLOBAL_MEMORY = true;
+  // KO_REGULATION = false;
+  // org_t ko_mem_org(org);
+  // EvaluateOrg(ko_mem_org);
+  // //     - ko regulation
+  // KO_GLOBAL_MEMORY = false;
+  // KO_REGULATION = true;
+  // org_t ko_reg_org(org);
+  // EvaluateOrg(ko_reg_org);
+  // // todo - evaluate organism
+  // //     - ko memory & ko regulation
+  // KO_GLOBAL_MEMORY = true;
+  // KO_REGULATION = true;
+  // org_t ko_all_org(org);
+  // EvaluateOrg(ko_all_org);
+  // // todo - evaluate organism
+  // // Reset KO variables to both be false
+  // KO_GLOBAL_MEMORY = false;
+  // KO_REGULATION = false;
+  // ////////////////////////////////////////////////
+  // // (4) Setup and write to analysis output file
+  // // note: I'll arbitrarily use test_org 0 as canonical version
+  // emp::DataFile analysis_file(OUTPUT_DIR + "/analysis_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
+  // analysis_file.template AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
+  // analysis_file.template AddFun<size_t>([&org_id]() { return org_id; }, "pop_id");
+  // analysis_file.template AddFun<bool>([&test_orgs, this]() {
+  //   emp_assert(test_orgs.size());
+  //   org_t & org = test_orgs[0];
+  //   return org.GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;
+  // }, "solution");
+  // analysis_file.template AddFun<double>([&test_orgs]() {
+  //   emp_assert(test_orgs.size());
+  //   org_t & org = test_orgs[0];
+  //   return org.GetPhenotype().GetResources();
+  // }, "score");
+  // analysis_file.template AddFun<bool>([&consistent_performance]() {
+  //   return consistent_performance;
+  // }, "consistent");
+  // analysis_file.template AddFun<double>([&ko_reg_org]() {
+  //   return ko_reg_org.GetPhenotype().GetResources();
+  // }, "score_ko_regulation");
+  // analysis_file.template AddFun<double>([&ko_mem_org]() {
+  //   return ko_mem_org.GetPhenotype().GetResources();
+  // }, "score_ko_global_memory");
+  // analysis_file.template AddFun<double>([&ko_all_org]() {
+  //   return ko_all_org.GetPhenotype().GetResources();
+  // }, "score_ko_all");
+  // analysis_file.template AddFun<size_t>([this, &org_id]() {
+  //   return this->GetOrg(org_id).GetGenome().GetProgram().GetSize();
+  // }, "num_modules");
+  // analysis_file.template AddFun<size_t>([this, &org_id]() {
+  //   return this->GetOrg(org_id).GetGenome().GetProgram().GetInstCount();
+  // }, "num_instructions");
+  // analysis_file.template AddFun<std::string>([this, &org_id]() {
+  //   std::ostringstream stream;
+  //   stream << "\"";
+  //   this->PrintProgramSingleLine(this->GetOrg(org_id).GetGenome().GetProgram(), stream);
+  //   stream << "\"";
+  //   return stream.str();
+  // }, "program");
+  // analysis_file.PrintHeaderKeys();
+  // analysis_file.Update();
+}
+
+/// Perform step-by-step execution trace on an organism, output
+void ChgEnvWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
+  org_t trace_org(org); // Make a copy of the the given organism so we don't mess with any of the original's
+                        // data.
+  // Data file to store trace information.
+  emp::DataFile trace_file(OUTPUT_DIR + "/trace_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
+  // Add functions to trace file.
+  HardwareStatePrintInfo hw_state_info;
+  size_t env_update=0;
+  size_t cpu_step=0;
+  // ----- Timing information -----
+  trace_file.template AddFun<size_t>([&env_update]() {
+    return env_update;
+  }, "env_update");
+  trace_file.template AddFun<size_t>([&cpu_step]() {
+    return cpu_step;
+  }, "cpu_step");
+  // ----- Environment Information -----
+  //    * num_states
+  trace_file.template AddFun<size_t>([this]() {
+    return eval_environment.num_states;
+  }, "num_env_states");
+  //    * cur_state
+  trace_file.template AddFun<size_t>([this]() {
+    return eval_environment.cur_state;
+  }, "cur_env_state");
+  //    * env_signal_tag
+  trace_file.template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    eval_environment.env_state_tags[eval_environment.cur_state].Print(stream);
+    return stream.str();
+  }, "cur_env_signal_tag");
+  // ----- Hardware Information -----
+  //    * current response
+  trace_file.template AddFun<int>([this]() {
+    return eval_hardware->GetCustomComponent().GetResponse();
+  }, "cur_response");
+  //    * correct responses
+  trace_file.template AddFun<bool>([&trace_org, this]() {
+    return eval_hardware->GetCustomComponent().response == (int)eval_environment.cur_state;
+  }, "has_correct_response");
+  //    * num_modules
+  trace_file.template AddFun<size_t>([&hw_state_info]() {
+    return hw_state_info.num_modules;
+  }, "num_modules");
+  //    * module_regulator_states
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < hw_state_info.module_regulator_states.size(); ++i) {
+      if (i) stream << ",";
+      stream << hw_state_info.module_regulator_states[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "module_regulator_states");
+  //    * which module would be triggered by the environment signal?
+  trace_file.template AddFun<int>([this]() {
+    const auto matches = eval_hardware->GetMatchBin().Match(eval_environment.env_state_tags[eval_environment.cur_state]);
+    if (matches.size()) return (int)matches[0];
+    else return -1;
+  }, "env_signal_closest_match");
+  //    * match scores against environment signal tag for each module
+  trace_file.template AddFun<std::string>([this]() {
+    const auto match_scores = eval_hardware->GetMatchBin().ComputeMatchScores(eval_environment.env_state_tags[eval_environment.cur_state]);
+    emp::vector<double> scores(eval_hardware->GetNumModules());
+    std::ostringstream stream;
+    for (const auto & pair : match_scores) {
+      const size_t module_id = pair.first;
+      const double match_score = pair.second;
+      scores[module_id] = match_score;
+    }
+    stream << "\"[";
+    for (size_t i = 0; i < scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << scores[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "env_signal_match_scores");
+  //    * module_regulator_timers
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < hw_state_info.module_regulator_timers.size(); ++i) {
+      if (i) stream << ",";
+      stream << hw_state_info.module_regulator_timers[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "module_regulator_timers");
+  //    * global_mem_str
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    return "\"" + hw_state_info.global_mem_str + "\"";
+  }, "global_mem");
+  //    * num_active_threads
+  trace_file.template AddFun<size_t>([&hw_state_info]() {
+    return hw_state_info.num_active_threads;
+  }, "num_active_threads");
+  //    * thread_state_str
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    return "\"" + hw_state_info.thread_state_str + "\"";
+  }, "thread_state_info");
+  trace_file.PrintHeaderKeys();
+
+  // ---- Do an traced-evaluation ----
+  trace_org.GetPhenotype().Reset();
+  // Ready the hardware!
+  eval_hardware->SetProgram(trace_org.GetGenome().program);
+  // Reset trial phenotype
+  phenotype_t trace_phen = trace_org.GetPhenotype();
+  trace_phen.Reset();
+  // reset the environment
+  eval_environment.ResetEnv();
+  // shuffle environment schedule for this trial
+  emp::Shuffle(*random_ptr, eval_environment.env_schedule);
+  // reset hardware matchbin between trials
+  eval_hardware->ResetMatchBin();
+  // Evaluate the organism in the environment.
+  for (env_update = 0; env_update < NUM_ENV_UPDATES; ++env_update) {
+    // Reset the hardware!
+    eval_hardware->ResetHardwareState();
+    eval_hardware->GetCustomComponent().Reset();
+    emp_assert(eval_hardware->ValidateThreadState());
+    emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
+    emp_assert(eval_hardware->GetNumQueuedEvents() == 0);
+    // Select a random environment.
+    emp_assert(env_update % NUM_ENV_STATES < eval_environment.env_schedule.size());
+    emp_assert(eval_environment.env_schedule[env_update % NUM_ENV_STATES] < eval_environment.env_state_tags.size());
+    eval_environment.cur_state = eval_environment.env_schedule[env_update % NUM_ENV_STATES]; //random_ptr->GetUInt(0, NUM_ENV_STATES);
+    eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.GetCurEnvTag()));
+    // Step the hardware! If at any point, there are not active || pending threads, we're done!
+    cpu_step = 0;
+    hw_state_info = GetHardwareStatePrintInfo(*eval_hardware);
+    trace_file.Update(); // Always output state BEFORE time step advances
+    while (cpu_step < CPU_CYCLES_PER_ENV_UPDATE) {
+      eval_hardware->SingleProcess();
+      ++cpu_step;
+      hw_state_info = GetHardwareStatePrintInfo(*eval_hardware);
+      trace_file.Update();
+      if (!( eval_hardware->GetNumActiveThreads() || eval_hardware->GetNumPendingThreads() )) break;
+    }
+    // Did the hardware match, miss, or not respond to environment signal?
+    if (eval_hardware->GetCustomComponent().HasResponse()) {
+      trace_phen.env_matches += (size_t)(eval_hardware->GetCustomComponent().GetResponse() == (int)eval_environment.cur_state);
+      trace_phen.env_misses += (size_t)(eval_hardware->GetCustomComponent().GetResponse() != (int)eval_environment.cur_state);
+    } else {
+      trace_phen.no_responses += 1;
+    }
+  }
+  trace_phen.score = (double)trace_phen.env_matches; // Score = number of times organism matched environment.
+}
+
 void ChgEnvWorld::DoEvaluation() {
   max_fit_org_id = 0;
   for (size_t org_id = 0; org_id < this->GetSize(); ++org_id) {
@@ -897,7 +1162,10 @@ void ChgEnvWorld::DoUpdate() {
   if (SNAPSHOT_RESOLUTION) {
     if ( !(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution) ) {
       DoPopulationSnapshot();
-      if (cur_update) systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+      if (cur_update || (STOP_ON_SOLUTION & found_solution)) {
+        systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+        AnalyzeOrg(GetOrg(max_fit_org_id), max_fit_org_id);
+      }
     }
   }
   Update();
@@ -947,6 +1215,98 @@ void ChgEnvWorld::PrintProgramInstruction(const inst_t & inst, std::ostream & ou
   }
   out << ")";
 }
+
+ChgEnvWorld::HardwareStatePrintInfo ChgEnvWorld::GetHardwareStatePrintInfo(hardware_t & hw) {
+  HardwareStatePrintInfo print_info;
+  // Collect global memory
+  std::ostringstream gmem_stream;
+  hw.GetMemoryModel().PrintMemoryBuffer(hw.GetMemoryModel().GetGlobalBuffer(), gmem_stream);
+  print_info.global_mem_str = gmem_stream.str();
+
+  // number of modules
+  print_info.num_modules = hw.GetNumModules();
+  // module regulator states & timers
+  print_info.module_regulator_states.resize(hw.GetNumModules());
+  print_info.module_regulator_timers.resize(hw.GetNumModules());
+  for (size_t module_id = 0; module_id < hw.GetNumModules(); ++module_id) {
+    const auto reg_state = hw.GetMatchBin().GetRegulator(module_id).state;
+    const auto reg_timer = hw.GetMatchBin().GetRegulator(module_id).timer;
+    print_info.module_regulator_states[module_id] = reg_state;
+    print_info.module_regulator_timers[module_id] = reg_timer;
+  }
+  // number of active threads
+  print_info.num_active_threads = hw.GetNumActiveThreads();
+  // for each thread: {thread_id: {priority: ..., callstack: [...]}}
+  // - priority
+  // - callstack: [callstate, callstate, etc]
+  //   - callstate: [memory, flowstack]
+  //     - flowstack: [type, mp, ip, begin, end]
+  print_info.thread_state_str = "[";
+  bool comma = false;
+  for (size_t thread_id : hw.GetThreadExecOrder()) {
+    auto & thread = hw.GetThread(thread_id);
+    std::ostringstream stream;
+    if (comma) { stream << ","; }
+    stream << "{";
+    stream << "id:" << thread_id << ",";
+    // thread priority
+    stream << "priority:" << thread.GetPriority() << ",";
+    // thread state
+    stream << "state:";
+    if (thread.IsDead()) { stream << "dead,"; }
+    else if (thread.IsPending()) { stream << "pending,"; }
+    else if (thread.IsRunning()) { stream << "running,"; }
+    else { stream << "unknown,"; }
+    // call stack
+    stream << "call_stack:[";
+    auto & call_stack = thread.GetExecState().GetCallStack();
+    for (size_t i = 0; i < call_stack.size(); ++i) {
+      auto & mem_state = thread.GetExecState().GetCallStack()[i].memory;
+      auto & flow_stack = thread.GetExecState().GetCallStack()[i].flow_stack;
+      if (i) stream << ",";
+      // - call state -
+      stream << "{";
+      stream << "working_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetWorkingMemory(), stream);
+      stream << ",input_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetInputMemory(), stream);
+      stream << ",output_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetOutputMemory(), stream);
+      // - call state - flow stack -
+      stream << ",flow_stack:[";
+      for (size_t f = 0; f < flow_stack.size(); ++f) {
+        auto & flow = flow_stack[f];
+        if (f) stream << ",";
+        stream << "{";
+        // type
+        stream << "type:";
+        if (flow.IsBasic()) { stream << "basic,"; }
+        else if (flow.IsWhileLoop()) { stream << "whileloop,"; }
+        else if (flow.IsRoutine()) { stream << "routine,"; }
+        else if (flow.IsCall()) { stream << "call,"; }
+        else { stream << "unknown,"; }
+        // mp
+        stream << "mp:" << flow.mp << ",";
+        // ip
+        stream << "ip:" << flow.ip << ",";
+        // begin
+        stream << "begin:" << flow.begin << ",";
+        // end
+        stream << "end:" << flow.end;
+        stream << "}";
+      }
+      stream << "]";
+      stream << "}";
+    }
+    stream << "]";
+    stream << "}";
+    print_info.thread_state_str += stream.str();
+    if (!comma) { comma=true; }
+  }
+  print_info.thread_state_str += "]";
+  return print_info;
+}
+
 
 // -_-_-_-_- PUBLIC IMPLEMENTATIONS -_-_-_-_-
 void ChgEnvWorld::Setup(const config_t & config) {
