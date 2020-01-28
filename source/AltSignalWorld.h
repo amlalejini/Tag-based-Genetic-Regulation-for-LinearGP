@@ -253,7 +253,8 @@ protected:
 
   void EvaluateOrg(org_t & org);
 
-  void AnalyzeOrg(const org_t & org);
+  void AnalyzeOrg(const org_t & org, size_t org_id=0);
+  void TraceOrganism(const org_t & org, size_t org_id=0);
 
   // -- Utilities --
   void DoPopulationSnapshot();
@@ -734,14 +735,15 @@ void AltSignalWorld::DoUpdate() {
   if (SUMMARY_RESOLUTION) {
     if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) max_fit_file->Update();
   }
-
   if (SNAPSHOT_RESOLUTION) {
     if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) {
       DoPopulationSnapshot();
-      if (cur_update) sys_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+      if (cur_update) {
+        sys_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+        AnalyzeOrg(GetOrg(max_fit_org_tracker.org_id), max_fit_org_tracker.org_id); // Fully analyze max fitness organism
+      }
     }
   }
-
   Update();
   ClearCache();
 }
@@ -756,17 +758,15 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
   emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
   // Evaluate organism in the environment!
   for (size_t cycle = 0; cycle < NUM_ENV_CYCLES; ++cycle) {
-    std::cout << "============== CYCLE " << cycle << "==============" << std::endl;
     eval_hardware->ResetBaseHardwareState(); // Reset threads every cycle.
     eval_hardware->GetCustomComponent().Reset();
     emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
     eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.env_signal_tag));
     // Step hardware! If at any point there are no active || pending threads, we're done!
-    auto information = GetHardwareStatePrintInfo(*eval_hardware);
+    // auto information = GetHardwareStatePrintInfo(*eval_hardware);
     for (size_t step = 0; step < CPU_TIME_PER_ENV_CYCLE; ++step) {
-      std::cout << "===== STEP " << step << "=====" << std::endl;
       eval_hardware->SingleProcess();
-      auto information = GetHardwareStatePrintInfo(*eval_hardware);
+      // auto information = GetHardwareStatePrintInfo(*eval_hardware);
       if (!(eval_hardware->GetNumActiveThreads() || eval_hardware->GetNumPendingThreads())) break;
     }
     // Did hardware consume the resource?
@@ -784,11 +784,10 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
     }
     eval_environment.AdvanceEnv();
   }
-  exit(-1);
 }
 
 /// Analyze organism
-void AltSignalWorld::AnalyzeOrg(const org_t & org) {
+void AltSignalWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   ////////////////////////////////////////////////
   // (1) Does this organism's genotype perform equivalently across independent evaluations?
   // Make a new test organism from input org.
@@ -813,7 +812,7 @@ void AltSignalWorld::AnalyzeOrg(const org_t & org) {
   }
   ////////////////////////////////////////////////
   // (2) Run a full trace of this organism.
-  // TODO
+  TraceOrganism(org, org_id);
   ////////////////////////////////////////////////
   // (3) Run with knockouts
   //     - ko memory
@@ -821,8 +820,152 @@ void AltSignalWorld::AnalyzeOrg(const org_t & org) {
   //     - ko memory & ko regulation
   // TODO
 
+}
 
-
+/// Perform step-by-step execution trace on an organism, output
+void AltSignalWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
+  org_t trace_org(org); // Make a copy of the the given organism so we don't mess with any of the original's
+                        // data.
+  // Data file to store trace information.
+  emp::DataFile trace_file(OUTPUT_DIR + "/trace_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
+  // Add functions to trace file.
+  HardwareStatePrintInfo hw_state_info;
+  size_t env_cycle=0;
+  size_t cpu_step=0;
+  // ----- Timing information -----
+  trace_file.template AddFun<size_t>([&env_cycle]() {
+    return env_cycle;
+  }, "env_cycle");
+  trace_file.template AddFun<size_t>([&cpu_step]() {
+    return cpu_step;
+  }, "cpu_step");
+  // ----- Environment Information -----
+  //    * num_states
+  trace_file.template AddFun<size_t>([this]() {
+    return eval_environment.num_states;
+  }, "num_env_states");
+  //    * cur_state
+  trace_file.template AddFun<size_t>([this]() {
+    return eval_environment.cur_state;
+  }, "cur_env_state");
+  //    * env_signal_tag
+  trace_file.template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    eval_environment.env_signal_tag.Print(stream);
+    return stream.str();
+  }, "env_signal_tag");
+  // ----- Hardware Information -----
+  //    * current response
+  trace_file.template AddFun<int>([this]() {
+    return eval_hardware->GetCustomComponent().response;
+  }, "cur_response");
+  //    * correct responses
+  trace_file.template AddFun<bool>([&trace_org, this]() {
+    return eval_hardware->GetCustomComponent().response == (int)eval_environment.cur_state;
+  }, "has_correct_response");
+  //    * num_modules
+  trace_file.template AddFun<size_t>([&hw_state_info]() {
+    return hw_state_info.num_modules;
+  }, "num_modules");
+  //    * module_regulator_states
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < hw_state_info.module_regulator_states.size(); ++i) {
+      if (i) stream << ",";
+      stream << hw_state_info.module_regulator_states[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "module_regulator_states");
+  //    * which module would be triggered by the environment signal?
+  trace_file.template AddFun<int>([this]() {
+    const auto matches = eval_hardware->GetMatchBin().Match(eval_environment.env_signal_tag);
+    if (matches.size()) return (int)matches[0];
+    else return -1;
+  }, "env_signal_closest_match");
+  //    * match scores against environment signal tag for each module
+  trace_file.template AddFun<std::string>([this]() {
+    const auto match_scores = eval_hardware->GetMatchBin().ComputeMatchScores(eval_environment.env_signal_tag);
+    emp::vector<double> scores(eval_hardware->GetNumModules());
+    std::ostringstream stream;
+    for (const auto & pair : match_scores) {
+      const size_t module_id = pair.first;
+      const double match_score = pair.second;
+      scores[module_id] = match_score;
+    }
+    stream << "\"[";
+    for (size_t i = 0; i < scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << scores[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "env_signal_match_scores");
+  //    * module_regulator_timers
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < hw_state_info.module_regulator_timers.size(); ++i) {
+      if (i) stream << ",";
+      stream << hw_state_info.module_regulator_timers[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "module_regulator_timers");
+  //    * global_mem_str
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    return "\"" + hw_state_info.global_mem_str + "\"";
+  }, "global_mem");
+  //    * num_active_threads
+  trace_file.template AddFun<size_t>([&hw_state_info]() {
+    return hw_state_info.num_active_threads;
+  }, "num_active_threads");
+  //    * thread_state_str
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    return "\"" + hw_state_info.thread_state_str + "\"";
+  }, "thread_state_info");
+  trace_file.PrintHeaderKeys();
+  // Do an traced-evaluation
+  eval_environment.ResetEnv();
+  trace_org.GetPhenotype().Reset();
+  // Ready the hardware! Load organism program, reset the custom hardware component.
+  eval_hardware->SetProgram(trace_org.GetGenome().program);
+  emp_assert(eval_hardware->ValidateThreadState());
+  emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
+  // Evaluate organism in the environment!
+  for (env_cycle = 0; env_cycle < NUM_ENV_CYCLES; ++env_cycle) {
+    eval_hardware->ResetBaseHardwareState(); // Reset threads every cycle.
+    eval_hardware->GetCustomComponent().Reset();
+    emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
+    eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.env_signal_tag));
+    // Step hardware! If at any point there are no active || pending threads, we're done!
+    // => Trace! <=
+    cpu_step = 0;
+    hw_state_info = GetHardwareStatePrintInfo(*eval_hardware);
+    trace_file.Update(); // Always output state BEFORE time step advances
+    while (cpu_step < CPU_TIME_PER_ENV_CYCLE) {
+      eval_hardware->SingleProcess();
+      ++cpu_step;
+      hw_state_info = GetHardwareStatePrintInfo(*eval_hardware);
+      trace_file.Update();
+      if (!(eval_hardware->GetNumActiveThreads() || eval_hardware->GetNumPendingThreads())) break;
+    }
+    // Did hardware consume the resource?
+    const int org_response = eval_hardware->GetCustomComponent().response;
+    if (org_response == (int)eval_environment.cur_state) {
+      // Correct response!
+      trace_org.GetPhenotype().resources_consumed += 1;
+      trace_org.GetPhenotype().correct_resp_cnt += 1;
+    } else if (org_response == -1) {
+      // No response!
+      trace_org.GetPhenotype().no_resp_cnt += 1;
+    } else {
+      // Incorrect response, end evaluation.
+      break;
+    }
+    eval_environment.AdvanceEnv();
+  }
 }
 
 // -- utilities --
@@ -982,8 +1125,8 @@ AltSignalWorld::HardwareStatePrintInfo AltSignalWorld::GetHardwareStatePrintInfo
   std::ostringstream gmem_stream;
   hw.GetMemoryModel().PrintMemoryBuffer(hw.GetMemoryModel().GetGlobalBuffer(), gmem_stream);
   print_info.global_mem_str = gmem_stream.str();
-  std::cout << "GLOBAL MEMORY" << std::endl;
-  std::cout << print_info.global_mem_str << std::endl;
+  // std::cout << "GLOBAL MEMORY" << std::endl;
+  // std::cout << print_info.global_mem_str << std::endl;
   // number of modules
   print_info.num_modules = hw.GetNumModules();
   // module regulator states & timers
@@ -995,18 +1138,18 @@ AltSignalWorld::HardwareStatePrintInfo AltSignalWorld::GetHardwareStatePrintInfo
     print_info.module_regulator_states[module_id] = reg_state;
     print_info.module_regulator_timers[module_id] = reg_timer;
   }
-  std::cout << "Regulator values" << std::endl;
-  for (size_t i = 0; i < print_info.module_regulator_states.size(); ++i) {
-    if (i) std::cout << ",";
-    std::cout << print_info.module_regulator_states[i];
-  }
-  std::cout << std::endl;
-  std::cout << "Regulator timers" << std::endl;
-  for (size_t i = 0; i < print_info.module_regulator_timers.size(); ++i) {
-    if (i) std::cout << ",";
-    std::cout << print_info.module_regulator_timers[i];
-  }
-  std::cout << std::endl;
+  // std::cout << "Regulator values" << std::endl;
+  // for (size_t i = 0; i < print_info.module_regulator_states.size(); ++i) {
+  //   if (i) std::cout << ",";
+  //   std::cout << print_info.module_regulator_states[i];
+  // }
+  // std::cout << std::endl;
+  // std::cout << "Regulator timers" << std::endl;
+  // for (size_t i = 0; i < print_info.module_regulator_timers.size(); ++i) {
+  //   if (i) std::cout << ",";
+  //   std::cout << print_info.module_regulator_timers[i];
+  // }
+  // std::cout << std::endl;
   // number of active threads
   print_info.num_active_threads = hw.GetNumActiveThreads();
   // for each thread: {thread_id: {priority: ..., callstack: [...]}}
@@ -1077,8 +1220,8 @@ AltSignalWorld::HardwareStatePrintInfo AltSignalWorld::GetHardwareStatePrintInfo
     if (!comma) { comma=true; }
   }
   print_info.thread_state_str += "]";
-  std::cout << "THREAD INFO" << std::endl;
-  std::cout << print_info.thread_state_str << std::endl;
+  // std::cout << "THREAD INFO" << std::endl;
+  // std::cout << print_info.thread_state_str << std::endl;
   return print_info;
 }
 
