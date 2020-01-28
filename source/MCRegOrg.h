@@ -75,14 +75,16 @@ public:
                       num_active_cells,
                       response_cnts,
                       response_locs,
-                      clumpyness_ratings) ==
+                      clumpyness_ratings,
+                      active_cells) ==
              std::tie(o.score,
                       o.num_unique_resp,
                       o.num_resp,
                       o.num_active_cells,
                       o.response_cnts,
                       o.response_locs,
-                      o.clumpyness_ratings);
+                      o.clumpyness_ratings,
+                      o.active_cells);
     }
 
     bool operator!=(const MCRegPhenotype & o) const {
@@ -96,14 +98,16 @@ public:
                       num_active_cells,
                       response_cnts,
                       response_locs,
-                      clumpyness_ratings) <
+                      clumpyness_ratings,
+                      active_cells) <
              std::tie(o.score,
                       o.num_unique_resp,
                       o.num_resp,
                       o.num_active_cells,
                       o.response_cnts,
                       o.response_locs,
-                      o.clumpyness_ratings);
+                      o.clumpyness_ratings,
+                      o.active_cells);
     }
 
     double GetScore() const { return score; }

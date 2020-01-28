@@ -111,16 +111,6 @@ namespace MCRegWorldDefs {
   using org_t = MCRegOrganism<emp::BitSet<TAG_LEN>,int>;
 }
 
-/*
-  def dist(x1,y1, x2,y2):
-    dx = abs(x1 - x2)
-    dy = abs(y1 - y2)
-    if (dx > WIDTH/2):
-        dx = WIDTH - dx
-    if (dy > HEIGHT/2):
-        dy = HEIGHT - dy
-    return dx+dy - min(dx, dy)
-  */
 struct Point2D {
   int x=0;
   int y=0;
@@ -182,6 +172,20 @@ public:
       cur_state = state;
     }
     ENV_STATE GetPhase() { return cur_state; }
+
+    bool IsDevelopmentPhase() const { return cur_state == ENV_STATE::DEVELOPMENT; }
+    bool IsResponsePhase() const { return cur_state == ENV_STATE::RESPONSE; }
+  };
+
+  /// Struct used as intermediary for printing/outputting SignalGP hardware state
+  struct HardwareStatePrintInfo {
+    std::string global_mem_str="";
+    size_t num_modules=0;
+    emp::vector<double> module_regulator_states;
+    emp::vector<size_t> module_regulator_timers;
+    // module values here
+    size_t num_active_threads=0;
+    std::string thread_state_str="";
   };
 
 protected:
@@ -189,7 +193,6 @@ protected:
   // Default group
   size_t GENERATIONS;
   size_t POP_SIZE;
-  // bool STOP_ON_SOLUTION;
   // Environment group
   size_t NUM_RESPONSE_TYPES;
   size_t DEVELOPMENT_PHASE_CPU_TIME;
@@ -244,9 +247,7 @@ protected:
   emp::Ptr<emp::DataFile> max_fit_file;
   emp::Ptr<systematics_t> systematics_ptr;  ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
 
-  // bool found_solution = false;              ///< Have we stumbled onto a 'solution' yet?
   size_t MAX_SINGLE_RESPONSE_CREDIT=0;      ///< What is the maximum number of responses of a particular type that an organism can get credit for?
-  // double MAX_RESPONSE_SCORE=0;              ///< What is the maximum score an organism can achieve?
   size_t max_fit_org_id=0;                  ///< What is the most fit organism ID for this generation?
   bool CLUMPY_PROPAGULES=false;
 
@@ -254,7 +255,12 @@ protected:
   size_t event_id__response_sig=0;
   size_t event_id__birth_sig=0;
   size_t event_id__send_msg=0;
-  // size_t event_id__broadcast_msg=0;
+
+  bool KO_REGULATION=false;
+  bool KO_GLOBAL_MEMORY=false;
+  bool KO_MESSAGING=false;
+  bool KO_REG_IMPRINTING=false;
+  bool KO_REPRO_TAG_CONTROL=false;
 
   void InitConfigs(const config_t & config);
   void InitInstLib();
@@ -273,6 +279,10 @@ protected:
   void DoUpdate();
 
   void EvaluateOrg(org_t & org);
+
+  void AnalyzeOrg(const org_t & org, size_t org_id=0);
+  void TraceOrganism(const org_t & org, size_t org_id=0);
+  HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
 
   // -- utilities --
   void DoPopulationSnapshot();
@@ -472,6 +482,250 @@ void MCRegWorld::EvaluateOrg(org_t & org) {
   org.GetPhenotype().score = ScoreOrgPhenotype(org);
 }
 
+void MCRegWorld::AnalyzeOrg(const org_t & org, size_t org_id) {
+  ////////////////////////////////////////////////
+  // (1) Does this organism's genotype perform equivalently across independent evaluations?
+  emp::vector<org_t> test_orgs;
+  for (size_t i = 0; i < 3; ++i) {
+    test_orgs.emplace_back(org);
+  }
+  // Evaluate each test org.
+  for (org_t & test_org : test_orgs) {
+    EvaluateOrg(test_org);
+  }
+  // Did this organism's phenotype change across runs?
+  bool consistent_performance = true;
+  for (size_t i = 0; i < test_orgs.size(); ++i) {
+    for (size_t j = i; j < test_orgs.size(); ++j) {
+      if (test_orgs[i].GetPhenotype() != test_orgs[j].GetPhenotype()) {
+        consistent_performance = false;
+        break;
+      }
+    }
+    if (!consistent_performance) break;
+  }
+  ////////////////////////////////////////////////
+  // (2) Run a full trace of this organism.
+  TraceOrganism(org, org_id);
+  // ...
+}
+
+void MCRegWorld::TraceOrganism(const org_t & org, size_t org_id) {
+  org_t trace_org(org); // Make a copy of the the given organism so we don't mess with any of the original's
+                        // data.
+  // Data file to store trace information.
+  emp::DataFile trace_file(OUTPUT_DIR + "/trace_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
+  // ---- Some local variables that will track trace information. ----
+  emp::vector<HardwareStatePrintInfo> hw_state_info(DEME_WIDTH*DEME_HEIGHT);
+  size_t cpu_step=0;
+  // TODO - add functions to trace file
+  // -- Timing --
+  // * cpu_step
+  trace_file.template AddFun<size_t>([&cpu_step]() {
+    return cpu_step;
+  }, "cpu_step");
+  // -- Environment Information --
+  // * cur_phase (RESPONSE || DEVELOPMENT)
+  trace_file.template AddFun<std::string>([this]() {
+    if (eval_environment.IsDevelopmentPhase()) {
+      return "DEVELOPMENT";
+    } else if (eval_environment.IsResponsePhase()) {
+      return "RESPONSE";
+    } else {
+      return "UNKNOWN";
+    }
+  }, "cur_env_phase");
+  // * cur_phase_tag (RESPONSE || DEVELOPMENT)
+  trace_file.template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    if (eval_environment.IsDevelopmentPhase()) {
+      eval_environment.propagule_start_tag.Print(stream);
+    } else if (eval_environment.IsResponsePhase()) {
+      eval_environment.response_signal_tag.Print(stream);
+    } else {
+      emp_assert(false, "Uknown environment phase.");
+    }
+    return stream.str();
+  }, "cur_env_phase_tag");
+  // -- Overall Deme Information --
+  // * active cells (by ID)
+  trace_file.template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < eval_deme->GetSize(); ++i) {
+      if (i) stream << ",";
+      stream << eval_deme->IsActive(i);
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "cells_active");
+  // * cell responses (by ID)
+  trace_file.template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < eval_deme->GetSize(); ++i) {
+      if (i) stream << ",";
+      stream << eval_deme->GetCellResponse(i);
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "cell_responses");
+  // * num_modules
+  trace_file.template AddFun<size_t>([&trace_org]() {
+    return trace_org.GetGenome().program.GetSize();
+  }, "num_modules");
+  // * x,y by ID
+  trace_file.template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < eval_deme->GetSize(); ++i) {
+      if (i) stream << ",";
+      stream << "[" << eval_deme->GetCellX(i) << "," << eval_deme->GetCellY(i) << "]";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "cell_xy_map");
+  // -- For each hardware cell => cell hardware state info! --
+  for (size_t cell_id = 0; cell_id < hw_state_info.size(); ++cell_id) {
+    // * regulator states
+    trace_file.template AddFun<std::string>([cell_id, &hw_state_info, this]() {
+      std::ostringstream stream;
+      stream << "\"[";
+      const auto & info = hw_state_info[cell_id].module_regulator_states;
+      for (size_t i = 0; i < info.size(); ++i) {
+        if (i) stream << ",";
+        stream << info[i];
+      }
+      stream << "]\"";
+      return stream.str();
+    }, "module_regulator_states__cell_" + emp::to_string(cell_id));
+    // * regulator timers
+    trace_file.template AddFun<std::string>([cell_id, &hw_state_info, this]() {
+      std::ostringstream stream;
+      stream << "\"[";
+      const auto & info = hw_state_info[cell_id].module_regulator_timers;
+      for (size_t i = 0; i < info.size(); ++i) {
+        if (i) stream << ",";
+        stream << info[i];
+      }
+      stream << "]\"";
+      return stream.str();
+    }, "module_regulator_timers__cell_" + emp::to_string(cell_id));
+    // * response_signal_closest_match
+    trace_file.template AddFun<int>([cell_id, &hw_state_info, this]() {
+      const auto matches = eval_deme->GetCell(cell_id).GetMatchBin().Match(eval_environment.response_signal_tag);
+      if (matches.size()) return (int)matches[0];
+      else return -1;
+    }, "response_signal_closest_match__cell_" + emp::to_string(cell_id));
+    // * response_signal_match_scores
+    trace_file.template AddFun<std::string>([cell_id, &hw_state_info, this]() {
+      const auto match_scores = eval_deme->GetCell(cell_id).GetMatchBin().ComputeMatchScores(eval_environment.response_signal_tag);
+      emp::vector<double> scores(eval_deme->GetCell(cell_id).GetNumModules());
+      std::ostringstream stream;
+      for (const auto & pair : match_scores) {
+        const size_t module_id = pair.first;
+        const double match_score = pair.second;
+        scores[module_id] = match_score;
+      }
+      stream << "\"[";
+      for (size_t i = 0; i < scores.size(); ++i) {
+        if (i) stream << ",";
+        stream << scores[i];
+      }
+      stream << "]\"";
+      return stream.str();
+    }, "response_signal_match_scores__cell_" + emp::to_string(cell_id));
+    // * global memory
+    trace_file.template AddFun<std::string>([cell_id, &hw_state_info]() {
+      return "\"" + hw_state_info[cell_id].global_mem_str + "\"";
+    }, "global_mem__cell_" + emp::to_string(cell_id));
+    // * num_active_threads
+    trace_file.template AddFun<size_t>([cell_id, &hw_state_info]() {
+      return hw_state_info[cell_id].num_active_threads;
+    }, "num_active_threads__cell_" + emp::to_string(cell_id));
+    // * thread_state_info
+    trace_file.template AddFun<std::string>([cell_id, &hw_state_info]() {
+      return "\"" + hw_state_info[cell_id].thread_state_str + "\"";
+    }, "thread_state_info__cell_" + emp::to_string(cell_id));
+  }
+  trace_file.PrintHeaderKeys();
+
+  // ---- TRACE THIS SHIT ----
+  eval_environment.ResetEnv();
+  // Set environment to development phase
+  eval_environment.SetPhase(ENV_STATE::DEVELOPMENT);
+  // Reset organism's phenotype.
+  trace_org.GetPhenotype().Reset(NUM_RESPONSE_TYPES);
+  emp_assert(trace_org.GetPhenotype().response_cnts.size() == NUM_RESPONSE_TYPES);
+  // Ready the evaluation hardware (deme)
+  eval_deme->ActivatePropagule(trace_org.GetGenome().program, PROPAGULE_SIZE, CLUMPY_PROPAGULES);
+  // Evaluate developmental phase
+  cpu_step = 0;
+  for (size_t i = 0; i < eval_deme->GetSize(); ++i) { hw_state_info[i] = GetHardwareStatePrintInfo(eval_deme->GetCell(i)); }
+  trace_file.Update();
+  //  - Note: propagule cells have already received a 'start' event for the development phase
+  while (cpu_step < DEVELOPMENT_PHASE_CPU_TIME) {
+    const bool stop = !eval_deme->SingleAdvance();
+    ++cpu_step;
+    for (size_t i = 0; i < eval_deme->GetSize(); ++i) { hw_state_info[i] = GetHardwareStatePrintInfo(eval_deme->GetCell(i)); }
+    trace_file.Update();
+    if (stop) break;
+  }
+  // Evaluate response phase
+  eval_environment.SetPhase(ENV_STATE::RESPONSE);
+  // - Queue environment response phase event on all active cells
+  // - Kill all cell activity before the response phase
+  for (hardware_t & cell_hw : eval_deme->GetCells()) {
+    if (!cell_hw.GetCustomComponent().IsActive()) continue;
+    // Remove all pending threads.
+    cell_hw.RemoveAllPendingThreads();
+    // Mark all active threads as dead.
+    for (size_t thread_id : cell_hw.GetActiveThreadIDs()) {
+      cell_hw.GetThread(thread_id).SetDead();
+    }
+    // Clear event queue!
+    cell_hw.ClearEventQueue();
+    cell_hw.SingleProcess(); // Execute to clean up dead threads
+    emp_assert(cell_hw.GetNumActiveThreads() == 0 || cell_hw.GetNumPendingThreads() == 0 || cell_hw.GetNumQueuedEvents() == 0);
+    cell_hw.QueueEvent(event_t(event_id__response_sig, eval_environment.response_signal_tag));
+  }
+
+  cpu_step = 0;
+  for (size_t i = 0; i < eval_deme->GetSize(); ++i) { hw_state_info[i] = GetHardwareStatePrintInfo(eval_deme->GetCell(i)); }
+  trace_file.Update();
+  while (cpu_step < RESPONSE_PHASE_CPU_TIME) {
+    const bool stop = !eval_deme->SingleAdvance();
+    ++cpu_step;
+    for (size_t i = 0; i < eval_deme->GetSize(); ++i) { hw_state_info[i] = GetHardwareStatePrintInfo(eval_deme->GetCell(i)); }
+    trace_file.Update();
+    if (stop) break;
+  }
+  // Update org's phenotype
+  // std::unordered_set<size_t> unique_responses;
+  // for (hardware_t & cell_hw : eval_deme->GetCells()) {
+  //   // If cell is inactive, continue.
+  //   if (!cell_hw.GetCustomComponent().IsActive()) continue;
+  //   const size_t cell_x = eval_deme->GetCellX(cell_hw.GetCustomComponent().GetCellID());
+  //   const size_t cell_y = eval_deme->GetCellY(cell_hw.GetCustomComponent().GetCellID());
+  //   trace_org.GetPhenotype().active_cells.emplace_back(cell_x, cell_y);
+  //   trace_org.GetPhenotype().num_active_cells += 1;   // Increment phenotype's number of active cells.
+  //   // If cell had no response, continue.
+  //   if (cell_hw.GetCustomComponent().response < 0) {
+  //     emp_assert(cell_hw.GetCustomComponent().response == -1);
+  //     continue;
+  //   }
+  //   emp_assert(cell_hw.GetCustomComponent().GetResponse() >= 0
+  //              && (size_t)cell_hw.GetCustomComponent().GetResponse() < trace_org.GetPhenotype().GetResponsesByType().size());
+  //   const int response = cell_hw.GetCustomComponent().GetResponse();
+  //   trace_org.GetPhenotype().response_cnts[(size_t)response] += 1;
+  //   trace_org.GetPhenotype().num_resp += 1;
+  //   unique_responses.emplace(response);
+  //   trace_org.GetPhenotype().response_locs[(size_t)response].emplace_back( cell_x, cell_y );
+  // }
+  // trace_org.GetPhenotype().num_unique_resp = unique_responses.size();
+  // trace_org.GetPhenotype().score = ScoreOrgPhenotype(trace_org);
+}
+
 void MCRegWorld::DoEvaluation() {
   max_fit_org_id = 0;
   for (size_t org_id = 0; org_id < this->GetSize(); ++org_id) {
@@ -497,12 +751,15 @@ void MCRegWorld::DoUpdate() {
   // std::cout << "solution found: " << found_solution << std::endl;
   const size_t cur_update = GetUpdate();
   if (SUMMARY_RESOLUTION) {
-    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS /* || (STOP_ON_SOLUTION & found_solution)*/ ) max_fit_file->Update();
+    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS ) max_fit_file->Update();
   }
   if (SNAPSHOT_RESOLUTION) {
-    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS /* || (STOP_ON_SOLUTION & found_solution)*/) {
+    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS ) {
       DoPopulationSnapshot();
-      if (cur_update) systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+      if (cur_update) {
+        systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+        AnalyzeOrg(GetOrg(max_fit_org_id), max_fit_org_id);
+      }
     }
   }
   Update();
@@ -1333,6 +1590,96 @@ void MCRegWorld::RunStep() {
   DoEvaluation();
   DoSelection();
   DoUpdate();
+}
+
+MCRegWorld::HardwareStatePrintInfo MCRegWorld::GetHardwareStatePrintInfo(hardware_t & hw) {
+  HardwareStatePrintInfo print_info;
+  // Collect global memory
+  std::ostringstream gmem_stream;
+  hw.GetMemoryModel().PrintMemoryBuffer(hw.GetMemoryModel().GetGlobalBuffer(), gmem_stream);
+  print_info.global_mem_str = gmem_stream.str();
+  // number of modules
+  print_info.num_modules = hw.GetNumModules();
+  // module regulator states & timers
+  print_info.module_regulator_states.resize(hw.GetNumModules());
+  print_info.module_regulator_timers.resize(hw.GetNumModules());
+  for (size_t module_id = 0; module_id < hw.GetNumModules(); ++module_id) {
+    const auto reg_state = hw.GetMatchBin().GetRegulator(module_id).state;
+    const auto reg_timer = hw.GetMatchBin().GetRegulator(module_id).timer;
+    print_info.module_regulator_states[module_id] = reg_state;
+    print_info.module_regulator_timers[module_id] = reg_timer;
+  }
+  // number of active threads
+  print_info.num_active_threads = hw.GetNumActiveThreads();
+  // for each thread: {thread_id: {priority: ..., callstack: [...]}}
+  // - priority
+  // - callstack: [callstate, callstate, etc]
+  //   - callstate: [memory, flowstack]
+  //     - flowstack: [type, mp, ip, begin, end]
+  print_info.thread_state_str = "[";
+  bool comma = false;
+  for (size_t thread_id : hw.GetThreadExecOrder()) {
+    auto & thread = hw.GetThread(thread_id);
+    std::ostringstream stream;
+    if (comma) { stream << ","; }
+    stream << "{";
+    stream << "id:" << thread_id << ",";
+    // thread priority
+    stream << "priority:" << thread.GetPriority() << ",";
+    // thread state
+    stream << "state:";
+    if (thread.IsDead()) { stream << "dead,"; }
+    else if (thread.IsPending()) { stream << "pending,"; }
+    else if (thread.IsRunning()) { stream << "running,"; }
+    else { stream << "unknown,"; }
+    // call stack
+    stream << "call_stack:[";
+    auto & call_stack = thread.GetExecState().GetCallStack();
+    for (size_t i = 0; i < call_stack.size(); ++i) {
+      auto & mem_state = thread.GetExecState().GetCallStack()[i].memory;
+      auto & flow_stack = thread.GetExecState().GetCallStack()[i].flow_stack;
+      if (i) stream << ",";
+      // - call state -
+      stream << "{";
+      stream << "working_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetWorkingMemory(), stream);
+      stream << ",input_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetInputMemory(), stream);
+      stream << ",output_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetOutputMemory(), stream);
+      // - call state - flow stack -
+      stream << ",flow_stack:[";
+      for (size_t f = 0; f < flow_stack.size(); ++f) {
+        auto & flow = flow_stack[f];
+        if (f) stream << ",";
+        stream << "{";
+        // type
+        stream << "type:";
+        if (flow.IsBasic()) { stream << "basic,"; }
+        else if (flow.IsWhileLoop()) { stream << "whileloop,"; }
+        else if (flow.IsRoutine()) { stream << "routine,"; }
+        else if (flow.IsCall()) { stream << "call,"; }
+        else { stream << "unknown,"; }
+        // mp
+        stream << "mp:" << flow.mp << ",";
+        // ip
+        stream << "ip:" << flow.ip << ",";
+        // begin
+        stream << "begin:" << flow.begin << ",";
+        // end
+        stream << "end:" << flow.end;
+        stream << "}";
+      }
+      stream << "]";
+      stream << "}";
+    }
+    stream << "]";
+    stream << "}";
+    print_info.thread_state_str += stream.str();
+    if (!comma) { comma=true; }
+  }
+  print_info.thread_state_str += "]";
+  return print_info;
 }
 
 void MCRegWorld::PrintResponseLocationsSingleLine(const phenotype_t & phen, std::ostream & stream) {
