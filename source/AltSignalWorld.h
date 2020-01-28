@@ -764,7 +764,7 @@ void AltSignalWorld::DoUpdate() {
   if (SNAPSHOT_RESOLUTION) {
     if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) {
       DoPopulationSnapshot();
-      if (cur_update) {
+      if (cur_update || (STOP_ON_SOLUTION & found_solution)) {
         sys_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
         AnalyzeOrg(GetOrg(max_fit_org_tracker.org_id), max_fit_org_tracker.org_id); // Fully analyze max fitness organism
       }
