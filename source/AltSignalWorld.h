@@ -229,6 +229,9 @@ protected:
 
   // size_t best_org_id=0;
 
+  bool KO_REGULATION=false;
+  bool KO_GLOBAL_MEMORY=false;
+
   /// tracking information for max fitness organism in the population.
   struct {
     size_t org_id=0;
@@ -389,8 +392,12 @@ void AltSignalWorld::InitInstLib() {
 
   // If we can use global memory, give programs access. Otherwise, nops.
   if (USE_GLOBAL_MEMORY) {
-    inst_lib->AddInst("WorkingToGlobal", sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>, "");
-    inst_lib->AddInst("GlobalToWorking", sgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>, "");
+    inst_lib->AddInst("WorkingToGlobal", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("GlobalToWorking", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>(hw, inst);
+    }, "");
   } else {
     inst_lib->AddInst("Nop-WorkingToGlobal", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
@@ -399,16 +406,36 @@ void AltSignalWorld::InitInstLib() {
   // if (allow regulation)
   // If we can use regulation, add instructions. Otherwise, nops.
   if (USE_FUNC_REGULATION) {
-    inst_lib->AddInst("SetRegulator", sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("SetOwnRegulator", sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("AdjRegulator", sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("AdjOwnRegulator", sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("SenseRegulator", sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("SenseOwnRegulator", sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("IncRegulator", sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("IncOwnRegulator", sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("DecRegulator", sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("DecOwnRegulator", sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SetRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("SetOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("AdjRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("AdjOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("SenseRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("SenseOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("IncRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("IncOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>(hw, inst);
+     }, "");
+    inst_lib->AddInst("DecRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("DecOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
   } else {
     inst_lib->AddInst("Nop-SetRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SetOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
@@ -704,7 +731,6 @@ void AltSignalWorld::InitDataCollection() {
     return stream.str();
   }, "program");
   max_fit_file->PrintHeaderKeys();
-
 }
 
 /// Evaluate entire population.
@@ -816,10 +842,68 @@ void AltSignalWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   ////////////////////////////////////////////////
   // (3) Run with knockouts
   //     - ko memory
+  KO_GLOBAL_MEMORY = true;
+  KO_REGULATION = false;
+  org_t ko_mem_org(org);
+  EvaluateOrg(ko_mem_org);
   //     - ko regulation
+  KO_GLOBAL_MEMORY = false;
+  KO_REGULATION = true;
+  org_t ko_reg_org(org);
+  EvaluateOrg(ko_reg_org);
+  // todo - evaluate organism
   //     - ko memory & ko regulation
-  // TODO
-
+  KO_GLOBAL_MEMORY = true;
+  KO_REGULATION = true;
+  org_t ko_all_org(org);
+  EvaluateOrg(ko_all_org);
+  // todo - evaluate organism
+  // Reset KO variables to both be false
+  KO_GLOBAL_MEMORY = false;
+  KO_REGULATION = false;
+  ////////////////////////////////////////////////
+  // (4) Setup and write to analysis output file
+  // note: I'll arbitrarily use test_org 0 as canonical version
+  emp::DataFile analysis_file(OUTPUT_DIR + "/analysis_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
+  analysis_file.template AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
+  analysis_file.template AddFun<size_t>([&org_id]() { return org_id; }, "pop_id");
+  analysis_file.template AddFun<bool>([&test_orgs, this]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    return org.GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;
+  }, "solution");
+  analysis_file.template AddFun<double>([&test_orgs]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    return org.GetPhenotype().GetResources();
+  }, "score");
+  analysis_file.template AddFun<bool>([&consistent_performance]() {
+    return consistent_performance;
+  }, "consistent");
+  analysis_file.template AddFun<double>([&ko_reg_org]() {
+    return ko_reg_org.GetPhenotype().GetResources();
+  }, "score_ko_regulation");
+  analysis_file.template AddFun<double>([&ko_mem_org]() {
+    return ko_mem_org.GetPhenotype().GetResources();
+  }, "score_ko_global_memory");
+  analysis_file.template AddFun<double>([&ko_all_org]() {
+    return ko_all_org.GetPhenotype().GetResources();
+  }, "score_ko_all");
+  analysis_file.template AddFun<size_t>([this, &org_id]() {
+    return this->GetOrg(org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  analysis_file.template AddFun<size_t>([this, &org_id]() {
+    return this->GetOrg(org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  analysis_file.template AddFun<std::string>([this, &org_id]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  analysis_file.PrintHeaderKeys();
+  analysis_file.Update();
 }
 
 /// Perform step-by-step execution trace on an organism, output
