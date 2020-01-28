@@ -1209,8 +1209,6 @@ AltSignalWorld::HardwareStatePrintInfo AltSignalWorld::GetHardwareStatePrintInfo
   std::ostringstream gmem_stream;
   hw.GetMemoryModel().PrintMemoryBuffer(hw.GetMemoryModel().GetGlobalBuffer(), gmem_stream);
   print_info.global_mem_str = gmem_stream.str();
-  // std::cout << "GLOBAL MEMORY" << std::endl;
-  // std::cout << print_info.global_mem_str << std::endl;
   // number of modules
   print_info.num_modules = hw.GetNumModules();
   // module regulator states & timers
@@ -1222,18 +1220,6 @@ AltSignalWorld::HardwareStatePrintInfo AltSignalWorld::GetHardwareStatePrintInfo
     print_info.module_regulator_states[module_id] = reg_state;
     print_info.module_regulator_timers[module_id] = reg_timer;
   }
-  // std::cout << "Regulator values" << std::endl;
-  // for (size_t i = 0; i < print_info.module_regulator_states.size(); ++i) {
-  //   if (i) std::cout << ",";
-  //   std::cout << print_info.module_regulator_states[i];
-  // }
-  // std::cout << std::endl;
-  // std::cout << "Regulator timers" << std::endl;
-  // for (size_t i = 0; i < print_info.module_regulator_timers.size(); ++i) {
-  //   if (i) std::cout << ",";
-  //   std::cout << print_info.module_regulator_timers[i];
-  // }
-  // std::cout << std::endl;
   // number of active threads
   print_info.num_active_threads = hw.GetNumActiveThreads();
   // for each thread: {thread_id: {priority: ..., callstack: [...]}}
@@ -1304,8 +1290,6 @@ AltSignalWorld::HardwareStatePrintInfo AltSignalWorld::GetHardwareStatePrintInfo
     if (!comma) { comma=true; }
   }
   print_info.thread_state_str += "]";
-  // std::cout << "THREAD INFO" << std::endl;
-  // std::cout << print_info.thread_state_str << std::endl;
   return print_info;
 }
 
