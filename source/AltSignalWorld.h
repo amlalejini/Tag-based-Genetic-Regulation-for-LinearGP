@@ -165,6 +165,17 @@ public:
     }
   };
 
+  /// Struct used as intermediary for printing/outputting SignalGP hardware state
+  struct HardwareStatePrintInfo {
+    std::string global_mem_str="";
+    size_t num_modules=0;
+    emp::vector<double> module_regulator_states;
+    emp::vector<size_t> module_regulator_timers;
+    // module values here
+    size_t num_active_threads=0;
+    std::string thread_state_str="";
+  };
+
 protected:
   // Default group
   size_t GENERATIONS;
@@ -242,12 +253,15 @@ protected:
 
   void EvaluateOrg(org_t & org);
 
+  void AnalyzeOrg(const org_t & org);
+
   // -- Utilities --
   void DoPopulationSnapshot();
   void DoWorldConfigSnapshot(const AltSignalConfig & config);
   void PrintProgramSingleLine(const program_t & prog, std::ostream & out);
   void PrintProgramFunction(const program_function_t & func, std::ostream & out);
   void PrintProgramInstruction(const inst_t & inst, std::ostream & out);
+  HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
 
 public:
   AltSignalWorld() {}
@@ -737,19 +751,22 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
   eval_environment.ResetEnv();
   org.GetPhenotype().Reset();
   // Ready the hardware! Load organism program, reset the custom hardware component.
-  // eval_hardware->Reset();
   eval_hardware->SetProgram(org.GetGenome().program);
   emp_assert(eval_hardware->ValidateThreadState());
   emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
   // Evaluate organism in the environment!
   for (size_t cycle = 0; cycle < NUM_ENV_CYCLES; ++cycle) {
+    std::cout << "============== CYCLE " << cycle << "==============" << std::endl;
     eval_hardware->ResetBaseHardwareState(); // Reset threads every cycle.
     eval_hardware->GetCustomComponent().Reset();
     emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
     eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.env_signal_tag));
     // Step hardware! If at any point there are no active || pending threads, we're done!
+    auto information = GetHardwareStatePrintInfo(*eval_hardware);
     for (size_t step = 0; step < CPU_TIME_PER_ENV_CYCLE; ++step) {
+      std::cout << "===== STEP " << step << "=====" << std::endl;
       eval_hardware->SingleProcess();
+      auto information = GetHardwareStatePrintInfo(*eval_hardware);
       if (!(eval_hardware->GetNumActiveThreads() || eval_hardware->GetNumPendingThreads())) break;
     }
     // Did hardware consume the resource?
@@ -767,7 +784,45 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
     }
     eval_environment.AdvanceEnv();
   }
-  // std::cout << "Final - resources: "<< org.GetPhenotype().resources_consumed <<" ; correct: "<< org.GetPhenotype().correct_resp_cnt << " ; no resp: " << org.GetPhenotype().no_resp_cnt  << std::endl;
+  exit(-1);
+}
+
+/// Analyze organism
+void AltSignalWorld::AnalyzeOrg(const org_t & org) {
+  ////////////////////////////////////////////////
+  // (1) Does this organism's genotype perform equivalently across independent evaluations?
+  // Make a new test organism from input org.
+  emp::vector<org_t> test_orgs;
+  for (size_t i = 0; i < 3; ++i) {
+    test_orgs.emplace_back(org);
+  }
+  // Evaluate each test org.
+  for (org_t & test_org : test_orgs) {
+    EvaluateOrg(test_org);
+  }
+  // Did this organism's phenotype change across runs?
+  bool consistent_performance = true;
+  for (size_t i = 0; i < test_orgs.size(); ++i) {
+    for (size_t j = i; j < test_orgs.size(); ++j) {
+      if (test_orgs[i].GetPhenotype() != test_orgs[j].GetPhenotype()) {
+        consistent_performance = false;
+        break;
+      }
+    }
+    if (!consistent_performance) break;
+  }
+  ////////////////////////////////////////////////
+  // (2) Run a full trace of this organism.
+  // TODO
+  ////////////////////////////////////////////////
+  // (3) Run with knockouts
+  //     - ko memory
+  //     - ko regulation
+  //     - ko memory & ko regulation
+  // TODO
+
+
+
 }
 
 // -- utilities --
@@ -919,6 +974,112 @@ void AltSignalWorld::PrintProgramInstruction(const inst_t & inst, std::ostream &
     out << inst.GetArg(arg_id);
   }
   out << ")";
+}
+
+AltSignalWorld::HardwareStatePrintInfo AltSignalWorld::GetHardwareStatePrintInfo(hardware_t & hw) {
+  HardwareStatePrintInfo print_info;
+  // Collect global memory
+  std::ostringstream gmem_stream;
+  hw.GetMemoryModel().PrintMemoryBuffer(hw.GetMemoryModel().GetGlobalBuffer(), gmem_stream);
+  print_info.global_mem_str = gmem_stream.str();
+  std::cout << "GLOBAL MEMORY" << std::endl;
+  std::cout << print_info.global_mem_str << std::endl;
+  // number of modules
+  print_info.num_modules = hw.GetNumModules();
+  // module regulator states & timers
+  print_info.module_regulator_states.resize(hw.GetNumModules());
+  print_info.module_regulator_timers.resize(hw.GetNumModules());
+  for (size_t module_id = 0; module_id < hw.GetNumModules(); ++module_id) {
+    const auto reg_state = hw.GetMatchBin().GetRegulator(module_id).state;
+    const auto reg_timer = hw.GetMatchBin().GetRegulator(module_id).timer;
+    print_info.module_regulator_states[module_id] = reg_state;
+    print_info.module_regulator_timers[module_id] = reg_timer;
+  }
+  std::cout << "Regulator values" << std::endl;
+  for (size_t i = 0; i < print_info.module_regulator_states.size(); ++i) {
+    if (i) std::cout << ",";
+    std::cout << print_info.module_regulator_states[i];
+  }
+  std::cout << std::endl;
+  std::cout << "Regulator timers" << std::endl;
+  for (size_t i = 0; i < print_info.module_regulator_timers.size(); ++i) {
+    if (i) std::cout << ",";
+    std::cout << print_info.module_regulator_timers[i];
+  }
+  std::cout << std::endl;
+  // number of active threads
+  print_info.num_active_threads = hw.GetNumActiveThreads();
+  // for each thread: {thread_id: {priority: ..., callstack: [...]}}
+  // - priority
+  // - callstack: [callstate, callstate, etc]
+  //   - callstate: [memory, flowstack]
+  //     - flowstack: [type, mp, ip, begin, end]
+  print_info.thread_state_str = "[";
+  bool comma = false;
+  for (size_t thread_id : hw.GetThreadExecOrder()) {
+    auto & thread = hw.GetThread(thread_id);
+    std::ostringstream stream;
+    if (comma) { stream << ","; }
+    stream << "{";
+    stream << "id:" << thread_id << ",";
+    // thread priority
+    stream << "priority:" << thread.GetPriority() << ",";
+    // thread state
+    stream << "state:";
+    if (thread.IsDead()) { stream << "dead,"; }
+    else if (thread.IsPending()) { stream << "pending,"; }
+    else if (thread.IsRunning()) { stream << "running,"; }
+    else { stream << "unknown,"; }
+    // call stack
+    stream << "call_stack:[";
+    auto & call_stack = thread.GetExecState().GetCallStack();
+    for (size_t i = 0; i < call_stack.size(); ++i) {
+      auto & mem_state = thread.GetExecState().GetCallStack()[i].memory;
+      auto & flow_stack = thread.GetExecState().GetCallStack()[i].flow_stack;
+      if (i) stream << ",";
+      // - call state -
+      stream << "{";
+      stream << "working_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetWorkingMemory(), stream);
+      stream << ",input_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetInputMemory(), stream);
+      stream << ",output_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetOutputMemory(), stream);
+      // - call state - flow stack -
+      stream << ",flow_stack:[";
+      for (size_t f = 0; f < flow_stack.size(); ++f) {
+        auto & flow = flow_stack[f];
+        if (f) stream << ",";
+        stream << "{";
+        // type
+        stream << "type:";
+        if (flow.IsBasic()) { stream << "basic,"; }
+        else if (flow.IsWhileLoop()) { stream << "whileloop,"; }
+        else if (flow.IsRoutine()) { stream << "routine,"; }
+        else if (flow.IsCall()) { stream << "call,"; }
+        else { stream << "unknown,"; }
+        // mp
+        stream << "mp:" << flow.mp << ",";
+        // ip
+        stream << "ip:" << flow.ip << ",";
+        // begin
+        stream << "begin:" << flow.begin << ",";
+        // end
+        stream << "end:" << flow.end;
+        stream << "}";
+      }
+      stream << "]";
+      stream << "}";
+    }
+    stream << "]";
+    stream << "}";
+    print_info.thread_state_str += stream.str();
+    if (!comma) { comma=true; }
+  }
+  print_info.thread_state_str += "]";
+  std::cout << "THREAD INFO" << std::endl;
+  std::cout << print_info.thread_state_str << std::endl;
+  return print_info;
 }
 
 // ---- PUBLIC IMPLEMENTATIONS ----
