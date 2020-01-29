@@ -482,6 +482,8 @@ void MCRegWorld::EvaluateOrg(org_t & org) {
   org.GetPhenotype().score = ScoreOrgPhenotype(org);
 }
 
+/// Note, this is terrible, good for nothing code practice! EW! AVERT YOUR EYES!
+/// this is what deadlines do to me
 void MCRegWorld::AnalyzeOrg(const org_t & org, size_t org_id) {
   ////////////////////////////////////////////////
   // (1) Does this organism's genotype perform equivalently across independent evaluations?
@@ -507,7 +509,494 @@ void MCRegWorld::AnalyzeOrg(const org_t & org, size_t org_id) {
   ////////////////////////////////////////////////
   // (2) Run a full trace of this organism.
   TraceOrganism(org, org_id);
-  // ...
+  // (3) Run with knockouts
+  //  * ko regulation
+  KO_REGULATION=true;
+  KO_GLOBAL_MEMORY=false;
+  KO_MESSAGING=false;
+  KO_REG_IMPRINTING=false;
+  KO_REPRO_TAG_CONTROL=false;
+  org_t ko_reg_org(org);
+  EvaluateOrg(ko_reg_org);
+  //  * ko memory
+  KO_REGULATION=false;
+  KO_GLOBAL_MEMORY=true;
+  KO_MESSAGING=false;
+  KO_REG_IMPRINTING=false;
+  KO_REPRO_TAG_CONTROL=false;
+  org_t ko_mem_org(org);
+  EvaluateOrg(ko_mem_org);
+  //  * ko messaging
+  KO_REGULATION=false;
+  KO_GLOBAL_MEMORY=false;
+  KO_MESSAGING=true;
+  KO_REG_IMPRINTING=false;
+  KO_REPRO_TAG_CONTROL=false;
+  org_t ko_msg_org(org);
+  EvaluateOrg(ko_msg_org);
+  // * ko regulation imprinting
+  KO_REGULATION=false;
+  KO_GLOBAL_MEMORY=false;
+  KO_MESSAGING=false;
+  KO_REG_IMPRINTING=true;
+  KO_REPRO_TAG_CONTROL=false;
+  org_t ko_imprint_org(org);
+  EvaluateOrg(ko_imprint_org);
+  // * ko control over reproduction tag
+  KO_REGULATION=false;
+  KO_GLOBAL_MEMORY=false;
+  KO_MESSAGING=false;
+  KO_REG_IMPRINTING=false;
+  KO_REPRO_TAG_CONTROL=true;
+  org_t ko_repo_tag_org(org);
+  EvaluateOrg(ko_repo_tag_org);
+  // guarantee that all ko's are turned off
+  KO_REGULATION=false;
+  KO_GLOBAL_MEMORY=false;
+  KO_MESSAGING=false;
+  KO_REG_IMPRINTING=false;
+  KO_REPRO_TAG_CONTROL=false;
+  ////////////////////////////////////////////////
+  // (4) Setup and write to analysis output file
+  // note: I'll arbitrarily use test_org 0 as canonical version
+  emp::DataFile analysis_file(OUTPUT_DIR + "/analysis_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
+  analysis_file.template AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
+  analysis_file.template AddFun<size_t>([&org_id]() { return org_id; }, "pop_id");
+  analysis_file.template AddFun<double>([&test_orgs]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    return org.GetPhenotype().GetScore();
+  }, "score");
+  analysis_file.template AddFun<bool>([&consistent_performance]() {
+    return consistent_performance;
+  }, "consistent");
+  // score ko regulation
+  analysis_file.template AddFun<double>([&ko_reg_org]() {
+    return ko_reg_org.GetPhenotype().GetScore();
+  }, "score__ko_regulation");
+  // score ko memory
+  analysis_file.template AddFun<double>([&ko_mem_org]() {
+    return ko_mem_org.GetPhenotype().GetScore();
+  }, "score__ko_global_memory");
+  // score ko messaging
+  analysis_file.template AddFun<double>([&ko_msg_org]() {
+    return ko_msg_org.GetPhenotype().GetScore();
+  }, "score__ko_messaging");
+  // score ko reg imprinting
+  analysis_file.template AddFun<double>([&ko_imprint_org]() {
+    return ko_imprint_org.GetPhenotype().GetScore();
+  }, "score__ko_regulation_imprinting");
+  // score ko repro tag control
+  analysis_file.template AddFun<double>([&ko_repo_tag_org]() {
+    return ko_repo_tag_org.GetPhenotype().GetScore();
+  }, "score__ko_reproduction_tag_control");
+  // -- baseline phenotype info --
+  // unique_responses
+  analysis_file.template AddFun<size_t>([&test_orgs]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    return org.GetPhenotype().GetUniqueResponseCnt();
+  }, "unique_responses");
+  // total_responses
+  analysis_file.template AddFun<size_t>([&test_orgs]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    return org.GetPhenotype().GetResponseCnt();
+  }, "total_responses");
+  // responses
+  analysis_file.template AddFun<std::string>([&test_orgs]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().response_cnts.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().response_cnts[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "responses");
+  // clumpy_ratings
+  analysis_file.template AddFun<std::string>([&test_orgs]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().clumpyness_ratings.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().clumpyness_ratings[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "clumpy_ratings");
+  // response_locs
+  analysis_file.template AddFun<std::string>([&test_orgs, this]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    std::ostringstream stream;
+    phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    this->PrintResponseLocationsSingleLine(phen, stream);
+    stream << "\"";
+    return stream.str();
+  }, "response_locs");
+  // active_cell_cnt
+  analysis_file.template AddFun<size_t>([&test_orgs]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    return org.GetPhenotype().GetActiveCellCnt();
+  }, "active_cell_cnt");
+  // active_cell_locs
+  analysis_file.template AddFun<std::string>([&test_orgs]() {
+    emp_assert(test_orgs.size());
+    org_t & org = test_orgs[0];
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"[";
+    for (size_t i = 0; i < phen.active_cells.size(); ++i) {
+      if (i) stream << ",";
+      stream << "(" << phen.active_cells[i].first << "," << phen.active_cells[i].second << ")";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "active_cell_locs");
+
+  // - ko reg - ko_reg_org - __ko_regulation
+  // unique_responses
+  analysis_file.template AddFun<size_t>([&ko_reg_org]() {
+    org_t & org = ko_reg_org;
+    return org.GetPhenotype().GetUniqueResponseCnt();
+  }, "unique_responses__ko_regulation");
+  // total_responses
+  analysis_file.template AddFun<size_t>([&ko_reg_org]() {
+    org_t & org = ko_reg_org;
+    return org.GetPhenotype().GetResponseCnt();
+  }, "total_responses__ko_regulation");
+  // responses
+  analysis_file.template AddFun<std::string>([&ko_reg_org]() {
+    org_t & org = ko_reg_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().response_cnts.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().response_cnts[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "responses__ko_regulation");
+  // clumpy_ratings
+  analysis_file.template AddFun<std::string>([&ko_reg_org]() {
+    org_t & org = ko_reg_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().clumpyness_ratings.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().clumpyness_ratings[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "clumpy_ratings__ko_regulation");
+  // response_locs
+  analysis_file.template AddFun<std::string>([&ko_reg_org, this]() {
+    org_t & org = ko_reg_org;
+    std::ostringstream stream;
+    phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    this->PrintResponseLocationsSingleLine(phen, stream);
+    stream << "\"";
+    return stream.str();
+  }, "response_locs__ko_regulation");
+  // active_cell_cnt
+  analysis_file.template AddFun<size_t>([&ko_reg_org]() {
+    org_t & org = ko_reg_org;
+    return org.GetPhenotype().GetActiveCellCnt();
+  }, "active_cell_cnt__ko_regulation");
+  // active_cell_locs
+  analysis_file.template AddFun<std::string>([&ko_reg_org]() {
+    org_t & org = ko_reg_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"[";
+    for (size_t i = 0; i < phen.active_cells.size(); ++i) {
+      if (i) stream << ",";
+      stream << "(" << phen.active_cells[i].first << "," << phen.active_cells[i].second << ")";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "active_cell_locs__ko_regulation");
+
+  // - ko mem - ko_mem_org - __ko_global_memory
+  // unique_responses
+  analysis_file.template AddFun<size_t>([&ko_mem_org]() {
+    org_t & org = ko_mem_org;
+    return org.GetPhenotype().GetUniqueResponseCnt();
+  }, "unique_responses__ko_global_memory");
+  // total_responses
+  analysis_file.template AddFun<size_t>([&ko_mem_org]() {
+    org_t & org = ko_mem_org;
+    return org.GetPhenotype().GetResponseCnt();
+  }, "total_responses__ko_global_memory");
+  // responses
+  analysis_file.template AddFun<std::string>([&ko_mem_org]() {
+    org_t & org = ko_mem_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().response_cnts.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().response_cnts[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "responses__ko_global_memory");
+  // clumpy_ratings
+  analysis_file.template AddFun<std::string>([&ko_mem_org]() {
+    org_t & org = ko_mem_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().clumpyness_ratings.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().clumpyness_ratings[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "clumpy_ratings__ko_global_memory");
+  // response_locs
+  analysis_file.template AddFun<std::string>([&ko_mem_org, this]() {
+    org_t & org = ko_mem_org;
+    std::ostringstream stream;
+    phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    this->PrintResponseLocationsSingleLine(phen, stream);
+    stream << "\"";
+    return stream.str();
+  }, "response_locs__ko_global_memory");
+  // active_cell_cnt
+  analysis_file.template AddFun<size_t>([&ko_mem_org]() {
+    org_t & org = ko_mem_org;
+    return org.GetPhenotype().GetActiveCellCnt();
+  }, "active_cell_cnt__ko_global_memory");
+  // active_cell_locs
+  analysis_file.template AddFun<std::string>([&ko_mem_org]() {
+    org_t & org = ko_mem_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"[";
+    for (size_t i = 0; i < phen.active_cells.size(); ++i) {
+      if (i) stream << ",";
+      stream << "(" << phen.active_cells[i].first << "," << phen.active_cells[i].second << ")";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "active_cell_locs__ko_global_memory");
+
+  // - ko msg - ko_msg_org - __ko_messaging
+  analysis_file.template AddFun<size_t>([&ko_msg_org]() {
+    org_t & org = ko_msg_org;
+    return org.GetPhenotype().GetUniqueResponseCnt();
+  }, "unique_responses__ko_messaging");
+  // total_responses
+  analysis_file.template AddFun<size_t>([&ko_msg_org]() {
+    org_t & org = ko_msg_org;
+    return org.GetPhenotype().GetResponseCnt();
+  }, "total_responses__ko_messaging");
+  // responses
+  analysis_file.template AddFun<std::string>([&ko_msg_org]() {
+    org_t & org = ko_msg_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().response_cnts.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().response_cnts[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "responses__ko_messaging");
+  // clumpy_ratings
+  analysis_file.template AddFun<std::string>([&ko_msg_org]() {
+    org_t & org = ko_msg_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().clumpyness_ratings.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().clumpyness_ratings[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "clumpy_ratings__ko_messaging");
+  // response_locs
+  analysis_file.template AddFun<std::string>([&ko_msg_org, this]() {
+    org_t & org = ko_msg_org;
+    std::ostringstream stream;
+    phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    this->PrintResponseLocationsSingleLine(phen, stream);
+    stream << "\"";
+    return stream.str();
+  }, "response_locs__ko_messaging");
+  // active_cell_cnt
+  analysis_file.template AddFun<size_t>([&ko_msg_org]() {
+    org_t & org = ko_msg_org;
+    return org.GetPhenotype().GetActiveCellCnt();
+  }, "active_cell_cnt__ko_messaging");
+  // active_cell_locs
+  analysis_file.template AddFun<std::string>([&ko_msg_org]() {
+    org_t & org = ko_msg_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"[";
+    for (size_t i = 0; i < phen.active_cells.size(); ++i) {
+      if (i) stream << ",";
+      stream << "(" << phen.active_cells[i].first << "," << phen.active_cells[i].second << ")";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "active_cell_locs__ko_messaging");
+
+  // - ko reg imprinting - ko_imprint_org - __ko_regulation_imprinting
+  // unique_responses
+  analysis_file.template AddFun<size_t>([&ko_imprint_org]() {
+    org_t & org = ko_imprint_org;
+    return org.GetPhenotype().GetUniqueResponseCnt();
+  }, "unique_responses__ko_regulation_imprinting");
+  // total_responses
+  analysis_file.template AddFun<size_t>([&ko_imprint_org]() {
+    org_t & org = ko_imprint_org;
+    return org.GetPhenotype().GetResponseCnt();
+  }, "total_responses__ko_regulation_imprinting");
+  // responses
+  analysis_file.template AddFun<std::string>([&ko_imprint_org]() {
+    org_t & org = ko_imprint_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().response_cnts.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().response_cnts[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "responses__ko_regulation_imprinting");
+  // clumpy_ratings
+  analysis_file.template AddFun<std::string>([&ko_imprint_org]() {
+    org_t & org = ko_imprint_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().clumpyness_ratings.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().clumpyness_ratings[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "clumpy_ratings__ko_regulation_imprinting");
+  // response_locs
+  analysis_file.template AddFun<std::string>([&ko_imprint_org, this]() {
+    org_t & org = ko_imprint_org;
+    std::ostringstream stream;
+    phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    this->PrintResponseLocationsSingleLine(phen, stream);
+    stream << "\"";
+    return stream.str();
+  }, "response_locs__ko_regulation_imprinting");
+  // active_cell_cnt
+  analysis_file.template AddFun<size_t>([&ko_imprint_org]() {
+    org_t & org = ko_imprint_org;
+    return org.GetPhenotype().GetActiveCellCnt();
+  }, "active_cell_cnt__ko_regulation_imprinting");
+  // active_cell_locs
+  analysis_file.template AddFun<std::string>([&ko_imprint_org]() {
+    org_t & org = ko_imprint_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"[";
+    for (size_t i = 0; i < phen.active_cells.size(); ++i) {
+      if (i) stream << ",";
+      stream << "(" << phen.active_cells[i].first << "," << phen.active_cells[i].second << ")";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "active_cell_locs__ko_regulation_imprinting");
+
+  // - ko repro tag control - ko_repo_tag_org - __ko_reproduction_tag_control
+  // unique_responses
+  analysis_file.template AddFun<size_t>([&ko_repo_tag_org]() {
+    org_t & org = ko_repo_tag_org;
+    return org.GetPhenotype().GetUniqueResponseCnt();
+  }, "unique_responses__ko_reproduction_tag_control");
+  // total_responses
+  analysis_file.template AddFun<size_t>([&ko_repo_tag_org]() {
+    org_t & org = ko_repo_tag_org;
+    return org.GetPhenotype().GetResponseCnt();
+  }, "total_responses__ko_reproduction_tag_control");
+  // responses
+  analysis_file.template AddFun<std::string>([&ko_repo_tag_org]() {
+    org_t & org = ko_repo_tag_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().response_cnts.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().response_cnts[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "responses__ko_reproduction_tag_control");
+  // clumpy_ratings
+  analysis_file.template AddFun<std::string>([&ko_repo_tag_org]() {
+    org_t & org = ko_repo_tag_org;
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < org.GetPhenotype().clumpyness_ratings.size(); ++i) {
+      if (i) stream << ",";
+      stream << org.GetPhenotype().clumpyness_ratings[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "clumpy_ratings__ko_reproduction_tag_control");
+  // response_locs
+  analysis_file.template AddFun<std::string>([&ko_repo_tag_org, this]() {
+    org_t & org = ko_repo_tag_org;
+    std::ostringstream stream;
+    phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    this->PrintResponseLocationsSingleLine(phen, stream);
+    stream << "\"";
+    return stream.str();
+  }, "response_locs__ko_reproduction_tag_control");
+  // active_cell_cnt
+  analysis_file.template AddFun<size_t>([&ko_repo_tag_org]() {
+    org_t & org = ko_repo_tag_org;
+    return org.GetPhenotype().GetActiveCellCnt();
+  }, "active_cell_cnt__ko_reproduction_tag_control");
+  // active_cell_locs
+  analysis_file.template AddFun<std::string>([&ko_repo_tag_org]() {
+    org_t & org = ko_repo_tag_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"[";
+    for (size_t i = 0; i < phen.active_cells.size(); ++i) {
+      if (i) stream << ",";
+      stream << "(" << phen.active_cells[i].first << "," << phen.active_cells[i].second << ")";
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "active_cell_locs__ko_reproduction_tag_control");
+
+  // -- program info --
+  analysis_file.template AddFun<size_t>([this, &org_id]() {
+    return this->GetOrg(org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  analysis_file.template AddFun<size_t>([this, &org_id]() {
+    return this->GetOrg(org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  analysis_file.template AddFun<std::string>([this, &org_id]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  // output analysis file
+  analysis_file.PrintHeaderKeys();
+  analysis_file.Update();
 }
 
 void MCRegWorld::TraceOrganism(const org_t & org, size_t org_id) {
@@ -858,24 +1347,48 @@ void MCRegWorld::InitInstLib() {
   inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t>, "");
   // If we can use global memory, give programs access. Otherwise, nops.
   if (USE_GLOBAL_MEMORY) {
-    inst_lib->AddInst("WorkingToGlobal", sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>, "");
-    inst_lib->AddInst("GlobalToWorking", sgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>, "");
+    inst_lib->AddInst("WorkingToGlobal", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("GlobalToWorking", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>(hw, inst);
+    }, "");
   } else {
     inst_lib->AddInst("Nop-WorkingToGlobal", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
   // If we can use regulation, add instructions. Otherwise, nops.
   if (USE_FUNC_REGULATION) {
-    inst_lib->AddInst("SetRegulator", sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("SetOwnRegulator", sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("AdjRegulator", sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("AdjOwnRegulator", sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("SenseRegulator", sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("SenseOwnRegulator", sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("IncRegulator", sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("IncOwnRegulator", sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("DecRegulator", sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>, "");
-    inst_lib->AddInst("DecOwnRegulator", sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>, "");
+    inst_lib->AddInst("SetRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("SetOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("AdjRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("AdjOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("SenseRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("SenseOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("IncRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("IncOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>(hw, inst);
+     }, "");
+    inst_lib->AddInst("DecRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("DecOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
   } else {
     inst_lib->AddInst("Nop-SetRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SetOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
@@ -901,7 +1414,7 @@ void MCRegWorld::InitInstLib() {
       // If cell in front of us is active, bail out.
       if (eval_deme->IsActive(facing_id)) return;
       // If we're here, this cell is facing an empty cell && we're in the development phase.
-      eval_deme->DoReproduction(facing_id, cell_id, EPIGENETIC_INHERITANCE);
+      eval_deme->DoReproduction(facing_id, cell_id, EPIGENETIC_INHERITANCE && !KO_REG_IMPRINTING);
       // If we're here, cells[facing_id] is 'new born', queue repro event!
       eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, eval_environment.propagule_start_tag));
     }, "Executing this instruction triggers reproduction.");
@@ -916,9 +1429,13 @@ void MCRegWorld::InitInstLib() {
       // If cell in front of us is active, bail out.
       if (eval_deme->IsActive(facing_id)) return;
       // If we're here, this cell is facing an empty cell && we're in the development phase.
-      eval_deme->DoReproduction(facing_id, cell_id, EPIGENETIC_INHERITANCE);
+      eval_deme->DoReproduction(facing_id, cell_id, EPIGENETIC_INHERITANCE && !KO_REG_IMPRINTING);
       // If we're here, cells[facing_id] is 'new born', queue repro event!
-      eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, inst.GetTag(0)));
+      if (KO_REPRO_TAG_CONTROL) {
+        eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, eval_environment.propagule_start_tag));
+      } else {
+        eval_deme->GetCell(facing_id).QueueEvent(event_t(event_id__birth_sig, inst.GetTag(0)));
+      }
     }, "Executing this instruction triggers reproduction.");
   }
   //   - actuation (rotation)
@@ -980,6 +1497,7 @@ void MCRegWorld::InitInstLib() {
   if (ALLOW_MESSAGING) {
     inst_lib->AddInst("SendMsg", [this](hardware_t & hw, const inst_t & inst) {
       if (eval_environment.GetPhase() != ENV_STATE::DEVELOPMENT) return;
+      if (KO_MESSAGING) return;
       auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
       auto & mem_state = call_state.GetMemory();
       hw.TriggerEvent(msg_event_t(event_id__send_msg, inst.GetTag(0), mem_state.GetOutputMemory()));
