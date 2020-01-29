@@ -33,6 +33,7 @@ public:
     bool new_born=false;
     int response=-1;
     Facing cell_facing=Facing::N;
+    std::unordered_set<size_t> imprint;   ///< Which module regulation should get imprinted to offspring?
 
     /// Reset everything except cell id
     void Reset() {
@@ -40,7 +41,19 @@ public:
       active=false;
       cell_facing=Facing::N;
       new_born=false;
+      imprint.clear();
     }
+
+    void MarkImprint(size_t module_id) { imprint.emplace(module_id); }
+    bool RemoveImprint(size_t module_id) {
+      if (emp::Has(imprint, module_id)) {
+        imprint.erase(module_id);
+        return true;
+      } else {
+        return false;
+      }
+    }
+    bool HasImprint(size_t module_id) { return emp::Has(imprint, module_id); }
 
     size_t GetCellID() const { return cell_id; }
     void SetCellID(size_t id) { cell_id = id; }

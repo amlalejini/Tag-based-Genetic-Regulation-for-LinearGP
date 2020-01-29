@@ -1404,6 +1404,24 @@ void MCRegWorld::InitInstLib() {
     inst_lib->AddInst("Nop-DecRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-DecOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
+
+  if (EPIGENETIC_INHERITANCE) {
+    inst_lib->AddInst("MarkImprint", [this](hardware_t & hw, const inst_t & inst) {
+      emp::vector<size_t> matches(hw.GetMatchBin().MatchRaw(inst.GetTag(0), 1));
+      if (!matches.size()) { return; }
+      const size_t match = matches[0];
+      hw.GetCustomComponent().MarkImprint(match);
+    }, "Mark module with closest matching tag (raw) for imprinting.");
+    inst_lib->AddInst("RemoveImprint",[this](hardware_t & hw, const inst_t & inst) {
+      emp::vector<size_t> matches(hw.GetMatchBin().MatchRaw(inst.GetTag(0), 1));
+      if (!matches.size()) { return; }
+      const size_t match = matches[0];
+      hw.GetCustomComponent().RemoveImprint(match);
+    }, "Remove imprint.");
+  } else {
+    inst_lib->AddInst("Nop-MarkImprint", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-RemoveImprint", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+  }
   // Add deme instructions
   //   - repro
   if (FIXED_REPRO_TAG) {
@@ -1578,8 +1596,17 @@ void MCRegWorld::InitHardware() {
       offspring_hw.GetCustomComponent().SetFacing(face_parent);
       // Inherit regulation from parent
       if (imprint_regulators) {
-        offspring_hw.GetMatchBin().ImprintRegulators(parent_hw.GetMatchBin());
-        // TODO - check epigenetic inheritance!
+        // Note: We can assume that offspring have the same program as their parents.
+        // For each module marked for imprinting, copy regulator value from parent to offspring.
+        for (size_t module_id = 0; module_id < offspring_hw.GetNumModules(); ++module_id) {
+          if (parent_hw.GetCustomComponent().HasImprint(module_id)) {
+            const double parent_reg_state = parent_hw.GetMatchBin().ViewRegulator(module_id);
+            offspring_hw.GetMatchBin().SetRegulator(module_id, parent_reg_state);
+            offspring_hw.GetCustomComponent().MarkImprint(module_id);
+          }
+        }
+        // offspring_hw.GetMatchBin().ImprintRegulators(parent_hw.GetMatchBin());
+        // emp_assert(parent_hw.GetCustomComponent().imprint == offspring_hw.GetCustomComponent().imprint);
       }
     });
   }
