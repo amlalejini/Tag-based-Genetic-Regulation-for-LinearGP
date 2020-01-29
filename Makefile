@@ -5,17 +5,20 @@ PROJECT := chg-env-exp
 EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
 
-# Match metric options: hamming, integer, streak, hash
-MATCH_METRIC := integer
+# Match metric options: hamming, integer, streak, hash, streak-exact
+MATCH_METRIC := streak
 # MATCH_THRESH options: 0, 25, 50, 75
 MATCH_THRESH := 25
 # MATCH_REG options: add, mult
 MATCH_REG := mult
-EXEC_NAME := $(PROJECT)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)_reg-$(MATCH_REG)
+# TAG_NUM_BITS
+TAG_NUM_BITS := 128
+# combine it all into the executable name
+EXEC_NAME := $(PROJECT)_tag-len-$(TAG_NUM_BITS)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)_reg-$(MATCH_REG)
 
 # Flags to use regardless of compiler
 CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) $(CFLAGS_includes)
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) -DTAG_NUM_BITS=$(TAG_NUM_BITS) $(CFLAGS_includes)
 
 # Native compiler information
 CXX_nat := g++-9
