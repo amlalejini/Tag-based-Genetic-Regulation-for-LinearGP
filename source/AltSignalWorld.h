@@ -43,7 +43,10 @@
 
 // TODO - use compile args!
 namespace AltSignalWorldDefs {
-  constexpr size_t TAG_LEN = 64;      // How many bits per tag?
+  #ifndef TAG_NUM_BITS
+  #define TAG_NUM_BITS 64
+  #endif
+  constexpr size_t TAG_LEN = TAG_NUM_BITS;      // How many bits per tag?
   constexpr size_t INST_TAG_CNT = 1;  // How many tags per instruction?
   constexpr size_t INST_ARG_CNT = 3;  // How many instruction arguments per instruction?
   constexpr size_t FUNC_NUM_TAGS = 1; // How many tags are associated with each function in a program?
