@@ -9,7 +9,7 @@
 
 ########## Command Lines to Run ##########
 
-DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/alife-2020/alt-sig
+DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/alife-2020/alt-sig-ts8
 CONFIG_DIR=/mnt/home/lalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/configs-alt-sig
 
 ##################################
@@ -26,7 +26,7 @@ REGULATOR_TYPE=mult
 
 ##################################
 # General world parameters
-NUM_SIGNAL_RESPONSES=16
+NUM_SIGNAL_RESPONSES=32
 NUM_ENV_CYCLES=${NUM_SIGNAL_RESPONSES}
 CPU_TIME_PER_ENV_CYCLE=256
 POP_SIZE=1000
