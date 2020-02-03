@@ -315,7 +315,7 @@ def main():
             # What was unchanged?
             unchanged = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] == 0]).replace(" ", "") + "\""
             deltas = "\"" + str(match_deltas).replace(" ", "") + "\""
-            line = ",".join([str(cycle), module_triggered, modules_run, deltas, promoted, repressed, unchanged])
+            line = ",".join([str(cycle), str(module_triggered), modules_run, deltas, promoted, repressed, unchanged])
             lines.append(line)
         with open(os.path.join(dump_dir, env_cycle_graph_out_name), "w") as fp:
             fp.write("\n".join(lines))
