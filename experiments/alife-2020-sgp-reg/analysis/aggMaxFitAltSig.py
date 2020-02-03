@@ -201,7 +201,7 @@ def main():
         # currently_active = [] # For each time step, which modules are currently active?
         # currently_running = []
         modules_run_in_env_cycle = [set() for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
-        match_delta_in_env_cycle = [None for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
+        match_delta_in_env_cycle = [[0 for i in range(num_modules)] for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
         module_triggered_by_env_cycle = [None for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
 
         modules_present_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
