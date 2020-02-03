@@ -107,6 +107,8 @@ def main():
         print("Unable to locate all data directories. Able to locate:", {loc: os.path.exists(loc) for loc in data_dirs})
         exit(-1)
 
+    mkdir_p(dump_dir)
+
     # Aggregate a list of all runs
     run_dirs = [os.path.join(data_dir, run_dir) for data_dir in data_dirs for run_dir in os.listdir(data_dir) if "__SEED_" in run_dir]
 
@@ -322,7 +324,6 @@ def main():
     # Output analysis org infos
     out_content = list(analysis_header_set)[0] + "\n" # Should be guaranteed to be length 1!
     out_content += "\n".join([",".join(map(str, line)) for line in analysis_org_infos])
-    mkdir_p(dump_dir)
     with open(os.path.join(dump_dir, dump_fname), "w") as fp:
         fp.write(out_content)
     print(f"Done! Output written to {os.path.join(dump_dir, dump_fname)}")
