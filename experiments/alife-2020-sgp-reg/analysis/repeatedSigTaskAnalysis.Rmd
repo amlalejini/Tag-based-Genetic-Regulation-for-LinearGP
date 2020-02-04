@@ -8,6 +8,7 @@ output:
     toc_depth: 4
     collapsed: false
     theme: default
+    code_folding: hide
   pdf_document:
     toc: true
     toc_depth: 4
@@ -16,24 +17,41 @@ output:
 ## Overview
 
 The repeated signal task requires organisms to coordinate their behavior with a changing environment. 
-In the repeated signal task, organisms are evaluated in an environment that cycles through _K_ independent states (always in the same order), each lasting a fixed number of time steps. 
+In the repeated signal task, organisms are evaluated in an environment that cycles through $K$ independent states (always in the same order), each lasting a fixed number of time steps. 
 To maximize fitness, an organism must express the appropriate response in to each environmental state. 
+The capacity to exhibit different responses to a particular signal requires organisms to regulate their response to the signal.
 
-TODO - general descriptions of environment
+In classic SignalGP, organisms must use their global memory buffer to track the environment and respond to the environmental signals appropriately.
+In regulation-enabled SignalGP, organisms can leverage global memory (i.e., memory shared among a program's threads that is persistent between environments; all local thread memory does not persist between environments) or regulation to shift their responses to the environment signal over time.
+
+This document is a companion to our submission to the 2020 Artificial Life conference. Here, we provide our analyses of our repeated signal task results.
+
+We evolved populations of 1,000 SignalGP organisms to solve the repeated signal task at four complexity levels: $K=2$, $K=4$, $K=8$, $K=16$ (where $K$ denotes the number of environmental states). $K=16$ is the most complex (and thus challenging) environment, and $K=2$ is the simplest (and thus least challenging) environment.
+We evolved populations for 10,000 generations, or until an organism capable of perfectly solving the task evolved (able to correctly respond in all environments).
+
+For each environment complexity level, we ran four experimental conditions:
+
+1. Classic SignalGP where programs have access to a global memory buffer but not to function regulation
+2. Regulation-augmented SignalGP where programs have access to both global memory and to function regulation
+3. A regulation-only control SignalGP where programs have access to function regulation but not a global memory buffer
+4. A control version of SignalGP where programs have access to neigher function regulation nor a global memory buffer (this version of SignalGP should be incapable of solving the repeated signal task)
+
+We ran 50 replicates of each condition.
 
 ## Dependencies
 
+Load all required R libraries.
+
 ```{r, message=FALSE}
-library(tidyr)    # (Wickham & Henry, 2018)
 library(ggplot2)  # (Wickham, 2009)
-library(plyr)     # (Wickham, 2011)
 library(dplyr)    # (Wickham et al., 2018)
 library(cowplot)  # (Wilke, 2018)
+library(viridis)  # (Garnier, 2018)
 ```
 
-## Load Data
+## Setup
 
-TODO - describe any necessary processing/de-compressing replicator might need to perform!
+Load data, initial data cleanup, global settings.
 
 ```{r}
 data_loc <- "../data/alt-sig/max_fit_orgs_10000_no_program.csv"
@@ -67,15 +85,22 @@ data$condition <- mapply(get_con, data$USE_FUNC_REGULATION, data$USE_GLOBAL_MEMO
 data$condition <- factor(data$condition, levels=c("regulation", "memory", "none", "both"))
 
 data$stochastic <- 1 - data$consistent # Does this program rely on a stochastic strategy?
+
+# Settings for statistical analyses.
+alpha <- 0.05
+correction_method <- "bonferroni"
 ```
 
 ## Does regulation-enabled SignalGP solve the repeated signal task?
 
-### Solution Counts
+We expected populations with access to function regulation to be most successful on the repeated signal task. 
+Indeed, we see that conditions where function regulation is enabled yield the most fit organisms (and the most solutions).
 
-Here, we define a 'solution' as a program that successfully matches...
+### Number of evolved solutions per condition
 
-```{r}
+An organism is categorized as a 'solution' if it can correctly respond in each of the $K$ environment states.
+
+```{r, echo=TRUE}
 
 label_lu <- c(
   "2" = "Environments: 2", 
@@ -85,24 +110,121 @@ label_lu <- c(
   "32" ="Environments: 32"
 )
 
-ggplot(data, aes(x=condition, y=solution, fill=condition)) +
-  geom_bar(stat="identity") +
+
+sol_data <- filter(data, solution=="1")
+ggplot(sol_data, aes(x=condition, fill=condition)) +
+  geom_bar() +
+  geom_text(stat="count", aes(label=..count..), position=position_dodge(0.9), vjust=0) +
   ggtitle("Solution Counts by Condition and Environment Complexity") +
   xlab("Condition") +
   ylab("# Evolved Solutions") +
   ylim(0, 50) +
   scale_fill_discrete(name="Condition",
-                      breaks=c("regulation", "memory", "none", "both"),
-                      labels=c("Regulation", "Global Memory", "Neither", "Both")) +
-  scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
+                      limits=c("regulation", "memory", "none", "both"),
+                      labels=c("Regulation only", "Global memory only\n(classic SignalGP)", "Neither", "Both")) +
+  scale_x_discrete(limits=c("regulation", "memory", "none", "both"),
                    labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
   facet_wrap(~ NUM_SIGNAL_RESPONSES, labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
   ggsave("./imgs/repeated-signal-solultion-cnts.png", width=16,height=8)
 ```
 
-TODO - statistical comparisons
+Note that in the lowest-complexity environment ($K=2$), two runs using classic SignalGP digital organisms produce solutions. This, in addition to hand-coded programs, confirms that it is _possible_ to solve the repeated signal task without regulation. However, these data seem to indicate that using the global memory buffer as it is currently designed/implemented is more challenging than using function regulation.
 
-### Scores
+We use a Fisher's exact test to determine if there are significant differences (p < `r alpha`) between the numbers of solutions found in the regulation-augmented SignalGP condition and all other conditions (within each environment complexity level). 
+We correct for multiple comparisons using the `r correction_method` method.
+Indeed, our analyses (given below), confirm our visual intuitions: conditions with access to function regulation outperform those without access to function regulation.
+
+```{r, echo=TRUE, results="asis"}
+environments <- c("2", "4", "8", "16")
+
+for (env in environments) {
+  
+  env_data <- filter(data, NUM_SIGNAL_RESPONSES==env)
+  cat("#### Environment ", env, " - statistical analysis of solution counts  \n")
+  # Extract successes/fails for each condition.
+  mem_success_cnt <- nrow(filter(env_data, solution=="1" & condition=="memory"))
+  mem_fail_cnt <- nrow(filter(env_data, condition=="memory")) - mem_success_cnt
+  reg_success_cnt <- nrow(filter(env_data, solution=="1" & condition=="regulation"))
+  reg_fail_cnt <- nrow(filter(env_data, condition=="regulation")) - reg_success_cnt
+  both_success_cnt <- nrow(filter(env_data, solution=="1" & condition=="both"))
+  both_fail_cnt <- nrow(filter(env_data, condition=="both")) - both_success_cnt
+  none_success_cnt <- nrow(filter(env_data, solution=="1" & condition=="none"))
+  none_fail_cnt <- nrow(filter(env_data, condition=="none")) - none_success_cnt
+  
+  # Regulation-enabled SGP vs. Classic SGP
+  mem_sgp_table <- matrix(c(both_success_cnt, mem_success_cnt, both_fail_cnt, mem_fail_cnt), nrow=2)
+  rownames(mem_sgp_table) <- c("both", "mem-only")
+  colnames(mem_sgp_table) <- c("success", "fail")
+  mem_sgp_fishers <- fisher.test(mem_sgp_table)
+  
+  # Regulation-enabled SGP vs. Regulation-only SGP
+  reg_sgp_table <- matrix(c(both_success_cnt, reg_success_cnt, both_fail_cnt, reg_fail_cnt), nrow=2)
+  rownames(reg_sgp_table) <- c("both", "reg-only")
+  colnames(reg_sgp_table) <- c("success", "fail")
+  reg_sgp_fishers <- fisher.test(reg_sgp_table)
+  
+  # Regulation-enabled SGP vs. No reg/mem SGP
+  none_sgp_table <- matrix(c(both_success_cnt, none_success_cnt, both_fail_cnt, none_fail_cnt), nrow=2)
+  rownames(none_sgp_table) <- c("both", "none")
+  colnames(none_sgp_table) <- c("success", "fail")
+  none_sgp_fishers <- fisher.test(none_sgp_table)
+  
+  # Adjust for multiple comparisons
+  adjusted <- p.adjust(p=c(mem_sgp_fishers$p.value, 
+                           reg_sgp_fishers$p.value, 
+                           none_sgp_fishers$p.value), method=correction_method)
+  mem_sgp_fishers$p.adjusted <- adjusted[1]
+  reg_sgp_fishers$p.adjusted <- adjusted[2]
+  none_sgp_fishers$p.adjusted <- adjusted[3]
+  
+  # Summarize!
+  no_sig_comps <- TRUE
+  cat("Significant comparisons (Fisher's exact test, p < ", alpha, ",", correction_method, " correction for multiple comparisons):  \n\n")
+  if (mem_sgp_fishers$p.adjusted < alpha) {
+    cat("- Regulation-augmented SignalGP (regulation & global memory) vs. Classic SignalGP (global memory only )  \n")
+    no_sig_comps <- FALSE
+  }
+  if (reg_sgp_fishers$p.adjusted < alpha) {
+    cat("- Regulation-augmented SignalGP (regulation & global memory) vs. Regulation-only SignalGP (global memory disabled)  \n")
+    no_sig_comps <- FALSE
+  }
+  if (none_sgp_fishers$p.adjusted < alpha) {
+    cat("- Regulation-augmented SignalGP (regulation & global memory) vs. Regulation- and Memory-Disabled SignalGP  \n")
+    no_sig_comps <- FALSE
+  }
+  if (no_sig_comps) {
+    cat("- NONE  \n")
+  }
+  
+  cat("\n")
+  cat("**Results - Regulation-augmented SignalGP (regulation & global memory) vs. Classic SignalGP (global memory only)**  \n")
+  cat("```\n")
+  print(mem_sgp_table)
+  print(mem_sgp_fishers)
+  cat("p.adjusted = ", mem_sgp_fishers$p.adjusted, " (method = ", correction_method, ")", "  \n")
+  cat("```\n")
+  
+  cat("**Results - Regulation-augmented SignalGP (regulation & global memory) vs. Regulation-only SignalGP (global memory disabled)**  \n")
+  cat("```\n")
+  print(reg_sgp_table)
+  print(reg_sgp_fishers)
+  cat("p.adjusted = ", reg_sgp_fishers$p.adjusted, " (method = ", correction_method, ")", "  \n")
+  cat("```\n")
+  
+  cat("**Results - Regulation-augmented SignalGP (regulation & global memory) vs. Regulation- and Memory-Disabled SignalGP**  \n")
+  cat("```\n")
+  print(none_sgp_table)
+  print(none_sgp_fishers)
+  cat("p.adjusted = ", none_sgp_fishers$p.adjusted, " (method = ", correction_method,")", "  \n")
+  cat("```\n")
+  cat("\n")
+
+}
+```
+
+### Repeated signal task scores by condition
+
+Here, we give the raw task scores for the highest-fitness organism from each run across all environments/conditions.
 
 ```{r}
 ggplot(data, aes(x=condition, y=score, color=condition)) +
@@ -118,19 +240,78 @@ ggplot(data, aes(x=condition, y=score, color=condition)) +
   ggsave("./imgs/repeated-signal-scores.png", width=16,height=8)
 ```
 
-TODO - statistical comparisons
+### When given access to function regulation and global memory, what do solutions rely on?
 
-### Are solutions relying on regulation?
+Here, we take a closer at the strategies employed by solutions evolved across environment complexities.
+For each evolved solution, we independently knocked out (disabled) function regulation and global memory access. We measured the fitness effects of knocking each of function regulation and global memory, and if a knockout resulted in a decrease in fitness, we labeled that organism as relying on that functionality (global memory or function regulation) for success.
 
-From the regulation-only control?
+The graph below gives the proportion of solutions that rely on just regulation, just global memory, and both global memory and regulation for each of the regulation-only, global-memory-only (classic SignalGP), and regulation-and-memory (regulation-augmented SignalGP) conditions.
+We can see that in conditions where organisms have access to either just regulation or both regulation and global memory, evolved solutions rely _only_ on regulation. In conditions where memory is the only mechanism for solving the repeated signal task, we see that all evolved solutions (only 2) rely only on memory.
+
+These data show that, in SignalGP's current configuration of function regulation and global memory, evolution 'prefers' function regulation for solving the repeated signal task. 
+
 
 ```{r}
-regulation_only_solutions <- filter(data, condition=="regulation" & solution=="1")
-ggplot(regulation_only_solutions, aes(x=use_regulation, y=score, color=condition))
+reg_and_mem_solutions <- filter(data, solution=="1")
+get_strategy <- function(use_reg, use_mem) {
+  if (use_reg=="0" && use_mem=="0") {
+    return("use neither")
+  } else if (use_reg=="0" && use_mem=="1") {
+    return("use memory")
+  } else if (use_reg=="1" && use_mem=="0") {
+    return("use regulation")
+  } else if (use_reg=="1" && use_mem=="1") {
+    return("use both")
+  } else {
+    return("UNKNOWN")
+  }
+}
+# Specify experimental conditions (to make labeling easier).
+reg_and_mem_solutions$strategy <- mapply(get_strategy, reg_and_mem_solutions$use_regulation, reg_and_mem_solutions$use_global_memory)
+reg_and_mem_solutions$strategy <- factor(reg_and_mem_solutions$strategy, levels=c("use regulation", "use memory", "use neither", "use both"))
+
+ggplot(reg_and_mem_solutions, mapping=aes(x=NUM_SIGNAL_RESPONSES, fill=strategy)) +
+  geom_bar(position="fill", stat="count") +
+  geom_text(stat='count', mapping=aes(label=..count..), position=position_fill(vjust=-0.03)) +
+  ylab("% of Solutions") +
+  xlab("Environmental Complexity (number of environments)") +
+  scale_fill_discrete(breaks=c("use regulation", "use memory", "use neigther", "use both"),
+                   labels=c("Use regulation (only)", "Use global memory (only)", "Use neither", "Use both")) +
+  facet_wrap(~condition)
 ```
 
-From the regulation & global memory treatment?
 
-### Are solution relying on stochastic strategies?
+### Are evolved programs relying on stochastic strategies?
 
-## Case Studies: regulation in action
+To confirm that evolved organisms were not relying on stochastic approaches to solve the repeated signal task, we tested each of the highest-fitness individuals in the population at the end of each run three times. If an organism's phenotype was not identical across each of the three trials, we labeled is as using a stochastic strategy.
+From the graph below, we see no evidence of evolved organisms relying on stochastic strategies to solve the repeated signal task. I.e., all organisms responded consistently across trials.
+Note, this is unsurprising, as we do not give programs access to instructions capable of generating random values.
+
+```{r}
+label_lu <- c(
+  "2" = "Environments: 2", 
+  "4" = "Environments: 4", 
+  "8" = "Environments: 8", 
+  "16" = "Environments: 16", 
+  "32" ="Environments: 32"
+)
+
+ggplot(filter(data), aes(x=condition, y=stochastic, fill=condition)) +
+  geom_bar(stat="identity") +
+  ggtitle("Stochastic Strategies by Condition and Environment Complexity") +
+  xlab("Condition") +
+  ylab("# Stochastic Strategies") +
+  ylim(0, 50) +
+  scale_fill_discrete(name="Condition",
+                      breaks=c("regulation", "memory", "none", "both"),
+                      labels=c("Regulation", "Global Memory", "Neither", "Both")) +
+  scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
+  facet_wrap(~ NUM_SIGNAL_RESPONSES, labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu))
+```
+
+## Case Study: regulation in action
+
+Next, we take a closer look at the behavioral profile of evolved SignalGP organisms.
+
+Coming soon...
