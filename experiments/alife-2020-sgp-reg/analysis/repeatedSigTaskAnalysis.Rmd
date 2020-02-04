@@ -1,0 +1,136 @@
+---
+title: "Demonstrating Genetic Regulation in SignalGP - Analysis - Repeated Signal Task"
+output: 
+  html_document: 
+    keep_md: no
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    collapsed: false
+    theme: default
+  pdf_document:
+    toc: true
+    toc_depth: 4
+---
+
+## Overview
+
+The repeated signal task requires organisms to coordinate their behavior with a changing environment. 
+In the repeated signal task, organisms are evaluated in an environment that cycles through _K_ independent states (always in the same order), each lasting a fixed number of time steps. 
+To maximize fitness, an organism must express the appropriate response in to each environmental state. 
+
+TODO - general descriptions of environment
+
+## Dependencies
+
+```{r, message=FALSE}
+library(tidyr)    # (Wickham & Henry, 2018)
+library(ggplot2)  # (Wickham, 2009)
+library(plyr)     # (Wickham, 2011)
+library(dplyr)    # (Wickham et al., 2018)
+library(cowplot)  # (Wilke, 2018)
+```
+
+## Load Data
+
+TODO - describe any necessary processing/de-compressing replicator might need to perform!
+
+```{r}
+data_loc <- "../data/alt-sig/max_fit_orgs_10000_no_program.csv"
+data <- read.csv(data_loc, na.strings="NONE")
+
+# Specify factors.
+data$matchbin_thresh <- factor(data$matchbin_thresh,
+                                     levels=c(0, 25, 50, 75))
+data$NUM_SIGNAL_RESPONSES <- factor(data$NUM_SIGNAL_RESPONSES,
+                                    levels=c(2, 4, 8, 16, 32))
+data$NUM_ENV_CYCLES <- factor(data$NUM_ENV_CYCLES,
+                              levels=c(2, 4, 8, 16, 32))
+data$TAG_LEN <- factor(data$TAG_LEN,
+                       levels=c(32, 64, 128))
+# Define function to summarize regulation/memory configurations.
+get_con <- function(reg, mem) {
+  if (reg == "0" && mem == "0") {
+    return("none")
+  } else if (reg == "0" && mem=="1") {
+    return("memory")
+  } else if (reg=="1" && mem=="0") {
+    return("regulation")
+  } else if (reg=="1" && mem=="1") {
+    return("both")
+  } else {
+    return("UNKNOWN")
+  }
+}
+# Specify experimental condition for each datum.
+data$condition <- mapply(get_con, data$USE_FUNC_REGULATION, data$USE_GLOBAL_MEMORY)
+data$condition <- factor(data$condition, levels=c("regulation", "memory", "none", "both"))
+
+data$stochastic <- 1 - data$consistent # Does this program rely on a stochastic strategy?
+```
+
+## Does regulation-enabled SignalGP solve the repeated signal task?
+
+### Solution Counts
+
+Here, we define a 'solution' as a program that successfully matches...
+
+```{r}
+
+label_lu <- c(
+  "2" = "Environments: 2", 
+  "4" = "Environments: 4", 
+  "8" = "Environments: 8", 
+  "16" = "Environments: 16", 
+  "32" ="Environments: 32"
+)
+
+ggplot(data, aes(x=condition, y=solution, fill=condition)) +
+  geom_bar(stat="identity") +
+  ggtitle("Solution Counts by Condition and Environment Complexity") +
+  xlab("Condition") +
+  ylab("# Evolved Solutions") +
+  ylim(0, 50) +
+  scale_fill_discrete(name="Condition",
+                      breaks=c("regulation", "memory", "none", "both"),
+                      labels=c("Regulation", "Global Memory", "Neither", "Both")) +
+  scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
+  facet_wrap(~ NUM_SIGNAL_RESPONSES, labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
+  ggsave("./imgs/repeated-signal-solultion-cnts.png", width=16,height=8)
+```
+
+TODO - statistical comparisons
+
+### Scores
+
+```{r}
+ggplot(data, aes(x=condition, y=score, color=condition)) +
+  geom_boxplot() +
+  ggtitle("Scores by Condition and Environment Complexity") +
+  xlab("Condition") +
+  ylab("Score (# correct responses)") +
+  scale_color_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global Memory", "Neither", "Both")) +
+  scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
+  facet_wrap(~ NUM_SIGNAL_RESPONSES, scales="free_y", labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
+  ggsave("./imgs/repeated-signal-scores.png", width=16,height=8)
+```
+
+TODO - statistical comparisons
+
+### Are solutions relying on regulation?
+
+From the regulation-only control?
+
+```{r}
+regulation_only_solutions <- filter(data, condition=="regulation" & solution=="1")
+ggplot(regulation_only_solutions, aes(x=use_regulation, y=score, color=condition))
+```
+
+From the regulation & global memory treatment?
+
+### Are solution relying on stochastic strategies?
+
+## Case Studies: regulation in action
