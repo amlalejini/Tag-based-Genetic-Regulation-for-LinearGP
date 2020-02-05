@@ -240,6 +240,97 @@ ggplot(data, aes(x=condition, y=score, color=condition)) +
   ggsave("./imgs/repeated-signal-scores.png", width=16,height=8)
 ```
 
+### How long did it take for solutions to arise?
+
+```{r}
+ggplot(filter(data, solution=="1"), aes(x=condition, y=update, color=condition)) +
+  geom_boxplot() +
+  ggtitle("Time to solution") +
+  xlab("Condition") +
+  ylab("Generation of first solution") +
+  scale_color_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global Memory", "Neither", "Both")) +
+  scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
+  facet_wrap(~ NUM_SIGNAL_RESPONSES, scales="free_y", labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
+  ggsave("./imgs/repeated-signal-solve-time.png", width=16,height=8)
+```
+
+#### 2-state environment
+
+```{r}
+env_2_sol_data <- filter(data, solution=="1" & NUM_SIGNAL_RESPONSES==2)
+# First, kruskal-wallis to test for significant differences among groups
+env2_kt <- kruskal.test(update ~ condition, data=env_2_sol_data)
+print(env2_kt)
+# Next, if kruskal-wallis is significant, perform a pairwise wilcoxon rank-sum test
+if (env2_kt$p.value < alpha) {
+  # x: response vector; g: grouping vector
+  env2_wt <- pairwise.wilcox.test(x=env_2_sol_data$update, g=env_2_sol_data$condition, p.adjust.method="holm", exact=FALSE)
+  print(env2_wt)
+} else {
+  print("No significant difference.")
+}
+```
+Here, the solutions from regulation-enabled conditions arose sooner than solutions from memory-only conditions.
+
+#### 4-state environment
+
+```{r}
+env_4_sol_data <- filter(data, solution=="1" & NUM_SIGNAL_RESPONSES==4)
+# First, kruskal-wallis to test for significant differences among groups
+env4_kt <- kruskal.test(update ~ condition, data=env_4_sol_data)
+print(env4_kt)
+# Next, if kruskal-wallis is significant, perform a pairwise wilcoxon rank-sum test
+if (env4_kt$p.value < alpha) {
+  # x: response vector; g: grouping vector
+  env4_wt <- pairwise.wilcox.test(x=env_4_sol_data$update, g=env_4_sol_data$condition, p.adjust.method="holm", exact=FALSE)
+  print(env4_wt)
+} else {
+  print("No significant difference.")
+}
+```
+
+Here, only regulation-enabled treatments yielded solutions, and there is no significant difference between the two regulation-enabled conditions.
+
+#### 8-state environment
+
+```{r}
+env_8_sol_data <- filter(data, solution=="1" & NUM_SIGNAL_RESPONSES==8)
+# First, kruskal-wallis to test for significant differences among groups
+env8_kt <- kruskal.test(update ~ condition, data=env_8_sol_data)
+print(env8_kt)
+# Next, if kruskal-wallis is significant, perform a pairwise wilcoxon rank-sum test
+if (env8_kt$p.value < alpha) {
+  # x: response vector; g: grouping vector
+  env8_wt <- pairwise.wilcox.test(x=env_8_sol_data$update, g=env_8_sol_data$condition, p.adjust.method="holm", exact=FALSE)
+  print(env8_wt)
+} else {
+  print("No significant difference.")
+}
+```
+
+Here, only regulation-enabled treatments yielded solutions, and there is no significant difference between the two regulation-enabled conditions.
+
+#### 16-state environment
+
+```{r, echo=TRUE}
+# First, kruskal-wallis to test for significant differences among groups
+env_16_sol_data <- filter(data, solution=="1" & NUM_SIGNAL_RESPONSES==16)
+env16_kt <- kruskal.test(update ~ condition, data=env_16_sol_data)
+print(env16_kt)
+# Next, if kruskal-wallis is significant, perform a pairwise wilcoxon rank-sum test
+if (env16_kt$p.value < alpha) {
+  # x: response vector; g: grouping vector
+  env16_wt <- pairwise.wilcox.test(x=env_16_sol_data$update, g=env_16_sol_data$condition, p.adjust.method="holm", exact=FALSE)
+  print(env16_wt)
+} else {
+  print("No significant difference.")
+}
+```
+
+Here, only regulation-enabled treatments yielded solutions, and there is no significant difference between the two regulation-enabled conditions.
+
 ### When given access to function regulation and global memory, what do solutions rely on?
 
 Here, we take a closer at the strategies employed by solutions evolved across environment complexities.
