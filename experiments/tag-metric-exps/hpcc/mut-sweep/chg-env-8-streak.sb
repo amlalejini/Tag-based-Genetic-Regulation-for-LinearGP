@@ -29,7 +29,7 @@ REGULATOR_TYPE=mult
 MATCH_METRIC=streak
 NUM_ENV_STATES=8
 NUM_ENV_UPDATES=${NUM_ENV_STATES}
-
+TAG_LEN=32
 ##################################
 # General world parameters
 POP_SIZE=1000
