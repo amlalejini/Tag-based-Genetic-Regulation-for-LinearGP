@@ -163,7 +163,7 @@ def main():
         ko_reg_delta = base_score - ko_reg_score
         ko_global_mem_delta = base_score - ko_gmem_score
         ko_all_delta = base_score - ko_all_score
-        extra_fields = ["use_regulation", "use_global_memory", "use_either",
+        extra_fields = ["relies_on_regulation", "relies_on_global_memory", "relies_on_either",
                         "ko_regulation_delta", "ko_global_memory_delta", "ko_all_delta"]
         extra_values = [use_regulation, use_global_memory, use_either,
                         ko_reg_delta, ko_global_mem_delta, ko_all_delta]
@@ -203,7 +203,7 @@ def main():
         modules_run_in_env_cycle = [set() for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
         match_delta_in_env_cycle = [[0 for i in range(num_modules)] for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
         module_triggered_by_env_cycle = [None for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
-
+        modules_active_ever = set()
         modules_present_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
         modules_active_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
 
@@ -236,7 +236,9 @@ def main():
                 if len(call_stack):
                     if len(call_stack[-1]["flow_stack"]):
                         active_module = call_stack[-1]["flow_stack"][-1]["mp"]
-                if active_module != None: active_modules.append(active_module)
+                if active_module != None:
+                    active_modules.append(active_module)
+                    modules_active_ever.add(active_module)
                 # add ALL modules
                 present_modules += list({flow["mp"] for call in call_stack for flow in call["flow_stack"]})
             # add present modules to env set for this env
@@ -249,14 +251,6 @@ def main():
             final_match_scores = list(map(float, steps[-1][trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
             match_delta_in_env_cycle[cur_env] = [baseline - final for baseline, final in zip(baseline_match_scores, final_match_scores)]
 
-            # print("Active modules:", active_modules)
-            # print( modules_active_by_step[i])
-            # print("Present modules:", present_modules)
-            # print(modules_present_by_step[i])
-
-        # print("================")
-        # print(match_delta_in_env_cycle)
-
         # ========= build trace out file for this run =========
         # - There's one trace output file per run
         # - Extra fields:
@@ -267,7 +261,7 @@ def main():
         #   - regulator_state__mid_[:]
         trace_out_name = f"trace_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
         orig_fields = ["env_cycle","cpu_step","num_env_states","cur_env_state","cur_response","has_correct_response","num_modules","env_signal_closest_match","num_active_threads"]
-        derived_fields = ["module_id", "time_step", "is_in_call_stack", "is_running", "is_match", "match_score", "regulator_state"]
+        derived_fields = ["module_id", "time_step", "is_in_call_stack", "is_running", "is_match", "is_ever_active", "match_score", "regulator_state"]
         trace_header = ",".join(orig_fields + derived_fields)
         trace_out_lines = []
         expected_lines = num_modules * len(steps)
@@ -287,6 +281,7 @@ def main():
                                 modules_present[module_id],   # is_in_call_stack
                                 modules_active[module_id],    # is_running
                                 int(cur_match == module_id),  # is_match
+                                int(module_id in modules_active_ever), # is_ever_active
                                 cur_match_scores[module_id],  # match_score
                                 cur_reg_states[module_id]     # regulator_state
                                ]
@@ -299,24 +294,64 @@ def main():
         print("  Wrote out:", os.path.join(dump_dir, trace_out_name))
 
         # ========= build environment cycle regulation graph =========
-        num_env_cycles = int(run_settings["NUM_ENV_CYCLES"])
-        env_cycle_graph_out_name = f"env-cycle-graph_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
-        env_cycle_graph_fields = ["env_cycle", "module_triggered", "modules_run", "match_delta", "promoted", "repressed", "unchanged"]
+        # num_env_cycles = int(run_settings["NUM_ENV_CYCLES"])
+        # env_cycle_graph_out_name = f"env-cycle-graph_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
+        # env_cycle_graph_fields = ["env_cycle", "module_triggered", "modules_run", "match_delta", "promoted", "repressed", "unchanged"]
+        # lines = [",".join(env_cycle_graph_fields)]
+        # for cycle in range(0, num_env_cycles):
+        #     module_triggered = module_triggered_by_env_cycle[cycle]
+        #     match_deltas = match_delta_in_env_cycle[cycle]
+        #     # What modules were running?
+        #     modules_run = "\"" + str(modules_run_in_env_cycle[cycle]).replace(" ","") + "\""
+        #     # What was promoted?
+        #     promoted = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] < 0]).replace(" ", "") + "\""
+        #     # What was repressed?
+        #     repressed = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] > 0]).replace(" ", "") + "\""
+        #     # What was unchanged?
+        #     unchanged = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] == 0]).replace(" ", "") + "\""
+        #     deltas = "\"" + str(match_deltas).replace(" ", "") + "\""
+        #     line = ",".join([str(cycle), str(module_triggered), modules_run, deltas, promoted, repressed, unchanged])
+        #     lines.append(line)
+        # with open(os.path.join(dump_dir, env_cycle_graph_out_name), "w") as fp:
+        #     fp.write("\n".join(lines))
+        # print("  Wrote out:", os.path.join(dump_dir, env_cycle_graph_out_name))
+
+        # num_env_cycles = int(run_settings["NUM_ENV_CYCLES"])
+        env_cycle_graph_out_name = f"reg-graph_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
+        env_cycle_graph_fields = ["transition_id", "env_cycle", "time_step", "module_triggered", "active_modules", "promoted", "repressed", "match_scores" , "match_deltas"]
         lines = [",".join(env_cycle_graph_fields)]
-        for cycle in range(0, num_env_cycles):
-            module_triggered = module_triggered_by_env_cycle[cycle]
-            match_deltas = match_delta_in_env_cycle[cycle]
-            # What modules were running?
-            modules_run = "\"" + str(modules_run_in_env_cycle[cycle]).replace(" ","") + "\""
-            # What was promoted?
-            promoted = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] < 0]).replace(" ", "") + "\""
-            # What was repressed?
-            repressed = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] > 0]).replace(" ", "") + "\""
-            # What was unchanged?
-            unchanged = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] == 0]).replace(" ", "") + "\""
-            deltas = "\"" + str(match_deltas).replace(" ", "") + "\""
-            line = ",".join([str(cycle), str(module_triggered), modules_run, deltas, promoted, repressed, unchanged])
-            lines.append(line)
+
+        state_i = None
+        cur_env_cycle = None
+        cur_active_modules = None
+        cur_match_scores = None
+        print("len(steps) = ", len(steps))
+        for step_i in range(0, len(steps)):
+            print("=== Step: ", step_i, " ===")
+            step_info = steps[step_i]
+            # Extract current env cycle
+            env_cycle = int(step_info[trace_header_lu["env_cycle"]])
+            # Extract active modules (top of call stacks)
+            active_modules = {i for i in range(0, num_modules) if modules_active_by_step[step_i][i] > 0}
+            match_scores = list(map(float, step_info[trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
+            if (active_modules != cur_active_modules) or (env_cycle != cur_env_cycle):
+                print("  >> ", step_i)
+                cur_active_modules = active_modules
+                cur_env_cycle = env_cycle
+                if step_i > 0:
+                    match_deltas = [cur_match_scores[i] - match_scores[i] for i in range(0, num_modules)]
+                    state_i += 1
+                else:
+                    match_deltas = [0 for i in range(0, num_modules)]
+                    state_i = 0
+                cur_match_scores = match_scores
+                promoted = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] < 0]).replace(" ", "") + "\""
+                repressed = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] > 0]).replace(" ", "") + "\""
+                deltas = "\"" + str(match_deltas).replace(" ", "") + "\""
+                scores = "\"" + str(cur_match_scores).replace(" ", "") + "\""
+                active_modules = "\"" + str(list(cur_active_modules)).replace(" ", "") + "\""
+                module_triggered = module_triggered_by_env_cycle[env_cycle]
+                lines.append(",".join([str(state_i), str(cur_env_cycle), str(step_i), str(module_triggered), active_modules, promoted, repressed, scores, deltas]))
         with open(os.path.join(dump_dir, env_cycle_graph_out_name), "w") as fp:
             fp.write("\n".join(lines))
         print("  Wrote out:", os.path.join(dump_dir, env_cycle_graph_out_name))
