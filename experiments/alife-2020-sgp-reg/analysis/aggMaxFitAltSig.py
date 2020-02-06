@@ -325,9 +325,7 @@ def main():
         cur_env_cycle = None
         cur_active_modules = None
         cur_match_scores = None
-        print("len(steps) = ", len(steps))
         for step_i in range(0, len(steps)):
-            print("=== Step: ", step_i, " ===")
             step_info = steps[step_i]
             # Extract current env cycle
             env_cycle = int(step_info[trace_header_lu["env_cycle"]])
@@ -335,7 +333,6 @@ def main():
             active_modules = {i for i in range(0, num_modules) if modules_active_by_step[step_i][i] > 0}
             match_scores = list(map(float, step_info[trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
             if (active_modules != cur_active_modules) or (env_cycle != cur_env_cycle):
-                print("  >> ", step_i)
                 cur_active_modules = active_modules
                 cur_env_cycle = env_cycle
                 if step_i > 0:
