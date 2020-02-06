@@ -110,7 +110,7 @@ def main():
     mkdir_p(dump_dir)
 
     # Aggregate a list of all runs
-    run_dirs = [os.path.join(data_dir, run_dir) for data_dir in data_dirs for run_dir in os.listdir(data_dir) if "__SEED_" in run_dir and not "_ENV_32_" in run_dir]
+    run_dirs = [os.path.join(data_dir, run_dir) for data_dir in data_dirs for run_dir in os.listdir(data_dir) if "__SEED_" in run_dir and not "_ENVS_32_" in run_dir]
 
     # sort run directories by seed to make easier on the eyes
     run_dirs.sort(key=lambda x : int(x.split("_")[-1]))
