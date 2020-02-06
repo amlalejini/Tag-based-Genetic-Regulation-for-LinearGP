@@ -110,7 +110,7 @@ def main():
     mkdir_p(dump_dir)
 
     # Aggregate a list of all runs
-    run_dirs = [os.path.join(data_dir, run_dir) for data_dir in data_dirs for run_dir in os.listdir(data_dir) if "__SEED_" in run_dir]
+    run_dirs = [os.path.join(data_dir, run_dir) for data_dir in data_dirs for run_dir in os.listdir(data_dir) if "__SEED_" in run_dir and not "_ENV_32_" in run_dir]
 
     # sort run directories by seed to make easier on the eyes
     run_dirs.sort(key=lambda x : int(x.split("_")[-1]))
@@ -347,11 +347,11 @@ def main():
 
             # Has anything been repressed/promoted?
             match_deltas = [match_scores[i] - prev_match_scores[i] for i in range(0, num_modules)]
-            repressed_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] < 0}
-            promoted_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] > 0}
+            repressed_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] > 0}
+            promoted_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] < 0}
 
             # if current active modules or current env cycle don't match previous, output what happened since last time we output
-            if (active_modules != prev_active_modules and len(active_modules) != 0):
+            if (( active_modules != prev_active_modules and len(active_modules) != 0 ) or (step_i == (len(steps) - 1)) ):
                 promoted_str = "\"" + str(list(promoted_modules)).replace(" ", "") + "\""
                 repressed_str = "\"" + str(list(repressed_modules)).replace(" ", "") + "\""
                 deltas = "\"" + str(match_deltas).replace(" ", "") + "\"" # deltas from beginning => end of state
@@ -365,6 +365,7 @@ def main():
                 prev_active_modules = active_modules
                 prev_env_cycle = env_cycle
                 state_i += 1
+            # collect end-state information
 
         with open(os.path.join(dump_dir, env_cycle_graph_out_name), "w") as fp:
             fp.write("\n".join(lines))
