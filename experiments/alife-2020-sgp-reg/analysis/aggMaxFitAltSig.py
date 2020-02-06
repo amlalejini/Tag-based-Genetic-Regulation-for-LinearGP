@@ -336,7 +336,7 @@ def main():
                 cur_active_modules = active_modules
                 cur_env_cycle = env_cycle
                 if step_i > 0:
-                    match_deltas = [cur_match_scores[i] - match_scores[i] for i in range(0, num_modules)]
+                    match_deltas = [match_scores[i] - cur_match_scores[i] for i in range(0, num_modules)]
                     state_i += 1
                 else:
                     match_deltas = [0 for i in range(0, num_modules)]
