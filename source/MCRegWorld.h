@@ -86,7 +86,7 @@ namespace MCRegWorldDefs {
   using matchbin_metric_t =
   #ifdef MATCH_METRIC
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer",
-      emp::UnifMod<emp::SymmetricWrapMetric<TAG_LEN>>,
+      emp::UnifMod<emp::AsymmetricNoWrapMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hamming",
       emp::UnifMod<emp::HammingMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hash",
