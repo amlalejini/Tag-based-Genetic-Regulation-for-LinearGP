@@ -165,10 +165,11 @@ def main():
         ko_all_delta = base_score - ko_all_score
         extra_fields = ["relies_on_regulation", "relies_on_global_memory", "relies_on_either",
                         "ko_regulation_delta", "ko_global_memory_delta", "ko_all_delta"]
+        trace_fields = ["call_promoted_cnt", "call_repressed_cnt"]
         extra_values = [use_regulation, use_global_memory, use_either,
                         ko_reg_delta, ko_global_mem_delta, ko_all_delta]
 
-        analysis_header_set.add(",".join([key for key in key_settings] + extra_fields + analysis_header))
+        analysis_header_set.add(",".join([key for key in key_settings] + extra_fields + trace_fields + analysis_header))
         if len(analysis_header_set) > 1:
             print(f"Header mismatch! ({org_analysis_path})")
             exit(-1)
@@ -176,8 +177,7 @@ def main():
         org[analysis_header_lu["program"]] = "\"" + org[analysis_header_lu["program"]] + "\""
         num_modules = int(org[analysis_header_lu["num_modules"]])
         # org_update = int(org[analysis_header_lu["update"]])
-        # append csv line (as a list) for analysis orgs
-        analysis_org_infos.append([run_settings[key] for key in key_settings] + extra_values + org)
+
 
         # ========= extract org trace information =========
         content = None
@@ -327,6 +327,9 @@ def main():
         prev_match_scores = None
         found_first_module = False
 
+        calls_with_repressors = 0
+        calls_with_promotors = 0
+
         for step_i in range(0, len(steps)):
             step_info = steps[step_i]
             # Extract current env cycle
@@ -352,6 +355,8 @@ def main():
 
             # if current active modules or current env cycle don't match previous, output what happened since last time we output
             if (( active_modules != prev_active_modules and len(active_modules) != 0 ) or (step_i == (len(steps) - 1)) ):
+                calls_with_repressors += len(repressed_modules)
+                calls_with_promotors += len(promoted_modules)
                 promoted_str = "\"" + str(list(promoted_modules)).replace(" ", "") + "\""
                 repressed_str = "\"" + str(list(repressed_modules)).replace(" ", "") + "\""
                 deltas = "\"" + str(match_deltas).replace(" ", "") + "\"" # deltas from beginning => end of state
@@ -365,11 +370,15 @@ def main():
                 prev_active_modules = active_modules
                 prev_env_cycle = env_cycle
                 state_i += 1
-            # collect end-state information
+
 
         with open(os.path.join(dump_dir, env_cycle_graph_out_name), "w") as fp:
             fp.write("\n".join(lines))
         print("  Wrote out:", os.path.join(dump_dir, env_cycle_graph_out_name))
+
+        trace_values = [str(calls_with_promotors), str(calls_with_repressors)]
+        # append csv line (as a list) for analysis orgs
+        analysis_org_infos.append([run_settings[key] for key in key_settings] + extra_values + trace_values + org)
 
     # Output analysis org infos
     out_content = list(analysis_header_set)[0] + "\n" # Should be guaranteed to be length 1!
