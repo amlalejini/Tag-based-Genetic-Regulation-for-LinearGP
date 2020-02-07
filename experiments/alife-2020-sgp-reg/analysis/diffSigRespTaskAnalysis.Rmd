@@ -1,0 +1,116 @@
+---
+title: "Demonstrating Genetic Regulation in SignalGP - Analysis - Differentiated Signal Response Task"
+output: 
+  html_document: 
+    keep_md: no
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    collapsed: false
+    theme: default
+    code_folding: hide
+  pdf_document:
+    toc: true
+    toc_depth: 4
+---
+
+## Overview
+
+## Dependencies
+
+Load all required R libraries.
+
+```{r, message=FALSE}
+library(ggplot2)  # (Wickham, 2009)
+library(dplyr)    # (Wickham et al., 2018)
+library(cowplot)  # (Wilke, 2018)
+library(viridis)  # (Garnier, 2018)
+```
+
+## Setup
+
+Load data, initial data cleanup, global settings.
+
+```{r}
+data_loc <- "../data/mc-reg/max_fit_1500.csv"
+data <- read.csv(data_loc, na.strings="NONE")
+
+# Specify factors.
+data$matchbin_thresh <- factor(data$matchbin_thresh,
+                                     levels=c(0, 25, 50, 75))
+
+data$TAG_LEN <- factor(data$TAG_LEN,
+                       levels=c(32, 64, 128))
+
+data$relies_on_reg <- factor(data$relies_on_reg, levels=c(0, 1))
+data$relies_on_mem <- factor(data$relies_on_mem, levels=c(0, 1))
+data$relies_on_msg <- factor(data$relies_on_msg, levels=c(0, 1))
+data$relies_on_imprinting <- factor(data$relies_on_imprinting, levels=c(0, 1))
+data$relies_on_repro_tag <- factor(data$relies_on_repro_tag, levels=c(0, 1))
+# Define function to summarize regulation/memory configurations.
+get_con <- function(reg, mem) {
+  if (reg == "0" && mem == "0") {
+    return("none")
+  } else if (reg == "0" && mem=="1") {
+    return("memory")
+  } else if (reg=="1" && mem=="0") {
+    return("regulation")
+  } else if (reg=="1" && mem=="1") {
+    return("both")
+  } else {
+    return("UNKNOWN")
+  }
+}
+# Specify experimental condition for each datum.
+data$condition <- mapply(get_con, data$USE_FUNC_REGULATION, data$USE_GLOBAL_MEMORY)
+data$condition <- factor(data$condition, levels=c("regulation", "memory", "none", "both"))
+
+data$stochastic <- 1 - data$consistent # Does this program rely on a stochastic strategy?
+
+# Settings for statistical analyses.
+alpha <- 0.05
+correction_method <- "bonferroni"
+```
+
+## fitness
+
+### scores by condition
+
+Here, we give the raw task scores for the highest-fitness organism from each run across all environments/conditions.
+
+```{r}
+ggplot(data, aes(x=condition, y=score, color=condition)) +
+  geom_boxplot() +
+  ggtitle("Scores by Condition") +
+  xlab("Condition") +
+  ylab("Score (# correct responses)") +
+  scale_color_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global Memory", "Neither", "Both")) +
+  scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
+  scale_y_continuous(trans="log10") +
+  ggsave("./imgs/mc-reg-scores.png", width=16,height=8)
+```
+
+```{r}
+reg_data <- filter(data, condition=="regulation" | condition=="both")
+
+ggplot(reg_data, aes(x=relies_on_msg, fill=relies_on_msg)) +
+  geom_bar() +
+  ylim(0, 100)
+
+ggplot(reg_data, aes(x=relies_on_imprinting, fill=relies_on_imprinting)) +
+  geom_bar() +
+  ylim(0, 100)
+
+ggplot(reg_data, aes(x=relies_on_repro_tag, fill=relies_on_repro_tag)) +
+  geom_bar() +
+  ylim(0, 100)
+
+ggplot(reg_data, aes(x=relies_on_reg, fill=relies_on_reg)) +
+  geom_bar() +
+  ylim(0, 100) +
+  scale_x_discrete(limits=c("0", "1"), labels=c("0", "1"))
+
+
+```

@@ -117,13 +117,13 @@ ggplot(sol_data, aes(x=condition, fill=condition)) +
   geom_text(stat="count", aes(label=..count..), position=position_dodge(0.9), vjust=0) +
   ggtitle("Solution Counts by Condition and Environment Complexity") +
   xlab("Condition") +
-  ylab("# Evolved Solutions") +
-  ylim(0, 50) +
-  scale_fill_discrete(name="Condition",
+  # ylab("# Evolved Solutions") +
+  scale_y_continuous(name="Number of evolved solutions", breaks=seq(0, 50, 10), limits=c(0, 52)) +
+  scale_fill_discrete(name="SignalGP Treatment",
                       limits=c("regulation", "memory", "none", "both"),
-                      labels=c("Regulation only", "Global memory only\n(classic SignalGP)", "Neither", "Both")) +
+                      labels=c("Regulation-only", "Memory-only", "Neither", "Regulation & Memory")) +
   scale_x_discrete(limits=c("regulation", "memory", "none", "both"),
-                   labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
+                   labels=c("Regulation", "Memory", "Neither", "Both")) +
   facet_wrap(~ NUM_SIGNAL_RESPONSES, labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
   ggsave("./imgs/repeated-signal-solultion-cnts.png", width=16,height=8)
 ```
