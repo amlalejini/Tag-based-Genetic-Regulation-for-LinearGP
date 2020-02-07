@@ -86,6 +86,8 @@ namespace ChgEnvWorldDefs {
   #ifdef MATCH_METRIC
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer",
       emp::UnifMod<emp::AsymmetricWrapMetric<TAG_LEN>>,
+    std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer-symmetric",
+      emp::UnifMod<emp::SymmetricWrapMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hamming",
       emp::UnifMod<emp::HammingMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hash",
@@ -95,6 +97,7 @@ namespace ChgEnvWorldDefs {
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak-exact",
       emp::UnifMod<emp::ExactDualStreakMetric<TAG_LEN>>,
     std::enable_if<false>
+    >::type
     >::type
     >::type
     >::type
