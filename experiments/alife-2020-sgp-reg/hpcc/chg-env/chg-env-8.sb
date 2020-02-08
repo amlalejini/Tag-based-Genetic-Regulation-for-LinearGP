@@ -10,7 +10,7 @@
 ########## Command Lines to Run ##########
 
 EXP=chg-env
-DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/alife-2020/${EXP}
+DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/alife-2020/${EXP}-ts8
 CONFIG_DIR=/mnt/home/lalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/configs-${EXP}
 
 ##################################
