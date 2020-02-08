@@ -2,10 +2,12 @@ library(ggplot2)  # (Wickham, 2009)
 library(dplyr)    # (Wickham et al., 2018)
 library(cowplot)  # (Wilke, 2018)
 library(viridis)  # (Garnier, 2018)
+library(scales)
 
 data_dir <- "/Users/amlalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/data"
 dump_dir <- "/Users/amlalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/analysis"
-trace_ids <- 100001:100100
+trace_ids <- 100201:100300
+
 
 max_fit_data_file <- paste(data_dir, "/alt-sig/max_fit_orgs_10000_no_program.csv", sep="")
 max_fit_data <- read.csv(max_fit_data_file, na.strings="NONE")
@@ -44,10 +46,10 @@ for (trace_id in trace_ids) {
   trace_data$is_running <- factor(trace_data$is_running, levels=c(0, 1))
   
   trace_data$triggered <- (trace_data$env_signal_closest_match == trace_data$module_id) & (trace_data$cpu_step == "0")
-  
+  # , limits=c(-5, 5), oob=squish
   out_name <- paste(dump_dir, "/imgs/traces/trace-id-", trace_id, "-regulator-state.png", sep="")
   ggplot(trace_data, aes(x=module_id, y=time_step, fill=regulator_state)) +
-    scale_fill_viridis(option="plasma") +
+    scale_fill_viridis(option="viridis", direction=-1) +
     geom_tile(color="white", size=0.2, width=1, height=1) +
     geom_tile(data=filter(trace_data, is_running==1), color="black", width=1, height=1, size=0.8) +
     geom_hline(yintercept=filter(trace_data, cpu_step==0)$time_step-0.5, size=1) +

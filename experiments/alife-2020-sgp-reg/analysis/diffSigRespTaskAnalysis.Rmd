@@ -25,6 +25,8 @@ library(ggplot2)  # (Wickham, 2009)
 library(dplyr)    # (Wickham et al., 2018)
 library(cowplot)  # (Wilke, 2018)
 library(viridis)  # (Garnier, 2018)
+library(eulerr)
+library(tidyr)
 ```
 
 ## Setup
@@ -34,6 +36,7 @@ Load data, initial data cleanup, global settings.
 ```{r}
 data_loc <- "../data/mc-reg/max_fit_1500.csv"
 data <- read.csv(data_loc, na.strings="NONE")
+data <- subset(data, select = -c(program))
 
 # Specify factors.
 data$matchbin_thresh <- factor(data$matchbin_thresh,
@@ -79,6 +82,11 @@ correction_method <- "bonferroni"
 Here, we give the raw task scores for the highest-fitness organism from each run across all environments/conditions.
 
 ```{r}
+# From: https://stackoverflow.com/questions/23901907/create-a-log-sequence-across-multiple-orders-of-magnitude
+lseq <- function(from=1, to=100000, length.out=6) {
+  return(exp(seq(log(from), log(to), length.out = length.out)))
+}
+
 ggplot(data, aes(x=condition, y=score, color=condition)) +
   geom_boxplot() +
   ggtitle("Scores by Condition") +
@@ -88,29 +96,76 @@ ggplot(data, aes(x=condition, y=score, color=condition)) +
                    labels=c("Regulation", "Global Memory", "Neither", "Both")) +
   scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
                    labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
-  scale_y_continuous(trans="log10") +
+  scale_y_continuous(trans="log", limits=c(1, 1e+20), breaks=c(lseq(1, 1e+20, 5))) +
+  theme(legend.position="none") +
   ggsave("./imgs/mc-reg-scores.png", width=16,height=8)
 ```
 
+### What do multi-cells rely on to differentiate cell responses?
+
 ```{r}
-reg_data <- filter(data, condition=="regulation" | condition=="both")
+reg_data <- filter(data, condition=="both")
 
-ggplot(reg_data, aes(x=relies_on_msg, fill=relies_on_msg)) +
-  geom_bar() +
-  ylim(0, 100)
+msg_p <- ggplot(reg_data, aes(x=relies_on_msg, fill=relies_on_msg)) +
+            geom_bar() +
+            ylim(0, 50) +
+            ggtitle("Relies on messaging?") +
+            theme(legend.position="none",axis.title.x=element_blank())
 
-ggplot(reg_data, aes(x=relies_on_imprinting, fill=relies_on_imprinting)) +
-  geom_bar() +
-  ylim(0, 100)
+imp_p <- ggplot(reg_data, aes(x=relies_on_imprinting, fill=relies_on_imprinting)) +
+            geom_bar() +
+            ylim(0, 50) +
+            ggtitle("Relies on imprinting?") +
+            theme(legend.position="none",axis.title.x=element_blank())
 
-ggplot(reg_data, aes(x=relies_on_repro_tag, fill=relies_on_repro_tag)) +
-  geom_bar() +
-  ylim(0, 100)
+tag_p <- ggplot(reg_data, aes(x=relies_on_repro_tag, fill=relies_on_repro_tag)) +
+            geom_bar() +
+            ylim(0, 50) +
+            ggtitle("Relies on reproduction tags?") +
+            theme(legend.position="none",axis.title.x=element_blank())
 
-ggplot(reg_data, aes(x=relies_on_reg, fill=relies_on_reg)) +
-  geom_bar() +
-  ylim(0, 100) +
-  scale_x_discrete(limits=c("0", "1"), labels=c("0", "1"))
+reg_p <- ggplot(reg_data, aes(x=relies_on_reg, fill=relies_on_reg)) +
+            geom_bar() +
+            ylim(0, 50) +
+            ggtitle("Relies on regulation?") +
+            scale_x_discrete(limits=c("0", "1"), labels=c("0", "1")) +
+            theme(legend.position="none",axis.title.x=element_blank())
 
 
+grid <- plot_grid(reg_p,msg_p,tag_p,imp_p, labels = c('A', 'B', 'C', 'D'), label_size = 12)
+print(grid)
+save_plot("./imgs/multi-cell-differentiation-strategy.png", grid, base_height=6, base_width=8)
+```
+
+What are the fitnesses of demes that relies on each strategy?
+
+```{r}
+ggplot(reg_data, aes(x=relies_on_repro_tag, y=score, fill=relies_on_repro_tag)) +
+  scale_y_continuous(trans="log10") +
+  geom_boxplot()
+
+ggplot(reg_data, aes(x=relies_on_imprinting, y=score, fill=relies_on_imprinting)) +
+  scale_y_continuous(trans="log10") +
+  geom_boxplot()
+
+ggplot(reg_data, aes(x=relies_on_msg, y=score, fill=relies_on_msg)) +
+  scale_y_continuous(trans="log10") +
+  geom_boxplot()
+```
+
+What is the strategy breakdown (in more detail)?
+
+```{r}
+usage_data <- filter(data, condition=="both")
+usage_data <- subset(usage_data, select=c(relies_on_msg,relies_on_imprinting,relies_on_repro_tag))
+usage_data$msg <- usage_data$relies_on_msg == "1"
+usage_data$repro_tag <- usage_data$relies_on_repro_tag == "1"
+usage_data$imprinting <- usage_data$relies_on_imprinting == "1"
+usage_data$none <- !usage_data$msg & !usage_data$repro_tag & !usage_data$imprinting
+usage_data <- subset(usage_data, select=c(msg, repro_tag, imprinting, none))
+euler(usage_data)
+# png("./plot.png", width=4, height=4)
+e <- plot(euler(usage_data), legend=TRUE)
+save_plot("./imgs/multicell-strategies-breakdown.png", e, base_width=4, base_height=4)
+# dev.off()
 ```
