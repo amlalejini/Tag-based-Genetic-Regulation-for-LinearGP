@@ -44,9 +44,11 @@ Load all required R libraries.
 
 ```{r, message=FALSE}
 library(ggplot2)  # (Wickham, 2009)
+library(tidyr)    # (Wickham and Henry, 2018)
 library(dplyr)    # (Wickham et al., 2018)
 library(cowplot)  # (Wilke, 2018)
 library(viridis)  # (Garnier, 2018)
+library(reshape2)
 ```
 
 ## Setup
@@ -103,11 +105,11 @@ An organism is categorized as a 'solution' if it can correctly respond in each o
 ```{r, echo=TRUE}
 
 label_lu <- c(
-  "2" = "Environments: 2", 
-  "4" = "Environments: 4", 
-  "8" = "Environments: 8", 
-  "16" = "Environments: 16", 
-  "32" ="Environments: 32"
+  "2" = "2 Environments", 
+  "4" = "4 Environments", 
+  "8" = "8 Environments", 
+  "16" = "16 Environments", 
+  "32" ="32 Environments"
 )
 
 
@@ -117,15 +119,15 @@ ggplot(sol_data, aes(x=condition, fill=condition)) +
   geom_text(stat="count", aes(label=..count..), position=position_dodge(0.9), vjust=0) +
   ggtitle("Solution Counts by Condition and Environment Complexity") +
   xlab("Condition") +
-  # ylab("# Evolved Solutions") +
-  scale_y_continuous(name="Number of evolved solutions", breaks=seq(0, 50, 10), limits=c(0, 52)) +
-  scale_fill_discrete(name="SignalGP Treatment",
+  scale_y_continuous(name="# solutions", breaks=seq(0, 50, 10), limits=c(0, 52)) +
+  scale_fill_discrete(name="Condition:",
                       limits=c("regulation", "memory", "none", "both"),
-                      labels=c("Regulation-only", "Memory-only", "Neither", "Regulation & Memory")) +
+                      labels=c("Regulation-only", "Memory-only", "Neither", "Both")) +
   scale_x_discrete(limits=c("regulation", "memory", "none", "both"),
                    labels=c("Regulation", "Memory", "Neither", "Both")) +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES, labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
-  ggsave("./imgs/repeated-signal-solultion-cnts.png", width=16,height=8)
+  facet_wrap(~ NUM_SIGNAL_RESPONSES, nrow=1, labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
+  theme(legend.position="bottom", axis.text.x=element_blank(), axis.title.x=element_blank()) +
+  ggsave("./imgs/repeated-signal-solultion-cnts.png", width=8,height=3)
 ```
 
 Note that in the lowest-complexity environment ($K=2$), two runs using classic SignalGP digital organisms produce solutions. This, in addition to hand-coded programs, confirms that it is _possible_ to solve the repeated signal task without regulation. However, these data seem to indicate that using the global memory buffer as it is currently designed/implemented is more challenging than using function regulation.
@@ -246,14 +248,15 @@ ggplot(data, aes(x=condition, y=score, color=condition)) +
 ggplot(filter(data, solution=="1"), aes(x=condition, y=update, color=condition)) +
   geom_boxplot() +
   ggtitle("Time to solution") +
-  xlab("Condition") +
-  ylab("Generation of first solution") +
+  ylab("Generation of first solution (log scale)") +
   scale_color_discrete(breaks=c("regulation", "memory", "none", "both"),
                    labels=c("Regulation", "Global Memory", "Neither", "Both")) +
   scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
                    labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES, scales="free_y", labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
-  ggsave("./imgs/repeated-signal-solve-time.png", width=16,height=8)
+  scale_y_continuous(limits=c(0, 10000), breaks=c(0, 10, 100, 1000, 10000), trans="pseudo_log")+
+  facet_wrap(~ NUM_SIGNAL_RESPONSES, nrow=1, labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
+  theme(legend.position="bottom", axis.text.x=element_blank(), axis.title.x=element_blank()) +
+  ggsave("./imgs/repeated-signal-solve-time.png", width=8,height=4)
 ```
 
 #### 2-state environment
@@ -358,17 +361,19 @@ get_strategy <- function(use_reg, use_mem) {
   }
 }
 # Specify experimental conditions (to make labeling easier).
-reg_and_mem_solutions$strategy <- mapply(get_strategy, reg_and_mem_solutions$use_regulation, reg_and_mem_solutions$use_global_memory)
+reg_and_mem_solutions$strategy <- mapply(get_strategy, reg_and_mem_solutions$relies_on_regulation, reg_and_mem_solutions$relies_on_global_memory)
 reg_and_mem_solutions$strategy <- factor(reg_and_mem_solutions$strategy, levels=c("use regulation", "use memory", "use neither", "use both"))
 
 ggplot(reg_and_mem_solutions, mapping=aes(x=NUM_SIGNAL_RESPONSES, fill=strategy)) +
   geom_bar(position="fill", stat="count") +
   geom_text(stat='count', mapping=aes(label=..count..), position=position_fill(vjust=-0.03)) +
   ylab("% of Solutions") +
-  xlab("Environmental Complexity (number of environments)") +
-  scale_fill_discrete(breaks=c("use regulation", "use memory", "use neigther", "use both"),
+  xlab("Environment Complexity") +
+  scale_fill_discrete(name="Strategy:", breaks=c("use regulation", "use memory", "use neither", "use both"),
                    labels=c("Use regulation (only)", "Use global memory (only)", "Use neither", "Use both")) +
-  facet_wrap(~condition)
+  facet_wrap(~condition) +
+  theme(legend.position = "bottom") +
+  ggsave("./imgs/repeated-signal-strategies.png", width=8,height=4)
 ```
 
 
@@ -406,3 +411,23 @@ ggplot(filter(data), aes(x=condition, y=stochastic, fill=condition)) +
 Next, we take a closer look at the behavioral profile of evolved SignalGP organisms.
 
 Coming soon...
+
+```{r}
+
+# call_promoted_cnt
+# call_repressed_cnt
+melted <- melt(filter(data, condition=="both" & solution=="1"), 
+               variable.name = "call_reg_type",
+               value.names = "call_reg_cnt",
+               measure.vars=c("call_promoted_cnt", "call_repressed_cnt"))
+ggplot(melted, aes(y=value, x=NUM_SIGNAL_RESPONSES, color=call_reg_type)) +
+  geom_boxplot() +
+  ylab("Regulation Calls") +
+  xlab("Environment States") +
+  scale_color_discrete(name="Type:", limits=c("call_promoted_cnt", "call_repressed_cnt"), labels=c("Up-regulation calls", "Down-regulation calls"), direction=-1) +
+  theme(legend.position="bottom") +
+  ggsave("./imgs/repeated-sig-regulate-counts.png", width=6, height=4)
+  # facet_wrap(~ NUM_SIGNAL_RESPONSES, scales="free_y", labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu))
+```
+
+
