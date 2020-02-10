@@ -41,7 +41,6 @@
 #include "mutation_utils.h"
 #include "Event.h"
 
-// TODO - use compile args!
 namespace ChgEnvWorldDefs {
   #ifndef TAG_NUM_BITS
   #define TAG_NUM_BITS 64
