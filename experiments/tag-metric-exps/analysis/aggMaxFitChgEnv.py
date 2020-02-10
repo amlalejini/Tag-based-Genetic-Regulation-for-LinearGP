@@ -106,7 +106,8 @@ def main():
             exit(-1)
         # Build organism line.
         # - do some special processing on program entry
-        orgs[best_org_id][header_lu["program"]] = f"\"{orgs[best_org_id][header_lu['program']]}\""
+        # orgs[best_org_id][header_lu["program"]] = f"\"{orgs[best_org_id][header_lu['program']]}\""
+        orgs[best_org_id][header_lu["program"]] = "EXCLUDED"
         max_fits.append([run_settings[key] for key in key_settings] + orgs[best_org_id])
     # Output header + max_fit orgs
     out_content = list(header_set)[0] + "\n" # Should be guaranteed to be length 1!
