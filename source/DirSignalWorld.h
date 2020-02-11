@@ -133,6 +133,9 @@ struct DirSigCustomHardware {
     responded = true;
     response = i;
   }
+
+  int GetResponse() const { return response; }
+  bool HasResponse() const { return responded; }
 };
 
 class DirSigWorld : public emp::World<DirSigWorldDefs::org_t> {
@@ -509,7 +512,7 @@ void DirSigWorld::InitEventLib() {
                                             emp_assert(eval_environment.GetShiftLeftTag() == event.GetTag());
                                             hw.SpawnThreadWithTag(event.GetTag());
                                           });
-  event_id__left_env_sig = event_lib->AddEvent("RightSignal",
+  event_id__right_env_sig = event_lib->AddEvent("RightSignal",
                                         [this](hardware_t & hw, const base_event_t & e) {
                                           const event_t & event = static_cast<const event_t&>(e);
                                           emp_assert(eval_environment.GetShiftRightTag() == event.GetTag());
@@ -551,7 +554,7 @@ void DirSigWorld::InitEnvironment() {
   //                   ++n;
   //               });
   // BitVector::SetUInt seems broken, so I'll just brute force this...
-  std::cout << "Possible lr environment direction sequences:" << std::endl;
+  // std::cout << "Possible lr environment direction sequences:" << std::endl;
   size_t strip_size = 1;
   bool val = false;
   size_t counter = 0;
@@ -653,17 +656,105 @@ void DirSigWorld::InitPop_Hardcoded() {
 // ----- protected utility functions -----
 
 void DirSigWorld::DoEvaluation() {
-  // todo
+  // Sample tests! (shuffle test ids)
+  emp::Shuffle(*random_ptr, dir_seq_ids);
+  max_fit_org_id = 0;
+  for (size_t org_id = 0; org_id < this->GetSize(); ++org_id) {
+    emp_assert(this->IsOccupied(org_id));
+    EvaluateOrg(this->GetOrg(org_id));
+    if (CalcFitnessID(org_id) > CalcFitnessID(max_fit_org_id)) max_fit_org_id = org_id;
+    // Record phenotype information for this taxon.
+    after_eval_sig.Trigger(org_id);
+  }
 }
+
 void DirSigWorld::DoSelection() {
   // todo
 }
+
 void DirSigWorld::DoUpdate() {
   // todo
 }
 
 void DirSigWorld::EvaluateOrg(org_t & org) {
-  // TODO
+  // Evaluate given organism on each test (TEST_SAMPLE_SIZE) NUM_TRIALS number of times.
+  // Fitness on a test = min(trial on test)
+  org.GetPhenotype().Reset(TEST_SAMPLE_SIZE);
+  // Ready the hardware
+  eval_hardware->SetProgram(org.GetGenome().program);
+  // Evaluate the organism on each sampled test (tests should be shuffled prior to evaluation).
+  emp_assert(dir_seq_ids.size() == possible_dir_sequences.size());
+  std::for_each(trial_phenotypes.begin(), trial_phenotypes.end(), [this](auto & phen) { phen.Reset(TEST_SAMPLE_SIZE); });
+  for (size_t sample_id = 0; sample_id < TEST_SAMPLE_SIZE; ++sample_id) {
+    const size_t test_id = sample_id % dir_seq_ids.size();         // Make sure we're sampling a valid test id.
+    auto & env_seq = possible_dir_sequences[dir_seq_ids[test_id]]; // Grab the environment sequence we'll be using.
+    size_t min_trial_id = 0;
+    // std::cout << "===================================" << std::endl;
+    // std::cout << "SAMPLE ID = " << sample_id << "; TEST ID = " << test_id << std::endl;
+    // std::cout << "Env seq: "; env_seq.Print(); std::cout << std::endl;
+    for (size_t trial_id = 0; trial_id < EVAL_TRIAL_CNT; ++trial_id) {
+      // std::cout << "TRIAL ID = " << trial_id << std::endl;
+      emp_assert(trial_id < trial_phenotypes.size());
+      // Reset the trial phenotype
+      phenotype_t & trial_phen = trial_phenotypes[trial_id];
+      // Reset the environment.
+      eval_environment.ResetEnv();
+      // Reset the hardware matchbin between trials.
+      eval_hardware->ResetMatchBin();
+      // Evaluate the organism in the current environment sequence.
+      emp_assert(env_seq.GetSize() == NUM_ENV_UPDATES);
+      emp_assert(trial_phen.test_scores[sample_id] == 0);
+      for (size_t env_update = 0; env_update < NUM_ENV_UPDATES; ++env_update) {
+        // What direction will the environment be shifting? [0: left, 1: right]
+        const bool dir = env_seq.Get(env_update);
+        const size_t cur_env_state = (dir) ? eval_environment.ShiftRight() : eval_environment.ShiftLeft();
+        // std::cout << "  Env update: " << env_update << "; Direction: " << dir << "; Current state: " << cur_env_state << std::endl;
+        // Reset the hardware!
+        eval_hardware->ResetHardwareState();
+        eval_hardware->GetCustomComponent().Reset();
+        emp_assert(eval_hardware->ValidateThreadState());
+        emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
+        emp_assert(eval_hardware->GetNumQueuedEvents() == 0);
+        if (dir) {
+          // Shift right.
+          eval_hardware->QueueEvent(event_t(event_id__right_env_sig, eval_environment.GetShiftRightTag()));
+        } else {
+          // Shift left.
+          eval_hardware->QueueEvent(event_t(event_id__left_env_sig, eval_environment.GetShiftLeftTag()));
+        }
+        // Step the hardware forward to process the event.
+        for (size_t step = 0; step < CPU_CYCLES_PER_ENV_UPDATE; ++step) {
+          eval_hardware->SingleProcess();
+          if (!( eval_hardware->GetNumActiveThreads() || eval_hardware->GetNumPendingThreads() )) break;
+        }
+        // How did the organism respond?
+        if (eval_hardware->GetCustomComponent().HasResponse() && eval_hardware->GetCustomComponent().GetResponse() == (int)cur_env_state) {
+          // Correct! Increment score.
+          trial_phen.test_scores[sample_id] += 1;
+          // std::cout << "  Correct response!" << std::endl;
+        } else {
+          // Incorrect! Bail out on trial evaluation.
+          break;
+        }
+      }
+      // std::cout << "  Test trial score = " << trial_phen.test_scores[sample_id] << std::endl;
+      // is this trial the new worst trial?
+      if (trial_phen.test_scores[sample_id] < trial_phenotypes[min_trial_id].test_scores[sample_id]) {
+        min_trial_id = trial_id;
+      }
+    }
+    phenotype_t & org_phen = org.GetPhenotype();
+    const double min_trial_score = trial_phenotypes[min_trial_id].test_scores[sample_id];
+    org_phen.test_scores[sample_id] = min_trial_score;
+    org_phen.aggregate_score += min_trial_score;
+  }
+  // std::cout << "Aggregate score = " << org.GetPhenotype().aggregate_score << std::endl;
+  std::for_each(org.GetPhenotype().test_scores.begin(), org.GetPhenotype().test_scores.end(), [i=0](double score) mutable {
+    // std::cout << " => Sample " << i << " score = " << score << std::endl;
+    ++i;
+  });
+  // std::cout << "EVAL DONE" << std::endl;
+  // exit(-1);
 }
 
 
@@ -675,7 +766,7 @@ void DirSigWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
   // TODO
 }
 
-HardwareStatePrintInfo DirSigWorld::GetHardwareStatePrintInfo(hardware_t & hw) {
+DirSigWorld::HardwareStatePrintInfo DirSigWorld::GetHardwareStatePrintInfo(hardware_t & hw) {
   // TODO
 }
 
@@ -711,27 +802,27 @@ void DirSigWorld::DoWorldConfigSnapshot(const config_t & config) {
   snapshot_file.Update();
   // TAG_LEN
   get_cur_param = []() { return "TAG_LEN"; };
-  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::TAG_LEN); };
+  get_cur_value = []() { return emp::to_string(DirSigWorldDefs::TAG_LEN); };
   snapshot_file.Update();
   // INST_TAG_CNT
   get_cur_param = []() { return "INST_TAG_CNT"; };
-  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::INST_TAG_CNT); };
+  get_cur_value = []() { return emp::to_string(DirSigWorldDefs::INST_TAG_CNT); };
   snapshot_file.Update();
   // INST_ARG_CNT
   get_cur_param = []() { return "INST_ARG_CNT"; };
-  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::INST_ARG_CNT); };
+  get_cur_value = []() { return emp::to_string(DirSigWorldDefs::INST_ARG_CNT); };
   snapshot_file.Update();
   // FUNC_NUM_TAGS
   get_cur_param = []() { return "FUNC_NUM_TAGS"; };
-  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::FUNC_NUM_TAGS); };
+  get_cur_value = []() { return emp::to_string(DirSigWorldDefs::FUNC_NUM_TAGS); };
   snapshot_file.Update();
   // INST_MIN_ARG_VAL
   get_cur_param = []() { return "INST_MIN_ARG_VAL"; };
-  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::INST_MIN_ARG_VAL); };
+  get_cur_value = []() { return emp::to_string(DirSigWorldDefs::INST_MIN_ARG_VAL); };
   snapshot_file.Update();
   // INST_MAX_ARG_VAL
   get_cur_param = []() { return "INST_MAX_ARG_VAL"; };
-  get_cur_value = []() { return emp::to_string(ChgEnvWorldDefs::INST_MAX_ARG_VAL); };
+  get_cur_value = []() { return emp::to_string(DirSigWorldDefs::INST_MAX_ARG_VAL); };
   snapshot_file.Update();
   // environment signal
   get_cur_param = []() { return "env_state_tags"; };
@@ -798,6 +889,21 @@ void DirSigWorld::Setup(const config_t & config) {
   // End of setup!
   end_setup_sig.Trigger();
   setup=true;
+}
+
+/// Advance world by a single time step (generation).
+void DirSigWorld::RunStep() {
+  for (size_t u = 0; u <= GENERATIONS; ++u) {
+    RunStep();
+  }
+}
+
+/// Run world for configured number of generations.
+void DirSigWorld::Run() {
+  // (1) evaluate population, (2) select parents, (3) update the world
+  DoEvaluation();
+  // DoSelection(); // TODO
+  // DoUpdate();    // TODO
 }
 
 #endif

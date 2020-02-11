@@ -11,7 +11,7 @@ EMP_BUILD_CONFIG(DirSigConfig,
     VALUE(STOP_ON_SOLUTION, bool, false, "Should we stop run on solution?"),
 
   GROUP(EVALUATION_GROUP, "Organism evaluation settings"),
-    VALUE(EVAL_TRIAL_CNT, size_t, 3, "How many times should we evaluate individuals (where fitness = min trial performance)?"),
+    VALUE(EVAL_TRIAL_CNT, size_t, 1, "How many times should we evaluate individuals (where fitness = min trial performance)?"),
 
   GROUP(ENVIRONMENT_GROUP, "Environment settings"),
     VALUE(NUM_ENV_STATES, size_t, 8, "How many responses are there to the environment signal?"),
