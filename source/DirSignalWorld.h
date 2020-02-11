@@ -849,7 +849,6 @@ void DirSigWorld::InitPop_Random() {
 }
 
 void DirSigWorld::InitPop_Hardcoded() {
-  // TODO
   std::cout << "nope" << std::endl;
 }
 
@@ -991,13 +990,160 @@ void DirSigWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
 }
 
 DirSigWorld::HardwareStatePrintInfo DirSigWorld::GetHardwareStatePrintInfo(hardware_t & hw) {
-  // TODO
+  HardwareStatePrintInfo print_info;
+  // Collect global memory
+  std::ostringstream gmem_stream;
+  hw.GetMemoryModel().PrintMemoryBuffer(hw.GetMemoryModel().GetGlobalBuffer(), gmem_stream);
+  print_info.global_mem_str = gmem_stream.str();
+
+  // number of modules
+  print_info.num_modules = hw.GetNumModules();
+  // module regulator states & timers
+  print_info.module_regulator_states.resize(hw.GetNumModules());
+  print_info.module_regulator_timers.resize(hw.GetNumModules());
+  for (size_t module_id = 0; module_id < hw.GetNumModules(); ++module_id) {
+    const auto reg_state = hw.GetMatchBin().GetRegulator(module_id).state;
+    const auto reg_timer = hw.GetMatchBin().GetRegulator(module_id).timer;
+    print_info.module_regulator_states[module_id] = reg_state;
+    print_info.module_regulator_timers[module_id] = reg_timer;
+  }
+  // number of active threads
+  print_info.num_active_threads = hw.GetNumActiveThreads();
+  // for each thread: {thread_id: {priority: ..., callstack: [...]}}
+  // - priority
+  // - callstack: [callstate, callstate, etc]
+  //   - callstate: [memory, flowstack]
+  //     - flowstack: [type, mp, ip, begin, end]
+  print_info.thread_state_str = "[";
+  bool comma = false;
+  for (size_t thread_id : hw.GetThreadExecOrder()) {
+    auto & thread = hw.GetThread(thread_id);
+    std::ostringstream stream;
+    if (comma) { stream << ","; }
+    stream << "{";
+    stream << "id:" << thread_id << ",";
+    // thread priority
+    stream << "priority:" << thread.GetPriority() << ",";
+    // thread state
+    stream << "state:";
+    if (thread.IsDead()) { stream << "dead,"; }
+    else if (thread.IsPending()) { stream << "pending,"; }
+    else if (thread.IsRunning()) { stream << "running,"; }
+    else { stream << "unknown,"; }
+    // call stack
+    stream << "call_stack:[";
+    auto & call_stack = thread.GetExecState().GetCallStack();
+    for (size_t i = 0; i < call_stack.size(); ++i) {
+      auto & mem_state = thread.GetExecState().GetCallStack()[i].memory;
+      auto & flow_stack = thread.GetExecState().GetCallStack()[i].flow_stack;
+      if (i) stream << ",";
+      // - call state -
+      stream << "{";
+      stream << "working_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetWorkingMemory(), stream);
+      stream << ",input_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetInputMemory(), stream);
+      stream << ",output_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetOutputMemory(), stream);
+      // - call state - flow stack -
+      stream << ",flow_stack:[";
+      for (size_t f = 0; f < flow_stack.size(); ++f) {
+        auto & flow = flow_stack[f];
+        if (f) stream << ",";
+        stream << "{";
+        // type
+        stream << "type:";
+        if (flow.IsBasic()) { stream << "basic,"; }
+        else if (flow.IsWhileLoop()) { stream << "whileloop,"; }
+        else if (flow.IsRoutine()) { stream << "routine,"; }
+        else if (flow.IsCall()) { stream << "call,"; }
+        else { stream << "unknown,"; }
+        // mp
+        stream << "mp:" << flow.mp << ",";
+        // ip
+        stream << "ip:" << flow.ip << ",";
+        // begin
+        stream << "begin:" << flow.begin << ",";
+        // end
+        stream << "end:" << flow.end;
+        stream << "}";
+      }
+      stream << "]";
+      stream << "}";
+    }
+    stream << "]";
+    stream << "}";
+    print_info.thread_state_str += stream.str();
+    if (!comma) { comma=true; }
+  }
+  print_info.thread_state_str += "]";
+  return print_info;
 }
 
 
 // -- Utilities --
 void DirSigWorld::DoPopulationSnapshot() {
-  // TODO
+  // Make a new data file for snapshot.
+  emp::DataFile snapshot_file(OUTPUT_DIR + "/pop_" + emp::to_string((int)GetUpdate()) + ".csv");
+  size_t cur_org_id = 0;
+  // Add functions.
+  snapshot_file.AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
+  snapshot_file.AddFun<size_t>([this, &cur_org_id]() { return cur_org_id; }, "pop_id");
+  // max_fit_file->AddFun(, "genotype_id");
+  snapshot_file.template AddFun<double>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetPhenotype().GetAggregateScore();
+  }, "aggregate_score");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    const phenotype_t & phen = this->GetOrg(cur_org_id).GetPhenotype();
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_scores[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "scores_by_test", "Organism's scores on each test.");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    stream << "\"";
+    const phenotype_t & phen = this->GetOrg(cur_org_id).GetPhenotype();
+    for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_ids[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "test_ids", "Test IDs. The bitstring representation of each ID gives the L/R direction sequence.");
+  max_fit_file->template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    stream << "\"";
+    const phenotype_t & phen = this->GetOrg(cur_org_id).GetPhenotype();
+    for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+      if (i) stream << ",";
+      stream << possible_dir_sequences[phen.test_ids[i]];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "test_seqs", "Test Seqs. The bitstring representation gives the L/R direction sequence.");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
+    return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(cur_org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  snapshot_file.PrintHeaderKeys();
+  for (cur_org_id = 0; cur_org_id < GetSize(); ++cur_org_id) {
+    emp_assert(IsOccupied(cur_org_id));
+    snapshot_file.Update();
+  }
 }
 
 void DirSigWorld::DoWorldConfigSnapshot(const config_t & config) {
@@ -1068,17 +1214,48 @@ void DirSigWorld::DoWorldConfigSnapshot(const config_t & config) {
 }
 
 void DirSigWorld::PrintProgramSingleLine(const program_t & prog, std::ostream & out) {
-  // TODO
+  out << "[";
+  for (size_t func_id = 0; func_id < prog.GetSize(); ++func_id) {
+    if (func_id) out << ",";
+    PrintProgramFunction(prog[func_id], out);
+  }
+  out << "]";
 }
 
 void DirSigWorld::PrintProgramFunction(const program_function_t & func, std::ostream & out) {
-  // TODO
+  out << "{";
+  // print function tags
+  out << "[";
+  for (size_t tag_id = 0; tag_id < func.GetTags().size(); ++tag_id) {
+    if (tag_id) out << ",";
+    func.GetTag(tag_id).Print(out);
+  }
+  out << "]:";
+  // print instruction sequence
+  out << "[";
+  for (size_t inst_id = 0; inst_id < func.GetSize(); ++inst_id) {
+    if (inst_id) out << ",";
+    PrintProgramInstruction(func[inst_id], out);
+  }
+  out << "]";
+  out << "}";
 }
 
 void DirSigWorld::PrintProgramInstruction(const inst_t & inst, std::ostream & out) {
-  // TODO
+  out << inst_lib->GetName(inst.GetID()) << "[";
+  // print tags
+  for (size_t tag_id = 0; tag_id < inst.GetTags().size(); ++tag_id) {
+    if (tag_id) out << ",";
+    inst.GetTag(tag_id).Print(out);
+  }
+  out << "](";
+  // print args
+  for (size_t arg_id = 0; arg_id < inst.GetArgs().size(); ++arg_id) {
+    if (arg_id) out << ",";
+    out << inst.GetArg(arg_id);
+  }
+  out << ")";
 }
-
 
 // ------- PUBLIC FUNCTIONS --------
 
@@ -1129,7 +1306,7 @@ void DirSigWorld::Setup(const config_t & config) {
   });
   // Configure data collection/snapshots
   InitDataCollection();
-  // DoWorldConfigSnapshot(config); // TODO
+  DoWorldConfigSnapshot(config);
   // End of setup!
   end_setup_sig.Trigger();
   setup=true;
