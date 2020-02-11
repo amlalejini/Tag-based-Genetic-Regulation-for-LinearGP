@@ -281,11 +281,14 @@ protected:
 
   emp::Signal<void(size_t)> after_eval_sig; ///< Triggered after organism (ID given by size_t argument) evaluation
   emp::Signal<void(void)> end_setup_sig;    ///< Triggered at end of world setup.
+  emp::Signal<void(void)> do_selection_sig; ///< Triggered when it's time to do selection!
 
   emp::Ptr<emp::DataFile> max_fit_file;
   emp::Ptr<systematics_t> systematics_ptr; ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
 
   size_t max_fit_org_id=0;
+
+  emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;
 
   bool KO_REGULATION=false;
   bool KO_GLOBAL_MEMORY=false;
@@ -669,11 +672,35 @@ void DirSigWorld::DoEvaluation() {
 }
 
 void DirSigWorld::DoSelection() {
-  // todo
+  do_selection_sig.Trigger(); // outsourced to configurable signal trigger
 }
 
 void DirSigWorld::DoUpdate() {
-  // todo
+  // Log current update, best fitnesses.
+  const double max_score = CalcFitnessID(max_fit_org_id);
+  const double max_possible = TEST_SAMPLE_SIZE * NUM_ENV_UPDATES;
+  // found_solution = IsSolution(GetOrg())
+  std::cout << "update: " << GetUpdate() << "; ";
+  std::cout << "best score (" << max_fit_org_id << "): " << max_score << "; ";
+  std::cout << "max score? " << (max_score >= max_possible) << std::endl;
+  const size_t cur_update = GetUpdate();
+  if (SUMMARY_RESOLUTION) {
+    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS ) {
+      // max_fit_file-Update(); TODO!
+    }
+  }
+  if (SNAPSHOT_RESOLUTION) {
+    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS) {
+      DoPopulationSnapshot();
+      if (cur_update) {
+        // TODO!
+        // systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+        // AnalyzeOrg(GetOrg(max_fit_org_id), max_fit_org_id);
+      }
+    }
+  }
+  Update();
+  ClearCache();
 }
 
 void DirSigWorld::EvaluateOrg(org_t & org) {
@@ -749,10 +776,10 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
     org_phen.aggregate_score += min_trial_score;
   }
   // std::cout << "Aggregate score = " << org.GetPhenotype().aggregate_score << std::endl;
-  std::for_each(org.GetPhenotype().test_scores.begin(), org.GetPhenotype().test_scores.end(), [i=0](double score) mutable {
+  // std::for_each(org.GetPhenotype().test_scores.begin(), org.GetPhenotype().test_scores.end(), [i=0](double score) mutable {
     // std::cout << " => Sample " << i << " score = " << score << std::endl;
-    ++i;
-  });
+    // ++i;
+  // });
   // std::cout << "EVAL DONE" << std::endl;
   // exit(-1);
 }
@@ -878,6 +905,26 @@ void DirSigWorld::Setup(const config_t & config) {
     std::cout << " Done" << std::endl;
     this->SetAutoMutate(); // Set to automutate after initializing population!
   });
+  // How should we do selection?
+  if (SELECTION_MODE == "tournament") {
+    do_selection_sig.AddAction([this]() {
+      emp::TournamentSelect(*this, TOURNAMENT_SIZE, POP_SIZE);
+    });
+  } else if (SELECTION_MODE == "lexicase") {
+    lexicase_fit_funs.clear();
+    for (size_t i = 0; i < TEST_SAMPLE_SIZE; ++i) {
+      lexicase_fit_funs.emplace_back([i](org_t & org) {
+        emp_assert(i < org.GetPhenotype().test_scores.size());
+        return org.GetPhenotype().test_scores[i];
+      });
+    }
+    do_selection_sig.AddAction([this]() {
+      emp::LexicaseSelect(*this, lexicase_fit_funs, POP_SIZE);
+    });
+  } else {
+    std::cout << "UNKNOWN selection scheme ("<< SELECTION_MODE <<")!" << std::endl;
+    exit(-1);
+  }
   // Misc world configuration
   this->SetPopStruct_Mixed(true); // Population is well-mixed with synchronous generations.
   this->SetFitFun([this](org_t & org) {
@@ -893,17 +940,17 @@ void DirSigWorld::Setup(const config_t & config) {
 
 /// Advance world by a single time step (generation).
 void DirSigWorld::RunStep() {
-  for (size_t u = 0; u <= GENERATIONS; ++u) {
-    RunStep();
-  }
+  // (1) evaluate population, (2) select parents, (3) update the world
+  DoEvaluation();
+  DoSelection();
+  DoUpdate();
 }
 
 /// Run world for configured number of generations.
 void DirSigWorld::Run() {
-  // (1) evaluate population, (2) select parents, (3) update the world
-  DoEvaluation();
-  // DoSelection(); // TODO
-  // DoUpdate();    // TODO
+  for (size_t u = 0; u <= GENERATIONS; ++u) {
+    RunStep();
+  }
 }
 
 #endif
