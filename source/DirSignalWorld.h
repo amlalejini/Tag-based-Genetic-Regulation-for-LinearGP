@@ -629,7 +629,204 @@ void DirSigWorld::InitMutator() {
 }
 
 void DirSigWorld::InitDataCollection() {
-  // TODO
+  emp_assert(!setup);
+  if (setup) {
+    max_fit_file.Delete();
+  } else {
+    mkdir(OUTPUT_DIR.c_str(), ACCESSPERMS);
+    if(OUTPUT_DIR.back() != '/')
+        OUTPUT_DIR += '/';
+  }
+  // -- generally useful functions --
+  std::function<size_t(void)> get_update = [this]() { return this->GetUpdate(); };
+  // -- fitness file --
+  SetupFitnessFile(OUTPUT_DIR + "/fitness.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
+  systematics_ptr = emp::NewPtr<systematics_t>([](const org_t & o) { return o.GetGenome(); });
+  // We want to record phenotype information AFTER organism is evaluated.
+  // - for this, we need to find the appropriate taxon post-evaluation
+  after_eval_sig.AddAction([this](size_t pop_id) {
+    emp::Ptr<taxon_t> taxon = systematics_ptr->GetTaxonAt(pop_id);
+    taxon->GetData().RecordFitness(this->CalcFitnessID(pop_id));
+    taxon->GetData().RecordPhenotype(this->GetOrg(pop_id).GetPhenotype());
+  });
+  // We want to record mutations when organism is added to the population
+  // - because mutations are applied automatically by this->DoBirth => this->AddOrgAt => sys->OnNew
+  std::function<void(emp::Ptr<taxon_t>, org_t&)> record_taxon_mut_data =
+    [this](emp::Ptr<taxon_t> taxon, org_t & org) {
+      taxon->GetData().RecordMutation(org.GetMutations());
+    };
+  systematics_ptr->OnNew(record_taxon_mut_data);
+  // Add snapshot functions
+  // - fitness information (taxon->GetFitness)
+  // - phenotype information
+  //   - aggregate score, test_seqs, test_scores
+  // - mutations (counts by type)
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetFitness());
+  }, "fitness", "Taxon fitness");
+
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    return emp::to_string(taxon.GetData().GetPhenotype().GetAggregateScore());
+  }, "aggregate_score", "Aggregate score.");
+
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+    std::ostringstream stream;
+    const phenotype_t & phen = taxon.GetData().GetPhenotype();
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_scores[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "scores_by_test", "Organism's scores on each test.");
+
+  systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
+    std::ostringstream stream;
+    stream << "\"";
+    const phenotype_t & phen = taxon.GetData().GetPhenotype();
+    for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_ids[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "test_ids", "Test IDs. The bitstring representation of each ID gives the L/R direction sequence.");
+
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+    if (taxon.GetData().HasMutationType("inst_arg_sub")) {
+      return emp::to_string(taxon.GetData().GetMutationCount("inst_arg_sub"));
+    } else {
+      return "0";
+    }
+  }, "inst_arg_sub_mut_cnt", "How many mutations from parent taxon to this taxon?");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_tag_bit_flip")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_tag_bit_flip"));
+      } else {
+        return "0";
+      }
+    }, "inst_tag_bit_flip_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_sub")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_sub"));
+      } else {
+        return "0";
+      }
+    }, "inst_sub_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_ins")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_ins"));
+      } else {
+        return "0";
+      }
+    }, "inst_ins_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("inst_del")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("inst_del"));
+      } else {
+        return "0";
+      }
+    }, "inst_del_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("seq_slip_dup")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("seq_slip_dup"));
+      } else {
+        return "0";
+      }
+    }, "seq_slip_dup_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("seq_slip_del")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("seq_slip_del"));
+      } else {
+        return "0";
+      }
+    }, "seq_slip_del_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("func_dup")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("func_dup"));
+      } else {
+        return "0";
+      }
+    }, "func_dup_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("func_del")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("func_del"));
+      } else {
+        return "0";
+      }
+    }, "func_del_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+      if (taxon.GetData().HasMutationType("func_tag_bit_flip")) {
+        return emp::to_string(taxon.GetData().GetMutationCount("func_tag_bit_flip"));
+      } else {
+        return "0";
+      }
+    }, "func_tag_bit_flip_mut_cnt", "Mutation count");
+  systematics_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(taxon.GetInfo().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program", "Program representing this taxon");
+  AddSystematics(systematics_ptr);
+  SetupSystematicsFile(0, OUTPUT_DIR + "/systematics.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
+  // -- Dominant File --
+  max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
+  max_fit_file->AddFun(get_update, "update");
+  max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_id; }, "pop_id");
+
+  max_fit_file->template AddFun<double>([this]() {
+    return this->GetOrg(max_fit_org_id).GetPhenotype().GetAggregateScore();
+  }, "aggregate_score");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_scores[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "scores_by_test", "Organism's scores on each test.");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"";
+    const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
+    for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_ids[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "test_ids", "Test IDs. The bitstring representation of each ID gives the L/R direction sequence.");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"";
+    const phenotype_t & phen = this->GetOrg(max_fit_org_id).GetPhenotype();
+    for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+      if (i) stream << ",";
+      stream << possible_dir_sequences[phen.test_ids[i]];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "test_seqs", "Test IDs. The bitstring representation of each ID gives the L/R direction sequence.");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  max_fit_file->template AddFun<size_t>([this]() {
+    return this->GetOrg(max_fit_org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  max_fit_file->template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(max_fit_org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  max_fit_file->PrintHeaderKeys();
 }
 
 void DirSigWorld::InitPop() {
@@ -686,15 +883,14 @@ void DirSigWorld::DoUpdate() {
   const size_t cur_update = GetUpdate();
   if (SUMMARY_RESOLUTION) {
     if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS ) {
-      // max_fit_file-Update(); TODO!
+      max_fit_file->Update();
     }
   }
   if (SNAPSHOT_RESOLUTION) {
     if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS) {
       DoPopulationSnapshot();
       if (cur_update) {
-        // TODO!
-        // systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+        systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
         // AnalyzeOrg(GetOrg(max_fit_org_id), max_fit_org_id);
       }
     }
@@ -774,6 +970,7 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
     const double min_trial_score = trial_phenotypes[min_trial_id].test_scores[sample_id];
     org_phen.test_scores[sample_id] = min_trial_score;
     org_phen.aggregate_score += min_trial_score;
+    org_phen.test_ids[sample_id] = dir_seq_ids[test_id];
   }
   // std::cout << "Aggregate score = " << org.GetPhenotype().aggregate_score << std::endl;
   // std::for_each(org.GetPhenotype().test_scores.begin(), org.GetPhenotype().test_scores.end(), [i=0](double score) mutable {
@@ -931,8 +1128,8 @@ void DirSigWorld::Setup(const config_t & config) {
     return org.GetPhenotype().GetAggregateScore();
   });
   // Configure data collection/snapshots
-  // InitDataCollection();
-  // DoWorldConfigSnapshot(config);
+  InitDataCollection();
+  // DoWorldConfigSnapshot(config); // TODO
   // End of setup!
   end_setup_sig.Trigger();
   setup=true;

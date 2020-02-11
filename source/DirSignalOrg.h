@@ -52,19 +52,26 @@ public:
     using this_t = DirSigPhenotype;
 
     emp::vector<double> test_scores;
+    emp::vector<size_t> test_ids;
     double aggregate_score=0.0;
 
     void Reset(size_t tests=1) {
       aggregate_score=0.0;         // Reset aggregate score.
       test_scores.resize(tests); // Make sure trial scores is right size.
+      test_ids.resize(tests);
       std::fill(test_scores.begin(), test_scores.end(), 0); // Fill with zeroes.
+      std::fill(test_ids.begin(), test_ids.end(), 0);
     }
 
     bool operator==(const this_t & o) const {
       return std::tie(test_scores,
-                      aggregate_score)
-          == std::tie(o.trial_scores,
-                      o.aggregate_score);
+                      test_ids,
+                      aggregate_score
+                      )
+          == std::tie(o.test_scores,
+                      o.test_ids,
+                      o.aggregate_score
+                      );
     }
 
     bool operator!=(const this_t & o) const {
@@ -73,9 +80,13 @@ public:
 
     bool operator<(const this_t & o) const {
       return std::tie(test_scores,
-                      aggregate_score)
+                      test_ids,
+                      aggregate_score
+                    )
             < std::tie(o.test_scores,
-                       o.aggregate_score);
+                       o.test_ids,
+                       o.aggregate_score
+                      );
     }
 
     double GetAggregateScore() const { return aggregate_score; }
