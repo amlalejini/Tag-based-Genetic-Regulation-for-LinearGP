@@ -890,7 +890,7 @@ void DirSigWorld::DoUpdate() {
       DoPopulationSnapshot();
       if (cur_update) {
         systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
-        // AnalyzeOrg(GetOrg(max_fit_org_id), max_fit_org_id);
+        AnalyzeOrg(GetOrg(max_fit_org_id), max_fit_org_id);
       }
     }
   }
@@ -911,11 +911,7 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
     const size_t test_id = sample_id % dir_seq_ids.size();         // Make sure we're sampling a valid test id.
     auto & env_seq = possible_dir_sequences[dir_seq_ids[test_id]]; // Grab the environment sequence we'll be using.
     size_t min_trial_id = 0;
-    // std::cout << "===================================" << std::endl;
-    // std::cout << "SAMPLE ID = " << sample_id << "; TEST ID = " << test_id << std::endl;
-    // std::cout << "Env seq: "; env_seq.Print(); std::cout << std::endl;
     for (size_t trial_id = 0; trial_id < EVAL_TRIAL_CNT; ++trial_id) {
-      // std::cout << "TRIAL ID = " << trial_id << std::endl;
       emp_assert(trial_id < trial_phenotypes.size());
       // Reset the trial phenotype
       phenotype_t & trial_phen = trial_phenotypes[trial_id];
@@ -930,7 +926,6 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
         // What direction will the environment be shifting? [0: left, 1: right]
         const bool dir = env_seq.Get(env_update);
         const size_t cur_env_state = (dir) ? eval_environment.ShiftRight() : eval_environment.ShiftLeft();
-        // std::cout << "  Env update: " << env_update << "; Direction: " << dir << "; Current state: " << cur_env_state << std::endl;
         // Reset the hardware!
         eval_hardware->ResetHardwareState();
         eval_hardware->GetCustomComponent().Reset();
@@ -953,13 +948,11 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
         if (eval_hardware->GetCustomComponent().HasResponse() && eval_hardware->GetCustomComponent().GetResponse() == (int)cur_env_state) {
           // Correct! Increment score.
           trial_phen.test_scores[sample_id] += 1;
-          // std::cout << "  Correct response!" << std::endl;
         } else {
           // Incorrect! Bail out on trial evaluation.
           break;
         }
       }
-      // std::cout << "  Test trial score = " << trial_phen.test_scores[sample_id] << std::endl;
       // is this trial the new worst trial?
       if (trial_phen.test_scores[sample_id] < trial_phenotypes[min_trial_id].test_scores[sample_id]) {
         min_trial_id = trial_id;
@@ -971,18 +964,168 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
     org_phen.aggregate_score += min_trial_score;
     org_phen.test_ids[sample_id] = dir_seq_ids[test_id];
   }
-  // std::cout << "Aggregate score = " << org.GetPhenotype().aggregate_score << std::endl;
-  // std::for_each(org.GetPhenotype().test_scores.begin(), org.GetPhenotype().test_scores.end(), [i=0](double score) mutable {
-    // std::cout << " => Sample " << i << " score = " << score << std::endl;
-    // ++i;
-  // });
-  // std::cout << "EVAL DONE" << std::endl;
-  // exit(-1);
 }
 
+// TODO - screen for solution
 
 void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
-  // TODO
+  ////////////////////////////////////////////////
+  // (1) Analyze organism in ALL possible direction sequences.
+  // std::cout << "ANALYZE ORG" << std::endl;
+  org_t test_org(org);
+  std::sort(dir_seq_ids.begin(), dir_seq_ids.end()); // Minimize cognitive load on future me.
+  const size_t evo_sample_size = TEST_SAMPLE_SIZE;
+  const size_t analysis_sample_size = dir_seq_ids.size();
+  TEST_SAMPLE_SIZE = analysis_sample_size;  // Set the sample size to all possible sequences.
+  // Run normally.
+  EvaluateOrg(test_org);
+  // Run with knockouts
+  // - ko memory
+  KO_GLOBAL_MEMORY=true;
+  KO_REGULATION=false;
+  org_t ko_mem_org(org);
+  EvaluateOrg(ko_mem_org);
+  // - ko regulation
+  KO_GLOBAL_MEMORY=false;
+  KO_REGULATION=true;
+  org_t ko_reg_org(org);
+  EvaluateOrg(ko_reg_org);
+  // - ko memory and regulation
+  KO_GLOBAL_MEMORY=true;
+  KO_REGULATION=true;
+  org_t ko_all_org(org);
+  EvaluateOrg(ko_all_org);
+  // reset ko variables
+  KO_GLOBAL_MEMORY=false;
+  KO_REGULATION=false;
+  TEST_SAMPLE_SIZE = evo_sample_size;
+  // Write out analysis file
+  // org_id, is_solution, aggregate_score, scores_by_test, test_ids, test_seqs, ko_[:]_is_solution, ko_[:]_aggregate_score, ko_[:]_scores_by_test,
+  const double solution_score = NUM_ENV_UPDATES * possible_dir_sequences.size();
+  std::cout << "Solution score = " << solution_score << std::endl;
+  emp::DataFile analysis_file(OUTPUT_DIR + "/analysis_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
+  analysis_file.template AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
+  analysis_file.template AddFun<size_t>([&org_id]() { return org_id; }, "pop_id");
+  analysis_file.template AddFun<bool>([&test_org, this, solution_score]() {
+    const org_t & org = test_org;
+    return org.GetPhenotype().GetAggregateScore() >= solution_score;
+  }, "solution");
+  analysis_file.template AddFun<bool>([&ko_reg_org, this, solution_score]() {
+    const org_t & org = ko_reg_org;
+    return org.GetPhenotype().GetAggregateScore() >= solution_score;
+  }, "solution_ko_regulation");
+  analysis_file.template AddFun<bool>([&ko_mem_org, this, solution_score]() {
+    const org_t & org = ko_mem_org;
+    return org.GetPhenotype().GetAggregateScore() >= solution_score;
+  }, "solution_ko_global_memory");
+  analysis_file.template AddFun<bool>([&ko_all_org, this, solution_score]() {
+    const org_t & org = ko_all_org;
+    return org.GetPhenotype().GetAggregateScore() >= solution_score;
+  }, "solution_ko_all");
+  analysis_file.template AddFun<double>([&test_org, this]() {
+    const org_t & org = test_org;
+    return org.GetPhenotype().GetAggregateScore();
+  }, "aggregate_score");
+  analysis_file.template AddFun<double>([&ko_reg_org, this]() {
+    const org_t & org = ko_reg_org;
+    return org.GetPhenotype().GetAggregateScore();
+  }, "ko_regulation_aggregate_score");
+  analysis_file.template AddFun<double>([&ko_mem_org, this]() {
+    const org_t & org = ko_mem_org;
+    return org.GetPhenotype().GetAggregateScore();
+  }, "ko_global_memory_aggregate_score");
+  analysis_file.template AddFun<double>([&ko_all_org, this]() {
+    const org_t & org = ko_all_org;
+    return org.GetPhenotype().GetAggregateScore();
+  }, "ko_all_aggregate_score");
+  analysis_file.template AddFun<std::string>([&test_org, this]() {
+    const org_t & org = test_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_scores[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "scores_by_test");
+  analysis_file.template AddFun<std::string>([&ko_reg_org, this]() {
+    org_t & org = ko_reg_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_scores[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "ko_regulation_scores_by_test");
+  analysis_file.template AddFun<std::string>([&ko_mem_org, this]() {
+    org_t & org = ko_mem_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_scores[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "ko_global_memory_scores_by_test");
+  analysis_file.template AddFun<std::string>([&ko_all_org, this]() {
+    org_t & org = ko_all_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_scores[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "ko_all_scores_by_test");
+  analysis_file.template AddFun<std::string>([&test_org, this]() {
+    const org_t & org = test_org;
+    const phenotype_t & phen = org.GetPhenotype();
+    std::ostringstream stream;
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_ids[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "test_ids");
+  analysis_file.template AddFun<std::string>([&test_org, this]() {
+    const org_t & org = test_org;
+    const phenotype_t & phen = org.GetPhenotype();
+    std::ostringstream stream;
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+      if (i) stream << ",";
+      stream << possible_dir_sequences[phen.test_ids[i]];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "test_seqs");
+  analysis_file.template AddFun<size_t>([this, &org_id]() {
+    return this->GetOrg(org_id).GetGenome().GetProgram().GetSize();
+  }, "num_modules");
+  analysis_file.template AddFun<size_t>([this, &org_id]() {
+    return this->GetOrg(org_id).GetGenome().GetProgram().GetInstCount();
+  }, "num_instructions");
+  analysis_file.template AddFun<std::string>([this, &org_id]() {
+    std::ostringstream stream;
+    stream << "\"";
+    this->PrintProgramSingleLine(this->GetOrg(org_id).GetGenome().GetProgram(), stream);
+    stream << "\"";
+    return stream.str();
+  }, "program");
+  analysis_file.PrintHeaderKeys();
+  analysis_file.Update();
+  // TODO - trace organism!
 }
 
 void DirSigWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
@@ -1080,7 +1223,6 @@ DirSigWorld::HardwareStatePrintInfo DirSigWorld::GetHardwareStatePrintInfo(hardw
   return print_info;
 }
 
-
 // -- Utilities --
 void DirSigWorld::DoPopulationSnapshot() {
   // Make a new data file for snapshot.
@@ -1115,7 +1257,7 @@ void DirSigWorld::DoPopulationSnapshot() {
     stream << "\"";
     return stream.str();
   }, "test_ids", "Test IDs. The bitstring representation of each ID gives the L/R direction sequence.");
-  max_fit_file->template AddFun<std::string>([this, &cur_org_id]() {
+  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
     std::ostringstream stream;
     stream << "\"";
     const phenotype_t & phen = this->GetOrg(cur_org_id).GetPhenotype();
