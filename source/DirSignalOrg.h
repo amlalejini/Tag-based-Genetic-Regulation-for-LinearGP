@@ -2,6 +2,7 @@
 #define DIR_SIG_DIGITAL_ORGANISM_H
 
 #include <tuple>
+#include <algorithm>
 
 // New signalgp includes
 #include "hardware/SignalGP/utils/LinearFunctionsProgram.h"
@@ -43,29 +44,27 @@ public:
 
   };
 
+  // struct TrialProfile {
+  //   double score;
+  // };
+
   struct DirSigPhenotype {
     using this_t = DirSigPhenotype;
-    double score=0.0;
-    size_t env_matches=0;
-    size_t env_misses=0;
-    size_t no_responses=0;
 
-    void Reset() {
-      score=0.0;
-      env_matches=0;
-      env_misses=0;
-      no_responses=0;
+    emp::vector<double> test_scores;
+    double aggregate_score=0.0;
+
+    void Reset(size_t tests=1) {
+      aggregate_score=0.0;         // Reset aggregate score.
+      test_scores.resize(tests); // Make sure trial scores is right size.
+      std::fill(test_scores.begin(), test_scores.end(), 0); // Fill with zeroes.
     }
 
     bool operator==(const this_t & o) const {
-      return std::tie(score,
-                      env_matches,
-                      env_misses,
-                      no_responses)
-          == std::tie(o.score,
-                      o.env_matches,
-                      o.env_misses,
-                      o.no_responses);
+      return std::tie(test_scores,
+                      aggregate_score)
+          == std::tie(o.trial_scores,
+                      o.aggregate_score);
     }
 
     bool operator!=(const this_t & o) const {
@@ -73,20 +72,14 @@ public:
     }
 
     bool operator<(const this_t & o) const {
-      return std::tie(score,
-                      env_matches,
-                      env_misses,
-                      no_responses)
-           < std::tie(o.score,
-                      o.env_matches,
-                      o.env_misses,
-                      o.no_responses);
+      return std::tie(test_scores,
+                      aggregate_score)
+            < std::tie(o.test_scores,
+                       o.aggregate_score);
     }
 
-    double GetScore() const { return score; }
-    size_t GetEnvMatches() const { return env_matches; }
-    size_t GetEnvMisses() const { return env_misses; }
-    size_t GetNoResponses() const { return no_responses; }
+    double GetAggregateScore() const { return aggregate_score; }
+
   };
 
 protected:

@@ -300,10 +300,10 @@ public:
   ~ChgEnvWorld() {
     if (setup) {
       inst_lib.Delete();
-      // event_lib.Delete();
-      // eval_hardware.Delete();
-      // mutator.Delete();
-      // max_fit_file.Delete();
+      event_lib.Delete();
+      eval_hardware.Delete();
+      mutator.Delete();
+      max_fit_file.Delete();
     }
   }
 
@@ -462,7 +462,6 @@ void ChgEnvWorld::InitInstLib() {
       }
     }, "Set organism response to the environment");
   }
-
 }
 
 void ChgEnvWorld::InitEventLib() {

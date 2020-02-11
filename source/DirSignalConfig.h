@@ -8,7 +8,7 @@ EMP_BUILD_CONFIG(DirSigConfig,
     VALUE(SEED, int, 0, "Random number seed (-1 for seed based on time)"),
     VALUE(GENERATIONS, size_t, 100, "How many generations do we evolve things?"),
     VALUE(POP_SIZE, size_t, 100, "How big is our population?"),
-    VALUE(STOP_ON_SOLUTION, bool, true, "Should we stop run on solution?"),
+    VALUE(STOP_ON_SOLUTION, bool, false, "Should we stop run on solution?"),
 
   GROUP(EVALUATION_GROUP, "Organism evaluation settings"),
     VALUE(EVAL_TRIAL_CNT, size_t, 3, "How many times should we evaluate individuals (where fitness = min trial performance)?"),
@@ -31,7 +31,9 @@ EMP_BUILD_CONFIG(DirSigConfig,
     VALUE(MAX_THREAD_CAPACITY, size_t, 32, "Maximum capacity for thread memory (pending + active)."),
 
   GROUP(SELECTION_GROUP, "Selection settings"),
+    VALUE(SELECTION_MODE, std::string, "lexicase", "Selection scheme? [lexicase, tournament]"),
     VALUE(TOURNAMENT_SIZE, size_t, 8, "How big are tournaments when doing tournament selection?"),
+    VALUE(TEST_SAMPLE_SIZE, size_t, 1, "How many directional sequences should we sample to evaluate organisms?"),
 
   GROUP(MUTATION_GROUP, "Mutation settings"),
     VALUE(MUT_RATE__INST_ARG_SUB, double, 0.005, "InstArgSub rate"),
