@@ -1,7 +1,8 @@
 # Project-specific settings
 # PROJECT := mc-reg-exp
 # PROJECT := alt-signal-exp
-PROJECT := chg-env-exp
+# PROJECT := chg-env-exp
+PROJECT := dir-signal-exp
 EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
 
@@ -12,7 +13,7 @@ MATCH_THRESH := 25
 # MATCH_REG options: add, mult
 MATCH_REG := mult
 # TAG_NUM_BITS
-TAG_NUM_BITS := 128
+TAG_NUM_BITS := 64
 # combine it all into the executable name
 EXEC_NAME := $(PROJECT)_tag-len-$(TAG_NUM_BITS)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)_reg-$(MATCH_REG)
 
