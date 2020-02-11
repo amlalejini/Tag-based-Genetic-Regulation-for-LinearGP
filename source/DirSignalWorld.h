@@ -231,7 +231,7 @@ protected:
   // General settings group.
   size_t GENERATIONS;
   size_t POP_SIZE;
-  bool STOP_ON_SOLUTION;
+  bool STOP_ON_SOLUTION;  // TODO - add in stop on solution functionality
   // Evaluation group.
   size_t EVAL_TRIAL_CNT;
   size_t NUM_ENV_STATES;
@@ -262,6 +262,7 @@ protected:
   // Data collection group
   std::string OUTPUT_DIR;
   size_t SUMMARY_RESOLUTION;
+  size_t SCREEN_RESOLUTION;
   size_t SNAPSHOT_RESOLUTION;
 
   Environment eval_environment;
@@ -287,6 +288,7 @@ protected:
   emp::Ptr<systematics_t> systematics_ptr; ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
 
   size_t max_fit_org_id=0;
+  bool found_solution=false;
 
   emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;
 
@@ -313,6 +315,7 @@ protected:
 
   void AnalyzeOrg(const org_t & org, size_t org_id=0);
   void TraceOrganism(const org_t & org, size_t org_id=0);
+  bool ScreenSolution(const org_t & org);
   HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
 
   // -- Utilities --
@@ -384,6 +387,7 @@ void DirSigWorld::InitConfigs(const config_t & config) {
   // Data collection group
   OUTPUT_DIR = config.OUTPUT_DIR();
   SUMMARY_RESOLUTION = config.SUMMARY_RESOLUTION();
+  SCREEN_RESOLUTION = config.SCREEN_RESOLUTION();
   SNAPSHOT_RESOLUTION = config.SNAPSHOT_RESOLUTION();
 }
 
@@ -875,11 +879,21 @@ void DirSigWorld::DoUpdate() {
   // Log current update, best fitnesses.
   const double max_score = CalcFitnessID(max_fit_org_id);
   const double max_possible = TEST_SAMPLE_SIZE * NUM_ENV_UPDATES;
-  // found_solution = IsSolution(GetOrg())
-  std::cout << "update: " << GetUpdate() << "; ";
-  std::cout << "best score (" << max_fit_org_id << "): " << max_score << "; ";
-  std::cout << "max score? " << (max_score >= max_possible) << std::endl;
   const size_t cur_update = GetUpdate();
+  // const double solution_score = NUM_ENV_UPDATES * possible_dir_sequences.size();
+
+  if (SCREEN_RESOLUTION) {
+    // screen for a solution if it's time (i.e., resolution, at end of run) AND max score is max possible
+    if ( (!(cur_update % SCREEN_RESOLUTION) || cur_update == GENERATIONS) && max_score >= max_possible ) {
+      found_solution = ScreenSolution(GetOrg(max_fit_org_id));
+    }
+  }
+
+  std::cout << "update: " << cur_update << "; ";
+  std::cout << "best score (" << max_fit_org_id << "): " << max_score << "; ";
+  std::cout << "max score? " << (max_score >= max_possible) << "; ";
+  std::cout << "solution? " << found_solution << std::endl;
+
   if (SUMMARY_RESOLUTION) {
     if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS ) {
       max_fit_file->Update();
@@ -967,6 +981,19 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
 }
 
 // TODO - screen for solution
+bool DirSigWorld::ScreenSolution(const org_t & org) {
+  org_t test_org(org);
+  const emp::vector<size_t> original_ordering = dir_seq_ids;
+  std::sort(dir_seq_ids.begin(), dir_seq_ids.end()); // Minimize cognitive load on future me.
+  const size_t evo_sample_size = TEST_SAMPLE_SIZE;
+  const size_t analysis_sample_size = dir_seq_ids.size();
+  TEST_SAMPLE_SIZE = analysis_sample_size;  // Set the sample size to all possible sequences.
+  EvaluateOrg(test_org);
+  TEST_SAMPLE_SIZE = evo_sample_size;
+  dir_seq_ids = original_ordering;      // Restore dir_seq_id ordering.
+  const double solution_score = NUM_ENV_UPDATES * possible_dir_sequences.size();
+  return test_org.GetPhenotype().GetAggregateScore() >= solution_score;
+}
 
 void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   ////////////////////////////////////////////////

@@ -49,6 +49,7 @@ EMP_BUILD_CONFIG(DirSigConfig,
   GROUP(DATA_COLLECTION_GROUP, "Data collection settings"),
     VALUE(OUTPUT_DIR, std::string, "output", "where should we dump output?"),
     VALUE(SUMMARY_RESOLUTION, size_t, 10, "How often should we output summary statistics?"),
+    VALUE(SCREEN_RESOLUTION, size_t, 10, "How often should we attempt to screen for a solution?"),
     VALUE(SNAPSHOT_RESOLUTION, size_t, 100, "How often should we snapshot the population?"),
 )
 
