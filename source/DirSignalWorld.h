@@ -895,14 +895,14 @@ void DirSigWorld::DoUpdate() {
   std::cout << "solution? " << found_solution << std::endl;
 
   if (SUMMARY_RESOLUTION) {
-    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS ) {
+    if (!(cur_update % SUMMARY_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) {
       max_fit_file->Update();
     }
   }
   if (SNAPSHOT_RESOLUTION) {
-    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS) {
+    if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) {
       DoPopulationSnapshot();
-      if (cur_update) {
+      if (cur_update || (STOP_ON_SOLUTION & found_solution)) {
         systematics_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
         AnalyzeOrg(GetOrg(max_fit_org_id), max_fit_org_id);
       }
@@ -1029,7 +1029,6 @@ void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   // Write out analysis file
   // org_id, is_solution, aggregate_score, scores_by_test, test_ids, test_seqs, ko_[:]_is_solution, ko_[:]_aggregate_score, ko_[:]_scores_by_test,
   const double solution_score = NUM_ENV_UPDATES * possible_dir_sequences.size();
-  std::cout << "Solution score = " << solution_score << std::endl;
   emp::DataFile analysis_file(OUTPUT_DIR + "/analysis_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
   analysis_file.template AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
   analysis_file.template AddFun<size_t>([&org_id]() { return org_id; }, "pop_id");
@@ -1493,6 +1492,7 @@ void DirSigWorld::RunStep() {
 void DirSigWorld::Run() {
   for (size_t u = 0; u <= GENERATIONS; ++u) {
     RunStep();
+    if (STOP_ON_SOLUTION & found_solution) break;
   }
 }
 
