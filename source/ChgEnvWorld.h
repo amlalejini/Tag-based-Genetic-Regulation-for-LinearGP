@@ -235,6 +235,7 @@ protected:
   std::string OUTPUT_DIR;
   size_t SUMMARY_RESOLUTION;
   size_t SNAPSHOT_RESOLUTION;
+  size_t ANALYZE_ORG_EVAL_TRIALS;
 
   Environment eval_environment;
 
@@ -277,7 +278,7 @@ protected:
   void DoSelection();
   void DoUpdate();
 
-  void EvaluateOrg(org_t & org);
+  void EvaluateOrg(org_t & org, bool shuffle_env=true);
 
   void AnalyzeOrg(const org_t & org, size_t org_id=0);
   void TraceOrganism(const org_t & org, size_t org_id=0);
@@ -353,6 +354,7 @@ void ChgEnvWorld::InitConfigs(const config_t & config) {
   OUTPUT_DIR = config.OUTPUT_DIR();
   SUMMARY_RESOLUTION = config.SUMMARY_RESOLUTION();
   SNAPSHOT_RESOLUTION = config.SNAPSHOT_RESOLUTION();
+  ANALYZE_ORG_EVAL_TRIALS = config.ANALYZE_ORG_EVAL_TRIALS();
 }
 
 void ChgEnvWorld::InitInstLib() {
@@ -857,7 +859,7 @@ void ChgEnvWorld::DoPopulationSnapshot() {
   }
 }
 
-void ChgEnvWorld::EvaluateOrg(org_t & org) {
+void ChgEnvWorld::EvaluateOrg(org_t & org, bool shuffle_env/*=true*/) {
   // Evaluate org NUM_TRIALS times, keep worst phenotype.
   // Reset organism phenotype.
   org.GetPhenotype().Reset();
@@ -872,7 +874,7 @@ void ChgEnvWorld::EvaluateOrg(org_t & org) {
     // reset the environment
     eval_environment.ResetEnv();
     // shuffle environment schedule for this trial
-    emp::Shuffle(*random_ptr, eval_environment.env_schedule);
+    if (shuffle_env) { emp::Shuffle(*random_ptr, eval_environment.env_schedule); }
     // reset hardware matchbin between trials
     eval_hardware->ResetMatchBin();
     // Evaluate the organism in the environment.
@@ -915,72 +917,27 @@ void ChgEnvWorld::EvaluateOrg(org_t & org) {
 
 /// Analyze organism
 void ChgEnvWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
-  ////////////////////////////////////////////////
-  // (1) Does this organism's genotype perform equivalently across independent evaluations?
-  // Make a new test organism from input org.
-  emp::vector<org_t> test_orgs;
-  for (size_t i = 0; i < 3; ++i) {
-    test_orgs.emplace_back(org);
-  }
-  // Evaluate each test org.
-  for (org_t & test_org : test_orgs) {
-    EvaluateOrg(test_org);
-  }
-  // Did this organism's phenotype change across runs?
-  bool consistent_performance = true;
-  for (size_t i = 0; i < test_orgs.size(); ++i) {
-    for (size_t j = i; j < test_orgs.size(); ++j) {
-      if (test_orgs[i].GetPhenotype() != test_orgs[j].GetPhenotype()) {
-        consistent_performance = false;
-        break;
-      }
-    }
-    if (!consistent_performance) break;
-  }
-  ////////////////////////////////////////////////
-  // (2) Run a full trace of this organism.
-  TraceOrganism(org, org_id);
-  ////////////////////////////////////////////////
-  // (3) Run with knockouts
-  //     - ko memory
-  KO_GLOBAL_MEMORY = true;
-  KO_REGULATION = false;
+
+  size_t trial_id = 0;
+  org_t test_org(org);
   org_t ko_mem_org(org);
-  EvaluateOrg(ko_mem_org);
-  //     - ko regulation
-  KO_GLOBAL_MEMORY = false;
-  KO_REGULATION = true;
   org_t ko_reg_org(org);
-  EvaluateOrg(ko_reg_org);
-  // todo - evaluate organism
-  //     - ko memory & ko regulation
-  KO_GLOBAL_MEMORY = true;
-  KO_REGULATION = true;
   org_t ko_all_org(org);
-  EvaluateOrg(ko_all_org);
-  // todo - evaluate organism
-  // Reset KO variables to both be false
-  KO_GLOBAL_MEMORY = false;
-  KO_REGULATION = false;
-  ////////////////////////////////////////////////
-  // (4) Setup and write to analysis output file
-  // note: I'll arbitrarily use test_org 0 as canonical version
+  const size_t orig_eval_trial_cnt = EVAL_TRIAL_CNT;
+  EVAL_TRIAL_CNT = 1;
+
   emp::DataFile analysis_file(OUTPUT_DIR + "/analysis_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
   analysis_file.template AddFun<size_t>([this]() { return this->GetUpdate(); }, "update");
   analysis_file.template AddFun<size_t>([&org_id]() { return org_id; }, "pop_id");
-  analysis_file.template AddFun<bool>([&test_orgs, this]() {
-    emp_assert(test_orgs.size());
-    org_t & org = test_orgs[0];
+  analysis_file.template AddFun<size_t>([&trial_id]() { return trial_id; }, "trial_id");
+  analysis_file.template AddFun<bool>([&test_org, this]() {
+    org_t & org = test_org;
     return this->IsSolution(org.GetPhenotype());
   }, "solution");
-  analysis_file.template AddFun<double>([&test_orgs]() {
-    emp_assert(test_orgs.size());
-    org_t & org = test_orgs[0];
+  analysis_file.template AddFun<double>([&test_org]() {
+    org_t & org = test_org;
     return org.GetPhenotype().GetScore();
   }, "score");
-  analysis_file.template AddFun<bool>([&consistent_performance]() {
-    return consistent_performance;
-  }, "consistent");
   analysis_file.template AddFun<double>([&ko_reg_org]() {
     return ko_reg_org.GetPhenotype().GetScore();
   }, "score_ko_regulation");
@@ -990,21 +947,61 @@ void ChgEnvWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   analysis_file.template AddFun<double>([&ko_all_org]() {
     return ko_all_org.GetPhenotype().GetScore();
   }, "score_ko_all");
+  analysis_file.template AddFun<std::string>([this]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < eval_environment.env_schedule.size(); ++i) {
+      if (i) stream << ",";
+      stream << eval_environment.env_schedule[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "environment_seq");
   analysis_file.template AddFun<size_t>([this, &org_id]() {
     return this->GetOrg(org_id).GetGenome().GetProgram().GetSize();
   }, "num_modules");
   analysis_file.template AddFun<size_t>([this, &org_id]() {
     return this->GetOrg(org_id).GetGenome().GetProgram().GetInstCount();
   }, "num_instructions");
-  analysis_file.template AddFun<std::string>([this, &org_id]() {
-    std::ostringstream stream;
-    stream << "\"";
-    this->PrintProgramSingleLine(this->GetOrg(org_id).GetGenome().GetProgram(), stream);
-    stream << "\"";
-    return stream.str();
-  }, "program");
+  // analysis_file.template AddFun<std::string>([this, &org_id]() {
+  //   std::ostringstream stream;
+  //   stream << "\"";
+  //   this->PrintProgramSingleLine(this->GetOrg(org_id).GetGenome().GetProgram(), stream);
+  //   stream << "\"";
+  //   return stream.str();
+  // }, "program");
   analysis_file.PrintHeaderKeys();
-  analysis_file.Update();
+
+  // Analyze org across many trials.
+  for (trial_id=0; trial_id < ANALYZE_ORG_EVAL_TRIALS; ++trial_id) {
+    // Use consistent environment schedule for knockouts.
+    emp::Shuffle(*random_ptr, eval_environment.env_schedule);
+    // Evaluate org normally.
+    EvaluateOrg(test_org, false);
+    KO_GLOBAL_MEMORY = true;
+    KO_REGULATION = false;
+    EvaluateOrg(ko_mem_org, false);
+    //     - ko regulation
+    KO_GLOBAL_MEMORY = false;
+    KO_REGULATION = true;
+    EvaluateOrg(ko_reg_org, false);
+    // todo - evaluate organism
+    //     - ko memory & ko regulation
+    KO_GLOBAL_MEMORY = true;
+    KO_REGULATION = true;
+    EvaluateOrg(ko_all_org, false);
+    // todo - evaluate organism
+    // Reset KO variables to both be false
+    KO_GLOBAL_MEMORY = false;
+    KO_REGULATION = false;
+    analysis_file.Update();
+  }
+  KO_GLOBAL_MEMORY = false;
+  KO_REGULATION = false;
+  EVAL_TRIAL_CNT = orig_eval_trial_cnt;
+  ////////////////////////////////////////////////
+  // (2) Run a full trace of this organism.
+  TraceOrganism(org, org_id);
 }
 
 /// Perform step-by-step execution trace on an organism, output

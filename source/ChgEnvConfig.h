@@ -45,6 +45,7 @@ EMP_BUILD_CONFIG(ChgEnvConfig,
     VALUE(MUT_RATE__FUNC_TAG_BF, double, 0.001, "FuncTagBF rate"),
 
   GROUP(DATA_COLLECTION_GROUP, "Data collection settings"),
+    VALUE(ANALYZE_ORG_EVAL_TRIALS, size_t, 10, ""),
     VALUE(OUTPUT_DIR, std::string, "output", "where should we dump output?"),
     VALUE(SUMMARY_RESOLUTION, size_t, 10, "How often should we output summary statistics?"),
     VALUE(SNAPSHOT_RESOLUTION, size_t, 100, "How often should we snapshot the population?"),
