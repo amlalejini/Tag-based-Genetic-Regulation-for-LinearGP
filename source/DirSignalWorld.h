@@ -231,7 +231,7 @@ protected:
   // General settings group.
   size_t GENERATIONS;
   size_t POP_SIZE;
-  bool STOP_ON_SOLUTION;  // TODO - add in stop on solution functionality
+  bool STOP_ON_SOLUTION;
   // Evaluation group.
   size_t EVAL_TRIAL_CNT;
   size_t NUM_ENV_STATES;
@@ -980,7 +980,6 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
   }
 }
 
-// TODO - screen for solution
 bool DirSigWorld::ScreenSolution(const org_t & org) {
   org_t test_org(org);
   const emp::vector<size_t> original_ordering = dir_seq_ids;
@@ -1000,6 +999,7 @@ void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   // (1) Analyze organism in ALL possible direction sequences.
   // std::cout << "ANALYZE ORG" << std::endl;
   org_t test_org(org);
+  const emp::vector<size_t> original_ordering = dir_seq_ids;
   std::sort(dir_seq_ids.begin(), dir_seq_ids.end()); // Minimize cognitive load on future me.
   const size_t evo_sample_size = TEST_SAMPLE_SIZE;
   const size_t analysis_sample_size = dir_seq_ids.size();
@@ -1026,6 +1026,7 @@ void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   KO_GLOBAL_MEMORY=false;
   KO_REGULATION=false;
   TEST_SAMPLE_SIZE = evo_sample_size;
+  dir_seq_ids = original_ordering;      // Restore dir_seq_id ordering.
   // Write out analysis file
   // org_id, is_solution, aggregate_score, scores_by_test, test_ids, test_seqs, ko_[:]_is_solution, ko_[:]_aggregate_score, ko_[:]_scores_by_test,
   const double solution_score = NUM_ENV_UPDATES * possible_dir_sequences.size();
@@ -1151,11 +1152,220 @@ void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   }, "program");
   analysis_file.PrintHeaderKeys();
   analysis_file.Update();
-  // TODO - trace organism!
+  // run a trace on organism (all possible environment sequences)
+  TraceOrganism(org);
 }
 
 void DirSigWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
-  // TODO
+  // Save environment state information to restore post-trace.
+  const emp::vector<size_t> original_ordering = dir_seq_ids;
+  const size_t evo_sample_size = TEST_SAMPLE_SIZE;
+  const size_t analysis_sample_size = dir_seq_ids.size();
+  std::sort(dir_seq_ids.begin(), dir_seq_ids.end()); // Minimize cognitive load on future me.
+  TEST_SAMPLE_SIZE = analysis_sample_size;  // Set the sample size to all possible sequences.
+  org_t trace_org(org);
+  const std::string trace_dir = OUTPUT_DIR + "trace-" + emp::to_string(GetUpdate()) + "/";
+  mkdir(trace_dir.c_str(), ACCESSPERMS);
+  // Configure trace org phenotype/eval hardware
+  trace_org.GetPhenotype().Reset(TEST_SAMPLE_SIZE);
+  eval_hardware->SetProgram(org.GetGenome().program);
+  // For each l/r direction sequence, run trace.
+  for (size_t sample_id = 0; sample_id < TEST_SAMPLE_SIZE; ++sample_id) {
+    const size_t seq_id = dir_seq_ids[sample_id];
+    const auto & env_seq = possible_dir_sequences[seq_id];
+    emp::DataFile trace_file(trace_dir + "trace_org_" + emp::to_string(org_id) + "_test_" + emp::to_string(seq_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
+    // --- Trace state information ---
+    HardwareStatePrintInfo hw_state_info;
+    size_t env_update=0;
+    size_t cpu_step=0;
+    bool cur_dir = false;
+    // ----- Timing information -----
+    trace_file.template AddFun<std::string>([&env_seq]() {
+      std::ostringstream stream;
+      stream << env_seq;
+      return stream.str();
+    }, "env_seq");
+    trace_file.template AddFun<size_t>([&seq_id]() {
+      return seq_id;
+    }, "test_id");
+    trace_file.template AddFun<size_t>([&env_update]() {
+      return env_update;
+    }, "env_update");
+    trace_file.template AddFun<size_t>([&cpu_step]() {
+      return cpu_step;
+    }, "cpu_step");
+    // ----- Environment Information -----
+    //    * num_states
+    trace_file.template AddFun<size_t>([this]() {
+      return eval_environment.num_states;
+    }, "num_env_states");
+    //    * cur_state
+    trace_file.template AddFun<size_t>([this]() {
+      return eval_environment.cur_state;
+    }, "cur_env_state");
+    trace_file.template AddFun<bool>([&cur_dir]() {
+      return cur_dir;
+    }, "direction");
+    //    * env_signal_tag
+    trace_file.template AddFun<std::string>([this, &cur_dir]() {
+      std::ostringstream stream;
+      if (cur_dir) {
+        eval_environment.GetShiftRightTag().Print(stream);
+      } else {
+        eval_environment.GetShiftLeftTag().Print(stream);
+      }
+      return stream.str();
+    }, "cur_env_signal_tag");
+    // ----- Hardware Information -----
+    //    * current response
+    trace_file.template AddFun<bool>([this]() {
+      return eval_hardware->GetCustomComponent().HasResponse();
+    }, "has_response");
+    trace_file.template AddFun<int>([this]() {
+      return eval_hardware->GetCustomComponent().GetResponse();
+    }, "cur_response");
+    //    * correct responses
+    trace_file.template AddFun<bool>([this]() {
+      return eval_hardware->GetCustomComponent().GetResponse() == (int)eval_environment.cur_state;
+    }, "has_correct_response");
+    //    * num_modules
+    trace_file.template AddFun<size_t>([&hw_state_info]() {
+      return hw_state_info.num_modules;
+    }, "num_modules");
+    //    * module_regulator_states
+    trace_file.template AddFun<std::string>([&hw_state_info]() {
+      std::ostringstream stream;
+      stream << "\"[";
+      for (size_t i = 0; i < hw_state_info.module_regulator_states.size(); ++i) {
+        if (i) stream << ",";
+        stream << hw_state_info.module_regulator_states[i];
+      }
+      stream << "]\"";
+      return stream.str();
+    }, "module_regulator_states");
+    //    * which module would be triggered by the environment signal?
+    trace_file.template AddFun<int>([this]() {
+      const auto matches = eval_hardware->GetMatchBin().Match(eval_environment.GetShiftLeftTag());
+      if (matches.size()) return (int)matches[0];
+      else return -1;
+    }, "0_signal_closest_match");
+    trace_file.template AddFun<int>([this]() {
+      const auto matches = eval_hardware->GetMatchBin().Match(eval_environment.GetShiftRightTag());
+      if (matches.size()) return (int)matches[0];
+      else return -1;
+    }, "1_signal_closest_match");
+    //    * match scores against environment signal tag for each module
+    trace_file.template AddFun<std::string>([this]() {
+      const auto match_scores = eval_hardware->GetMatchBin().ComputeMatchScores(eval_environment.GetShiftLeftTag());
+      emp::vector<double> scores(eval_hardware->GetNumModules());
+      std::ostringstream stream;
+      for (const auto & pair : match_scores) {
+        const size_t module_id = pair.first;
+        const double match_score = pair.second;
+        scores[module_id] = match_score;
+      }
+      stream << "\"[";
+      for (size_t i = 0; i < scores.size(); ++i) {
+        if (i) stream << ",";
+        stream << scores[i];
+      }
+      stream << "]\"";
+      return stream.str();
+    }, "0_signal_match_scores");
+    trace_file.template AddFun<std::string>([this]() {
+      const auto match_scores = eval_hardware->GetMatchBin().ComputeMatchScores(eval_environment.GetShiftRightTag());
+      emp::vector<double> scores(eval_hardware->GetNumModules());
+      std::ostringstream stream;
+      for (const auto & pair : match_scores) {
+        const size_t module_id = pair.first;
+        const double match_score = pair.second;
+        scores[module_id] = match_score;
+      }
+      stream << "\"[";
+      for (size_t i = 0; i < scores.size(); ++i) {
+        if (i) stream << ",";
+        stream << scores[i];
+      }
+      stream << "]\"";
+      return stream.str();
+    }, "1_signal_match_scores");
+    //    * module_regulator_timers
+    trace_file.template AddFun<std::string>([&hw_state_info]() {
+      std::ostringstream stream;
+      stream << "\"[";
+      for (size_t i = 0; i < hw_state_info.module_regulator_timers.size(); ++i) {
+        if (i) stream << ",";
+        stream << hw_state_info.module_regulator_timers[i];
+      }
+      stream << "]\"";
+      return stream.str();
+    }, "module_regulator_timers");
+    //    * global_mem_str
+    trace_file.template AddFun<std::string>([&hw_state_info]() {
+      return "\"" + hw_state_info.global_mem_str + "\"";
+    }, "global_mem");
+    //    * num_active_threads
+    trace_file.template AddFun<size_t>([&hw_state_info]() {
+      return hw_state_info.num_active_threads;
+    }, "num_active_threads");
+    //    * thread_state_str
+    trace_file.template AddFun<std::string>([&hw_state_info]() {
+      return "\"" + hw_state_info.thread_state_str + "\"";
+    }, "thread_state_info");
+    trace_file.PrintHeaderKeys();
+
+    // ---- Do an traced-evaluation ----
+    // reset the environment
+    eval_environment.ResetEnv();
+    // reset hardware matchbin between trials
+    eval_hardware->ResetMatchBin();
+    emp_assert(env_seq.GetSize() == NUM_ENV_UPDATES);
+    emp_assert(trace_org.GetPhenotype().test_scores[sample_id] == 0);
+    // Evaluate the organism on the current environment sequence.
+    for (env_update = 0; env_update < NUM_ENV_UPDATES; ++env_update) {
+      // What direction will the environment be shifting? [0: left, 1: right]
+      cur_dir = env_seq.Get(env_update);
+      const size_t cur_env_state = (cur_dir) ? eval_environment.ShiftRight() : eval_environment.ShiftLeft();
+      // Reset the hardware!
+      eval_hardware->ResetHardwareState();
+      eval_hardware->GetCustomComponent().Reset();
+      emp_assert(eval_hardware->ValidateThreadState());
+      emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
+      emp_assert(eval_hardware->GetNumQueuedEvents() == 0);
+      if (cur_dir) {
+        // Shift right.
+        eval_hardware->QueueEvent(event_t(event_id__right_env_sig, eval_environment.GetShiftRightTag()));
+      } else {
+        // Shift left.
+        eval_hardware->QueueEvent(event_t(event_id__left_env_sig, eval_environment.GetShiftLeftTag()));
+      }
+      // Step the hardware forward to process the event.
+      cpu_step = 0;
+      hw_state_info = GetHardwareStatePrintInfo(*eval_hardware);
+      trace_file.Update(); // Always output state BEFORE time step advances
+      while (cpu_step < CPU_CYCLES_PER_ENV_UPDATE) {
+        eval_hardware->SingleProcess();
+        ++cpu_step;
+        hw_state_info = GetHardwareStatePrintInfo(*eval_hardware);
+        trace_file.Update();
+        if (!( eval_hardware->GetNumActiveThreads() || eval_hardware->GetNumPendingThreads() )) break;
+      }
+      // How did the organism respond?
+      if (eval_hardware->GetCustomComponent().HasResponse() && eval_hardware->GetCustomComponent().GetResponse() == (int)cur_env_state) {
+        // Correct! Increment score.
+        trace_org.GetPhenotype().test_scores[sample_id] += 1;
+      } else {
+        // Incorrect! Bail out on trial evaluation.
+        break;
+      }
+    }
+    phenotype_t & trace_phen = trace_org.GetPhenotype();
+    trace_phen.aggregate_score += trace_phen.test_scores[sample_id];
+    trace_phen.test_ids[sample_id] = seq_id;
+  }
+  // restore world state post-trace
+  TEST_SAMPLE_SIZE = evo_sample_size;
+  dir_seq_ids = original_ordering;
 }
 
 DirSigWorld::HardwareStatePrintInfo DirSigWorld::GetHardwareStatePrintInfo(hardware_t & hw) {
