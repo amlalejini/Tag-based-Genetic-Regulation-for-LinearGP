@@ -56,12 +56,6 @@ def extract_settings(run_config_path):
     configs = [l for l in csv.reader(content, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)]
     return {param[header_lu["parameter"]]:param[header_lu["value"]] for param in configs}
 
-def extract_org_analyses():
-    pass
-
-def extract_org_traces():
-    pass
-
 def find_org_analysis_path(run_path, update):
     output_path = os.path.join(run_path, "output")
     # Find all org analysis files (analysis_org_0_update_1000.csv)
