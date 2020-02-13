@@ -247,9 +247,15 @@ def main():
             for module_id in active_modules: modules_active_by_step[i][module_id] += 1
             # Add present modules for this step
             for module_id in present_modules: modules_present_by_step[i][module_id] += 1
+            ########## OLD ###########
             # update
-            final_match_scores = list(map(float, steps[-1][trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
-            match_delta_in_env_cycle[cur_env] = [baseline - final for baseline, final in zip(baseline_match_scores, final_match_scores)]
+            # final_match_scores = list(map(float, steps[-1][trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
+            # match_delta_in_env_cycle[cur_env] = [baseline - final for baseline, final in zip(baseline_match_scores, final_match_scores)]
+            ########## OLD ###########
+        ######### NEW ###########
+        final_match_scores = list(map(float, steps[-1][trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
+        match_delta_in_env_cycle[cur_env] = [final - baseline for baseline, final in zip(baseline_match_scores, final_match_scores)]
+        ######### NEW ###########
 
         # ========= build trace out file for this run =========
         # - There's one trace output file per run
