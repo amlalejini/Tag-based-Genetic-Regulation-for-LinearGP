@@ -1,6 +1,9 @@
 '''
 Script: aggMaxFit.py
 For each run, grab the maximum fitness organism at end of run.
+
+:horror:
+This script is a result of code sprinting. It desperately needs to be cleaned up.
 '''
 
 import argparse, os, copy, errno, csv, re, sys
@@ -25,7 +28,7 @@ key_settings = [
     "MAX_FUNC_INST_CNT",
     "MAX_ACTIVE_THREAD_CNT",
     "MAX_THREAD_CAPACITY",
-    "TOURNAMENT_SIZE"
+    "MUT_RATE__FUNC_DUP"
 ]
 
 """
