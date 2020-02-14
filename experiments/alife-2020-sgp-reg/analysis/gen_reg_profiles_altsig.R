@@ -43,7 +43,8 @@ for (trace_id in trace_ids) {
   trace_file <- paste(data_dir, "/alt-sig/traces/trace_update-10000_run-id-", trace_id, ".csv", sep="")
   trace_data <- read.csv(trace_file, na.strings="NONE")
   trace_data$similarity_score <- 1 - trace_data$match_score
-  trace_data$is_running <- factor(trace_data$is_running, levels=c(0, 1))
+  # trace_data$is_running <- factor(trace_data$is_running, levels=c(0, 1))
+  trace_data$is_running <- trace_data$is_running > 0
   
   trace_data$triggered <- (trace_data$env_signal_closest_match == trace_data$module_id) & (trace_data$cpu_step == "0")
   # , limits=c(-5, 5), oob=squish
@@ -51,7 +52,7 @@ for (trace_id in trace_ids) {
   ggplot(trace_data, aes(x=module_id, y=time_step, fill=regulator_state)) +
     scale_fill_viridis(option="viridis", direction=-1) +
     geom_tile(color="white", size=0.2, width=1, height=1) +
-    geom_tile(data=filter(trace_data, is_running==1), color="black", width=1, height=1, size=0.8) +
+    geom_tile(data=filter(trace_data, is_running==TRUE), color="black", width=1, height=1, size=0.8) +
     geom_hline(yintercept=filter(trace_data, cpu_step==0)$time_step-0.5, size=1) +
     geom_point(data=filter(trace_data, triggered==TRUE), size=0.4) +
     ggtitle(paste("Condition: ",condition, "; # Envs: ", num_envs, "; Score: ", score, "; Solution? ", is_sol , sep="")) +
@@ -61,7 +62,7 @@ for (trace_id in trace_ids) {
   ggplot(trace_data, aes(x=module_id, y=time_step, fill=similarity_score)) +
     scale_fill_viridis(option="plasma") +
     geom_tile(color="white", size=0.2, width=1, height=1) +
-    geom_tile(data=filter(trace_data, is_running==1), color="black", width=1, height=1, size=0.8) +
+    geom_tile(data=filter(trace_data, is_running==TRUE), color="black", width=1, height=1, size=0.8) +
     geom_point(data=filter(trace_data, triggered==TRUE), size=0.4) +
     geom_hline(yintercept=filter(trace_data, cpu_step==0)$time_step-0.5, size=1) +
     ggtitle(paste("Condition: ",condition, "; # Envs: ", num_envs, "; Score: ", score, "; Solution? ", is_sol , sep="")) +
