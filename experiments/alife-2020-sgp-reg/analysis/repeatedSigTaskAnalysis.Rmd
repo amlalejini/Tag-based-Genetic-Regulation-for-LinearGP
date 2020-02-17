@@ -49,6 +49,9 @@ library(dplyr)    # (Wickham et al., 2018)
 library(cowplot)  # (Wilke, 2018)
 library(viridis)  # (Garnier, 2018)
 library(reshape2)
+library(RColorBrewer)
+library(igraph)
+library(ggplotify)
 ```
 
 ## Setup
@@ -56,8 +59,10 @@ library(reshape2)
 Load data, initial data cleanup, global settings.
 
 ```{r}
-data_loc <- "../data/alt-sig/max_fit_orgs_10000_no_program.csv"
+theme_set(theme_cowplot())
+data_loc <- "../data/alt-sig/max_fit_orgs.csv"
 data <- read.csv(data_loc, na.strings="NONE")
+data <- subset(data, select = -c(program))
 
 # Specify factors.
 data$matchbin_thresh <- factor(data$matchbin_thresh,
@@ -119,15 +124,15 @@ ggplot(sol_data, aes(x=condition, fill=condition)) +
   geom_text(stat="count", aes(label=..count..), position=position_dodge(0.9), vjust=0) +
   ggtitle("Solution Counts by Condition and Environment Complexity") +
   xlab("Condition") +
-  scale_y_continuous(name="# solutions", breaks=seq(0, 50, 10), limits=c(0, 52)) +
+  scale_y_continuous(name="# evolved solutions", breaks=seq(0, 50, 10), limits=c(0, 52)) +
   scale_fill_discrete(name="Condition:",
-                      limits=c("regulation", "memory", "none", "both"),
-                      labels=c("Regulation-only", "Memory-only", "Neither", "Both")) +
-  scale_x_discrete(limits=c("regulation", "memory", "none", "both"),
-                   labels=c("Regulation", "Memory", "Neither", "Both")) +
+                      limits=c("regulation", "memory", "both", "none"),
+                      labels=c("Regulation-only", "Memory-only", "Both", "Neither")) +
+  scale_x_discrete(limits=c("regulation", "memory", "both", "none"),
+                   labels=c("Regulation", "Memory", "Both", "Neither")) +
   facet_wrap(~ NUM_SIGNAL_RESPONSES, nrow=1, labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
   theme(legend.position="bottom", axis.text.x=element_blank(), axis.title.x=element_blank()) +
-  ggsave("./imgs/repeated-signal-solultion-cnts.png", width=8,height=3)
+  ggsave("./imgs/repeated-signal-solultion-cnts.png", width=8,height=2.75)
 ```
 
 Note that in the lowest-complexity environment ($K=2$), two runs using classic SignalGP digital organisms produce solutions. This, in addition to hand-coded programs, confirms that it is _possible_ to solve the repeated signal task without regulation. However, these data seem to indicate that using the global memory buffer as it is currently designed/implemented is more challenging than using function regulation.
@@ -245,6 +250,7 @@ ggplot(data, aes(x=condition, y=score, color=condition)) +
 ### How long did it take for solutions to arise?
 
 ```{r}
+# TODO - show ranked version
 ggplot(filter(data, solution=="1"), aes(x=condition, y=update, color=condition)) +
   geom_boxplot() +
   ggtitle("Time to solution") +
@@ -410,7 +416,159 @@ ggplot(filter(data), aes(x=condition, y=stochastic, fill=condition)) +
 
 Next, we take a closer look at the behavioral profile of evolved SignalGP organisms.
 
-Coming soon...
+4-state environment; run id = 234; similarity & regulator states over time
+
+```{r}
+trace_id <- 100234
+org_info <- filter(data, SEED==trace_id)
+num_envs <- org_info$NUM_SIGNAL_RESPONSES
+score <- org_info$score
+condition <- org_info$condition
+is_sol <- org_info$solution
+num_modules <- org_info$num_modules
+data_dir <- "/Users/amlalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/data/alt-sig/"
+
+trace_file <- paste(data_dir, "traces-1/trace_update-10000_run-id-", trace_id, ".csv", sep="")
+trace_data <- read.csv(trace_file, na.strings="NONE")
+trace_data$similarity_score <- 1 - trace_data$match_score
+trace_data$is_running <- trace_data$is_running > 0
+trace_data$regulator_state_simplified <- NA
+trace_data$triggered <- (trace_data$env_signal_closest_match == trace_data$module_id) & (trace_data$cpu_step == "0")
+categorize_reg_state <- function(reg_state) {
+  if (reg_state == 0) {
+    return("neutral")
+  } else if (reg_state < 0) {
+    return("promoted")
+  } else if (reg_state > 0) {
+    return("repressed")
+  } else {
+    return("unknown")
+  }
+}
+trace_data$regulator_state_simplified <- mapply(categorize_reg_state, trace_data$regulator_state)
+
+active_data <- filter(trace_data, is_ever_active=="1")
+active_module_ids <- levels(factor(active_data$module_id))
+active_module_ids <- as.integer(active_module_ids)
+module_id_map <- as.data.frame(active_module_ids)
+module_id_map$order <- order(module_id_map$active_module_ids) - 1
+get_module_x_pos <- function(module_id) {
+  return(filter(module_id_map, active_module_ids==module_id)$order)
+}
+active_data$mod_id_x_pos <- mapply(get_module_x_pos, active_data$module_id)
+
+trace_data <- active_data
+
+out_name <- paste("./imgs/case-study-trace-id-", trace_id, "-regulator-state-ao.pdf", sep="")
+reg_plot <- 
+  ggplot(trace_data, 
+        aes(x=mod_id_x_pos, y=time_step, fill=regulator_state_simplified)) +
+  scale_fill_viridis(name="State:",
+                     limits=c("promoted", "neutral", "repressed"),
+                     labels=c("Promoted", "Neutral", "Repressed"),
+                     discrete=TRUE, direction=-1) +
+  # scale_x_discrete(name="Function ID",
+  #                  limits=seq(0, num_modules, 1)) +
+  scale_x_discrete(name="Function ID",
+                 limits=seq(0, length(active_module_ids)-1, 1),
+                 labels=active_module_ids) +
+  scale_y_discrete(name="Time Step",
+                   limits=seq(0, 50, 10)) +
+  geom_tile(color="white", size=0.2, width=1, height=1) +
+  geom_tile(data=filter(trace_data, is_running==TRUE | triggered==TRUE), color="black", width=1, height=1, size=0.8) +
+  geom_hline(yintercept=filter(trace_data, cpu_step==0)$time_step-0.5, size=1) +
+  geom_point(data=filter(trace_data, triggered==TRUE),
+             shape=21, colour="black", fill="white", stroke=0.33, size=0.75,
+             position=position_nudge(x = 0, y = 0.01)) +
+  theme(legend.position = "top",
+        legend.text = element_text(size=10),
+        axis.text.y = element_text(size=10),
+        axis.text.x = element_text(size=10)) +
+  ggtitle("Function Regulation States") +
+  coord_flip() +
+  ggsave(out_name, height=3, width=4)
+reg_plot
+
+out_name <- paste("./imgs/case-study-trace-id-", trace_id, "-similarity-score-ao.pdf", sep="")
+match_plot <- 
+  ggplot(trace_data, aes(x=mod_id_x_pos, y=time_step, fill=similarity_score)) +
+  scale_fill_viridis(option="plasma",
+                     name="Score:  ",
+                     limits=c(0, 1.0),
+                     breaks=c(0, 0.25, 0.50, 0.75, 1.0),
+                     labels=c("0%", "25%", "50%", "75%", "100%")) +
+  # scale_x_discrete(name="Function ID",
+  #                  limits=seq(0, num_modules, 1)) +
+  scale_x_discrete(name="Function ID",
+                   limits=seq(0, length(active_module_ids)-1, 1),
+                   labels=active_module_ids) +
+  scale_y_discrete(name="Time Step",
+                   limits=seq(0, 50, 10)) +
+  geom_tile(color="white", size=0.2, width=1, height=1) +
+  geom_tile(data=filter(trace_data, is_running==TRUE | triggered==TRUE), color="black", width=1, height=1, size=0.8) +
+  geom_hline(yintercept=filter(trace_data, cpu_step==0)$time_step-0.5, size=1) +
+  geom_point(data=filter(trace_data, triggered==TRUE),
+             shape=21, colour="black", fill="white", stroke=0.33, size=0.75,
+             position=position_nudge(x = 0, y = 0.01)) +
+  theme(legend.position = "top",
+        legend.text = element_text(size=10),
+        axis.text.y = element_text(size=10),
+        axis.text.x = element_text(size=10)) +
+  guides(fill = guide_colourbar(barwidth = 10, barheight = 0.5)) +
+  ggtitle("Function Match Scores") +
+  coord_flip() +
+  ggsave(out_name, height=3, width=4)
+match_plot
+```
+
+```{r}
+# Networks!
+graph_nodes_loc <- paste("../data/alt-sig/reg-igraphs/reg_graph_", trace_id, "_nodes.csv", sep="")
+graph_edges_loc <- paste("../data/alt-sig/reg-igraphs/reg_graph_", trace_id, "_edges.csv", sep="")
+graph_nodes_data <- read.csv(graph_nodes_loc, na.strings="NONE")
+graph_edges_data <- read.csv(graph_edges_loc, na.strings="NONE")
+
+network <- graph_from_data_frame(d=graph_edges_data, vertices=graph_nodes_data, directed=TRUE)
+
+# generate edge colors
+E(network)$color[E(network)$type == "promote"] <- "#FCE640"
+E(network)$lty[E(network)$type == "promote"] <- 1
+E(network)$color[E(network)$type == "repress"] <- "#441152"
+E(network)$lty[E(network)$type == "repress"] <- 2
+E(network)$frame
+network_out_name <- paste("./imgs/case-study-id-", trace_id, "-network.svg", sep="")
+svg(network_out_name, width=4.5,height=4)
+# bottom, left, top, right
+par(mar=c(0.2,0,1,0))
+plot(network, 
+     main="Regulation Network",
+     edge.arrow.size=.5, 
+     edge.width=2,
+     vertex.size=20,
+     curved=TRUE,
+     vertex.color="grey99",
+     vertex.label.color="black",
+     vertex.label.family="sans",
+     layout=layout.auto(network))
+legend(x = "bottomleft",      ## position, also takes x,y coordinates
+       legend = c("Promoted", "Repressed"),
+       pch = 19,              ## legend symbols see ?points
+       col = c("#FCE640", "#441152"),
+       bty = "n",
+       title = "Edges")
+dev.flush()
+dev.off()
+library(magick)
+library(svglite)
+network_img <- ggdraw() + draw_image(network_out_name)
+
+grid_out_name <- paste("./imgs/case-study-id-", trace_id, ".svg", sep="")
+grid <- plot_grid(reg_plot, match_plot, 
+                  labels=c("A", "B"), ncol=1)
+grid
+save_plot(grid_out_name, grid)
+
+```
 
 ```{r}
 

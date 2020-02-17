@@ -32,8 +32,9 @@ library(viridis)  # (Garnier, 2018)
 Load data, initial data cleanup, global settings.
 
 ```{r}
-data_loc <- "../data/chg-env/max_fit_orgs_10000_no_program.csv"
+data_loc <- "../data/chg-env/rd2/max_fit_orgs.csv"
 data <- read.csv(data_loc, na.strings="NONE")
+# data <- subset(data, select = -c(program))
 
 # Specify factors.
 data$matchbin_thresh <- factor(data$matchbin_thresh,
@@ -62,7 +63,6 @@ get_con <- function(reg, mem) {
 data$condition <- mapply(get_con, data$USE_FUNC_REGULATION, data$USE_GLOBAL_MEMORY)
 data$condition <- factor(data$condition, levels=c("regulation", "memory", "none", "both"))
 
-data$stochastic <- 1 - data$consistent # Does this program rely on a stochastic strategy?
 
 # Settings for statistical analyses.
 alpha <- 0.05
@@ -93,14 +93,29 @@ ggplot(sol_data, aes(x=condition, fill=condition)) +
   ggtitle("Solution Counts by Condition and Environment Complexity") +
   xlab("Condition") +
   ylab("# Evolved Solutions") +
-  ylim(0, 50) +
-  scale_fill_discrete(name="Condition",
-                      limits=c("regulation", "memory", "none", "both"),
-                      labels=c("Regulation only", "Global memory only\n(classic SignalGP)", "Neither", "Both")) +
-  scale_x_discrete(limits=c("regulation", "memory", "none", "both"),
-                   labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
-  facet_wrap(~ NUM_ENV_STATES, labeller=labeller(NUM_ENV_STATES=label_lu)) +
-  ggsave("./imgs/changing-signal-solultion-cnts.png", width=16,height=8)
+  ylim(0, 100) 
+  # facet_wrap(~ NUM_ENV_STATES, labeller=labeller(NUM_ENV_STATES=label_lu)) +
+  # ggsave("./imgs/changing-signal-solultion-cnts.png", width=16,height=8)
+
+ggplot(filter(sol_data, all_solution=="1"), aes(x=condition, fill=condition)) +
+  geom_bar() +
+  geom_text(stat="count", aes(label=..count..), position=position_dodge(0.9), vjust=0) +
+  ggtitle("Solution Counts by Condition and Environment Complexity") +
+  xlab("Condition") +
+  ylab("# Evolved Solutions") +
+  ylim(0, 100) 
+  # facet_wrap(~ NUM_ENV_STATES, labeller=labeller(NUM_ENV_STATES=label_lu)) +
+  # ggsave("./imgs/changing-signal-solultion-cnts.png", width=16,height=8)
+  
+ggplot(filter(sol_data, all_solution_ko_reg=="1"), aes(x=condition, fill=condition)) +
+  geom_bar() +
+  geom_text(stat="count", aes(label=..count..), position=position_dodge(0.9), vjust=0) +
+  ggtitle("Solution Counts by Condition and Environment Complexity") +
+  xlab("Condition") +
+  ylab("# Evolved Solutions") +
+  ylim(0, 100) 
+  # facet_wrap(~ NUM_ENV_STATES, labeller=labeller(NUM_ENV_STATES=label_lu)) +
+  # ggsave("./imgs/changing-signal-solultion-cnts.png", width=16,height=8)
 ```
 
 ### scores by condition
@@ -136,6 +151,45 @@ ggplot(filter(data, solution=="1"), aes(x=condition, y=update, color=condition))
   facet_wrap(~ NUM_ENV_STATES, scales="free_y", labeller=labeller(NUM_ENV_STATES=label_lu)) +
   ggsave("./imgs/changing-signal-solve-time.png", width=16,height=8)
 ```
+
+
+```{r}
+# Make comparison of time to solution fair
+
+# Rank by condition
+
+envs <- c(2, 4, 8, 16)
+ranked_data <- data.frame()
+for (env in envs) {
+  none_data <- filter(data, condition=="none" & NUM_ENV_STATES==env)
+  none_data$rank <- rank(none_data$update, ties="random")
+  
+  mem_data <- filter(data, condition=="memory" & NUM_ENV_STATES==env)
+  mem_data$rank <- rank(mem_data$update, ties="random")
+  
+  reg_data <- filter(data, condition=="regulation" & NUM_ENV_STATES==env)
+  reg_data$rank <- rank(reg_data$update, ties="random")
+  
+  both_data <- filter(data, condition=="both" & NUM_ENV_STATES==env)
+  both_data$rank <- rank(both_data$update, ties="random")  
+  
+  ranked_data <- rbind(ranked_data, none_data, mem_data, reg_data, both_data)
+}
+
+ggplot(filter(ranked_data, solution=="1" & rank<=25), aes(x=condition, y=update, color=condition)) +
+  geom_boxplot() +
+  ggtitle("Time to solution") +
+  xlab("Condition") +
+  ylab("Generation of first solution") +
+  scale_color_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global Memory", "Neither", "Both")) +
+  scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
+                   labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
+  facet_wrap(~ NUM_ENV_STATES, scales="free_y", labeller=labeller(NUM_ENV_STATES=label_lu)) +
+  ggsave("./imgs/changing-signal-solve-time.png", width=16,height=8)
+
+```
+
 
 #### 2-state environment
 

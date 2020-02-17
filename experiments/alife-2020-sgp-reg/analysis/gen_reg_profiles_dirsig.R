@@ -6,7 +6,7 @@ library(scales)
 
 data_dir <- "/Users/amlalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/data/dir-sig/"
 dump_dir <- "/Users/amlalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/analysis/imgs/dir-sig/traces/"
-trace_ids <- 101:190
+trace_ids <- 101:130
 
 
 max_fit_data_file <- paste(data_dir, "max_fit_orgs.csv", sep="")
@@ -31,7 +31,7 @@ get_con <- function(reg, mem) {
 max_fit_data$condition <- mapply(get_con, max_fit_data$USE_FUNC_REGULATION, max_fit_data$USE_GLOBAL_MEMORY)
 max_fit_data$condition <- factor(max_fit_data$condition, levels=c("regulation", "memory", "none", "both"))
 
-trace_ids <- 131:160
+trace_ids <- 160:190
 # trace_id <- 127
 # if (TRUE) {
 for (trace_id in trace_ids) {
