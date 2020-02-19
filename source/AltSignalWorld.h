@@ -41,6 +41,8 @@
 #include "mutation_utils.h"
 #include "Event.h"
 
+#include "reg_ko_instr_impls.h"
+
 // TODO - use compile args!
 namespace AltSignalWorldDefs {
   #ifndef TAG_NUM_BITS
@@ -122,9 +124,11 @@ namespace AltSignalWorldDefs {
 /// Custom hardware component for SignalGP.
 struct CustomHardware {
   int response = -1;
+  int response_function_id=-1;
 
   void Reset() {
     response = -1;
+    response_function_id=-1;
   }
 };
 
@@ -236,6 +240,8 @@ protected:
   // size_t best_org_id=0;
 
   bool KO_REGULATION=false;
+  bool KO_UP_REGULATION=false;
+  bool KO_DOWN_REGULATION=false;
   bool KO_GLOBAL_MEMORY=false;
 
   /// tracking information for max fitness organism in the population.
@@ -413,40 +419,114 @@ void AltSignalWorld::InitInstLib() {
   // If we can use regulation, add instructions. Otherwise, nops.
   if (USE_FUNC_REGULATION) {
     inst_lib->AddInst("SetRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_SetRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_SetRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("SetOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_SetOwnRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_SetOwnRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("AdjRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_AdjRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_AdjRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("AdjOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_AdjOwnRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_AdjOwnRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
+    inst_lib->AddInst("ClearRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_ClearRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_ClearRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_ClearRegulator<hardware_t, inst_t>(hw, inst);
+      }
+    }, "");
+    inst_lib->AddInst("ClearOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_ClearOwnRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_ClearOwnRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_ClearOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
+    }, "");
+
     inst_lib->AddInst("SenseRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>(hw, inst);
     }, "");
     inst_lib->AddInst("SenseOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>(hw, inst);
     }, "");
+
     inst_lib->AddInst("IncRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION || KO_DOWN_REGULATION) {
+        return;
+      } else {
+        sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("IncOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION || KO_DOWN_REGULATION) {
+        return;
+      } else {
+        sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
      }, "");
     inst_lib->AddInst("DecRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION || KO_UP_REGULATION) {
+        return;
+      } else {
+        sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("DecOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION || KO_UP_REGULATION) {
+        return;
+      } else {
+        sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
   } else {
     inst_lib->AddInst("Nop-SetRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SetOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-AdjRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-AdjOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-ClearRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-ClearOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SenseRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SenseOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-IncRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
@@ -458,8 +538,12 @@ void AltSignalWorld::InitInstLib() {
   // Add response instructions
   for (size_t i = 0; i < NUM_SIGNAL_RESPONSES; ++i) {
     inst_lib->AddInst("Response-" + emp::to_string(i), [this, i](hardware_t & hw, const inst_t & inst) {
+      const auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
+      const auto & flow = call_state.GetTopFlow();
+      const size_t mp = flow.GetMP();
       // Mark response in hardware.
       hw.GetCustomComponent().response = i;
+      hw.GetCustomComponent().response_function_id=(int)mp;
       // Remove all pending threads.
       hw.RemoveAllPendingThreads();
       // Mark all active threads as dead.
@@ -850,23 +934,43 @@ void AltSignalWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   //     - ko memory
   KO_GLOBAL_MEMORY = true;
   KO_REGULATION = false;
+  KO_UP_REGULATION = false;
+  KO_DOWN_REGULATION = false;
   org_t ko_mem_org(org);
   EvaluateOrg(ko_mem_org);
   //     - ko regulation
   KO_GLOBAL_MEMORY = false;
   KO_REGULATION = true;
+  KO_UP_REGULATION = false;
+  KO_DOWN_REGULATION = false;
   org_t ko_reg_org(org);
   EvaluateOrg(ko_reg_org);
-  // todo - evaluate organism
   //     - ko memory & ko regulation
   KO_GLOBAL_MEMORY = true;
   KO_REGULATION = true;
+  KO_UP_REGULATION = false;
+  KO_DOWN_REGULATION = false;
   org_t ko_all_org(org);
   EvaluateOrg(ko_all_org);
-  // todo - evaluate organism
+  //    - ko up-regulation (promotors)
+  KO_GLOBAL_MEMORY = false;
+  KO_REGULATION = false;
+  KO_UP_REGULATION = true;
+  KO_DOWN_REGULATION = false;
+  org_t ko_up_reg_org(org);
+  EvaluateOrg(ko_up_reg_org);
+  //    - ko down-regulation (repressors)
+  KO_GLOBAL_MEMORY = false;
+  KO_REGULATION = false;
+  KO_UP_REGULATION = false;
+  KO_DOWN_REGULATION = true;
+  org_t ko_down_reg_org(org);
+  EvaluateOrg(ko_down_reg_org);
   // Reset KO variables to both be false
   KO_GLOBAL_MEMORY = false;
   KO_REGULATION = false;
+  KO_UP_REGULATION = false;
+  KO_DOWN_REGULATION = false;
   ////////////////////////////////////////////////
   // (4) Setup and write to analysis output file
   // note: I'll arbitrarily use test_org 0 as canonical version
@@ -895,6 +999,12 @@ void AltSignalWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   analysis_file.template AddFun<double>([&ko_all_org]() {
     return ko_all_org.GetPhenotype().GetResources();
   }, "score_ko_all");
+  analysis_file.template AddFun<double>([&ko_up_reg_org]() {
+    return ko_up_reg_org.GetPhenotype().GetResources();
+  }, "score_ko_up_reg");
+  analysis_file.template AddFun<double>([&ko_down_reg_org]() {
+    return ko_down_reg_org.GetPhenotype().GetResources();
+  }, "score_ko_down_reg");
   analysis_file.template AddFun<size_t>([this, &org_id]() {
     return this->GetOrg(org_id).GetGenome().GetProgram().GetSize();
   }, "num_modules");
@@ -949,6 +1059,9 @@ void AltSignalWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
   trace_file.template AddFun<int>([this]() {
     return eval_hardware->GetCustomComponent().response;
   }, "cur_response");
+  trace_file.template AddFun<int>([this]() {
+    return eval_hardware->GetCustomComponent().response_function_id;
+  }, "cur_responding_function");
   //    * correct responses
   trace_file.template AddFun<bool>([&trace_org, this]() {
     return eval_hardware->GetCustomComponent().response == (int)eval_environment.cur_state;
@@ -1268,6 +1381,14 @@ AltSignalWorld::HardwareStatePrintInfo AltSignalWorld::GetHardwareStatePrintInfo
       stream << ",flow_stack:[";
       for (size_t f = 0; f < flow_stack.size(); ++f) {
         auto & flow = flow_stack[f];
+        std::string cur_inst_name=""; // get the name of the current instruction
+        if (hw.IsValidProgramPosition(flow.mp, flow.ip)) {
+          emp_assert(hw.GetProgram().IsValidPosition(flow.mp, flow.ip));
+          const size_t inst_type_id = hw.GetProgram()[flow.mp][flow.ip].GetID();
+          cur_inst_name = inst_lib->GetName(inst_type_id);
+        } else {
+          cur_inst_name = "NONE";
+        }
         if (f) stream << ",";
         stream << "{";
         // type
@@ -1281,6 +1402,8 @@ AltSignalWorld::HardwareStatePrintInfo AltSignalWorld::GetHardwareStatePrintInfo
         stream << "mp:" << flow.mp << ",";
         // ip
         stream << "ip:" << flow.ip << ",";
+        // inst name
+        stream << "inst_name:" << cur_inst_name << ",";
         // begin
         stream << "begin:" << flow.begin << ",";
         // end
