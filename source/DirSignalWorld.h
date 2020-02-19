@@ -41,6 +41,7 @@
 #include "DirSignalConfig.h"
 #include "mutation_utils.h"
 #include "Event.h"
+#include "reg_ko_instr_impls.h"
 
 namespace DirSigWorldDefs {
   #ifndef TAG_NUM_BITS
@@ -122,19 +123,23 @@ namespace DirSigWorldDefs {
 
 struct DirSigCustomHardware {
   int response=-1;
+  int response_function_id=-1;
   bool responded=false;
 
   void Reset() {
     response=-1;
+    response_function_id=-1;
     responded=false;
   }
 
-  void SetResponse(int i) {
+  void SetResponse(int i, int func_id=-1) {
     responded = true;
     response = i;
+    response_function_id=func_id;
   }
 
   int GetResponse() const { return response; }
+  int GetResponseFunction() const { return response_function_id; }
   bool HasResponse() const { return responded; }
 };
 
@@ -293,6 +298,8 @@ protected:
   emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;
 
   bool KO_REGULATION=false;
+  bool KO_UP_REGULATION=false;
+  bool KO_DOWN_REGULATION=false;
   bool KO_GLOBAL_MEMORY=false;
 
   void InitConfigs(const config_t & config);
@@ -441,42 +448,109 @@ void DirSigWorld::InitInstLib() {
 
   // if (allow regulation)
   // If we can use regulation, add instructions. Otherwise, nops.
+  // auto handle_ko_wrapper
   if (USE_FUNC_REGULATION) {
-    inst_lib->AddInst("ClearRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_ClearRegulator<hardware_t, inst_t>(hw, inst);
-    }, "");
-    inst_lib->AddInst("ClearOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_ClearOwnRegulator<hardware_t, inst_t>(hw, inst);
-    }, "");
     inst_lib->AddInst("SetRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_SetRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_SetRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("SetOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_SetOwnRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_SetOwnRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("AdjRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_AdjRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_AdjRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("AdjOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_AdjOwnRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_AdjOwnRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
+    inst_lib->AddInst("ClearRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_ClearRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_ClearRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_ClearRegulator<hardware_t, inst_t>(hw, inst);
+      }
+    }, "");
+    inst_lib->AddInst("ClearOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_ClearOwnRegulator_KO_DOWN_REG<hardware_t, inst_t>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_ClearOwnRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_ClearOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
+    }, "");
+
     inst_lib->AddInst("SenseRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>(hw, inst);
     }, "");
     inst_lib->AddInst("SenseOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>(hw, inst);
     }, "");
+
     inst_lib->AddInst("IncRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION || KO_DOWN_REGULATION) {
+        return;
+      } else {
+        sgp::inst_impl::Inst_IncRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("IncOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION || KO_DOWN_REGULATION) {
+        return;
+      } else {
+        sgp::inst_impl::Inst_IncOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
      }, "");
     inst_lib->AddInst("DecRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION || KO_UP_REGULATION) {
+        return;
+      } else {
+        sgp::inst_impl::Inst_DecRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
     inst_lib->AddInst("DecOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_REGULATION) sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>(hw, inst);
+      if (KO_REGULATION || KO_UP_REGULATION) {
+        return;
+      } else {
+        sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>(hw, inst);
+      }
     }, "");
   } else {
     inst_lib->AddInst("Nop-ClearRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
@@ -496,8 +570,11 @@ void DirSigWorld::InitInstLib() {
   // Add response instructions
   for (size_t i = 0; i < NUM_ENV_STATES; ++i) {
     inst_lib->AddInst("Response-" + emp::to_string(i), [this, i](hardware_t & hw, const inst_t & inst) {
+      const auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
+      const auto & flow = call_state.GetTopFlow();
+      const size_t mp = flow.GetMP();
       // Mark response in hardware.
-      hw.GetCustomComponent().SetResponse(i);
+      hw.GetCustomComponent().SetResponse(i, (int)mp);
       // Remove all pending threads.
       hw.RemoveAllPendingThreads();
       // Mark all active threads as dead.
@@ -1010,23 +1087,45 @@ void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
   // - ko memory
   KO_GLOBAL_MEMORY=true;
   KO_REGULATION=false;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=false;
   org_t ko_mem_org(org);
   EvaluateOrg(ko_mem_org);
   // - ko regulation
   KO_GLOBAL_MEMORY=false;
   KO_REGULATION=true;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=false;
   org_t ko_reg_org(org);
   EvaluateOrg(ko_reg_org);
   // - ko memory and regulation
   KO_GLOBAL_MEMORY=true;
   KO_REGULATION=true;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=false;
   org_t ko_all_org(org);
   EvaluateOrg(ko_all_org);
+  // - ko down regulation
+  KO_GLOBAL_MEMORY=false;
+  KO_REGULATION=false;
+  KO_DOWN_REGULATION=true;
+  KO_UP_REGULATION=false;
+  org_t ko_down_reg_org(org);
+  EvaluateOrg(ko_down_reg_org);
+  // - ko up regulation
+  KO_GLOBAL_MEMORY=false;
+  KO_REGULATION=false;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=true;
+  org_t ko_up_reg_org(org);
+  EvaluateOrg(ko_up_reg_org);
   // reset ko variables
   KO_GLOBAL_MEMORY=false;
   KO_REGULATION=false;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=false;
   TEST_SAMPLE_SIZE = evo_sample_size;
-  dir_seq_ids = original_ordering;      // Restore dir_seq_id ordering.
+  dir_seq_ids = original_ordering;        // Restore dir_seq_id ordering.
   // Write out analysis file
   // org_id, is_solution, aggregate_score, scores_by_test, test_ids, test_seqs, ko_[:]_is_solution, ko_[:]_aggregate_score, ko_[:]_scores_by_test,
   const double solution_score = NUM_ENV_UPDATES * possible_dir_sequences.size();
@@ -1049,6 +1148,14 @@ void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
     const org_t & org = ko_all_org;
     return org.GetPhenotype().GetAggregateScore() >= solution_score;
   }, "solution_ko_all");
+  analysis_file.template AddFun<bool>([&ko_up_reg_org, this, solution_score]() {
+    const org_t & org = ko_up_reg_org;
+    return org.GetPhenotype().GetAggregateScore() >= solution_score;
+  }, "solution_ko_up_reg");
+  analysis_file.template AddFun<bool>([&ko_down_reg_org, this, solution_score]() {
+    const org_t & org = ko_down_reg_org;
+    return org.GetPhenotype().GetAggregateScore() >= solution_score;
+  }, "solution_ko_down_reg");
   analysis_file.template AddFun<double>([&test_org, this]() {
     const org_t & org = test_org;
     return org.GetPhenotype().GetAggregateScore();
@@ -1065,6 +1172,14 @@ void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
     const org_t & org = ko_all_org;
     return org.GetPhenotype().GetAggregateScore();
   }, "ko_all_aggregate_score");
+  analysis_file.template AddFun<double>([&ko_up_reg_org, this]() {
+    const org_t & org = ko_up_reg_org;
+    return org.GetPhenotype().GetAggregateScore();
+  }, "ko_up_reg_aggregate_score");
+  analysis_file.template AddFun<double>([&ko_down_reg_org, this]() {
+    const org_t & org = ko_down_reg_org;
+    return org.GetPhenotype().GetAggregateScore();
+  }, "ko_down_reg_aggregate_score");
   analysis_file.template AddFun<std::string>([&test_org, this]() {
     const org_t & org = test_org;
     std::ostringstream stream;
@@ -1113,6 +1228,33 @@ void DirSigWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
     stream << "\"";
     return stream.str();
   }, "ko_all_scores_by_test");
+
+  analysis_file.template AddFun<std::string>([&ko_up_reg_org, this]() {
+    org_t & org = ko_up_reg_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_scores[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "ko_up_reg_scores_by_test");
+
+  analysis_file.template AddFun<std::string>([&ko_down_reg_org, this]() {
+    org_t & org = ko_down_reg_org;
+    std::ostringstream stream;
+    const phenotype_t & phen = org.GetPhenotype();
+    stream << "\"";
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      if (i) stream << ",";
+      stream << phen.test_scores[i];
+    }
+    stream << "\"";
+    return stream.str();
+  }, "ko_down_reg_scores_by_test");
+
   analysis_file.template AddFun<std::string>([&test_org, this]() {
     const org_t & org = test_org;
     const phenotype_t & phen = org.GetPhenotype();
@@ -1224,6 +1366,9 @@ void DirSigWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
     trace_file.template AddFun<int>([this]() {
       return eval_hardware->GetCustomComponent().GetResponse();
     }, "cur_response");
+    trace_file.template AddFun<int>([this]() {
+      return eval_hardware->GetCustomComponent().GetResponseFunction();
+    }, "cur_responding_function");
     //    * correct responses
     trace_file.template AddFun<bool>([this]() {
       return eval_hardware->GetCustomComponent().GetResponse() == (int)eval_environment.cur_state;
@@ -1428,6 +1573,14 @@ DirSigWorld::HardwareStatePrintInfo DirSigWorld::GetHardwareStatePrintInfo(hardw
       stream << ",flow_stack:[";
       for (size_t f = 0; f < flow_stack.size(); ++f) {
         auto & flow = flow_stack[f];
+        std::string cur_inst_name=""; // get the name of the current instruction
+        if (hw.IsValidProgramPosition(flow.mp, flow.ip)) {
+          emp_assert(hw.GetProgram().IsValidPosition(flow.mp, flow.ip));
+          const size_t inst_type_id = hw.GetProgram()[flow.mp][flow.ip].GetID();
+          cur_inst_name = inst_lib->GetName(inst_type_id);
+        } else {
+          cur_inst_name = "NONE";
+        }
         if (f) stream << ",";
         stream << "{";
         // type
@@ -1441,6 +1594,8 @@ DirSigWorld::HardwareStatePrintInfo DirSigWorld::GetHardwareStatePrintInfo(hardw
         stream << "mp:" << flow.mp << ",";
         // ip
         stream << "ip:" << flow.ip << ",";
+        // inst name
+        stream << "inst_name:" << cur_inst_name << ",";
         // begin
         stream << "begin:" << flow.begin << ",";
         // end
