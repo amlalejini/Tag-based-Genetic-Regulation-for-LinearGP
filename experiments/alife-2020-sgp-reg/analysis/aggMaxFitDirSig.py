@@ -177,6 +177,8 @@ def main():
         org[analysis_header_lu["ko_regulation_scores_by_test"]] = "\"" + org[analysis_header_lu["ko_regulation_scores_by_test"]] + "\""
         org[analysis_header_lu["ko_global_memory_scores_by_test"]] = "\"" + org[analysis_header_lu["ko_global_memory_scores_by_test"]] + "\""
         org[analysis_header_lu["ko_all_scores_by_test"]] = "\"" + org[analysis_header_lu["ko_all_scores_by_test"]] + "\""
+        org[analysis_header_lu["ko_up_reg_scores_by_test"]] = "\"" + org[analysis_header_lu["ko_up_reg_scores_by_test"]] + "\""
+        org[analysis_header_lu["ko_down_reg_scores_by_test"]] = "\"" + org[analysis_header_lu["ko_down_reg_scores_by_test"]] + "\""
         org[analysis_header_lu["test_ids"]] = "\"" + org[analysis_header_lu["test_ids"]] + "\""
         org[analysis_header_lu["test_seqs"]] = "\"" + org[analysis_header_lu["test_seqs"]] + "\""
         num_modules = int(org[analysis_header_lu["num_modules"]])
@@ -386,7 +388,7 @@ def main():
                     deltas_str = "\"" + str(reg_deltas).replace(" ", "") + "\""
                     active_modules_str = "\"" + str(list(prev_active_modules)).replace(" ", "") + "\""
                     module_triggered = module_triggered_by_env_cycle[prev_env_update]
-                    module_responded = module_response_by_env_cycle[prev_env_update]
+                    module_responded = -1 if len(module_response_by_env_cycle[prev_env_update]) == 0 else list(module_response_by_env_cycle[prev_env_update])[0]
                     # reg_graph_fields = ["test_id","test_seq","state_id","env_update","time_step","module_triggered","active_modules","promoted","repressed","reg_deltas"]
                     line_info = {
                         "test_id": trace_test_id,
