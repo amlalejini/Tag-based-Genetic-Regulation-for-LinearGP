@@ -61,7 +61,7 @@ for (trace_id in trace_ids) {
   responses_by_env_update <- list()
   for (t in response_time_steps) {
     env_update <- levels(factor(filter(trace_data, time_step==t)$env_cycle))
-    if (env_update %in% responses_by_env_update) {
+    if (env_update %in% names(responses_by_env_update)) {
       if (as.integer(t) > as.integer(responses_by_env_update[env_update])) {
         responses_by_env_update[env_update] = t
       } 
