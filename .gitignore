@@ -37,3 +37,7 @@
 
 # Python
 venv/
+
+# R
+.RData
+.Rhistory
