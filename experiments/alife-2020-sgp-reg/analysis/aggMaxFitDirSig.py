@@ -145,17 +145,27 @@ def main():
         ko_reg_score = float(org[analysis_header_lu["ko_regulation_aggregate_score"]])
         ko_gmem_score = float(org[analysis_header_lu["ko_global_memory_aggregate_score"]])
         ko_all_score = float(org[analysis_header_lu["ko_all_aggregate_score"]])
+        ko_up_reg_score = float(org[analysis_header_lu["ko_up_reg_aggregate_score"]])
+        ko_down_reg_score = float(org[analysis_header_lu["ko_down_reg_aggregate_score"]])
         use_regulation = int(ko_reg_score < base_score)
         use_global_memory = int(ko_gmem_score < base_score)
         use_either = int(ko_all_score < base_score)
+        relies_on_up_reg = int(ko_up_reg_score < base_score)
+        relies_on_down_reg = int(ko_down_reg_score < base_score)
         ko_reg_delta = base_score - ko_reg_score
         ko_global_mem_delta = base_score - ko_gmem_score
         ko_all_delta = base_score - ko_all_score
+        ko_up_reg_delta = base_score - ko_up_reg_score
+        ko_down_reg_delta = base_score - ko_down_reg_score
         extra_fields = ["relies_on_regulation", "relies_on_global_memory", "relies_on_either",
-                        "ko_regulation_delta", "ko_global_memory_delta", "ko_all_delta"]
+                        "relies_on_up_reg", "relies_on_down_reg",
+                        "ko_regulation_delta", "ko_global_memory_delta", "ko_all_delta",
+                        "ko_up_reg_delta", "ko_down_reg_delta"]
         trace_fields = ["call_promoted_cnt", "call_repressed_cnt"]
         extra_values = [use_regulation, use_global_memory, use_either,
-                        ko_reg_delta, ko_global_mem_delta, ko_all_delta]
+                        relies_on_up_reg, relies_on_down_reg,
+                        ko_reg_delta, ko_global_mem_delta, ko_all_delta,
+                        ko_up_reg_delta, ko_down_reg_delta]
 
         analysis_header_set.add(",".join([key for key in key_settings] + extra_fields + trace_fields + analysis_header))
         if len(analysis_header_set) > 1:
