@@ -126,13 +126,13 @@ def main():
             response_id = response_lookup[env_cycle]
             if response_id not in nodes:
                     nodes[response_id] = GenNewNodeDict(response_id)
-            nodes[response_id]["times_active"] += 1
+                    nodes[response_id]["times_active"] += 1
             nodes[response_id]["times_triggered"] += 1
         for env_cycle in triggered_lookup:
             triggered_id = triggered_lookup[env_cycle]
             if triggered_id not in nodes:
                     nodes[triggered_id] = GenNewNodeDict(triggered_id)
-            nodes[triggered_id]["times_active"] += 1
+                    nodes[triggered_id]["times_active"] += 1
             nodes[triggered_id]["times_responded"] += 1
         # Write out the nodes file
         if dump_igraphs:

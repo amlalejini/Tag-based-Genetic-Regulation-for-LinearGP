@@ -63,7 +63,12 @@ def main():
                 ids = list({mod for mod in mod_list_str.strip("[]").split(",") if mod != ''})
                 return ids
             def GenNewNodeDict(node_id = None):
-                return {"id": node_id, "times_active": 0, "times_repressed": 0, "times_promoted": 0}
+                return {"id": node_id,
+                        "times_active": 0,
+                        "times_repressed": 0,
+                        "times_promoted": 0,
+                        "times_triggered": 0,
+                        "times_responded": 0}
             def GenNewEdgeDict():
                 return {"to": None, "from": None, "type": None, "reg_delta": 0}
 
@@ -110,9 +115,32 @@ def main():
                             promoted_edges[edge]["type"] = "promote"
                         edge_delta = reg_deltas[int(promoted_id)]
                         promoted_edges[edge]["reg_delta"] += edge_delta
+            # Build response/triggered information
+            response_lookup = {}  # By environment update/cycle
+            triggered_lookup = {} # BY environment update/cycle
+            for line in lines:
+                info = {header[i]:line[i] for i in range(0, len(line))}
+                response_id = int(info["module_responded"])
+                triggered_id = int(info["module_triggered"])
+                env_update = int(info["env_update"])
+                response_lookup[env_update] = response_id
+                triggered_lookup[env_update] = triggered_id
+            for env_update in response_lookup:
+                response_id = response_lookup[env_update]
+                if response_id not in nodes:
+                        nodes[response_id] = GenNewNodeDict(response_id)
+                        nodes[response_id]["times_active"] += 1
+                nodes[response_id]["times_triggered"] += 1
+            for env_update in triggered_lookup:
+                triggered_id = triggered_lookup[env_update]
+                if triggered_id not in nodes:
+                        nodes[triggered_id] = GenNewNodeDict(triggered_id)
+                        nodes[triggered_id]["times_active"] += 1
+                nodes[triggered_id]["times_responded"] += 1
+
             # Write out the nodes file
             if dump_igraphs:
-                nodes_fields = ["id", "times_active", "times_repressed","times_promoted"]
+                nodes_fields = ["id", "times_active", "times_repressed","times_promoted","times_triggered","times_responded"]
                 edges_fields = ["from", "to", "type", "reg_delta"]
 
                 nodes_content = [",".join(nodes_fields)] + [",".join([str(nodes[node][field]) for field in nodes_fields]) for node in nodes]
