@@ -184,7 +184,7 @@ def main():
         # TODO - this whole bit should be => for each trace file... extract
         trace_out_name = f"trace_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
         orig_trace_fields = ["env_seq","test_id","num_env_states","env_update","cpu_step","cur_env_state","direction","cur_env_signal_tag","has_response","cur_response","has_correct_response","num_modules","0_signal_closest_match","1_signal_closest_match","num_active_threads"]
-        derived_trace_fields = ["module_id", "time_step", "is_in_call_stack", "is_running", "is_match_cur_dir","is_match_0","is_match_1","is_ever_active", "0_match_score", "1_match_score", "regulator_state"]
+        derived_trace_fields = ["module_id", "time_step", "is_in_call_stack", "is_running", "is_cur_responding_module", "is_match_cur_dir","is_match_0","is_match_1","is_ever_active", "0_match_score", "1_match_score", "regulator_state"]
         trace_content_lines = []
         out_trace_header = ",".join(orig_trace_fields + derived_trace_fields)
         trace_files = sorted([fname for fname in os.listdir(org_trace_dir)])
@@ -192,7 +192,7 @@ def main():
         promoting_calls = 0
 
         reg_graph_out_name = f"reg-graph_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
-        reg_graph_fields = ["test_id","test_seq","state_id","env_update","time_step","module_triggered","active_modules","promoted","repressed","reg_deltas"]
+        reg_graph_fields = ["test_id","test_seq","state_id","env_update","time_step","module_triggered", "module_responded", "active_modules","promoted","repressed","reg_deltas"]
         reg_lines = [",".join(reg_graph_fields)]
 
         for trace_file in trace_files:
@@ -220,6 +220,7 @@ def main():
             match_delta_in_env_cycle = [ {"left": [0 for i in range(num_modules)], "right": [0 for i in range(num_modules)]} for i in range(num_env_cycles)]
             direction_by_env_cycle = [None for i in range(num_env_cycles)]
             module_triggered_by_env_cycle = [None for i in range(num_env_cycles)]
+            module_response_by_env_cycle = [set() for i in range(num_env_cycles)]
             modules_present_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
             modules_active_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
 
@@ -235,6 +236,17 @@ def main():
             # 0_signal_closest_match
             # 1_signal_closest_match
             module_triggered_by_env_cycle[0] = steps[0][trace_header_lu[cur_direction + "_signal_closest_match"]]
+
+            # Figure out which module responded to each environment signal.
+            for i in range(0, len(steps)):
+                step_info = {trace_header[j]: steps[i][j] for j in range(0, len(steps[i])) }
+                cur_response_module_id = int(step_info["cur_responding_function"])
+                cur_env_update = int(step_info["env_update"])
+                if cur_response_module_id != -1:
+                    module_response_by_env_cycle[cur_env_update].add(cur_response_module_id)
+            if any([len(e) > 1 for e in module_response_by_env_cycle]):
+                print("something bad")
+                exit(-1)
 
             # Loop over each step of the trace, collecting information as we go.
             for i in range(0, len(steps)):
@@ -292,6 +304,7 @@ def main():
                 original_trace_content = [step_info[field] for field in orig_trace_fields]
                 time_step = time_steps[step_i]
                 cur_direction = step_info["direction"]
+                cur_responding_function = int(step_info["cur_responding_function"])
                 cur_left_match = int(step_info["0_signal_closest_match"])
                 cur_right_match = int(step_info["1_signal_closest_match"])
                 cur_left_match_scores = list(map(float, step_info["0_signal_match_scores"].strip("[]").split(",")))
@@ -314,6 +327,7 @@ def main():
                         "time_step": time_step,
                         "is_in_call_stack": modules_in_call_stack[module_id],
                         "is_running": modules_active[module_id],
+                        "is_cur_responding_module": int(cur_responding_function == module_id),
                         "is_match_cur_dir": int(is_match_dir),
                         "is_match_0": int(cur_left_match == module_id),
                         "is_match_1": int(cur_right_match == module_id),
@@ -372,6 +386,7 @@ def main():
                     deltas_str = "\"" + str(reg_deltas).replace(" ", "") + "\""
                     active_modules_str = "\"" + str(list(prev_active_modules)).replace(" ", "") + "\""
                     module_triggered = module_triggered_by_env_cycle[prev_env_update]
+                    module_responded = module_response_by_env_cycle[prev_env_update]
                     # reg_graph_fields = ["test_id","test_seq","state_id","env_update","time_step","module_triggered","active_modules","promoted","repressed","reg_deltas"]
                     line_info = {
                         "test_id": trace_test_id,
@@ -380,6 +395,7 @@ def main():
                         "env_update": str(prev_env_update),
                         "time_step": str(step_i),
                         "module_triggered": str(module_triggered),
+                        "module_responded": str(module_responded),     # module that responds to this env update
                         "active_modules": active_modules_str,
                         "promoted": promoted_str,
                         "repressed": repressed_str,
