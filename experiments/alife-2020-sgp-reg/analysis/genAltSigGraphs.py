@@ -61,7 +61,12 @@ def main():
             ids = list({mod for mod in mod_list_str.strip("[]").split(",") if mod != ''})
             return ids
         def GenNewNodeDict(node_id = None):
-            return {"id": node_id, "times_active": 0, "times_repressed": 0, "times_promoted": 0}
+            return {"id": node_id,
+                    "times_active": 0,
+                    "times_repressed": 0,
+                    "times_promoted": 0,
+                    "times_triggered": 0,
+                    "times_responded": 0}
         def GenNewEdgeDict():
             return {"to": None, "from": None, "type": None, "match_delta": 0}
 
@@ -107,9 +112,31 @@ def main():
                         promoted_edges[edge]["type"] = "promote"
                     edge_delta = match_deltas[int(promoted_id)]
                     promoted_edges[edge]["match_delta"] += edge_delta
+        # Build response/triggered information
+        response_lookup = {}  # By environment update/cycle
+        triggered_lookup = {} # BY environment update/cycle
+        for line in lines:
+            info = {header[i]:line[i] for i in range(0, len(line))}
+            response_id = int(info["module_responded"])
+            triggered_id = int(info["module_triggered"])
+            env_cycle = int(info["env_cycle"])
+            response_lookup[env_cycle] = response_id
+            triggered_lookup[env_cycle] = triggered_id
+        for env_cycle in response_lookup:
+            response_id = response_lookup[env_cycle]
+            if response_id not in nodes:
+                    nodes[response_id] = GenNewNodeDict(response_id)
+            nodes[response_id]["times_active"] += 1
+            nodes[response_id]["times_triggered"] += 1
+        for env_cycle in triggered_lookup:
+            triggered_id = triggered_lookup[env_cycle]
+            if triggered_id not in nodes:
+                    nodes[triggered_id] = GenNewNodeDict(triggered_id)
+            nodes[triggered_id]["times_active"] += 1
+            nodes[triggered_id]["times_responded"] += 1
         # Write out the nodes file
         if dump_igraphs:
-            nodes_fields = ["id", "times_active", "times_repressed","times_promoted"]
+            nodes_fields = ["id", "times_active", "times_repressed","times_promoted", "times_responded", "times_triggered"]
             edges_fields = ["from", "to", "type", "match_delta"]
 
             nodes_content = [",".join(nodes_fields)] + [",".join([str(nodes[node][field]) for field in nodes_fields]) for node in nodes]
@@ -124,8 +151,6 @@ def main():
             with open(edges_out_path, "w") as fp:
                 fp.write("\n".join(edges_content))
         # Analyze graph properties.
-        #repressed_edges[edge] = GenNewEdgeDict()
-        #promoted_edges[edge] = GenNewEdgeDict()
         #nodes
         graph_info = {}
         graph_info["run_id"] = run_id
