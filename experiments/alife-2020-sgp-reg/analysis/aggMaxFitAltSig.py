@@ -28,10 +28,6 @@ key_settings = [
     "TOURNAMENT_SIZE"
 ]
 
-possible_metrics = ["hamming", "streak", "symmetric wrap", "hash"]
-possible_selectors = ["ranked"]
-possible_regulators = ["add", "mult"]
-
 """
 This is functionally equivalent to the mkdir -p [fname] bash command
 """
@@ -55,12 +51,6 @@ def extract_settings(run_config_path):
     content = content[1:]
     configs = [l for l in csv.reader(content, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)]
     return {param[header_lu["parameter"]]:param[header_lu["value"]] for param in configs}
-
-def extract_org_analyses():
-    pass
-
-def extract_org_traces():
-    pass
 
 def find_org_analysis_path(run_path, update):
     output_path = os.path.join(run_path, "output")
@@ -157,17 +147,27 @@ def main():
         ko_reg_score = float(org[analysis_header_lu["score_ko_regulation"]])
         ko_gmem_score = float(org[analysis_header_lu["score_ko_global_memory"]])
         ko_all_score = float(org[analysis_header_lu["score_ko_all"]])
+        ko_up_reg_score = float(org[analysis_header_lu["score_ko_up_reg"]])
+        ko_down_reg_score = float(org[analysis_header_lu["score_ko_down_reg"]])
         use_regulation = int(ko_reg_score < base_score)
         use_global_memory = int(ko_gmem_score < base_score)
         use_either = int(ko_all_score < base_score)
+        use_up_reg = int(ko_up_reg_score < base_score)
+        use_down_reg = int(ko_down_reg_score < base_score)
         ko_reg_delta = base_score - ko_reg_score
         ko_global_mem_delta = base_score - ko_gmem_score
         ko_all_delta = base_score - ko_all_score
+        ko_up_reg_delta = base_score - ko_up_reg_score
+        ko_down_reg_delta = base_score - ko_down_reg_score
         extra_fields = ["relies_on_regulation", "relies_on_global_memory", "relies_on_either",
-                        "ko_regulation_delta", "ko_global_memory_delta", "ko_all_delta"]
+                        "relies_on_up_reg", "relies_on_down_reg",
+                        "ko_regulation_delta", "ko_global_memory_delta", "ko_all_delta",
+                        "ko_up_reg_delta", "ko_down_reg_delta"]
         trace_fields = ["call_promoted_cnt", "call_repressed_cnt"]
         extra_values = [use_regulation, use_global_memory, use_either,
-                        ko_reg_delta, ko_global_mem_delta, ko_all_delta]
+                        use_up_reg, use_down_reg,
+                        ko_reg_delta, ko_global_mem_delta, ko_all_delta,
+                        ko_up_reg_delta, ko_down_reg_delta]
 
         analysis_header_set.add(",".join([key for key in key_settings] + extra_fields + trace_fields + analysis_header))
         if len(analysis_header_set) > 1:
@@ -176,8 +176,6 @@ def main():
         # surround things in quotes that need it
         org[analysis_header_lu["program"]] = "\"" + org[analysis_header_lu["program"]] + "\""
         num_modules = int(org[analysis_header_lu["num_modules"]])
-        # org_update = int(org[analysis_header_lu["update"]])
-
 
         # ========= extract org trace information =========
         content = None
@@ -200,12 +198,25 @@ def main():
         # From thread states, collect lists: currently_running,
         # currently_active = [] # For each time step, which modules are currently active?
         # currently_running = []
-        modules_run_in_env_cycle = [set() for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
-        match_delta_in_env_cycle = [[0 for i in range(num_modules)] for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
-        module_triggered_by_env_cycle = [None for i in range(int(run_settings["NUM_ENV_CYCLES"]))]
+        num_env_cycles = int(run_settings["NUM_ENV_CYCLES"])
+        modules_run_in_env_cycle = [set() for i in range(num_env_cycles)]
+        match_delta_in_env_cycle = [[0 for i in range(num_modules)] for i in range(num_env_cycles)]
+        module_triggered_by_env_cycle = [None for i in range(num_env_cycles)]
+        module_response_by_env_cycle = [set() for i in range(num_env_cycles)]
         modules_active_ever = set()
         modules_present_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
         modules_active_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
+
+        # Figure out which module responded to each environment signal.
+        for i in range(0, len(steps)):
+            step_info = {trace_header[j]: steps[i][j] for j in range(0, len(steps[i])) }
+            cur_response_module_id = int(step_info["cur_responding_function"])
+            cur_env_update = int(step_info["env_cycle"])
+            if cur_response_module_id != -1:
+                module_response_by_env_cycle[cur_env_update].add(cur_response_module_id)
+        if any([len(e) > 1 for e in module_response_by_env_cycle]):
+            print("something bad")
+            exit(-1)
 
         cur_env = int(steps[0][trace_header_lu["env_cycle"]])
         baseline_match_scores = list(map(float, steps[0][trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
@@ -267,7 +278,7 @@ def main():
         #   - regulator_state__mid_[:]
         trace_out_name = f"trace_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
         orig_fields = ["env_cycle","cpu_step","num_env_states","cur_env_state","cur_response","has_correct_response","num_modules","env_signal_closest_match","num_active_threads"]
-        derived_fields = ["module_id", "time_step", "is_in_call_stack", "is_running", "is_match", "is_ever_active", "match_score", "regulator_state"]
+        derived_fields = ["module_id", "time_step", "is_in_call_stack", "is_running", "is_cur_responding_function", "is_match", "is_ever_active", "match_score", "regulator_state"]
         trace_header = ",".join(orig_fields + derived_fields)
         trace_out_lines = []
         expected_lines = num_modules * len(steps)
@@ -279,6 +290,7 @@ def main():
             cur_match = int(step_info[trace_header_lu["env_signal_closest_match"]])
             cur_match_scores = list(map(float, step_info[trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
             cur_reg_states = list(map(float, step_info[trace_header_lu["module_regulator_states"]].strip("[]").split(",")))
+            cur_responding_function = int(step_info[trace_header_lu["cur_responding_function"]])
             modules_present = modules_present_by_step[step_i]
             modules_active = modules_active_by_step[step_i]
             for module_id in range(0, num_modules):
@@ -286,6 +298,7 @@ def main():
                                 time_step,                    # time_step
                                 modules_present[module_id],   # is_in_call_stack
                                 modules_active[module_id],    # is_running
+                                int(cur_responding_function == module_id), # is_cur_responding_function
                                 int(cur_match == module_id),  # is_match
                                 int(module_id in modules_active_ever), # is_ever_active
                                 cur_match_scores[module_id],  # match_score
@@ -299,32 +312,8 @@ def main():
             fp.write("\n".join([trace_header] + trace_out_lines))
         print("  Wrote out:", os.path.join(dump_dir, trace_out_name))
 
-        # ========= build environment cycle regulation graph =========
-        # num_env_cycles = int(run_settings["NUM_ENV_CYCLES"])
-        # env_cycle_graph_out_name = f"env-cycle-graph_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
-        # env_cycle_graph_fields = ["env_cycle", "module_triggered", "modules_run", "match_delta", "promoted", "repressed", "unchanged"]
-        # lines = [",".join(env_cycle_graph_fields)]
-        # for cycle in range(0, num_env_cycles):
-        #     module_triggered = module_triggered_by_env_cycle[cycle]
-        #     match_deltas = match_delta_in_env_cycle[cycle]
-        #     # What modules were running?
-        #     modules_run = "\"" + str(modules_run_in_env_cycle[cycle]).replace(" ","") + "\""
-        #     # What was promoted?
-        #     promoted = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] < 0]).replace(" ", "") + "\""
-        #     # What was repressed?
-        #     repressed = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] > 0]).replace(" ", "") + "\""
-        #     # What was unchanged?
-        #     unchanged = "\"" + str([mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] == 0]).replace(" ", "") + "\""
-        #     deltas = "\"" + str(match_deltas).replace(" ", "") + "\""
-        #     line = ",".join([str(cycle), str(module_triggered), modules_run, deltas, promoted, repressed, unchanged])
-        #     lines.append(line)
-        # with open(os.path.join(dump_dir, env_cycle_graph_out_name), "w") as fp:
-        #     fp.write("\n".join(lines))
-        # print("  Wrote out:", os.path.join(dump_dir, env_cycle_graph_out_name))
-
-        # num_env_cycles = int(run_settings["NUM_ENV_CYCLES"])
         env_cycle_graph_out_name = f"reg-graph_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
-        env_cycle_graph_fields = ["state_id", "env_cycle", "time_step", "module_triggered", "active_modules", "promoted", "repressed", "match_scores" , "match_deltas"]
+        env_cycle_graph_fields = ["state_id", "env_cycle", "time_step", "module_triggered", "module_responded", "active_modules", "promoted", "repressed", "match_scores" , "match_deltas"]
         lines = [",".join(env_cycle_graph_fields)]
 
         state_i = None
@@ -369,8 +358,8 @@ def main():
                 scores = "\"" + str(match_scores).replace(" ", "") + "\"" # match scores at end of state
                 active_modules_str = "\"" + str(list(prev_active_modules)).replace(" ", "") + "\"" # active modules _during_ this state
                 module_triggered = module_triggered_by_env_cycle[prev_env_cycle] # module triggered for this environment cycle
-
-                lines.append(",".join([str(state_i), str(prev_env_cycle), str(step_i), str(module_triggered), active_modules_str, promoted_str, repressed_str, scores, deltas]))
+                module_responded = -1 if len(module_response_by_env_cycle[prev_env_cycle]) == 0 else list(module_response_by_env_cycle[prev_env_cycle])[0]
+                lines.append(",".join([str(state_i), str(prev_env_cycle), str(step_i), str(module_triggered), str(module_responded), active_modules_str, promoted_str, repressed_str, scores, deltas]))
 
                 prev_match_scores = match_scores
                 prev_active_modules = active_modules
