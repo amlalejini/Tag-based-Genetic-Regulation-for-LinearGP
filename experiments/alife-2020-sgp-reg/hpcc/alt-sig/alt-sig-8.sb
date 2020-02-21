@@ -9,7 +9,7 @@
 
 ########## Command Lines to Run ##########
 
-DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/alife-2020/alt-sig-ts8
+DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/alife-2020/alt-sig-fresh
 CONFIG_DIR=/mnt/home/lalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/configs-alt-sig
 
 ##################################
