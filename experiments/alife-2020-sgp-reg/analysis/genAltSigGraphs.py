@@ -58,7 +58,7 @@ def main():
         #  - to, from, type (promote, repress), delta
 
         def GetModIDs(mod_list_str):
-            ids = list({mod for mod in mod_list_str.strip("[]").split(",") if mod != ''})
+            ids = list({int(mod) for mod in mod_list_str.strip("[]").split(",") if mod != ''})
             return ids
         def GenNewNodeDict(node_id = None):
             return {"id": node_id,
