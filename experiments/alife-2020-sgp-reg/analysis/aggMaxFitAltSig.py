@@ -313,13 +313,15 @@ def main():
         print("  Wrote out:", os.path.join(dump_dir, trace_out_name))
 
         env_cycle_graph_out_name = f"reg-graph_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
-        env_cycle_graph_fields = ["state_id", "env_cycle", "time_step", "module_triggered", "module_responded", "active_modules", "promoted", "repressed", "match_scores" , "match_deltas"]
+        env_cycle_graph_fields = ["state_id", "env_cycle", "time_step", "module_triggered", "module_responded", "active_modules", "promoted", "repressed", "match_scores" , "match_deltas", "reg_deltas"]
         lines = [",".join(env_cycle_graph_fields)]
 
+        # == build env cycle reg graph ==
         state_i = None
         prev_env_cycle = None
         prev_active_modules = None
         prev_match_scores = None
+        prev_reg_state = None
         found_first_module = False
 
         calls_with_repressors = 0
@@ -332,40 +334,50 @@ def main():
             # Extract active modules (top of call stacks)
             active_modules = {i for i in range(0, num_modules) if modules_active_by_step[step_i][i] > 0}
             match_scores = list(map(float, step_info[trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
-
+            reg_state = list(map(float, step_info[trace_header_lu["module_regulator_states"]].strip("[]").split(",")))
             # if this is the first time step, setup 'previous' state
             if step_i == 0:
                 state_i = 0
                 prev_env_cycle = env_cycle
                 prev_active_modules = active_modules
                 prev_match_scores = match_scores
+                prev_reg_state = reg_state
             if not found_first_module:
                 prev_active_modules = active_modules
                 found_first_module = len(active_modules) > 0
 
             # Has anything been repressed/promoted?
             match_deltas = [match_scores[i] - prev_match_scores[i] for i in range(0, num_modules)]
-            repressed_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] > 0}
-            promoted_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] < 0}
+            # repressed_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] > 0}
+            # promoted_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] < 0}
+
+            reg_deltas = [reg_state[i] - prev_reg_state[i] for i in range(0, num_modules)]
+            promoted_modules = { i for i in range(0, num_modules) if reg_state[i] < prev_reg_state[i] }
+            repressed_modules = { i for i in range(0, num_modules) if reg_state[i] > prev_reg_state[i] }
 
             # if current active modules or current env cycle don't match previous, output what happened since last time we output
-            if (( active_modules != prev_active_modules and len(active_modules) != 0 ) or (step_i == (len(steps) - 1)) ):
+            if (( active_modules != prev_active_modules and len(active_modules) != 0 )
+                or (step_i == (len(steps) - 1))
+                or (len(promoted_modules) != 0)
+                or (len(repressed_modules) != 0)):
+
                 calls_with_repressors += len(repressed_modules)
                 calls_with_promotors += len(promoted_modules)
                 promoted_str = "\"" + str(list(promoted_modules)).replace(" ", "") + "\""
                 repressed_str = "\"" + str(list(repressed_modules)).replace(" ", "") + "\""
                 deltas = "\"" + str(match_deltas).replace(" ", "") + "\"" # deltas from beginning => end of state
                 scores = "\"" + str(match_scores).replace(" ", "") + "\"" # match scores at end of state
+                reg_deltas_str = "\"" + str(reg_deltas).replace(" ", "") + "\""
                 active_modules_str = "\"" + str(list(prev_active_modules)).replace(" ", "") + "\"" # active modules _during_ this state
                 module_triggered = module_triggered_by_env_cycle[prev_env_cycle] # module triggered for this environment cycle
                 module_responded = -1 if len(module_response_by_env_cycle[prev_env_cycle]) == 0 else list(module_response_by_env_cycle[prev_env_cycle])[0]
-                lines.append(",".join([str(state_i), str(prev_env_cycle), str(step_i), str(module_triggered), str(module_responded), active_modules_str, promoted_str, repressed_str, scores, deltas]))
+                lines.append(",".join([str(state_i), str(prev_env_cycle), str(step_i), str(module_triggered), str(module_responded), active_modules_str, promoted_str, repressed_str, scores, deltas, reg_deltas_str]))
 
                 prev_match_scores = match_scores
                 prev_active_modules = active_modules
                 prev_env_cycle = env_cycle
+                prev_reg_state = reg_state
                 state_i += 1
-
 
         with open(os.path.join(dump_dir, env_cycle_graph_out_name), "w") as fp:
             fp.write("\n".join(lines))

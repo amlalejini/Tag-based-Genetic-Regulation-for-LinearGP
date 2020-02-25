@@ -380,7 +380,11 @@ def main():
                 # promoted_modules = [reg_state[i] < prev_reg_state[i] for i in range(0, num_modules)]
                 # repressed_modules = [reg_state[i] > prev_reg_state[i] for i in range(0, num_modules)]
 
-                if ( ( active_modules != prev_active_modules and len(active_modules) != 0 ) or (step_i == (len(steps) - 1)) ):
+                if ( ( active_modules != prev_active_modules and len(active_modules) != 0 )
+                    or (step_i == (len(steps) - 1))
+                    or (len(promoted_modules) != 0)
+                    or (len(repressed_modules) != 0) ):
+
                     repressing_calls += len(repressed_modules)
                     promoting_calls += len(promoted_modules)
                     promoted_str = "\"" + str(list(promoted_modules)).replace(" ", "") + "\""
