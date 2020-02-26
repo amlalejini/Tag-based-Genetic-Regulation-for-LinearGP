@@ -225,6 +225,8 @@ def main():
             module_response_by_env_cycle = [set() for i in range(num_env_cycles)]
             modules_present_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
             modules_active_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
+            modules_triggered_by_step = [None for i in range(0, len(steps))]
+            modules_responded_by_step = [None for i in range(0, len(steps))]
 
             cur_env_update = int(steps[0][trace_header_lu["env_update"]])
             cur_env_state = int(steps[0][trace_header_lu["cur_env_state"]])
@@ -238,7 +240,7 @@ def main():
             # 0_signal_closest_match
             # 1_signal_closest_match
             module_triggered_by_env_cycle[0] = steps[0][trace_header_lu[cur_direction + "_signal_closest_match"]]
-
+            modules_triggered_by_step[0] = int(steps[0][trace_header_lu[cur_direction + "_signal_closest_match"]])
             # Figure out which module responded to each environment signal.
             for i in range(0, len(steps)):
                 step_info = {trace_header[j]: steps[i][j] for j in range(0, len(steps[i])) }
@@ -246,6 +248,7 @@ def main():
                 cur_env_update = int(step_info["env_update"])
                 if cur_response_module_id != -1:
                     module_response_by_env_cycle[cur_env_update].add(cur_response_module_id)
+                    modules_responded_by_step[i].append(cur_response_module_id)
             if any([len(e) > 1 for e in module_response_by_env_cycle]):
                 print("something bad")
                 exit(-1)
@@ -269,9 +272,16 @@ def main():
                     cur_env_update = env_update_i
                     cur_env_state = env_state_i
                     module_triggered_by_env_cycle[env_update_i] = step_info[dir_i + "_signal_closest_match"]
+                    modules_triggered_by_step[i] = step_info[dir_i + "_signal_closest_match"]
                 # Extract what modules are running
                 active_modules = []
                 present_modules = []
+                if modules_triggered_by_step[i] != None:
+                    active_modules.append(int(modules_triggered_by_step[i]))
+                    present_modules.append(int(modules_triggered_by_step[i]))
+                if modules_responded_by_step[i] != None:
+                    active_modules.append(int(modules_responded_by_step[i]))
+                    present_modules.append(int(modules_responded_by_step[i]))
                 for thread in threads:
                     call_stack = thread["call_stack"]
                     # an active module is at the top of the TOP flow stack (i.e., in top call)
@@ -280,8 +290,8 @@ def main():
                         if len(call_stack[-1]["flow_stack"]):
                             active_module = call_stack[-1]["flow_stack"][-1]["mp"]
                     if active_module != None:
-                        active_modules.append(active_module)
-                        modules_active_ever.add(active_module)
+                        active_modules.append(int(active_module))
+                        modules_active_ever.add(int(active_module))
                     # add ALL modules
                     present_modules += list({flow["mp"] for call in call_stack for flow in call["flow_stack"]})
                 # add present modules to env set for this env
