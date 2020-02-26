@@ -248,7 +248,7 @@ def main():
                 cur_env_update = int(step_info["env_update"])
                 if cur_response_module_id != -1:
                     module_response_by_env_cycle[cur_env_update].add(cur_response_module_id)
-                    modules_responded_by_step[i].append(cur_response_module_id)
+                    modules_responded_by_step[i] = cur_response_module_id
             if any([len(e) > 1 for e in module_response_by_env_cycle]):
                 print("something bad")
                 exit(-1)
