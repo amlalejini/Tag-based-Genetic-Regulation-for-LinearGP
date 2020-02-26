@@ -206,6 +206,8 @@ def main():
         modules_active_ever = set()
         modules_present_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
         modules_active_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(steps))]
+        modules_triggered_by_step = [None for i in range(0, len(steps))]
+        modules_responded_by_step = [None for i in range(0, len(steps))]
 
         # Figure out which module responded to each environment signal.
         for i in range(0, len(steps)):
@@ -214,6 +216,7 @@ def main():
             cur_env_update = int(step_info["env_cycle"])
             if cur_response_module_id != -1:
                 module_response_by_env_cycle[cur_env_update].add(cur_response_module_id)
+                modules_responded_by_step[i] = cur_response_module_id
         if any([len(e) > 1 for e in module_response_by_env_cycle]):
             print("something bad")
             exit(-1)
@@ -221,6 +224,7 @@ def main():
         cur_env = int(steps[0][trace_header_lu["env_cycle"]])
         baseline_match_scores = list(map(float, steps[0][trace_header_lu["env_signal_match_scores"]].strip("[]").split(",")))
         module_triggered_by_env_cycle[0] = steps[0][trace_header_lu["env_signal_closest_match"]]
+        modules_triggered_by_step[0] = steps[0][trace_header_lu["env_signal_closest_match"]]
         for i in range(0, len(steps)):
             # print(f"==== step {i} ====")
             step_info = steps[i]
@@ -235,11 +239,18 @@ def main():
                 baseline_match_scores = cur_match_scores
                 cur_env = env_cycle
                 module_triggered_by_env_cycle[env_cycle] = step_info[trace_header_lu["env_signal_closest_match"]]
+                modules_triggered_by_step[i] = step_info[trace_header_lu["env_signal_closest_match"]]
             # Extract what modules are running
             # print("# Threads = ", len(threads))
             # print(threads)
             active_modules = []
             present_modules = []
+            if modules_triggered_by_step[i] != None:
+                active_modules.append(int(modules_triggered_by_step[i]))
+                present_modules.append(int(modules_triggered_by_step[i]))
+            if modules_responded_by_step[i] != None:
+                active_modules.append(int(modules_responded_by_step[i]))
+                present_modules.append(int(modules_responded_by_step[i]))
             for thread in threads:
                 call_stack = thread["call_stack"]
                 # an active module is at the top of the flow stack on the top of the call stack
@@ -248,12 +259,12 @@ def main():
                     if len(call_stack[-1]["flow_stack"]):
                         active_module = call_stack[-1]["flow_stack"][-1]["mp"]
                 if active_module != None:
-                    active_modules.append(active_module)
-                    modules_active_ever.add(active_module)
+                    active_modules.append(int(active_module))
+                    modules_active_ever.add(int(active_module))
                 # add ALL modules
                 present_modules += list({flow["mp"] for call in call_stack for flow in call["flow_stack"]})
             # add present modules to env set for this env
-            for mod_id in present_modules: modules_run_in_env_cycle[env_cycle].add(int(mod_id))
+            for module_id in present_modules: modules_run_in_env_cycle[env_cycle].add(int(module_id))
             # Add active modules for this step
             for module_id in active_modules: modules_active_by_step[i][module_id] += 1
             # Add present modules for this step
@@ -348,9 +359,6 @@ def main():
 
             # Has anything been repressed/promoted?
             match_deltas = [match_scores[i] - prev_match_scores[i] for i in range(0, num_modules)]
-            # repressed_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] > 0}
-            # promoted_modules = {mod_id for mod_id in range(0, num_modules) if match_deltas[mod_id] < 0}
-
             reg_deltas = [reg_state[i] - prev_reg_state[i] for i in range(0, num_modules)]
             promoted_modules = { i for i in range(0, num_modules) if reg_state[i] < prev_reg_state[i] }
             repressed_modules = { i for i in range(0, num_modules) if reg_state[i] > prev_reg_state[i] }
