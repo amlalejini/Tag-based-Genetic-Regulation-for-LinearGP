@@ -266,6 +266,7 @@ protected:
   double MUT_RATE__FUNC_TAG_BF;
   // Data collection group
   std::string OUTPUT_DIR;
+  bool MINIMAL_TRACES;
   size_t SUMMARY_RESOLUTION;
   size_t SCREEN_RESOLUTION;
   size_t SNAPSHOT_RESOLUTION;
@@ -393,6 +394,7 @@ void DirSigWorld::InitConfigs(const config_t & config) {
   MUT_RATE__FUNC_TAG_BF = config.MUT_RATE__FUNC_TAG_BF();
   // Data collection group
   OUTPUT_DIR = config.OUTPUT_DIR();
+  MINIMAL_TRACES = config.MINIMAL_TRACES();
   SUMMARY_RESOLUTION = config.SUMMARY_RESOLUTION();
   SCREEN_RESOLUTION = config.SCREEN_RESOLUTION();
   SNAPSHOT_RESOLUTION = config.SNAPSHOT_RESOLUTION();
@@ -1313,6 +1315,11 @@ void DirSigWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
   eval_hardware->SetProgram(org.GetGenome().program);
   // For each l/r direction sequence, run trace.
   for (size_t sample_id = 0; sample_id < TEST_SAMPLE_SIZE; ++sample_id) {
+    if (MINIMAL_TRACES) { // Hack in minimal tracing mode so I don't slaughter my HPCC file quota
+      if (! (sample_id == 0 || sample_id == (TEST_SAMPLE_SIZE - 1) ) ) {
+        continue;
+      }
+    }
     const size_t seq_id = dir_seq_ids[sample_id];
     const auto & env_seq = possible_dir_sequences[seq_id];
     emp::DataFile trace_file(trace_dir + "trace_org_" + emp::to_string(org_id) + "_test_" + emp::to_string(seq_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
