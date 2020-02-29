@@ -93,7 +93,7 @@ namespace AltSignalWorldDefs {
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hamming",
       emp::UnifMod<emp::HammingMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hash",
-      emp::UnifMod<emp::HashMetric<TAG_LEN>>,
+      emp::UnifMod<emp::CryptoHashMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak",
       emp::UnifMod<emp::StreakMetric<TAG_LEN>>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak-exact",
