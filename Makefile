@@ -7,7 +7,7 @@ EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
 
 # Match metric options: hamming, integer, streak, hash, streak-exact
-MATCH_METRIC := streak
+MATCH_METRIC := hash
 # MATCH_THRESH options: 0, 25, 50, 75
 MATCH_THRESH := 25
 # MATCH_REG options: add, mult
@@ -18,8 +18,10 @@ TAG_NUM_BITS := 64
 EXEC_NAME := $(PROJECT)_tag-len-$(TAG_NUM_BITS)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)_reg-$(MATCH_REG)
 
 # Flags to use regardless of compiler
+CFLAGS_alex := -I/usr/local/Cellar/openssl/1.0.2t/include -L/usr/local/Cellar/openssl/1.0.2t/lib
 CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) -DTAG_NUM_BITS=$(TAG_NUM_BITS) $(CFLAGS_includes)
+CFLAGS_links := -lssl -lcrypto
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) -DTAG_NUM_BITS=$(TAG_NUM_BITS) $(CFLAGS_alex) $(CFLAGS_includes) $(CFLAGS_links)
 
 # Native compiler information
 CXX_nat := g++-9
