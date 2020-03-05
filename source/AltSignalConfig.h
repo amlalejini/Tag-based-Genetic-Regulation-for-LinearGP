@@ -22,6 +22,8 @@ EMP_BUILD_CONFIG(AltSignalConfig,
     VALUE(MAX_FUNC_CNT, size_t, 32, "Maximum number of functions per program."),
     VALUE(MIN_FUNC_INST_CNT, size_t, 0, "Minimum number of instructions per function."),
     VALUE(MAX_FUNC_INST_CNT, size_t, 128, "Maximum number of instructions per function."),
+    VALUE(INST_MIN_ARG_VAL, int, -8, "Minimum instruction-argment value"),
+    VALUE(INST_MAX_ARG_VAL, int, 8, "Maximum instruction-argument value"),
 
   GROUP(HARDWARE_GROUP, "Virtual hardware settings"),
     VALUE(MAX_ACTIVE_THREAD_CNT, size_t, 32, "How many threads can be simultaneously running (active)?"),
