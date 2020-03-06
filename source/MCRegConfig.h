@@ -21,6 +21,8 @@ EMP_BUILD_CONFIG(MCRegConfig,
     VALUE(MAX_FUNC_CNT, size_t, 32, "Maximum number of functions per program."),
     VALUE(MIN_FUNC_INST_CNT, size_t, 0, "Minimum number of instructions per function."),
     VALUE(MAX_FUNC_INST_CNT, size_t, 128, "Maximum number of instructions per function."),
+    VALUE(INST_MIN_ARG_VAL, int, -8, "Minimum instruction-argment value"),
+    VALUE(INST_MAX_ARG_VAL, int, 8, "Maximum instruction-argument value"),
 
   GROUP(HARDWARE_GROUP, "Virtual hardware settings"),
     VALUE(DEME_WIDTH, size_t, 4, "How many columns of cells are in a deme?"),

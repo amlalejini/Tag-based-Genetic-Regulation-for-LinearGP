@@ -51,8 +51,8 @@ namespace MCRegWorldDefs {
   constexpr size_t INST_TAG_CNT = 1;  // How many tags per instruction?
   constexpr size_t INST_ARG_CNT = 3;  // How many instruction arguments per instruction?
   constexpr size_t FUNC_NUM_TAGS = 1; // How many tags are associated with each function in a program?
-  constexpr int INST_MIN_ARG_VAL = 0; // Minimum argument value?
-  constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
+  // constexpr int INST_MIN_ARG_VAL = 0; // Minimum argument value?
+  // constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
   // matchbin <VALUE, METRIC, SELECTOR, REGULATOR>
   #ifndef MATCH_THRESH
   #define MATCH_THRESH 0
@@ -205,6 +205,7 @@ protected:
   bool USE_GLOBAL_MEMORY;
   emp::Range<size_t> FUNC_CNT_RANGE;
   emp::Range<size_t> FUNC_LEN_RANGE;
+  emp::Range<int> ARG_VAL_RANGE;
   // Hardware group
   size_t DEME_WIDTH;
   size_t DEME_HEIGHT;
@@ -1274,6 +1275,7 @@ void MCRegWorld::InitConfigs(const config_t & config) {
   USE_GLOBAL_MEMORY = config.USE_GLOBAL_MEMORY();
   FUNC_CNT_RANGE = {config.MIN_FUNC_CNT(), config.MAX_FUNC_CNT()};
   FUNC_LEN_RANGE = {config.MIN_FUNC_INST_CNT(), config.MAX_FUNC_INST_CNT()};
+  ARG_VAL_RANGE = {config.INST_MIN_ARG_VAL(), config.INST_MAX_ARG_VAL()};
   // hardware group
   DEME_WIDTH = config.DEME_WIDTH();
   DEME_HEIGHT = config.DEME_HEIGHT();
@@ -1634,7 +1636,7 @@ void MCRegWorld::InitMutator() {
   // Set program constraints
   mutator->SetProgFunctionCntRange(FUNC_CNT_RANGE);
   mutator->SetProgFunctionInstCntRange(FUNC_LEN_RANGE);
-  mutator->SetProgInstArgValueRange({MCRegWorldDefs::INST_MIN_ARG_VAL, MCRegWorldDefs::INST_MAX_ARG_VAL});
+  mutator->SetProgInstArgValueRange(ARG_VAL_RANGE);
   mutator->SetTotalInstLimit(2*FUNC_LEN_RANGE.GetUpper()*FUNC_CNT_RANGE.GetUpper());
   mutator->SetFuncNumTags(MCRegWorldDefs::FUNC_NUM_TAGS);
   mutator->SetInstNumTags(MCRegWorldDefs::INST_TAG_CNT);
@@ -1686,7 +1688,7 @@ void MCRegWorld::InitPop_Random() {
                                    FUNC_LEN_RANGE,
                                    MCRegWorldDefs::INST_TAG_CNT,
                                    MCRegWorldDefs::INST_ARG_CNT,
-                                   {MCRegWorldDefs::INST_MIN_ARG_VAL,MCRegWorldDefs::INST_MAX_ARG_VAL})
+                                   ARG_VAL_RANGE)
                   }, 1);
   }
 }
@@ -2050,14 +2052,6 @@ void MCRegWorld::DoWorldConfigSnapshot(const config_t & config) {
   // FUNC_NUM_TAGS
   get_cur_param = []() { return "FUNC_NUM_TAGS"; };
   get_cur_value = []() { return emp::to_string(MCRegWorldDefs::FUNC_NUM_TAGS); };
-  snapshot_file.Update();
-  // INST_MIN_ARG_VAL
-  get_cur_param = []() { return "INST_MIN_ARG_VAL"; };
-  get_cur_value = []() { return emp::to_string(MCRegWorldDefs::INST_MIN_ARG_VAL); };
-  snapshot_file.Update();
-  // INST_MAX_ARG_VAL
-  get_cur_param = []() { return "INST_MAX_ARG_VAL"; };
-  get_cur_value = []() { return emp::to_string(MCRegWorldDefs::INST_MAX_ARG_VAL); };
   snapshot_file.Update();
   // environment response phase signal
   get_cur_param = []() { return "environment_response_tag"; };

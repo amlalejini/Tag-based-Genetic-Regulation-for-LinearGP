@@ -51,8 +51,8 @@ namespace DirSigWorldDefs {
   constexpr size_t INST_TAG_CNT = 1;  // How many tags per instruction?
   constexpr size_t INST_ARG_CNT = 3;  // How many instruction arguments per instruction?
   constexpr size_t FUNC_NUM_TAGS = 1; // How many tags are associated with each function in a program?
-  constexpr int INST_MIN_ARG_VAL = 0; // Minimum argument value?
-  constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
+  // constexpr int INST_MIN_ARG_VAL = 0; // Minimum argument value?
+  // constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
   // matchbin <VALUE, METRIC, SELECTOR, REGULATOR>
   #ifndef MATCH_THRESH
   #define MATCH_THRESH 0
@@ -247,6 +247,7 @@ protected:
   bool USE_GLOBAL_MEMORY;
   emp::Range<size_t> FUNC_CNT_RANGE;
   emp::Range<size_t> FUNC_LEN_RANGE;
+  emp::Range<int> ARG_VAL_RANGE;
   // Hardware group
   size_t MAX_ACTIVE_THREAD_CNT;
   size_t MAX_THREAD_CAPACITY;
@@ -375,6 +376,7 @@ void DirSigWorld::InitConfigs(const config_t & config) {
   USE_GLOBAL_MEMORY = config.USE_GLOBAL_MEMORY();
   FUNC_CNT_RANGE = {config.MIN_FUNC_CNT(), config.MAX_FUNC_CNT()};
   FUNC_LEN_RANGE = {config.MIN_FUNC_INST_CNT(), config.MAX_FUNC_INST_CNT()};
+  ARG_VAL_RANGE = {config.INST_MIN_ARG_VAL(), config.INST_MAX_ARG_VAL()};
   // Hardware group
   MAX_ACTIVE_THREAD_CNT = config.MAX_ACTIVE_THREAD_CNT();
   MAX_THREAD_CAPACITY = config.MAX_THREAD_CAPACITY();
@@ -674,7 +676,7 @@ void DirSigWorld::InitMutator() {
   // Set program constraints
   mutator->SetProgFunctionCntRange(FUNC_CNT_RANGE);
   mutator->SetProgFunctionInstCntRange(FUNC_LEN_RANGE);
-  mutator->SetProgInstArgValueRange({DirSigWorldDefs::INST_MIN_ARG_VAL, DirSigWorldDefs::INST_MAX_ARG_VAL});
+  mutator->SetProgInstArgValueRange(ARG_VAL_RANGE);
   mutator->SetTotalInstLimit(2*FUNC_LEN_RANGE.GetUpper()*FUNC_CNT_RANGE.GetUpper());
   mutator->SetFuncNumTags(DirSigWorldDefs::FUNC_NUM_TAGS);
   mutator->SetInstNumTags(DirSigWorldDefs::INST_TAG_CNT);
@@ -926,7 +928,7 @@ void DirSigWorld::InitPop_Random() {
                                    FUNC_LEN_RANGE,
                                    DirSigWorldDefs::INST_TAG_CNT,
                                    DirSigWorldDefs::INST_ARG_CNT,
-                                   {DirSigWorldDefs::INST_MIN_ARG_VAL,DirSigWorldDefs::INST_MAX_ARG_VAL})
+                                   ARG_VAL_RANGE)
                   }, 1);
   }
 }
@@ -1725,14 +1727,6 @@ void DirSigWorld::DoWorldConfigSnapshot(const config_t & config) {
   // FUNC_NUM_TAGS
   get_cur_param = []() { return "FUNC_NUM_TAGS"; };
   get_cur_value = []() { return emp::to_string(DirSigWorldDefs::FUNC_NUM_TAGS); };
-  snapshot_file.Update();
-  // INST_MIN_ARG_VAL
-  get_cur_param = []() { return "INST_MIN_ARG_VAL"; };
-  get_cur_value = []() { return emp::to_string(DirSigWorldDefs::INST_MIN_ARG_VAL); };
-  snapshot_file.Update();
-  // INST_MAX_ARG_VAL
-  get_cur_param = []() { return "INST_MAX_ARG_VAL"; };
-  get_cur_value = []() { return emp::to_string(DirSigWorldDefs::INST_MAX_ARG_VAL); };
   snapshot_file.Update();
   // environment signal
   get_cur_param = []() { return "env_state_tags"; };
