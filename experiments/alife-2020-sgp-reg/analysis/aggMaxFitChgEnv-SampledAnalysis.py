@@ -25,7 +25,9 @@ key_settings = [
     "MAX_FUNC_INST_CNT",
     "MAX_ACTIVE_THREAD_CNT",
     "MAX_THREAD_CAPACITY",
-    "TOURNAMENT_SIZE"
+    "TOURNAMENT_SIZE",
+    "INST_MIN_ARG_VAL",
+    "INST_MAX_ARG_VAL"
 ]
 
 """
