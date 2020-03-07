@@ -42,6 +42,7 @@
 #include "Event.h"
 
 #include "reg_ko_instr_impls.h"
+// #include "regulators.h"
 
 // TODO - use compile args!
 namespace AltSignalWorldDefs {
@@ -113,7 +114,10 @@ namespace AltSignalWorldDefs {
       emp::AdditiveCountdownRegulator<>,
     std::conditional<STRINGVIEWIFY(MATCH_REG) == "mult",
       emp::MultiplicativeCountdownRegulator<>,
-      std::enable_if<false>
+    // std::conditional<STRINGVIEWIFY(MATCH_REG) == "exp",
+    //   emp::ExponentialCountdownRegulator<>,
+    std::enable_if<false>
+    // >::type
     >::type
     >::type;
   #endif
@@ -401,8 +405,8 @@ void AltSignalWorld::InitInstLib() {
   inst_lib->AddInst("If", sgp::lfp_inst_impl::Inst_If<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
   inst_lib->AddInst("While", sgp::lfp_inst_impl::Inst_While<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
   inst_lib->AddInst("Routine", sgp::lfp_inst_impl::Inst_Routine<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t>, "");
-  inst_lib->AddInst("NegTerminal", sgp::inst_impl::Inst_NegTerminal<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t,
+                                                              std::ratio<1>, std::ratio<-1>>, "");
 
   // If we can use global memory, give programs access. Otherwise, nops.
   if (USE_GLOBAL_MEMORY) {
@@ -431,6 +435,18 @@ void AltSignalWorld::InitInstLib() {
         sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>(hw, inst);
       }
     }, "");
+    inst_lib->AddInst("SetRegulator-", [this](hardware_t & hw, const inst_t & inst) {
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_SetRegulator_KO_DOWN_REG<hardware_t, inst_t, -1>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_SetRegulator_KO_UP_REG<hardware_t, inst_t, -1>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t, -1>(hw, inst);
+      }
+    }, "");
+
     inst_lib->AddInst("SetOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (KO_REGULATION) {
         return;
@@ -442,6 +458,18 @@ void AltSignalWorld::InitInstLib() {
         sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t>(hw, inst);
       }
     }, "");
+    inst_lib->AddInst("SetOwnRegulator-", [this](hardware_t & hw, const inst_t & inst) {
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_SetOwnRegulator_KO_DOWN_REG<hardware_t, inst_t, -1>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_SetOwnRegulator_KO_UP_REG<hardware_t, inst_t, -1>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t, -1>(hw, inst);
+      }
+    }, "");
+
     inst_lib->AddInst("AdjRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (KO_REGULATION) {
         return;
@@ -451,6 +479,17 @@ void AltSignalWorld::InitInstLib() {
         inst_impls::Inst_AdjRegulator_KO_UP_REG<hardware_t, inst_t>(hw, inst);
       } else {
         sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t>(hw, inst);
+      }
+    }, "");
+    inst_lib->AddInst("AdjRegulator-", [this](hardware_t & hw, const inst_t & inst) {
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_AdjRegulator_KO_DOWN_REG<hardware_t, inst_t, -1>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_AdjRegulator_KO_UP_REG<hardware_t, inst_t, -1>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t, -1>(hw, inst);
       }
     }, "");
     inst_lib->AddInst("AdjOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
@@ -464,6 +503,18 @@ void AltSignalWorld::InitInstLib() {
         sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>(hw, inst);
       }
     }, "");
+    inst_lib->AddInst("AdjOwnRegulator-", [this](hardware_t & hw, const inst_t & inst) {
+      if (KO_REGULATION) {
+        return;
+      } else if (KO_DOWN_REGULATION) {
+        inst_impls::Inst_AdjOwnRegulator_KO_DOWN_REG<hardware_t, inst_t, -1>(hw, inst);
+      } else if (KO_UP_REGULATION) {
+        inst_impls::Inst_AdjOwnRegulator_KO_UP_REG<hardware_t, inst_t, -1>(hw, inst);
+      } else {
+        sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t, -1>(hw, inst);
+      }
+    }, "");
+
     inst_lib->AddInst("ClearRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (KO_REGULATION) {
         return;
@@ -486,7 +537,6 @@ void AltSignalWorld::InitInstLib() {
         sgp::inst_impl::Inst_ClearOwnRegulator<hardware_t, inst_t>(hw, inst);
       }
     }, "");
-
     inst_lib->AddInst("SenseRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>(hw, inst);
     }, "");
@@ -527,6 +577,10 @@ void AltSignalWorld::InitInstLib() {
     inst_lib->AddInst("Nop-SetOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-AdjRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-AdjOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SetRegulator-", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SetOwnRegulator-", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjRegulator-", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjOwnRegulator-", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-ClearRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-ClearOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SenseRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
