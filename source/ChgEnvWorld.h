@@ -422,6 +422,20 @@ void ChgEnvWorld::InitInstLib() {
     inst_lib->AddInst("AdjOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t>(hw, inst);
     }, "");
+
+    inst_lib->AddInst("SetRegulator-", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t, -1>(hw, inst);
+    }, "");
+    inst_lib->AddInst("SetOwnRegulator-", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t, -1>(hw, inst);
+    }, "");
+    inst_lib->AddInst("AdjRegulator-", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjRegulator<hardware_t, inst_t, -1>(hw, inst);
+    }, "");
+    inst_lib->AddInst("AdjOwnRegulator-", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t, -1>(hw, inst);
+    }, "");
+
     inst_lib->AddInst("SenseRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_SenseRegulator<hardware_t, inst_t>(hw, inst);
     }, "");
@@ -440,11 +454,23 @@ void ChgEnvWorld::InitInstLib() {
     inst_lib->AddInst("DecOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_DecOwnRegulator<hardware_t, inst_t>(hw, inst);
     }, "");
+    inst_lib->AddInst("ClearRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_ClearRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
+    inst_lib->AddInst("ClearOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
+      if (!KO_REGULATION) sgp::inst_impl::Inst_ClearOwnRegulator<hardware_t, inst_t>(hw, inst);
+    }, "");
   } else {
     inst_lib->AddInst("Nop-SetRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SetOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-AdjRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-AdjOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SetRegulator-", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-SetOwnRegulator-", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjRegulator-", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-AdjOwnRegulator-", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-ClearRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-ClearOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SenseRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-SenseOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
     inst_lib->AddInst("Nop-IncRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
