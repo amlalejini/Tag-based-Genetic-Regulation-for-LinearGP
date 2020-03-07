@@ -434,8 +434,8 @@ void DirSigWorld::InitInstLib() {
   inst_lib->AddInst("If", sgp::lfp_inst_impl::Inst_If<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
   inst_lib->AddInst("While", sgp::lfp_inst_impl::Inst_While<hardware_t, inst_t>, "", {inst_prop_t::BLOCK_DEF});
   inst_lib->AddInst("Routine", sgp::lfp_inst_impl::Inst_Routine<hardware_t, inst_t>, "");
-  inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t>, "");
-  inst_lib->AddInst("NegTerminal", sgp::inst_impl::Inst_NegTerminal<hardware_t, inst_t>, "");
+  inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t,
+                                                            std::ratio<1>, std::ratio<-1>>, "");
 
   // If we can use global memory, give programs access. Otherwise, nops.
   if (USE_GLOBAL_MEMORY) {
