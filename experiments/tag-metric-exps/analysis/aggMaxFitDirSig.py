@@ -172,7 +172,8 @@ def main():
             print(f"Header mismatch! ({org_analysis_path})")
             exit(-1)
         # surround things in quotes that need it
-        org[analysis_header_lu["program"]] = "\"" + org[analysis_header_lu["program"]] + "\""
+        # org[analysis_header_lu["program"]] = "\"" + org[analysis_header_lu["program"]] + "\""
+        org[analysis_header_lu["program"]] = "NONE"
         org[analysis_header_lu["scores_by_test"]] = "\"" + org[analysis_header_lu["scores_by_test"]] + "\""
         org[analysis_header_lu["ko_regulation_scores_by_test"]] = "\"" + org[analysis_header_lu["ko_regulation_scores_by_test"]] + "\""
         org[analysis_header_lu["ko_global_memory_scores_by_test"]] = "\"" + org[analysis_header_lu["ko_global_memory_scores_by_test"]] + "\""
