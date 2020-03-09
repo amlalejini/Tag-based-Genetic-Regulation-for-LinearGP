@@ -76,6 +76,17 @@ def main():
     # header = ",".join([key for key in key_settings] + ["score", "update"])
     # out_content = header + "\n"
 
+    out_fields = ["seed",
+                    "tag_metric",
+                    "tag_mut_rate",
+                    "regulator",
+                    "tag_width",
+                    "NUM_ENV_STATES",
+                    "NUM_ENV_UPDATES",
+                    "score",
+                    "update"]
+    out_content = ",".join(out_fields) + "\n"
+
     # For each run, extract fitness over time
     for run in run_dirs:
         print(f"Extracting from {run}")
@@ -99,16 +110,6 @@ def main():
         header_lu = {header[i].strip():i for i in range(0, len(header))}
         content = content[1:]
 
-        out_fields = ["seed",
-                      "tag_metric",
-                      "tag_mut_rate",
-                      "regulator",
-                      "tag_width",
-                      "NUM_ENV_STATES",
-                      "NUM_ENV_UPDATES",
-                      "score",
-                      "update"]
-        out_content = ",".join(out_fields) + "\n"
         for line in content:
             line = line.split(",")
             info = {col:line[header_lu[col]] for col in header_lu}
@@ -128,7 +129,6 @@ def main():
             }
             out_content += ",".join([out[field] for field in out_fields]) + "\n"
 
-
     # Write output to file.
     mkdir_p(dump_dir)
     with open(os.path.join(dump_dir, dump_fname), "w") as fp:
@@ -136,5 +136,4 @@ def main():
     print(f"Done! Output written to {os.path.join(dump_dir, dump_fname)}")
 
 if __name__ == "__main__":
-    # extract_settings("./run.log")
     main()
