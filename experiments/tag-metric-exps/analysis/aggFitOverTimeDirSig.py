@@ -110,7 +110,8 @@ def main():
                       "update"]
         out_content = ",".join(out_fields) + "\n"
         for line in content:
-            info = {col:content[header_lu[col]] for col in header_lu}
+            line = line.split(",")
+            info = {col:line[header_lu[col]] for col in header_lu}
             if run_settings["MUT_RATE__FUNC_TAG_BF"] != run_settings["MUT_RATE__INST_TAG_BF"]:
                 print("!")
                 exit(-1)
