@@ -58,10 +58,12 @@ def main():
     parser.add_argument("--data", type=str, nargs="+", help="Where should we pull data (one or more locations)?")
     parser.add_argument("--dump", type=str, help="Where to dump this?", default=".")
     parser.add_argument("--out_fname", type=str, help="What should we call the output file?", default="fot.csv")
+    parser.add_argument("--res", type=int, help="What resolution of fitness measures?", default=10)
     args = parser.parse_args()
     data_dirs = args.data
     dump_dir = args.dump
     dump_fname = args.out_fname
+    resolution = args.res
 
     # Are all data directories for real?
     if any([not os.path.exists(loc) for loc in data_dirs]):
@@ -110,6 +112,8 @@ def main():
         header_lu = {header[i].strip():i for i in range(0, len(header))}
         content = content[1:]
 
+        last_update = 0
+        last_fitness = 0
         for line in content:
             line = line.split(",")
             info = {col:line[header_lu[col]] for col in header_lu}
@@ -127,7 +131,25 @@ def main():
                 "score": info["max_fitness"],
                 "update": info["update"]
             }
+            last_update = int(info["update"])
+            last_fitness= float(info["max_fitness"])
             out_content += ",".join([out[field] for field in out_fields]) + "\n"
+        max_update=int(run_settings["GENERATIONS"])
+        while last_update < max_update:
+            last_update += resolution
+            out = {
+                "seed": run_settings["SEED"],
+                "tag_metric": run_settings["matchbin_metric"],
+                "tag_mut_rate": run_settings["MUT_RATE__FUNC_TAG_BF"],
+                "regulator": run_settings["matchbin_regulator"],
+                "tag_width": run_settings["TAG_LEN"],
+                "NUM_ENV_STATES": run_settings["NUM_ENV_STATES"],
+                "NUM_ENV_UPDATES": run_settings["NUM_ENV_STATES"],
+                "score": last_fitness,
+                "update": last_update
+            }
+            out_content += ",".join([out[field] for field in out_fields]) + "\n"
+
 
     # Write output to file.
     mkdir_p(dump_dir)
