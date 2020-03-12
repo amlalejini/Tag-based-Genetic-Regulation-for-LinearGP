@@ -9,7 +9,7 @@
 
 ########## Command Lines to Run ##########
 EXP=dir-sig
-DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/tag-metric-exps/${EXP}-mut-sweep-2
+DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/tag-metric-exps/3-12/${EXP}
 CONFIG_DIR=/mnt/home/lalejini/devo_ws/signalgp-genetic-regulation/experiments/tag-metric-exps/configs-${EXP}
 
 ##################################
@@ -77,19 +77,19 @@ STREAK_EXACT__STOP=$(($TREATMENT_ID*$REPLICATES + $REPLICATES))
 if [ ${SLURM_ARRAY_TASK_ID} -ge ${HAMMING__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${HAMMING__STOP} ] ; then
   MATCH_METRIC=hamming
   TAG_MUT_RATE=00001
-if [ ${SLURM_ARRAY_TASK_ID} -ge ${HASH__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${HASH__STOP} ] ; then
+elif [ ${SLURM_ARRAY_TASK_ID} -ge ${HASH__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${HASH__STOP} ] ; then
   MATCH_METRIC=hash
   TAG_MUT_RATE=0001
-if [ ${SLURM_ARRAY_TASK_ID} -ge ${INTEGER__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${INTEGER__STOP} ] ; then
+elif [ ${SLURM_ARRAY_TASK_ID} -ge ${INTEGER__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${INTEGER__STOP} ] ; then
   MATCH_METRIC=integer
   TAG_MUT_RATE=001
-if [ ${SLURM_ARRAY_TASK_ID} -ge ${INTEGER_SYM__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${INTEGER_SYM__STOP} ] ; then
+elif [ ${SLURM_ARRAY_TASK_ID} -ge ${INTEGER_SYM__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${INTEGER_SYM__STOP} ] ; then
   MATCH_METRIC=integer-symmetric
   TAG_MUT_RATE=001
-if [ ${SLURM_ARRAY_TASK_ID} -ge ${STREAK__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${STREAK__STOP} ] ; then
+elif [ ${SLURM_ARRAY_TASK_ID} -ge ${STREAK__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${STREAK__STOP} ] ; then
   MATCH_METRIC=streak
   TAG_MUT_RATE=0001
-if [ ${SLURM_ARRAY_TASK_ID} -ge ${STREAK_EXACT__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${STREAK_EXACT__STOP} ] ; then
+elif [ ${SLURM_ARRAY_TASK_ID} -ge ${STREAK_EXACT__START} ] && [ ${SLURM_ARRAY_TASK_ID} -le ${STREAK_EXACT__STOP} ] ; then
   MATCH_METRIC=streak-exact
   TAG_MUT_RATE=0001
 else
