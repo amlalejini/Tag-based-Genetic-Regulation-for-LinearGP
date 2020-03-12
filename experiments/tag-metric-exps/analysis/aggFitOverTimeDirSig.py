@@ -145,11 +145,10 @@ def main():
                 "tag_width": run_settings["TAG_LEN"],
                 "NUM_ENV_STATES": run_settings["NUM_ENV_STATES"],
                 "NUM_ENV_UPDATES": run_settings["NUM_ENV_STATES"],
-                "score": last_fitness,
-                "update": last_update
+                "score": str(last_fitness),
+                "update": str(last_update)
             }
             out_content += ",".join([out[field] for field in out_fields]) + "\n"
-
 
     # Write output to file.
     mkdir_p(dump_dir)
