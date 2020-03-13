@@ -1,6 +1,11 @@
 /***
- * Alternating Signal World
+ * ================================
+ * === Alternating Signal World ===
+ * ================================
  *
+ * Implements the Repeated Signal Task
+ * - Organisms must respond correctly to a repeated environmental signal. Each time the signal repeats,
+ *   a different response (from previous) is required.
  **/
 
 #ifndef _ALT_SIGNAL_WORLD_H
@@ -42,20 +47,18 @@
 #include "Event.h"
 
 #include "reg_ko_instr_impls.h"
-// #include "regulators.h"
 
-// TODO - use compile args!
+/// Globally-scoped, static variables.
 namespace AltSignalWorldDefs {
   #ifndef TAG_NUM_BITS
   #define TAG_NUM_BITS 64
   #endif
-  constexpr size_t TAG_LEN = TAG_NUM_BITS;      // How many bits per tag?
-  constexpr size_t INST_TAG_CNT = 1;  // How many tags per instruction?
-  constexpr size_t INST_ARG_CNT = 3;  // How many instruction arguments per instruction?
-  constexpr size_t FUNC_NUM_TAGS = 1; // How many tags are associated with each function in a program?
-  // constexpr int INST_MIN_ARG_VAL = 0; // Minimum argument value?
-  // constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
-  // matchbin <VALUE, METRIC, SELECTOR, REGULATOR>
+
+  constexpr size_t TAG_LEN = TAG_NUM_BITS;  ///< How many bits per tag?
+  constexpr size_t INST_TAG_CNT = 1;        ///< How many tags per instruction?
+  constexpr size_t INST_ARG_CNT = 3;        ///< How many instruction arguments per instruction?
+  constexpr size_t FUNC_NUM_TAGS = 1;       ///< How many tags are associated with each function in a program?
+
   #ifndef MATCH_THRESH
   #define MATCH_THRESH 0
   #endif
@@ -65,8 +68,10 @@ namespace AltSignalWorldDefs {
   #ifndef MATCH_METRIC
   #define MATCH_METRIC streak
   #endif
-  using matchbin_val_t = size_t;                        // Module ID
+  using matchbin_val_t = size_t;  ///< SignalGP function ID type (how are functions identified in the matchbin?)
+
   // What match threshold should we use?
+  // Remember, the ranked selector threshold is in terms of DISTANCE, not similarity. Thus, unintuitive template values.
   using matchbin_selector_t =
   #ifdef MATCH_THRESH
     std::conditional<STRINGVIEWIFY(MATCH_THRESH) == "0",
@@ -108,16 +113,14 @@ namespace AltSignalWorldDefs {
     >::type;
   #endif
 
+  // How should we regulate functions?
   using matchbin_regulator_t =
   #ifdef MATCH_REG
     std::conditional<STRINGVIEWIFY(MATCH_REG) == "add",
       emp::AdditiveCountdownRegulator<>,
     std::conditional<STRINGVIEWIFY(MATCH_REG) == "mult",
       emp::MultiplicativeCountdownRegulator<>,
-    // std::conditional<STRINGVIEWIFY(MATCH_REG) == "exp",
-    //   emp::ExponentialCountdownRegulator<>,
     std::enable_if<false>
-    // >::type
     >::type
     >::type;
   #endif
@@ -127,8 +130,8 @@ namespace AltSignalWorldDefs {
 
 /// Custom hardware component for SignalGP.
 struct CustomHardware {
-  int response = -1;
-  int response_function_id=-1;
+  int response = -1;            ///< Organism-set response to environment signal.
+  int response_function_id=-1;  ///< Which function responded? Used for data tracking/output.
 
   void Reset() {
     response = -1;
@@ -136,10 +139,12 @@ struct CustomHardware {
   }
 };
 
+/// Repeated signal world class definition. Manages the repeated signal task evolution experiment.
+/// Derives from Empirical::World class.
 class AltSignalWorld : public emp::World<AltSignalWorldDefs::org_t> {
 public:
-  using tag_t = emp::BitSet<AltSignalWorldDefs::TAG_LEN>;
-  using inst_arg_t = int;
+  using tag_t = emp::BitSet<AltSignalWorldDefs::TAG_LEN>;   ///< Tags are TAG_LENGTH-length bit-strings
+  using inst_arg_t = int;                                   ///< Instruction arguments are integers.
   using org_t = AltSignalOrganism<tag_t,inst_arg_t>;
 
   using matchbin_t = emp::MatchBin<AltSignalWorldDefs::matchbin_val_t,
@@ -169,9 +174,9 @@ public:
 
   /// State of the environment during an evaluation.
   struct Environment {
-    size_t num_states=0;
-    size_t cur_state=0;
-    tag_t env_signal_tag=tag_t();
+    size_t num_states=0;          ///< How many total states are there?
+    size_t cur_state=0;           ///< What is the current state of the environment?
+    tag_t env_signal_tag=tag_t(); ///< What is the tag for the repeated signal?
 
     void ResetEnv() { cur_state = 0; }
     void AdvanceEnv() {
@@ -179,15 +184,14 @@ public:
     }
   };
 
-  /// Struct used as intermediary for printing/outputting SignalGP hardware state
+  /// Struct used as intermediary for printing/outputting SignalGP hardware state at a given time step.
   struct HardwareStatePrintInfo {
-    std::string global_mem_str="";
-    size_t num_modules=0;
-    emp::vector<double> module_regulator_states;
-    emp::vector<size_t> module_regulator_timers;
-    // module values here
-    size_t num_active_threads=0;
-    std::string thread_state_str="";
+    std::string global_mem_str="";      ///< String representation of global memory.
+    size_t num_modules=0;               ///< Number of modules in the program loaded on hardware.
+    emp::vector<double> module_regulator_states; ///< State of regulation for each module.
+    emp::vector<size_t> module_regulator_timers; ///< Regulation timer for each module.
+    size_t num_active_threads=0;        ///< How many active threads are running?
+    std::string thread_state_str="";    ///< String representation of state of all threads.
   };
 
 protected:
@@ -225,63 +229,84 @@ protected:
   size_t SUMMARY_RESOLUTION;
   size_t SNAPSHOT_RESOLUTION;
 
-  Environment eval_environment;
+  Environment eval_environment;      ///< Tracks the environment during evaluation.
 
-  bool setup = false;                       ///< Has this world been setup already?
-  emp::Ptr<inst_lib_t> inst_lib;            ///< Manages SignalGP instruction set.
-  emp::Ptr<event_lib_t> event_lib;          ///< Manages SignalGP events.
-  emp::Ptr<mutator_t> mutator;
+  bool setup = false;               ///< Has this world been setup already?
+  emp::Ptr<inst_lib_t> inst_lib;    ///< Manages SignalGP instruction set.
+  emp::Ptr<event_lib_t> event_lib;  ///< Manages SignalGP events.
+  emp::Ptr<mutator_t> mutator;      ///< Mutates SignalGP programs.
 
-  size_t event_id__env_sig;
+  size_t event_id__env_sig;         ///< Event library ID of environment signal.
 
-  emp::Ptr<hardware_t> eval_hardware;       ///< Used to evaluate programs.
+  emp::Ptr<hardware_t> eval_hardware;  ///< The SignalGP virtual hardware used to evaluate programs.
 
-  emp::Signal<void(size_t)> after_eval_sig; ///< Triggered after organism (ID given by size_t argument) evaluation
-  emp::Signal<void(void)> end_setup_sig;
+  emp::Signal<void(size_t)> after_eval_sig; ///< Triggered after organism (ID given by size_t argument) evaluation.
+  emp::Signal<void(void)> end_setup_sig;    ///< Triggered after setup is done.
 
-  emp::Ptr<emp::DataFile> max_fit_file;
-  emp::Ptr<systematics_t> sys_ptr; ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
+  emp::Ptr<emp::DataFile> max_fit_file; ///< Manages max fitness organism file (output at SUMMARY_RESOLUTION)
+  emp::Ptr<systematics_t> sys_ptr;      ///< Shortcut pointer to correctly-typed systematics manager. Base world class will be responsible for memory management.
 
-  // size_t best_org_id=0;
-
-  bool KO_REGULATION=false;
-  bool KO_UP_REGULATION=false;
-  bool KO_DOWN_REGULATION=false;
-  bool KO_GLOBAL_MEMORY=false;
+  bool KO_REGULATION=false;       ///< Is regulation knocked out?
+  bool KO_UP_REGULATION=false;    ///< Is up-regulation knocked out?
+  bool KO_DOWN_REGULATION=false;  ///< Is down-regulation knocked out?
+  bool KO_GLOBAL_MEMORY=false;    ///< Is global memory access knocked out?
 
   /// tracking information for max fitness organism in the population.
   struct {
     size_t org_id=0;
   } max_fit_org_tracker;
-  bool found_solution = false;
+  bool found_solution = false; ///< Have we stumbled onto a solution yet?
 
+  /// Localize configuration parameters from input config object.
   void InitConfigs(const AltSignalConfig & config);
+  /// Initialize the instruction library.
   void InitInstLib();
+  /// Initialize the event library.
   void InitEventLib();
+  /// Initialize the SignalGP virtual hardware used to evaluate programs.
   void InitHardware();
+  /// Initialize the environment (e.g., generate environment tag, etc).
   void InitEnvironment();
+  /// Initialize and configure the mutator utility.
   void InitMutator();
+  /// Initialize and configure data collection.
   void InitDataCollection();
 
+  /// Initialize the population.
   void InitPop();
+  /// Initialize the population with randomly generated programs.
   void InitPop_Random();
+  /// Initialize the population with a hardcoded program. This is primarily used for debugging.
   void InitPop_Hardcoded();
 
+  /// Evaluate the entire population.
   void DoEvaluation();
+  /// Select parents for the next generation.
   void DoSelection();
+  /// Move from one generation to the next.
   void DoUpdate();
 
+  /// Evaluate org_t org on repeated signal task.
   void EvaluateOrg(org_t & org);
 
+  /// Monster function that runs analyses on given organisms.
+  /// - e.g., knockout experiments, traces, etc
   void AnalyzeOrg(const org_t & org, size_t org_id=0);
+  /// Extract and output the execution trace of the given organism.
   void TraceOrganism(const org_t & org, size_t org_id=0);
 
   // -- Utilities --
+  /// Output a snapshot of the current population.
   void DoPopulationSnapshot();
+  /// Output a snapshot of the world's configuration.
   void DoWorldConfigSnapshot(const AltSignalConfig & config);
+  /// Output utility - stream a given program on a single line to ostream.
   void PrintProgramSingleLine(const program_t & prog, std::ostream & out);
+  /// Output utility - stream a given function on a single line to ostream.
   void PrintProgramFunction(const program_function_t & func, std::ostream & out);
+  /// Output utility - stream a given instruction on a single line to ostream.
   void PrintProgramInstruction(const inst_t & inst, std::ostream & out);
+  /// Output utility - extract hardware state information from given SignalGP virtual hardware.
   HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
 
 public:
@@ -376,6 +401,7 @@ void AltSignalWorld::InitEnvironment() {
 void AltSignalWorld::InitInstLib() {
   if (!setup) inst_lib = emp::NewPtr<inst_lib_t>();
   inst_lib->Clear(); // Reset the instruction library
+  // Add default instructions.
   inst_lib->AddInst("Nop", [](hardware_t & hw, const inst_t & inst) { ; }, "No operation!");
   inst_lib->AddInst("Inc", sgp::inst_impl::Inst_Inc<hardware_t, inst_t>, "Increment!");
   inst_lib->AddInst("Dec", sgp::inst_impl::Inst_Dec<hardware_t, inst_t>, "Decrement!");
@@ -408,7 +434,8 @@ void AltSignalWorld::InitInstLib() {
   inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t,
                                                               std::ratio<1>, std::ratio<-1>>, "");
 
-  // If we can use global memory, give programs access. Otherwise, nops.
+  // If global memory access is allowed, add access instructions; otherwise, add an equivalent number
+  // of no-operation instructions.
   if (USE_GLOBAL_MEMORY) {
     inst_lib->AddInst("WorkingToGlobal", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>(hw, inst);
@@ -421,8 +448,8 @@ void AltSignalWorld::InitInstLib() {
     inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
 
-  // if (allow regulation)
-  // If we can use regulation, add instructions. Otherwise, nops.
+  // If we can use regulation, add regulation instructions; otherwise, add an equivalent number of
+  // no-operation instructions.
   if (USE_FUNC_REGULATION) {
     inst_lib->AddInst("SetRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (KO_REGULATION) {
@@ -469,7 +496,6 @@ void AltSignalWorld::InitInstLib() {
         sgp::inst_impl::Inst_SetOwnRegulator<hardware_t, inst_t, -1>(hw, inst);
       }
     }, "");
-
     inst_lib->AddInst("AdjRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (KO_REGULATION) {
         return;
@@ -514,7 +540,6 @@ void AltSignalWorld::InitInstLib() {
         sgp::inst_impl::Inst_AdjOwnRegulator<hardware_t, inst_t, -1>(hw, inst);
       }
     }, "");
-
     inst_lib->AddInst("ClearRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (KO_REGULATION) {
         return;
@@ -543,7 +568,6 @@ void AltSignalWorld::InitInstLib() {
     inst_lib->AddInst("SenseOwnRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_SenseOwnRegulator<hardware_t, inst_t>(hw, inst);
     }, "");
-
     inst_lib->AddInst("IncRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (KO_REGULATION || KO_DOWN_REGULATION) {
         return;
@@ -591,7 +615,7 @@ void AltSignalWorld::InitInstLib() {
     inst_lib->AddInst("Nop-DecOwnRegulator", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
 
-  // Add response instructions
+  // Add one response instruction for each possible response (equal to the number of possible environment states).
   for (size_t i = 0; i < NUM_SIGNAL_RESPONSES; ++i) {
     inst_lib->AddInst("Response-" + emp::to_string(i), [this, i](hardware_t & hw, const inst_t & inst) {
       const auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
@@ -719,13 +743,6 @@ void AltSignalWorld::InitDataCollection() {
   // Some generally useful functions
   std::function<size_t(void)> get_update = [this]() { return this->GetUpdate(); };
 
-
-  // Fitness file
-  // Max fitness file (solution should be last line(?))
-  // Phylogeny file
-  //  - mutation distribution from parent
-  // Population snapshot
-
   // --- Fitness File ---
   SetupFitnessFile(OUTPUT_DIR + "/fitness.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
 
@@ -746,10 +763,6 @@ void AltSignalWorld::InitDataCollection() {
     };
   sys_ptr->OnNew(record_taxon_mut_data);
   // Add snapshot functions
-  // - fitness information (taxon->GetFitness)
-  // - phenotype information
-  //   - res collected, correct resp, no resp
-  // - mutations (counts by type)
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
     return emp::to_string(taxon.GetData().GetFitness());
   }, "fitness", "Taxon fitness");
@@ -935,7 +948,6 @@ void AltSignalWorld::EvaluateOrg(org_t & org) {
     emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
     eval_hardware->QueueEvent(event_t(event_id__env_sig, eval_environment.env_signal_tag));
     // Step hardware! If at any point there are no active || pending threads, we're done!
-    // auto information = GetHardwareStatePrintInfo(*eval_hardware);
     for (size_t step = 0; step < CPU_TIME_PER_ENV_CYCLE; ++step) {
       eval_hardware->SingleProcess();
       // auto information = GetHardwareStatePrintInfo(*eval_hardware);
