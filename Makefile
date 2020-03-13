@@ -1,12 +1,19 @@
-# Project-specific settings
-# PROJECT := mc-reg-exp
+# Target project
+# PROJECT options: alt-signal-exp, chg-env-exp, dir-signal-exp
+# - Repeated signal task -
 # PROJECT := alt-signal-exp
+# - Changing signal task -
 # PROJECT := chg-env-exp
+# - Directional signal task -
 PROJECT := dir-signal-exp
+
+# Dependency directories
 EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
+OPEN_SSL_DIR := /usr/local/Cellar/openssl/1.0.2t
 
-# Match metric options: hamming, integer, streak, hash, streak-exact
+# Compile-time parameter configuration (tag metric, matching threshold, matching regulator, tag size)
+# MATCH_METRIC options: hamming, hash, integer, integer-symmetric, streak, streak-exact
 MATCH_METRIC := hash
 # MATCH_THRESH options: 0, 25, 50, 75
 MATCH_THRESH := 25
@@ -14,14 +21,16 @@ MATCH_THRESH := 25
 MATCH_REG := mult
 # TAG_NUM_BITS
 TAG_NUM_BITS := 64
+
+# Executable name
 # combine it all into the executable name
 EXEC_NAME := $(PROJECT)_tag-len-$(TAG_NUM_BITS)_match-metric-$(MATCH_METRIC)_thresh-$(MATCH_THRESH)_reg-$(MATCH_REG)
 
 # Flags to use regardless of compiler
-CFLAGS_alex := -I/usr/local/Cellar/openssl/1.0.2t/include -L/usr/local/Cellar/openssl/1.0.2t/lib
+CFLAGS_openssl := -I$(OPEN_SSL_DIR)/include -L$(OPEN_SSL_DIR)/lib
 CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/
 CFLAGS_links := -lssl -lcrypto
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) -DTAG_NUM_BITS=$(TAG_NUM_BITS) $(CFLAGS_alex) $(CFLAGS_includes) $(CFLAGS_links)
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) -DTAG_NUM_BITS=$(TAG_NUM_BITS) $(CFLAGS_openssl) $(CFLAGS_includes) $(CFLAGS_links)
 
 # Native compiler information
 CXX_nat := g++-9
@@ -36,7 +45,6 @@ OFLAGS_web_debug := -g4 -Oz -Wno-dollar-in-identifier-extension
 
 CFLAGS_web := $(CFLAGS_all) $(OFLAGS_web) $(OFLAGS_web_all)
 CFLAGS_web_debug := $(CFLAGS_all) $(OFLAGS_web_debug) $(OFLAGS_web_all)
-
 
 default: $(PROJECT)
 native: $(PROJECT)
