@@ -2,13 +2,10 @@
 #define CHG_ENV_DIGITAL_ORGANISM_H
 
 #include <tuple>
-
-// New signalgp includes
 #include "hardware/SignalGP/utils/LinearFunctionsProgram.h"
-
-// local includes
 #include "mutation_utils.h"
 
+/// Organism class for the changing signal task.
 template<typename TAG_T, typename INST_ARG_T>
 class ChgEnvOrganism {
 public:
@@ -43,10 +40,10 @@ public:
   };
 
   struct ChgEnvPhenotype {
-    double score=0.0;
-    size_t env_matches=0;
-    size_t env_misses=0;
-    size_t no_responses=0;
+    double score=0.0;       ///< i.e., fitness
+    size_t env_matches=0;   ///< How many signals did organism respond correctly to?
+    size_t env_misses=0;    ///< How many signals did organism respond incorrectly to?
+    size_t no_responses=0;  ///< How many signals did organism not respond to?
 
     void Reset() {
       score=0.0;
