@@ -1,5 +1,15 @@
 # Handcoded SignalGP example programs
 
+<!-- TOC -->
+
+- [Repeated Signal Task](#repeated-signal-task)
+  - [Two-signal Task - memory-based solution](#two-signal-task---memory-based-solution)
+  - [Four-signal Task - memory-based solution](#four-signal-task---memory-based-solution)
+  - [Eight-signal Task - memory-based solution](#eight-signal-task---memory-based-solution)
+  - [Sixteen-signal Task - memory-based solution](#sixteen-signal-task---memory-based-solution)
+
+<!-- /TOC -->
+
 Handcoded SignalGP programs, useful for task/intuition validation.
 
 ## Repeated Signal Task
