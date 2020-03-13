@@ -140,7 +140,7 @@ struct CustomHardware {
 };
 
 /// Repeated signal world class definition. Manages the repeated signal task evolution experiment.
-/// Derives from Empirical::World class.
+/// Derives from Empirical's World class.
 class AltSignalWorld : public emp::World<AltSignalWorldDefs::org_t> {
 public:
   using tag_t = emp::BitSet<AltSignalWorldDefs::TAG_LEN>;   ///< Tags are TAG_LENGTH-length bit-strings
@@ -229,7 +229,7 @@ protected:
   size_t SUMMARY_RESOLUTION;
   size_t SNAPSHOT_RESOLUTION;
 
-  Environment eval_environment;      ///< Tracks the environment during evaluation.
+  Environment eval_environment;     ///< Tracks the environment during evaluation.
 
   bool setup = false;               ///< Has this world been setup already?
   emp::Ptr<inst_lib_t> inst_lib;    ///< Manages SignalGP instruction set.
@@ -630,7 +630,6 @@ void AltSignalWorld::InitInstLib() {
       for (size_t thread_id : hw.GetActiveThreadIDs()) {
         hw.GetThread(thread_id).SetDead();
       }
-      // emp_assert(hw.ValidateThreadState());
     }, "Set organism response to environment.");
   }
 }

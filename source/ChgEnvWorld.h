@@ -1,6 +1,11 @@
 /***
- * (simple) Changing Environment World
+ * ============================
+ * === Changing Signal Task ===
+ * ============================
  *
+ * Implements the changing signal task experiment.
+ * - Organisms must respond correctly to a sequence of K distinct environmental signals. Each environmental
+ *   signal requires a distinct response from the organism.
  **/
 
 #ifndef _CHG_ENV_WORLD_H
@@ -41,17 +46,16 @@
 #include "mutation_utils.h"
 #include "Event.h"
 
+/// Globally-scoped, static variables.
 namespace ChgEnvWorldDefs {
   #ifndef TAG_NUM_BITS
   #define TAG_NUM_BITS 64
   #endif
-  constexpr size_t TAG_LEN = TAG_NUM_BITS;      // How many bits per tag?
-  constexpr size_t INST_TAG_CNT = 1;  // How many tags per instruction?
-  constexpr size_t INST_ARG_CNT = 3;  // How many instruction arguments per instruction?
-  constexpr size_t FUNC_NUM_TAGS = 1; // How many tags are associated with each function in a program?
-  // constexpr int INST_MIN_ARG_VAL = 0; // Minimum argument value?
-  // constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
-  // matchbin <VALUE, METRIC, SELECTOR, REGULATOR>
+  constexpr size_t TAG_LEN = TAG_NUM_BITS;  ///< How many bits per tag?
+  constexpr size_t INST_TAG_CNT = 1;        ///< How many tags per instruction?
+  constexpr size_t INST_ARG_CNT = 3;        ///< How many instruction arguments per instruction?
+  constexpr size_t FUNC_NUM_TAGS = 1;       ///< How many tags are associated with each function in a program?
+
   #ifndef MATCH_THRESH
   #define MATCH_THRESH 0
   #endif
@@ -61,8 +65,10 @@ namespace ChgEnvWorldDefs {
   #ifndef MATCH_METRIC
   #define MATCH_METRIC streak
   #endif
-  using matchbin_val_t = size_t;                        // Module ID
+  using matchbin_val_t = size_t;  ///< SignalGP function ID type (how are functions identified in the matchbin?)
+
   // What match threshold should we use?
+  // Remember, the ranked selector threshold is in terms of DISTANCE, not similarity. Thus, unintuitive template values.
   using matchbin_selector_t =
   #ifdef MATCH_THRESH
     std::conditional<STRINGVIEWIFY(MATCH_THRESH) == "0",
@@ -104,6 +110,7 @@ namespace ChgEnvWorldDefs {
     >::type;
   #endif
 
+  // How should we regulate functions?
   using matchbin_regulator_t =
   #ifdef MATCH_REG
     std::conditional<STRINGVIEWIFY(MATCH_REG) == "add",
@@ -120,8 +127,8 @@ namespace ChgEnvWorldDefs {
 
 /// Custom hardware component for SignalGP.
 struct ChgEnvCustomHardware {
-  int response = -1;
-  bool responded = false;
+  int response = -1;       ///< Organism-set response to environment signal.
+  bool responded = false;  ///< Flag: did organism express a response yet?
 
   void Reset() {
     response = -1;
@@ -137,6 +144,8 @@ struct ChgEnvCustomHardware {
   bool HasResponse() const { return responded; }
 };
 
+/// Changing signal world class definition. Manages the changing signal task evolution experiment.
+/// Derives from Empirical's world class.
 class ChgEnvWorld : public emp::World<ChgEnvWorldDefs::org_t> {
 public:
   using tag_t = emp::BitSet<ChgEnvWorldDefs::TAG_LEN>;
@@ -171,13 +180,12 @@ public:
   using systematics_t = emp::Systematics<org_t, typename org_t::genome_t, mut_landscape_t>;
   using taxon_t = typename systematics_t::taxon_t;
 
-  /// Environment
-  /// Tracks the state of the environment during organism evaluation.
+  /// State of the environment during an evaluation.
   struct Environment {
-    size_t num_states=0;
-    size_t cur_state=0;
-    emp::vector<tag_t> env_state_tags;
-    emp::vector<size_t> env_schedule;
+    size_t num_states=0;    ///< How many total environment states (signals) are there?
+    size_t cur_state=0;     ///< What is the current state of the environment?
+    emp::vector<tag_t> env_state_tags;  ///< Tags associated with each environment signal.
+    emp::vector<size_t> env_schedule;   ///< Current environment signal ordering.
 
     void ResetEnv() {
       cur_state = 0;
@@ -189,15 +197,14 @@ public:
     }
   };
 
-  /// Struct used as intermediary for printing/outputting SignalGP hardware state
+  /// Struct used as intermediary for printing/outputting SignalGP hardware state at a given time step.
   struct HardwareStatePrintInfo {
-    std::string global_mem_str="";
-    size_t num_modules=0;
-    emp::vector<double> module_regulator_states;
-    emp::vector<size_t> module_regulator_timers;
-    // module values here
-    size_t num_active_threads=0;
-    std::string thread_state_str="";
+    std::string global_mem_str="";               ///< String representation of global memory.
+    size_t num_modules=0;                        ///< Number of modules in the program loaded on hardware.
+    emp::vector<double> module_regulator_states; ///< State of regulation for each module.
+    emp::vector<size_t> module_regulator_timers; ///< Regulation timer for each module.
+    size_t num_active_threads=0;                 ///< How many active threads are running?
+    std::string thread_state_str="";             ///< String representation of state of all threads.
   };
 
 protected:
@@ -238,60 +245,83 @@ protected:
   size_t SNAPSHOT_RESOLUTION;
   size_t ANALYZE_ORG_EVAL_TRIALS;
 
-  Environment eval_environment;
+  Environment eval_environment;  ///< Tracks the environment during evaluation.
 
-  bool setup = false;                       ///< Has this world been setup already?
-  emp::Ptr<inst_lib_t> inst_lib;            ///< Manages SignalGP instruction set.
-  emp::Ptr<event_lib_t> event_lib;          ///< Manages SignalGP events.
-  emp::Ptr<mutator_t> mutator;
+  bool setup = false;               ///< Has this world been setup already?
+  emp::Ptr<inst_lib_t> inst_lib;    ///< Manages SignalGP instruction set.
+  emp::Ptr<event_lib_t> event_lib;  ///< Manages SignalGP events.
+  emp::Ptr<mutator_t> mutator;      ///< Mutates SignalGP programs.
 
-  size_t event_id__env_sig;
+  size_t event_id__env_sig; ///< Event library ID for environment signals.
 
-  emp::Ptr<hardware_t> eval_hardware;       ///< Used to evaluate programs.
+  emp::Ptr<hardware_t> eval_hardware;        ///< Used to evaluate programs.
   emp::vector<phenotype_t> trial_phenotypes; ///< Used to track phenotypes across organism evaluation trials.
 
   emp::Signal<void(size_t)> after_eval_sig; ///< Triggered after organism (ID given by size_t argument) evaluation
   emp::Signal<void(void)> end_setup_sig;    ///< Triggered at end of world setup.
 
-  emp::Ptr<emp::DataFile> max_fit_file;
+  emp::Ptr<emp::DataFile> max_fit_file;    ///< Manages max fitness organism data tracking file (updated/output at SUMMARY_RESOLUTION)
   emp::Ptr<systematics_t> systematics_ptr; ///< Short cut to correctly-typed systematics manager. Base class will be responsible for memory management.
 
   size_t max_fit_org_id=0;
-  double MAX_SCORE=0.0;
-  bool found_solution=false;
+  double MAX_SCORE=0.0;       ///< Maximum possible score.
+  bool found_solution=false;  ///< Found an organism that achieves a perfect score *DURING EVALUATION*
 
-  bool KO_REGULATION=false;
-  bool KO_GLOBAL_MEMORY=false;
+  bool KO_REGULATION=false;     ///< Is regulation knocked out right now?
+  bool KO_GLOBAL_MEMORY=false;  ///< Is global memory access knocked out right now?
 
+  /// Localize configuration parameters from input config object.
   void InitConfigs(const config_t & config);
+  /// Initialize the instruction library.
   void InitInstLib();
+  /// Initialize the event library.
   void InitEventLib();
+  /// Initialize the SignalGP virtual hardware used to evaluate programs.
   void InitHardware();
+  /// Initialize the environment (e.g., generate environment tag, etc).
   void InitEnvironment();
+  /// Initialize and configure the mutator utility.
   void InitMutator();
+  /// Initialize and configure data collection.
   void InitDataCollection();
 
+  /// Initialize the population.
   void InitPop();
+  /// Initialize the population with randomly generated programs.
   void InitPop_Random();
+  /// Initialize the population with a hardcoded program. This is primarily used for debugging.
   void InitPop_Hardcoded();
 
+  /// Evaluate the entire population.
   void DoEvaluation();
+  /// Select parents for the next generation.
   void DoSelection();
+  /// Move from one generation to the next.
   void DoUpdate();
 
+  /// Evaluate org_t org on changing signal task.
   void EvaluateOrg(org_t & org, bool shuffle_env=true);
 
+  /// Monster function that runs analyses on given organisms.
+  /// - e.g., knockout experiments, traces, etc
   void AnalyzeOrg(const org_t & org, size_t org_id=0);
+  /// Extract and output the execution trace of the given organism.
   void TraceOrganism(const org_t & org, size_t org_id=0);
-  HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
 
   // -- Utilities --
+  /// Output a snapshot of the current population.
   void DoPopulationSnapshot();
+  /// Output a snapshot of the world's configuration.
   void DoWorldConfigSnapshot(const config_t & config);
+  /// Output utility - stream a given program on a single line to ostream.
   void PrintProgramSingleLine(const program_t & prog, std::ostream & out);
+  /// Output utility - stream a given function on a single line to ostream.
   void PrintProgramFunction(const program_function_t & func, std::ostream & out);
+  /// Output utility - stream a given instruction on a single line to ostream.
   void PrintProgramInstruction(const inst_t & inst, std::ostream & out);
-
+  /// Output utility - extract hardware state information from given SignalGP virtual hardware.
+  HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
+  /// Does the given phenotype qualify as a 'solution'?
   bool IsSolution(const phenotype_t & phen) const {
     return phen.GetScore() >= MAX_SCORE;
   }
@@ -362,6 +392,7 @@ void ChgEnvWorld::InitConfigs(const config_t & config) {
 void ChgEnvWorld::InitInstLib() {
   if (!setup) inst_lib = emp::NewPtr<inst_lib_t>();
   inst_lib->Clear(); // Reset the instruction library
+  /// Add default instructions.
   inst_lib->AddInst("Nop", [](hardware_t & hw, const inst_t & inst) { ; }, "No operation!");
   inst_lib->AddInst("Inc", sgp::inst_impl::Inst_Inc<hardware_t, inst_t>, "Increment!");
   inst_lib->AddInst("Dec", sgp::inst_impl::Inst_Dec<hardware_t, inst_t>, "Decrement!");
@@ -394,7 +425,8 @@ void ChgEnvWorld::InitInstLib() {
   inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t,
                                                             std::ratio<1>, std::ratio<-1>>, "");
 
-  // If we can use global memory, give programs access. Otherwise, nops.
+  // If global memory access is allowed, add access instructions; otherwise, add an equivalent number
+  // of no-operation instructions.
   if (USE_GLOBAL_MEMORY) {
     inst_lib->AddInst("WorkingToGlobal", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>(hw, inst);
@@ -407,8 +439,8 @@ void ChgEnvWorld::InitInstLib() {
     inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
 
-  // if (allow regulation)
-  // If we can use regulation, add instructions. Otherwise, nops.
+  // If we can use regulation, add regulation instructions; otherwise, add an equivalent number of
+  // no-operation instructions.
   if (USE_FUNC_REGULATION) {
     inst_lib->AddInst("SetRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (!KO_REGULATION) sgp::inst_impl::Inst_SetRegulator<hardware_t, inst_t>(hw, inst);
@@ -776,7 +808,7 @@ void ChgEnvWorld::InitDataCollection() {
 }
 
 void ChgEnvWorld::DoWorldConfigSnapshot(const config_t & config) {
-    // Print matchbin metric
+  // Print matchbin metric
   std::cout << "Requested MatchBin Metric: " << STRINGVIEWIFY(MATCH_METRIC) << std::endl;
   std::cout << "Requested MatchBin Match Thresh: " << STRINGVIEWIFY(MATCH_THRESH) << std::endl;
   std::cout << "Requested MatchBin Regulator: " << STRINGVIEWIFY(MATCH_REG) << std::endl;
@@ -1005,12 +1037,10 @@ void ChgEnvWorld::AnalyzeOrg(const org_t & org, size_t org_id/*=0*/) {
     KO_GLOBAL_MEMORY = false;
     KO_REGULATION = true;
     EvaluateOrg(ko_reg_org, false);
-    // todo - evaluate organism
     //     - ko memory & ko regulation
     KO_GLOBAL_MEMORY = true;
     KO_REGULATION = true;
     EvaluateOrg(ko_all_org, false);
-    // todo - evaluate organism
     // Reset KO variables to both be false
     KO_GLOBAL_MEMORY = false;
     KO_REGULATION = false;
