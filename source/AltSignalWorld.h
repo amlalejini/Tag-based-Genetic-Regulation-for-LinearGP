@@ -699,15 +699,36 @@ void AltSignalWorld::InitPop() {
 
 void AltSignalWorld::InitPop_Hardcoded() {
   program_t program;
-  program.PushInst(*inst_lib, "SetMem", {2, 2, 0}, {tag_t()});
-  program.PushInst(*inst_lib, "GlobalToWorking", {0, 0, 0}, {tag_t()});
-  program.PushInst(*inst_lib, "Mod", {0, 2, 1}, {tag_t()});
-  program.PushInst(*inst_lib, "Inc", {0, 0, 0}, {tag_t()});
-  program.PushInst(*inst_lib, "WorkingToGlobal", {0, 0, 0}, {tag_t()});
-  program.PushInst(*inst_lib, "If", {1, 0, 0}, {tag_t()});
-  program.PushInst(*inst_lib, "Response-1", {0, 0, 0}, {tag_t()});
-  program.PushInst(*inst_lib, "Close", {0, 0, 0}, {tag_t()});
-  program.PushInst(*inst_lib, "Response-0", {0, 0, 0}, {tag_t()});
+  /*
+  program.PushInst(*inst_lib, "GlobalToWorking", {0,0,0}, {tag_t()} );
+  program.PushInst(*inst_lib, "CopyMem",         {0,3,0}, {tag_t()} );
+  program.PushInst(*inst_lib, "Inc",             {3,0,0}, {tag_t()} );
+  program.PushInst(*inst_lib, "WorkingToGlobal", {3,0,0}, {tag_t()} );
+
+  program.PushInst(*inst_lib, "SetMem",          {1,0,0}, {tag_t()});
+  program.PushInst(*inst_lib, "TestEqu",         {0,1,2}, {tag_t()});
+  program.PushInst(*inst_lib, "If",              {2,0,0}, {tag_t()});
+  program.PushInst(*inst_lib, "Response-0",      {0,0,0}, {tag_t()});
+  program.PushInst(*inst_lib, "Close",           {0,0,0}, {tag_t()});
+
+  program.PushInst(*inst_lib, "SetMem",          {1,1,0}, {tag_t()});
+  program.PushInst(*inst_lib, "TestEqu",         {0,1,2}, {tag_t()});
+  program.PushInst(*inst_lib, "If",              {2,0,0}, {tag_t()});
+  program.PushInst(*inst_lib, "Response-1",      {0,0,0}, {tag_t()});
+  program.PushInst(*inst_lib, "Close",           {0,0,0}, {tag_t()});
+
+  program.PushInst(*inst_lib, "SetMem",            {1,2,0}, {tag_t()});
+  program.PushInst(*inst_lib, "TestEqu",           {0,1,2}, {tag_t()});
+  program.PushInst(*inst_lib, "If",                {2,0,0}, {tag_t()});
+  program.PushInst(*inst_lib, "Response-2",        {0,0,0}, {tag_t()});
+  program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
+
+  program.PushInst(*inst_lib, "SetMem",            {1,3,0}, {tag_t()});
+  program.PushInst(*inst_lib, "TestEqu",           {0,1,2}, {tag_t()});
+  program.PushInst(*inst_lib, "If",                {2,0,0}, {tag_t()});
+  program.PushInst(*inst_lib, "Response-3",        {0,0,0}, {tag_t()});
+  program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
+  */
   for (size_t i = 0; i < POP_SIZE; ++i) {
     this->Inject({program}, 1);
   }
