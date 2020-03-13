@@ -1,38 +1,32 @@
-# signalgp-genetic-regulation
+# ALife 2020 - Genetic Regulation Facilitates the Evolution of Signal-response Plasticity in Digital Organisms
 
-## Goals
+**Navigation**
 
-### AltSignalWorld
+<!-- TOC -->
 
-The goal of AltSignalWorld is (almost) entirely demonstrative. _Does_ function regulation
-evolve to solve the problem? Is it easier (given this representation) than using
-memory?
+- [Overview](#overview)
+  - [SignalGP](#signalgp)
+  - [Genetic Regulation in SignalGP](#genetic-regulation-in-signalgp)
+  - [Contributing authors](#contributing-authors)
+- [Reproducibility](#reproducibility)
+- [Supplemental Material](#supplemental-material)
+- [Repository Guide](#repository-guide)
+- [References](#references)
 
-Secondarily, are duplication mutations overrepresented in successful lineages?
-If so, why? Is it because they add new modules? Or, is it something about the duplicated
-material?
+<!-- /TOC -->
 
-- (1) Find reasonable mutation rates & matching mechanisms
-- (2) Hand-code memory solution (to confirm that it is possible)
-- (3) Memory vs. Regulation vs. Both vs. None
-- (4) Are duplications occuring along lineage more often than we would expect by
-  chance?
+## Overview
 
-### Division of labor World
+### SignalGP
 
-Goal: does regulation help w/evolution of division of labor?
+### Genetic Regulation in SignalGP
 
-## Todos
+### Contributing authors
 
-- SignalGP
-  - [ ] General cleanup
-  - [ ] more ways to handle regulation
-- AltSignalWorld
-  - [ ] Add compile-time options for threshold
-  - [ ] Output configuration to CSV
-  - [ ] Implement regulation degradation
-  - [ ] More adjust regulation mechanisms?
-  - [ ] Mut rate sweeps
-    - [ ] Data collection/analysis, make decisions
-- Division of Labor
-  - [ ] Implement world!
+## Reproducibility
+
+## Supplemental Material
+
+## Repository Guide
+
+## References
