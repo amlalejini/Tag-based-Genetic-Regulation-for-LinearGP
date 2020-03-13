@@ -9,7 +9,6 @@
 
 #include "hardware/SignalGP/utils/LinearFunctionsProgram.h"
 
-///
 template<typename HARDWARE_T, typename TAG_T, typename ARGUMENT_T>
 class MutatorLinearFunctionsProgram {
 public:
@@ -18,6 +17,7 @@ public:
   }
 };
 
+/// Mutator for SignalGP programs that use bitstrings for tags and ints as instruction arguments.
 template<typename HARDWARE_T, size_t TAG_W>
 class MutatorLinearFunctionsProgram<HARDWARE_T, emp::BitSet<TAG_W>, int> {
 public:
