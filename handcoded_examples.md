@@ -128,7 +128,117 @@ program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
 
 SignalGP instructions:
 
+```
+GlobalToWorking(0,0,0)
+CopyMem(0,3,0)
+Inc(3,0,0)
+WorkingToGlobal(3,0,0)
+
+SetMem(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-0(0,0,0)
+Close(0,0,0)
+
+SetMem(1,1,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-1(0,0,0)
+Close(0,0,0)
+
+SetMem(1,2,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-2(0,0,0)
+Close(0,0,0)
+
+SetMem(1,3,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-3(0,0,0)
+Close(0,0,0)
+
+SetMem(1,4,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-4(0,0,0)
+Close(0,0,0)
+
+SetMem(1,5,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-5(0,0,0)
+Close(0,0,0)
+
+SetMem(1,6,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-6(0,0,0)
+Close(0,0,0)
+
+SetMem(1,7,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-7(0,0,0)
+Close(0,0,0)
+```
+
 As C++ (can be used in AltSigWorld::InitPop_Hardcoded):
+
+```
+program.PushInst(*inst_lib, "GlobalToWorking", {0,0,0}, {tag_t()} );
+program.PushInst(*inst_lib, "CopyMem",         {0,3,0}, {tag_t()} );
+program.PushInst(*inst_lib, "Inc",             {3,0,0}, {tag_t()} );
+program.PushInst(*inst_lib, "WorkingToGlobal", {3,0,0}, {tag_t()} );
+
+program.PushInst(*inst_lib, "SetMem",          {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "TestEqu",         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, "If",              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Response-0",      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Close",           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, "SetMem",          {1,1,0}, {tag_t()});
+program.PushInst(*inst_lib, "TestEqu",         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, "If",              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Response-1",      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Close",           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, "SetMem",            {1,2,0}, {tag_t()});
+program.PushInst(*inst_lib, "TestEqu",           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, "If",                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Response-2",        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, "SetMem",            {1,3,0}, {tag_t()});
+program.PushInst(*inst_lib, "TestEqu",           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, "If",                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Response-3",        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, "SetMem",            {1,4,0}, {tag_t()});
+program.PushInst(*inst_lib, "TestEqu",           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, "If",                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Response-4",        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, "SetMem",            {1,5,0}, {tag_t()});
+program.PushInst(*inst_lib, "TestEqu",           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, "If",                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Response-5",        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, "SetMem",            {1,6,0}, {tag_t()});
+program.PushInst(*inst_lib, "TestEqu",           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, "If",                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Response-6",        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, "SetMem",            {1,7,0}, {tag_t()});
+program.PushInst(*inst_lib, "TestEqu",           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, "If",                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Response-7",        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
+```
 
 
 ### Sixteen-signal Task - memory-based solution
