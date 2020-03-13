@@ -1,6 +1,13 @@
 /***
- * Directional Signal World
+ * ==============================
+ * == Directional Signal World ==
+ * ==============================
  *
+ * Implements the directional signal task experiment.
+ * - Organisms must respond correctly to a sequence of 'next'/'previous' signals. All 'next' signals
+ *   are identical, and all 'previous' signals are identical. There are K responses. A 'next' signal
+ *   indicates that organisms should express the next response (e.g., if previous was response-1, then
+ *   correct is response-2). A 'previous' signal indicates the reverse.
  **/
 
 #ifndef _DIR_SIG_WORLD_H
@@ -43,17 +50,16 @@
 #include "Event.h"
 #include "reg_ko_instr_impls.h"
 
+/// Globally-scoped, static variables.
 namespace DirSigWorldDefs {
   #ifndef TAG_NUM_BITS
   #define TAG_NUM_BITS 64
   #endif
-  constexpr size_t TAG_LEN = TAG_NUM_BITS;      // How many bits per tag?
-  constexpr size_t INST_TAG_CNT = 1;  // How many tags per instruction?
-  constexpr size_t INST_ARG_CNT = 3;  // How many instruction arguments per instruction?
-  constexpr size_t FUNC_NUM_TAGS = 1; // How many tags are associated with each function in a program?
-  // constexpr int INST_MIN_ARG_VAL = 0; // Minimum argument value?
-  // constexpr int INST_MAX_ARG_VAL = 7; // Maximum argument value?
-  // matchbin <VALUE, METRIC, SELECTOR, REGULATOR>
+  constexpr size_t TAG_LEN = TAG_NUM_BITS;  ///< How many bits per tag?
+  constexpr size_t INST_TAG_CNT = 1;        ///< How many tags per instruction?
+  constexpr size_t INST_ARG_CNT = 3;        ///< How many instruction arguments per instruction?
+  constexpr size_t FUNC_NUM_TAGS = 1;       ///< How many tags are associated with each function in a program?
+
   #ifndef MATCH_THRESH
   #define MATCH_THRESH 0
   #endif
@@ -63,8 +69,10 @@ namespace DirSigWorldDefs {
   #ifndef MATCH_METRIC
   #define MATCH_METRIC streak
   #endif
-  using matchbin_val_t = size_t;                        // Module ID
+  using matchbin_val_t = size_t;  ///< SignalGP function ID type (how are functions identified in the matchbin?)
+
   // What match threshold should we use?
+  // Remember, the ranked selector threshold is in terms of DISTANCE, not similarity. Thus, unintuitive template values.
   using matchbin_selector_t =
   #ifdef MATCH_THRESH
     std::conditional<STRINGVIEWIFY(MATCH_THRESH) == "0",
@@ -106,6 +114,7 @@ namespace DirSigWorldDefs {
     >::type;
   #endif
 
+  // How should we regulate functions?
   using matchbin_regulator_t =
   #ifdef MATCH_REG
     std::conditional<STRINGVIEWIFY(MATCH_REG) == "add",
@@ -121,10 +130,11 @@ namespace DirSigWorldDefs {
   using config_t = DirSigConfig;
 }
 
+/// Custom hardware component for SignalGP.
 struct DirSigCustomHardware {
-  int response=-1;
-  int response_function_id=-1;
-  bool responded=false;
+  int response=-1;              ///< Organism-set response to environment signal.
+  int response_function_id=-1;  ///< Which function produced the response? Used for data tracking/output.
+  bool responded=false;         ///< Has this organism expressed a response yet?
 
   void Reset() {
     response=-1;
@@ -143,6 +153,8 @@ struct DirSigCustomHardware {
   bool HasResponse() const { return responded; }
 };
 
+/// Directional signal task world definition. Manages the directional signal task evolution experiment.
+/// Derives from Empirical's World class.
 class DirSigWorld : public emp::World<DirSigWorldDefs::org_t> {
 public:
   using tag_t = emp::BitSet<DirSigWorldDefs::TAG_LEN>;
@@ -180,9 +192,9 @@ public:
   /// Environment tracking struct.
   /// Used to track environment state information during an organism's evaluation.
   struct Environment {
-    size_t num_states=0;
-    size_t cur_state=0;
-    tag_t right_env_tag;   ///< Indicates organism should do 'right' response.
+    size_t num_states=0;  ///< How many environmental states are there?
+    size_t cur_state=0;   ///< What is the current environmental state?
+    tag_t right_env_tag;  ///< Indicates organism should do 'right' response.
     tag_t left_env_tag;   ///< Indicates organism should do 'left' response.
 
     void ResetEnv() {
@@ -223,13 +235,12 @@ public:
 
   /// Struct used to track SignalGP hardware state.
   struct HardwareStatePrintInfo {
-    std::string global_mem_str="";
-    size_t num_modules=0;
-    emp::vector<double> module_regulator_states;
-    emp::vector<size_t> module_regulator_timers;
-    // module values here
-    size_t num_active_threads=0;
-    std::string thread_state_str="";
+    std::string global_mem_str="";                ///< String representation of global memory.
+    size_t num_modules=0;                         ///< Number of modules in the program loaded on hardware.
+    emp::vector<double> module_regulator_states;  ///< State of regulation for each module.
+    emp::vector<size_t> module_regulator_timers;  ///< Regulation timer for each module.
+    size_t num_active_threads=0;                  ///< How many active threads are running?
+    std::string thread_state_str="";              ///< String representation of state of all threads.
   };
 
 protected:
@@ -272,18 +283,18 @@ protected:
   size_t SCREEN_RESOLUTION;
   size_t SNAPSHOT_RESOLUTION;
 
-  Environment eval_environment;
+  Environment eval_environment;           ///< Tracks the environment during evaluation.
 
-  emp::vector<emp::BitVector> possible_dir_sequences;
-  emp::vector<size_t> dir_seq_ids;
+  emp::vector<emp::BitVector> possible_dir_sequences; ///< All possible sequences of signals, each stored as a bitstring.
+  emp::vector<size_t> dir_seq_ids;                    ///< Indices into possible_dir_sequences
 
   bool setup = false;
   emp::Ptr<inst_lib_t> inst_lib;            ///< Manages SignalGP instruction set.
   emp::Ptr<event_lib_t> event_lib;          ///< Manages SignalGP events.
   emp::Ptr<mutator_t> mutator;
 
-  size_t event_id__left_env_sig;
-  size_t event_id__right_env_sig;
+  size_t event_id__left_env_sig;             ///< Event library ID for left/previous environment signal.
+  size_t event_id__right_env_sig;            ///< Event library ID for right/next environment signal.
   emp::Ptr<hardware_t> eval_hardware;        ///< Used to evaluate programs.
   emp::vector<phenotype_t> trial_phenotypes; ///< Used to track phenotypes across organism evaluation trials.
 
@@ -297,42 +308,66 @@ protected:
   size_t max_fit_org_id=0;
   bool found_solution=false;
 
-  emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;
+  emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;  ///< Manages fitness functions if we're doing lexicase selection.
 
-  bool KO_REGULATION=false;
-  bool KO_UP_REGULATION=false;
-  bool KO_DOWN_REGULATION=false;
-  bool KO_GLOBAL_MEMORY=false;
+  bool KO_REGULATION=false;       ///< Is regulation knocked out right now?
+  bool KO_UP_REGULATION=false;    ///< Is up-regulation knocked out right now?
+  bool KO_DOWN_REGULATION=false;  ///< Is down-regulation knocked out right now?
+  bool KO_GLOBAL_MEMORY=false;    ///< Is global memory access knocked out right now?
 
+  /// Localize configuration parameters from input config object.
   void InitConfigs(const config_t & config);
+  /// Initialize the instruction library.
   void InitInstLib();
+  /// Initialize the event library.
   void InitEventLib();
+  /// Initialize the SignalGP virtual hardware used to evaluate programs.
   void InitHardware();
+  /// Initialize the environment (e.g., generate environment tag, etc).
   void InitEnvironment();
+  /// Initialize and configure the mutator utility.
   void InitMutator();
+  /// Initialize and configure data collection.
   void InitDataCollection();
 
+  /// Initialize the population.
   void InitPop();
+  /// Initialize the population with randomly generated programs.
   void InitPop_Random();
+  /// Initialize the population with a hardcoded program. This is primarily used for debugging.
   void InitPop_Hardcoded();
 
+  /// Evaluate the entire population.
   void DoEvaluation();
+  /// Select parents for the next generation.
   void DoSelection();
+  /// Move from one generation to the next.
   void DoUpdate();
 
+  /// Evaluate org_t org on directional signal task.
   void EvaluateOrg(org_t & org);
 
+  /// Monster function that runs analyses on given organisms.
+  /// - e.g., knockout experiments, traces, etc
   void AnalyzeOrg(const org_t & org, size_t org_id=0);
+  /// Extract and output the execution trace of the given organism.
   void TraceOrganism(const org_t & org, size_t org_id=0);
+  /// Screen given organism on ALL possible environment signal sequences to check if it is a solution.
   bool ScreenSolution(const org_t & org);
-  HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
 
   // -- Utilities --
+  /// Output a snapshot of the current population.
   void DoPopulationSnapshot();
+  /// Output a snapshot of the world's configuration.
   void DoWorldConfigSnapshot(const config_t & config);
+  /// Output utility - stream a given program on a single line to ostream.
   void PrintProgramSingleLine(const program_t & prog, std::ostream & out);
+  /// Output utility - stream a given function on a single line to ostream.
   void PrintProgramFunction(const program_function_t & func, std::ostream & out);
+  /// Output utility - stream a given instruction on a single line to ostream.
   void PrintProgramInstruction(const inst_t & inst, std::ostream & out);
+  /// Output utility - extract hardware state information from given SignalGP virtual hardware.
+  HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
 
 public:
 
@@ -436,7 +471,6 @@ void DirSigWorld::InitInstLib() {
   inst_lib->AddInst("Routine", sgp::lfp_inst_impl::Inst_Routine<hardware_t, inst_t>, "");
   inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t,
                                                             std::ratio<1>, std::ratio<-1>>, "");
-
   // If we can use global memory, give programs access. Otherwise, nops.
   if (USE_GLOBAL_MEMORY) {
     inst_lib->AddInst("WorkingToGlobal", [this](hardware_t & hw, const inst_t & inst) {
@@ -450,9 +484,7 @@ void DirSigWorld::InitInstLib() {
     inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
   }
 
-  // if (allow regulation)
   // If we can use regulation, add instructions. Otherwise, nops.
-  // auto handle_ko_wrapper
   if (USE_FUNC_REGULATION) {
     inst_lib->AddInst("SetRegulator", [this](hardware_t & hw, const inst_t & inst) {
       if (KO_REGULATION) {
@@ -642,7 +674,7 @@ void DirSigWorld::InitInstLib() {
 void DirSigWorld::InitEventLib() {
   if (!setup) event_lib = emp::NewPtr<event_lib_t>();
   event_lib->Clear();
-  // Setup event: EnvSignal
+  // Setup event: LeftSignal, RightSignal
   // Args: name, handler_fun, dispatchers, desc
   event_id__left_env_sig = event_lib->AddEvent("LeftSignal",
                                           [this](hardware_t & hw, const base_event_t & e) {
@@ -692,7 +724,6 @@ void DirSigWorld::InitEnvironment() {
   //                   ++n;
   //               });
   // BitVector::SetUInt seems broken, so I'll just brute force this...
-  // std::cout << "Possible lr environment direction sequences:" << std::endl;
   size_t strip_size = 1;
   bool val = false;
   size_t counter = 0;
