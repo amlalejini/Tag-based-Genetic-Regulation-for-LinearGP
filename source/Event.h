@@ -10,7 +10,8 @@
 // SignalGP includes
 #include "hardware/SignalGP/impls/SignalGPLinearFunctionsProgram.h"
 
-/// Custom Event type!
+/// Basic event type!
+/// - Just contains a tag.
 template<size_t W>
 struct Event : public sgp::BaseEvent {
   using tag_t = emp::BitSet<W>;
@@ -29,7 +30,8 @@ struct Event : public sgp::BaseEvent {
   }
 };
 
-/// Custom Event type!
+/// Message event type
+/// - contains a tag and data
 template<size_t W>
 struct MessageEvent : public Event<W> {
   using tag_t = typename Event<W>::tag_t;
