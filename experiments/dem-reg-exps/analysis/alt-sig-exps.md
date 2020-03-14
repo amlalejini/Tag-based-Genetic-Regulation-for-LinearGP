@@ -15,7 +15,8 @@ output:
 
 ## Dependencies
 
-```{r, message=FALSE}
+
+```r
 library(tidyr)    # (Wickham & Henry, 2018)
 library(ggplot2)  # (Wickham, 2009)
 library(plyr)     # (Wickham, 2011)
@@ -26,7 +27,8 @@ library(cowplot)  # (Wilke, 2018)
 
 ## Load and clean data
 
-```{r}
+
+```r
 data_loc <- "../data/alt_sig_max_fit.csv"
 data <- read.csv(data_loc, na.strings="NONE")
 
@@ -63,7 +65,8 @@ Note that:
 - none = access to neither regulation or global memory
 - both = access to both regulation and global memory
 
-```{r}
+
+```r
 ggplot(data, aes(x=condition, y=score)) +
   geom_boxplot() +
   scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
@@ -72,9 +75,12 @@ ggplot(data, aes(x=condition, y=score)) +
   ggsave("dem-reg-alt-sig-scores.png", width=16, height=8)
 ```
 
+![](alt-sig-exps_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 Task solution counts by environment & treatment
 
-```{r}
+
+```r
 ggplot(data, aes(x=condition, y=solution, fill=condition)) +
   geom_bar(stat="identity") +
   ylim(0, 50) +
@@ -83,5 +89,7 @@ ggplot(data, aes(x=condition, y=solution, fill=condition)) +
   facet_wrap(~ NUM_SIGNAL_RESPONSES) +
   ggsave("dem-reg-alt-sig-solutions.png", width=16, height=8)
 ```
+
+![](alt-sig-exps_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 We can see that conditions with access to regulation outperform (produce more successful programs) conditions without access to regulation. The global-memory-only condition is only successful in the simplest environment (the two-signal environment).
