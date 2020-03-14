@@ -5,6 +5,20 @@ experiments. For a broad overview of SignalGP, see [(Lalejini and Ofria, 2018)](
 
 For DISHTINY SignalGP details, see DISHTINY docs.
 
+**Navigation**
+<!-- TOC -->
+
+- [Memory model](#memory-model)
+- [Mutation operators](#mutation-operators)
+- [Instruction Set](#instruction-set)
+  - [Default Instructions](#default-instructions)
+  - [Global memory access instructions](#global-memory-access-instructions)
+  - [Regulation instructions](#regulation-instructions)
+  - [Task-specific instructions](#task-specific-instructions)
+- [References](#references)
+
+<!-- /TOC -->
+
 ## Memory model
 
 SignalGP digital organisms have four types of memory buffers with which to carry out computations:
