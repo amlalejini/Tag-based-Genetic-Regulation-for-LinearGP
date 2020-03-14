@@ -17,6 +17,8 @@
 
 ## Script descriptions
 
+Please excuse the haste in which many of these scripts were written...
+
 ### Data aggregation scripts
 
 Scripts for aggregrating data from completed jobs (submitted using the slurm scripts in [../hpcc/](../hpcc/)):
