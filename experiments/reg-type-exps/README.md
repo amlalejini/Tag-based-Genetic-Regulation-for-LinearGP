@@ -17,3 +17,5 @@ Goal: decide which regulation type to use going forward: additive vs. multiplica
 
 Results: negligible difference between multiplicative and additive regulation. Going forward, we'll
 use multiplicative.
+
+See data analyses here: [./analysis/reg-type-exps.html]
