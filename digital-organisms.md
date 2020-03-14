@@ -7,7 +7,58 @@ For DISHTINY SignalGP details, see DISHTINY docs.
 
 ## Memory model
 
-TODO
+SignalGP digital organisms have four types of memory buffers with which to carry out computations:
+
+- Working (register) memory
+  - Call-local (* thread-local) memory.
+  - Memory used by the majority of computation instructions.
+- Input memory
+  - Call-local (& thread-local) memory.
+  - Read-only.
+  - This memory is used to specify function call arguments. When a function is called on a thread (i.e.,
+    a call instruction is executed), the caller's working memory is copied into the input memory of
+    the new call-state, which is created on top of the thread's call stack.
+  - Programs must execute explicit instructions to read from the input memory buffer (into the working
+    memory buffer).
+- Output memory
+  - Call-local (& thread-local) memory.
+  - Write-only.
+  - This memory is used to specify the return values of a function call.
+  - When a function returns to the previous call-state (i.e., the one just below it on the thread's
+    call stack), positions that were set in the output buffer are returned to the caller's working memory
+    buffer.
+  - Programs must execute explicit instructions to write to the output memory buffer (from the working
+    memory buffer).
+- Global memory
+  - This memory buffer is shared by all executing threads. Threads must use explicit instructions
+    (`GlobalToWorking` or `WorkingToGlobal`) to access it.
+
+These are described in more detail in [(Lalejini and Ofria, 2018)](https://doi.org/10.1145/3205455.3205523).
+
+Memory buffers are implemented as integer => double maps.
+
+## Mutation operators
+
+- Single-instruction insertions
+  - Applied per instruction
+- Single-instruction deletions
+  - Applied per instruction
+- Single-instruction substitutions
+  - Applied per instruction
+- Single-argument substitutions
+  - Applied per argument
+- Slip mutations [(Lalejini et al., 2017)](https://doi.org/10.7551/ecal_a_045)
+  - Applied at a per-function rate.
+  - Pick two random positions in function's instructions sequence: A and B
+  - If A < B: duplicate sequence from A to B
+  - If A > B: delete sequence from A to B
+- Single-function duplications
+  - Applied per-function
+- Single-function deletions
+  - Applied per-function
+- Tag bit flips
+  - Applied at a per-bit rate
+  - (applies to both instruction- and function-tags)
 
 ## Instruction Set
 
@@ -92,14 +143,14 @@ can still up-regulate a function that was previously 'turned off' with down-regu
 
 | Instruction | Arguments Used | Description |
 | :--- | :---: | :--- |
-| `SetRegulator` | 1 | |
-| `SetRegulator-` | 1 | |
-| `SetOwnRegulator` | 1 | |
-| `SetOwnRegulator-` | 1 | |
-| `AdjRegulator` | 1 | |
-| `AdjRegulator-` | 1 | |
-| `AdjOwnRegulator` | 1 | |
-| `AdjOwnRegulator-` | 1 | |
+| `SetRegulator` | 1 | Set regulation value of function (targeted with instruction tag) to Reg[0]. |
+| `SetRegulator-` | 1 | Set regulation value of function (targeted with instruction tag) to -1 * Reg[0]. |
+| `SetOwnRegulator` | 1 | Set regulation value of function (currently executing) to Reg[0].|
+| `SetOwnRegulator-` | 1 | Set regulation value of function (currently executing) to -1 * Reg[0]. |
+| `AdjRegulator` | 1 | Regulation value of function (targeted with instruction tag) += Reg[0] |
+| `AdjRegulator-` | 1 | Regulation value of function (targeted with instruction tag) -= Reg[0] |
+| `AdjOwnRegulator` | 1 | Regulation value of function (currently executing) += Reg[0] |
+| `AdjOwnRegulator-` | 1 | Regulation value of function (currently executing) -= Reg[0] |
 | `ClearRegulator` | 0 | Clear function regulation (reset to neutral) of function targeted by instruction's tag. |
 | `ClearOwnRegulator` | 0 | Clear function regulation (reset to neutral) of currently executing function |
 | `SenseRegulator` | 1 | Reg[0] = regulator state of function targeted by instruction tag |
@@ -119,3 +170,5 @@ threads such that only function regulation and global memory contents persist.
 ## References
 
 Lalejini, A., & Ofria, C. (2018). Evolving event-driven programs with SignalGP. Proceedings of the Genetic and Evolutionary Computation Conference on - GECCO ’18, 1135–1142. https://doi.org/10.1145/3205455.3205523
+
+Lalejini, A., Wiser, M. J., & Ofria, C. (2017). Gene duplications drive the evolution of complex traits and regulation. Proceedings of the 14th European Conference on Artificial Life ECAL 2017, 257–264. https://doi.org/10.7551/ecal_a_045
