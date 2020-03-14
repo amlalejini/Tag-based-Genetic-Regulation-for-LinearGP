@@ -1,5 +1,7 @@
 # Experiment - Demonstrating Function Regulation in SignalGP
 
+## Experiments
+
 Hypothesis:
 
 - Regulation is valuable in alternativing signal environment and multi-cell development environment. Regulation is not necessary (but not harmful) in simple changing environment.
@@ -49,3 +51,11 @@ Environments:
       - Mutation rates - (same as reg-type-exps)
       - NUM_SIGNAL_RESPONSES (num envs) - 2, 4, 8, 16, 32
       - Organism Functionality - Regulation only, Memory only, Memory + Regulation, No memory + No regulation
+
+## Results
+
+See data analyses for each task:
+
+- [Repeated signal task/alternating signal environment](./analysis/alt-sig-exps.html)
+- [Changing signal task/simple changing environment](./analysis/chg-env-exps.html)
+- [Multicellular differentiation task/multi-cell regulation environment](./analysis/mc-reg-exps.html)
