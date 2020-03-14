@@ -1,5 +1,5 @@
 ---
-title: "Demonstrating Genetic Regulation in SignalGP - Repeated Signal Task"
+title: "Demonstrating Genetic Regulation in SignalGP - Changing Signal Task"
 output: 
   html_document: 
     keep_md: yes
@@ -15,7 +15,8 @@ output:
 
 ## Dependencies
 
-```{r, message=FALSE}
+
+```r
 library(tidyr)    # (Wickham & Henry, 2018)
 library(ggplot2)  # (Wickham, 2009)
 library(plyr)     # (Wickham, 2011)
@@ -23,16 +24,16 @@ library(dplyr)    # (Wickham et al., 2018)
 library(cowplot)  # (Wilke, 2018)
 ```
 
-
 ## Load and clean data
 
-```{r}
-data_loc <- "../data/alt_sig_max_fit.csv"
+
+```r
+data_loc <- "../data/chg_env_max_fit.csv"
 data <- read.csv(data_loc, na.strings="NONE")
 
 data$matchbin_thresh <- factor(data$matchbin_thresh,
                                      levels=c(0, 25, 50, 75))
-data$NUM_SIGNAL_RESPONSES <- factor(data$NUM_SIGNAL_RESPONSES,
+data$NUM_ENV_STATES <- factor(data$NUM_ENV_STATES,
                                      levels=c(2, 4, 8, 16, 32))
 
 get_con <- function(reg, mem) {
@@ -52,36 +53,29 @@ data$condition <- mapply(get_con, data$USE_FUNC_REGULATION, data$USE_GLOBAL_MEMO
 data$condition <- factor(data$condition, levels=c("regulation", "memory", "none", "both"))
 ```
 
-## Performance across environmental complexities
+## Task performance by condition
 
-Task scores by environment & treatment
 
-Note that:
-
-- reg. = regulation-only condition
-- mem. = global-memory-only condition
-- none = access to neither regulation or global memory
-- both = access to both regulation and global memory
-
-```{r}
+```r
 ggplot(data, aes(x=condition, y=score)) +
   geom_boxplot() +
-  scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
-                   labels=c("reg.", "mem.", "none", "both")) +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES, scales="free_y") +
-  ggsave("dem-reg-alt-sig-scores.png", width=16, height=8)
+  facet_wrap(~ NUM_ENV_STATES, scales="free_y") +
+  ggsave("dem-reg-chg-env-scores.png", width=16, height=8)
 ```
 
-Task solution counts by environment & treatment
+![](chg-env-exps_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
-```{r}
+
+```r
 ggplot(data, aes(x=condition, y=solution, fill=condition)) +
   geom_bar(stat="identity") +
   ylim(0, 50) +
-  scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
-                 labels=c("reg.", "mem.", "none", "both")) +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES) +
-  ggsave("dem-reg-alt-sig-solutions.png", width=16, height=8)
+  facet_wrap(~ NUM_ENV_STATES) +
+  ggsave("dem-reg-chg-env-solutions.png", width=16, height=8)
 ```
 
-We can see that conditions with access to regulation outperform (produce more successful programs) conditions without access to regulation. The global-memory-only condition is only successful in the simplest environment (the two-signal environment).
+![](chg-env-exps_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+From the above graphs, we can see that solutions evolve in every replicate of every condition. However, these are categorized as solutions based on a single (random) sequence of environmental signals.
+
+Do all of these programs generalize to all possible sequences? Stay tuned and find out! To answer this, we added more organism analyses to the changing signal experiment to test each evolved 'solution' on a random sample of environment sequences to evaluate how well it generalizes.

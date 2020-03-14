@@ -1,5 +1,5 @@
 ---
-title: "Demonstrating Genetic Regulation in SignalGP - Alternating Signal Environment"
+title: "Demonstrating Genetic Regulation in SignalGP - Repeated Signal Task"
 output: 
   html_document: 
     keep_md: yes
