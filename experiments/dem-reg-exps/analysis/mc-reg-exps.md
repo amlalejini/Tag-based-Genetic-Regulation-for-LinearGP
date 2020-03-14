@@ -15,7 +15,8 @@ output:
 
 ## Dependencies
 
-```{r, message=FALSE}
+
+```r
 library(tidyr)    # (Wickham & Henry, 2018)
 library(ggplot2)  # (Wickham, 2009)
 library(plyr)     # (Wickham, 2011)
@@ -25,7 +26,8 @@ library(cowplot)  # (Wilke, 2018)
 
 # Load data
 
-```{r}
+
+```r
 data_loc <- "../data/mc_reg_final_org.csv"
 data <- read.csv(data_loc, na.strings="NONE")
 
@@ -63,7 +65,8 @@ Multicell scores by maximum multicell size and by SignalGP variant.
 - both = both global memory access and regulation
 - none = neighter global memory access nor regulation
 
-```{r}
+
+```r
 ggplot(filter(data), aes(x=condition, y=score)) +
   geom_boxplot() +
   scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
@@ -72,11 +75,14 @@ ggplot(filter(data), aes(x=condition, y=score)) +
   ggsave("dem-reg-mc-scores.png", width=16, height=8)
 ```
 
+![](mc-reg-exps_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 For this, we can see that conditions with access to regulation fare much better than those without regulation.
 
 For these runs, there was no selection pressure for the arrangement of responses. Multicells were categorized as a solution simply if (1) all cells in the multicell were active and (2) the cells collectively produced N of each of N types of responses. Thus, all cells needed to give a response and coordinate such that an equal number of each response was collectively expressed.
 
-```{r}
+
+```r
 ggplot(filter(data, EPIGENETIC_INHERITANCE=="0"), aes(x=condition, y=solution, fill=condition)) +
   geom_bar(stat="identity") +
   ylim(0, 50) +
@@ -85,5 +91,7 @@ ggplot(filter(data, EPIGENETIC_INHERITANCE=="0"), aes(x=condition, y=solution, f
                  labels=c("reg.", "mem.", "none", "both")) +
   ggsave("dem-reg-mc-solutions.png", width=16, height=8)
 ```
+
+![](mc-reg-exps_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 No replicates solve the 10x10 multicell task. The global memory-only condition only produces solutions in the 1x2 multicell size. Note that we only ran 30 replicates of each condition in the simplest multicell size (1x2), and we ran 50 replicates of each condition in the other two multicell sizes (5x5 and 10x10).
