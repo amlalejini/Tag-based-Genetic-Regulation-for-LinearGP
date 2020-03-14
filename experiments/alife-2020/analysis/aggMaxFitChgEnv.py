@@ -25,12 +25,10 @@ key_settings = [
     "MAX_FUNC_INST_CNT",
     "MAX_ACTIVE_THREAD_CNT",
     "MAX_THREAD_CAPACITY",
-    "TOURNAMENT_SIZE"
+    "TOURNAMENT_SIZE",
+    "INST_MIN_ARG_VAL",
+    "INST_MAX_ARG_VAL"
 ]
-
-possible_metrics = ["hamming", "streak", "symmetric wrap", "hash"]
-possible_selectors = ["ranked"]
-possible_regulators = ["add", "mult"]
 
 """
 This is functionally equivalent to the mkdir -p [fname] bash command
@@ -118,6 +116,7 @@ def main():
         # these find functions will crash
         org_analysis_path = find_org_analysis_path(run, update if update >= 0 else None)
         org_trace_path = find_trace_path(run, update if update >= 0 else None)
+        max_fit_path = os.path.join(run, "output", "max_fit_org.csv")
         if not os.path.exists(run_config_path):
             print(f"Failed to find run parameters ({run_config_path})")
             exit(-1)
@@ -127,8 +126,8 @@ def main():
         if analysis_update != trace_update:
             print(f"Analysis file and trace file updates do not match: \n  * {analysis_update}\n  * {trace_update}\n")
             exit(-1)
-        analysis_id = org_analysis_path.split("/")[-1].strip("analysis_org_").split()
-        trace_id = org_trace_path.split("/")[-1].strip("trace_org_").split()
+        analysis_id = org_analysis_path.split("/")[-1].split("org_")[-1].split("_")[0]
+        trace_id = org_trace_path.split("/")[-1].split("org_")[-1].split("_")[0]
         if analysis_id != trace_id:
             print(f"Analysis file and trace file updates do not match: \n  * {analysis_id}\n  * {trace_id}\n")
             exit(-1)
@@ -138,40 +137,102 @@ def main():
 
         # ========= extract analysis file info =========
         content = None
+        with open(max_fit_path, "r") as fp:
+            content = fp.read().strip().split("\n")
+        max_fit_header = content[0].split(",")
+        max_fit_header_lu = {max_fit_header[i].strip():i for i in range(0, len(max_fit_header))}
+        content = content[1:]
+        orgs = [l for l in csv.reader(content, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)]
+        max_fit_org = orgs[-1]
+        max_fit_id = max_fit_org[max_fit_header_lu["pop_id"]]
+        if max_fit_id != analysis_id:
+            print("Max fit id: ", max_fit_id)
+            print("Analysis id: ", analysis_id)
+            print("Something's gone WRONG!")
+            exit(-1)
+
+        # Fields to collect from max fit file.
+        max_fit_vals = {
+            "update": max_fit_org[max_fit_header_lu["update"]],
+            "solution": max_fit_org[max_fit_header_lu["solution"]],
+            "score": max_fit_org[max_fit_header_lu["score"]],
+            "num_matches": max_fit_org[max_fit_header_lu["num_matches"]],
+            "num_misses": max_fit_org[max_fit_header_lu["num_misses"]],
+            "num_no_responses": max_fit_org[max_fit_header_lu["num_no_responses"]]
+        }
+        max_fit_fields = ["update","solution","score","num_matches","num_misses","num_no_responses"]
+
+        # ========= extract analysis file info =========
+        content = None
         with open(org_analysis_path, "r") as fp:
             content = fp.read().strip().split("\n")
         analysis_header = content[0].split(",")
         analysis_header_lu = {analysis_header[i].strip():i for i in range(0, len(analysis_header))}
         content = content[1:]
-        orgs = [l for l in csv.reader(content, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)]
-        org = orgs[-1]
+        analysis_orgs = [l for l in csv.reader(content, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)]
 
-        # -- collect extra fields --
-        base_score = float(org[analysis_header_lu["score"]])
-        ko_reg_score = float(org[analysis_header_lu["score_ko_regulation"]])
-        ko_gmem_score = float(org[analysis_header_lu["score_ko_global_memory"]])
-        ko_all_score = float(org[analysis_header_lu["score_ko_all"]])
-        use_regulation = int(ko_reg_score < base_score)
-        use_global_memory = int(ko_gmem_score < base_score)
-        use_either = int(ko_all_score < base_score)
-        ko_reg_delta = base_score - ko_reg_score
-        ko_global_mem_delta = base_score - ko_gmem_score
-        ko_all_delta = base_score - ko_all_score
-        extra_fields = ["relies_on_regulation", "relies_on_global_memory", "relies_on_either",
-                        "ko_regulation_delta", "ko_global_memory_delta", "ko_all_delta"]
-        extra_values = [use_regulation, use_global_memory, use_either,
-                        ko_reg_delta, ko_global_mem_delta, ko_all_delta]
+        num_analyses = len(analysis_orgs)
+        num_analysis_solutions = 0
+        num_analysis_solutions_ko_reg = 0
+        num_analysis_solutions_ko_mem = 0
+        num_analysis_solutions_ko_all = 0
 
-        analysis_header_set.add(",".join([key for key in key_settings] + extra_fields + analysis_header))
+        solution_score = float(run_settings["NUM_ENV_UPDATES"])
+
+        all_solution = True
+        all_solution_ko_reg = True
+        all_solution_ko_mem = True
+        all_solution_ko_all = True
+
+        for analysis_org in analysis_orgs:
+            org_info = { analysis_header[i]:analysis_org[i] for i in range(0, len(analysis_org)) }
+            base_score = float(org_info["score"])
+            ko_reg_score = float(org_info["score_ko_regulation"])
+            ko_mem_score = float(org_info["score_ko_global_memory"])
+            ko_all_score = float(org_info["score_ko_all"])
+
+            is_sol = base_score >= solution_score
+            ko_reg_is_sol = ko_reg_score >= solution_score
+            ko_mem_is_sol = ko_mem_score >= solution_score
+            ko_all_is_sol = ko_all_score >= solution_score
+
+            if (is_sol):
+                num_analysis_solutions += 1
+            else:
+                all_solution = False
+            if (ko_reg_is_sol):
+                num_analysis_solutions_ko_reg += 1
+            else:
+                all_solution_ko_reg = False
+            if (ko_mem_is_sol):
+                num_analysis_solutions_ko_mem += 1
+            else:
+                all_solution_ko_mem = False
+            if (ko_all_is_sol):
+                num_analysis_solutions_ko_all += 1
+            else:
+                all_solution_ko_all = False
+        # end analysis file for loop
+        analysis_vals = {
+            "num_analyses": num_analyses,
+            "num_analysis_solutions": num_analysis_solutions,
+            "num_analysis_solutions_ko_reg": num_analysis_solutions_ko_reg,
+            "num_analysis_solutions_ko_mem": num_analysis_solutions_ko_mem,
+            "num_analysis_solutions_ko_all": num_analysis_solutions_ko_all,
+            "all_solution": int(all_solution),
+            "all_solution_ko_reg": int(all_solution_ko_reg),
+            "all_solution_ko_mem": int(all_solution_ko_mem),
+            "all_solution_ko_all": int(all_solution_ko_all)
+        }
+        analysis_fields=["num_analyses","num_analysis_solutions","num_analysis_solutions_ko_reg","num_analysis_solutions_ko_mem","num_analysis_solutions_ko_all","all_solution","all_solution_ko_reg","all_solution_ko_mem","all_solution_ko_all"]
+
+        analysis_header_set.add(",".join([key for key in key_settings] + max_fit_fields + analysis_fields))
         if len(analysis_header_set) > 1:
             print(f"Header mismatch! ({org_analysis_path})")
             exit(-1)
-        # surround things in quotes that need it
-        org[analysis_header_lu["program"]] = "\"" + org[analysis_header_lu["program"]] + "\""
-        # num_modules = int(org[analysis_header_lu["num_modules"]])
-        # org_update = int(org[analysis_header_lu["update"]])
-        # append csv line (as a list) for analysis orgs
-        analysis_org_infos.append([run_settings[key] for key in key_settings] + extra_values + org)
+        # # surround things in quotes that need it
+        # org[analysis_header_lu["program"]] = "\"" + org[analysis_header_lu["program"]] + "\""
+        analysis_org_infos.append([run_settings[key] for key in key_settings] + [max_fit_vals[field] for field in max_fit_fields] + [analysis_vals[field] for field in analysis_fields])
 
     # Output analysis org infos
     out_content = list(analysis_header_set)[0] + "\n" # Should be guaranteed to be length 1!
