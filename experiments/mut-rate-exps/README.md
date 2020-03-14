@@ -1,5 +1,8 @@
 # Mutation Rate Experiments
 
+DISCLAIMER: the underlying source code has changed since running these exploratory experiments, as such
+the data aggregation script and configuration files may not work with the current C++ implementations.
+
 Goal: small sweep of mutation rates for tags for several different tag matching
 metrics.
 
