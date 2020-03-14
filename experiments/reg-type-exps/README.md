@@ -11,3 +11,6 @@ Goal: decide which regulation type to use going forward: additive vs. multiplica
   - NUM_ENV_CYCLES: 2*NUM_SIGNAL_RESPONSES
 - Replicates? 30
 - Regulation types: multiplicative, additive
+
+Results: negligible difference between multiplicative and additive regulation. Going forward, we'll
+use multiplicative.
