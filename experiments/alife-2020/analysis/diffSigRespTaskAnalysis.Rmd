@@ -1,5 +1,5 @@
 ---
-title: "Demonstrating Genetic Regulation in SignalGP - Analysis - Differentiated Signal Response Task"
+title: "Differentiated Signal Response Task"
 output: 
   html_document: 
     keep_md: no
@@ -34,7 +34,7 @@ library(tidyr)
 Load data, initial data cleanup, global settings.
 
 ```{r}
-data_loc <- "../data/mc-reg/max_fit_1500.csv"
+data_loc <- "../data/mc-reg/max_fit_orgs.csv"
 data <- read.csv(data_loc, na.strings="NONE")
 data <- subset(data, select = -c(program))
 
@@ -44,7 +44,7 @@ data$matchbin_thresh <- factor(data$matchbin_thresh,
 
 data$TAG_LEN <- factor(data$TAG_LEN,
                        levels=c(32, 64, 128))
-
+data$DEME_SIZE <- data$DEME_HEIGHT*data$DEME_WIDTH
 data$relies_on_reg <- factor(data$relies_on_reg, levels=c(0, 1))
 data$relies_on_mem <- factor(data$relies_on_mem, levels=c(0, 1))
 data$relies_on_msg <- factor(data$relies_on_msg, levels=c(0, 1))
@@ -73,13 +73,12 @@ data$stochastic <- 1 - data$consistent # Does this program rely on a stochastic 
 # Settings for statistical analyses.
 alpha <- 0.05
 correction_method <- "bonferroni"
+theme_set(theme_cowplot())
 ```
 
-## fitness
+## Multicell Fitness
 
-### scores by condition
-
-Here, we give the raw task scores for the highest-fitness organism from each run across all environments/conditions.
+Here, we give the raw task scores (log scale) for the highest-fitness organism from each run across all environments/conditions. Note that the axes are different for each multicell size.
 
 ```{r}
 # From: https://stackoverflow.com/questions/23901907/create-a-log-sequence-across-multiple-orders-of-magnitude
@@ -96,37 +95,46 @@ ggplot(data, aes(x=condition, y=score, color=condition)) +
                    labels=c("Regulation", "Global Memory", "Neither", "Both")) +
   scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
                    labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
-  scale_y_continuous(trans="log", limits=c(1, 1e+20), breaks=c(lseq(1, 1e+20, 5))) +
+  scale_y_continuous(trans="log") +
   theme(legend.position="none") +
+  facet_wrap(~DEME_SIZE, scales="free") +
   ggsave("./imgs/mc-reg-scores.png", width=16,height=8)
 ```
 
-### What do multi-cells rely on to differentiate cell responses?
+## What do multi-cells rely on to differentiate cell responses?
+
+### Multicell size = 10x10
+
+Maximum of 100 cells per multicell and 10 possible responses.
 
 ```{r}
-reg_data <- filter(data, condition=="both")
+reg_data <- filter(data, condition=="both" & DEME_SIZE==100)
 
 msg_p <- ggplot(reg_data, aes(x=relies_on_msg, fill=relies_on_msg)) +
             geom_bar() +
-            ylim(0, 50) +
+            geom_text(stat='count', aes(label=..count..), vjust=-.1) +
+            ylim(0, 55) +
             ggtitle("Relies on messaging?") +
             theme(legend.position="none",axis.title.x=element_blank())
 
 imp_p <- ggplot(reg_data, aes(x=relies_on_imprinting, fill=relies_on_imprinting)) +
             geom_bar() +
-            ylim(0, 50) +
+            geom_text(stat='count', aes(label=..count..), vjust=-.1) +
+            ylim(0, 55) +
             ggtitle("Relies on imprinting?") +
             theme(legend.position="none",axis.title.x=element_blank())
 
 tag_p <- ggplot(reg_data, aes(x=relies_on_repro_tag, fill=relies_on_repro_tag)) +
             geom_bar() +
-            ylim(0, 50) +
+            geom_text(stat='count', aes(label=..count..), vjust=-.1) +
+            ylim(0, 55) +
             ggtitle("Relies on reproduction tags?") +
             theme(legend.position="none",axis.title.x=element_blank())
 
 reg_p <- ggplot(reg_data, aes(x=relies_on_reg, fill=relies_on_reg)) +
             geom_bar() +
-            ylim(0, 50) +
+            geom_text(stat='count', aes(label=..count..), vjust=-.1) +
+            ylim(0, 55) +
             ggtitle("Relies on regulation?") +
             scale_x_discrete(limits=c("0", "1"), labels=c("0", "1")) +
             theme(legend.position="none",axis.title.x=element_blank())
@@ -134,10 +142,41 @@ reg_p <- ggplot(reg_data, aes(x=relies_on_reg, fill=relies_on_reg)) +
 
 grid <- plot_grid(reg_p,msg_p,tag_p,imp_p, labels = c('A', 'B', 'C', 'D'), label_size = 12)
 print(grid)
-save_plot("./imgs/multi-cell-differentiation-strategy.png", grid, base_height=6, base_width=8)
+save_plot("./imgs/multi-cell-differentiation-strategy-10x10.png", grid, base_height=6, base_width=8)
 ```
 
-What are the fitnesses of demes that relies on each strategy?
+Takeaways:
+
+- We can see that all evolved genotypes from this condition rely on regulation. 
+- The majority of genotypes rely on messaging and reproduction tags (i.e., allowing parents to control the 'start' tag for their offspring). 
+- About half of the genotypes rely on function regulation imprinting, but a majority do not.
+
+What is the strategy breakdown (in more detail)? 
+
+Each genotype may rely on multiple coordination strategies (i.e., messaging, imprinting, reproduction tags, etc) simultaneously. Here, we use a euler diagram to give a more detailed breakdown of coordination strategies.
+
+```{r}
+usage_data <- filter(data, condition=="both" & DEME_SIZE==100)
+usage_data <- subset(usage_data, select=c(relies_on_msg,relies_on_imprinting,relies_on_repro_tag,relies_on_mem))
+usage_data$msg <- usage_data$relies_on_msg == "1"
+usage_data$repro_tag <- usage_data$relies_on_repro_tag == "1"
+usage_data$imprinting <- usage_data$relies_on_imprinting == "1"
+usage_data$mem <- usage_data$relies_on_mem == "1"
+usage_data$none <- !usage_data$msg & !usage_data$repro_tag & !usage_data$imprinting & !usage_data$mem
+usage_data <- subset(usage_data, select=c(msg, repro_tag, imprinting, mem, none))
+euler(usage_data)
+e <- plot(euler(usage_data), legend=TRUE)
+save_plot("./imgs/multicell-strategies-breakdown-10x10.png", e, base_width=4, base_height=4)
+e
+```
+
+Takeaways:
+
+- 1 genotype uses a 'none' strategy. I.e., it uses none of the available _explicit_ mechanisms for coordination. My hypothesis is that this genotype is exploiting the timing of the development phase of this experiment. Cell births that occur later during development have fewer time steps to execute than cells born early during development, allowing multicells to leverage relative execution timing to differentiate.
+- The most common combination of mechanisms (18) uses all three of: messaging, reproduction tags, and regulation imprinting for differentiation
+- The second-most-common combination of mechanisms (14) uses messaging and reproduction tag control.
+
+What does fitness look like for genotypes relying on different mechanisms?
 
 ```{r}
 ggplot(reg_data, aes(x=relies_on_repro_tag, y=score, fill=relies_on_repro_tag)) +
@@ -153,21 +192,85 @@ ggplot(reg_data, aes(x=relies_on_msg, y=score, fill=relies_on_msg)) +
   geom_boxplot()
 ```
 
-What is the strategy breakdown (in more detail)?
+Not sure we can read much into these fitness differentials. A few issues here (nont balanced sets, strategies rely on more than one mechanisms, etc).
+
+### Multicell size = 20x20
+
+Maximum of 400 cells per multicell, 20 possible cellular responses.
 
 ```{r}
-usage_data <- filter(data, condition=="both")
-usage_data <- subset(usage_data, select=c(relies_on_msg,relies_on_imprinting,relies_on_repro_tag))
+reg_data <- filter(data, condition=="both" & DEME_SIZE==400)
+
+msg_p <- ggplot(reg_data, aes(x=relies_on_msg, fill=relies_on_msg)) +
+            geom_bar() +
+            geom_text(stat='count', aes(label=..count..), vjust=-.1) +
+            ylim(0, 55) +
+            ggtitle("Relies on messaging?") +
+            theme(legend.position="none",axis.title.x=element_blank())
+
+imp_p <- ggplot(reg_data, aes(x=relies_on_imprinting, fill=relies_on_imprinting)) +
+            geom_bar() +
+            geom_text(stat='count', aes(label=..count..), vjust=-.1) +
+            ylim(0, 55) +
+            ggtitle("Relies on imprinting?") +
+            theme(legend.position="none",axis.title.x=element_blank())
+
+tag_p <- ggplot(reg_data, aes(x=relies_on_repro_tag, fill=relies_on_repro_tag)) +
+            geom_bar() +
+            geom_text(stat='count', aes(label=..count..), vjust=-.1) +
+            ylim(0, 55) +
+            ggtitle("Relies on reproduction tags?") +
+            theme(legend.position="none",axis.title.x=element_blank())
+
+reg_p <- ggplot(reg_data, aes(x=relies_on_reg, fill=relies_on_reg)) +
+            geom_bar() +
+            geom_text(stat='count', aes(label=..count..), vjust=-.1) +
+            ylim(0, 55) +
+            ggtitle("Relies on regulation?") +
+            scale_x_discrete(limits=c("0", "1"), labels=c("0", "1")) +
+            theme(legend.position="none",axis.title.x=element_blank())
+
+
+grid <- plot_grid(reg_p,msg_p,tag_p,imp_p, labels = c('A', 'B', 'C', 'D'), label_size = 12)
+print(grid)
+save_plot("./imgs/multi-cell-differentiation-strategy-20x20.png", grid, base_height=6, base_width=8)
+```
+
+What is the strategy breakdown (in more detail)? 
+
+
+```{r}
+usage_data <- filter(data, condition=="both" & DEME_SIZE==400)
+usage_data <- subset(usage_data, select=c(relies_on_msg,relies_on_imprinting,relies_on_repro_tag,relies_on_mem))
 usage_data$msg <- usage_data$relies_on_msg == "1"
 usage_data$repro_tag <- usage_data$relies_on_repro_tag == "1"
 usage_data$imprinting <- usage_data$relies_on_imprinting == "1"
-usage_data$none <- !usage_data$msg & !usage_data$repro_tag & !usage_data$imprinting
-usage_data <- subset(usage_data, select=c(msg, repro_tag, imprinting, none))
+usage_data$mem <- usage_data$relies_on_mem == "1"
+usage_data$none <- !usage_data$msg & !usage_data$repro_tag & !usage_data$imprinting & !usage_data$mem
+usage_data <- subset(usage_data, select=c(msg, repro_tag, imprinting, mem, none))
 euler(usage_data)
-# png("./plot.png", width=4, height=4)
 e <- plot(euler(usage_data), legend=TRUE)
-save_plot("./imgs/multicell-strategies-breakdown.png", e, base_width=4, base_height=4)
-# dev.off()
+save_plot("./imgs/multicell-strategies-breakdown-20x20.png", e, base_width=4, base_height=4)
+e
 ```
+
+What does fitness look like for genotypes relying on different mechanisms?
+
+```{r}
+ggplot(reg_data, aes(x=relies_on_repro_tag, y=score, fill=relies_on_repro_tag)) +
+  scale_y_continuous(trans="log10") +
+  geom_boxplot()
+
+ggplot(reg_data, aes(x=relies_on_imprinting, y=score, fill=relies_on_imprinting)) +
+  scale_y_continuous(trans="log10") +
+  geom_boxplot()
+
+ggplot(reg_data, aes(x=relies_on_msg, y=score, fill=relies_on_msg)) +
+  scale_y_continuous(trans="log10") +
+  geom_boxplot()
+```
+
+
+
 
 
