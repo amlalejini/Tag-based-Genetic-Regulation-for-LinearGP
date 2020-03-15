@@ -1,15 +1,34 @@
+# Diagnostic Tasks
 
+**Navigation**
+<!-- TOC -->
 
-<object data="./media/regulation-example-cartoon.pdf" type="application/pdf">
-    <embed src="./media/regulation-example-cartoon.pdf">
-        <p>This browser does not support PDFs. <a href="./media/regulation-example-cartoon.pdf">Download to view</a>.</p>
-    </embed>
-</object>
+- [Repeated Signal Task](#repeated-signal-task)
+  - [Repeated signal task - experimental configuration](#repeated-signal-task---experimental-configuration)
+- [Directional Signal Task](#directional-signal-task)
+  - [Directional signal task - experimental configuration](#directional-signal-task---experimental-configuration)
+- [Changing Signal Task](#changing-signal-task)
+  - [Changing signal task - experimental configuration](#changing-signal-task---experimental-configuration)
+- [Multicellular Signal-differentiation Task](#multicellular-signal-differentiation-task)
 
-![regulation-example](./media/regulation-example-cartoon.svg)
+<!-- /TOC -->
 
-<object data="./media/repeated-signal-task.pdf" type="application/pdf">
-    <embed src="./media/repeated-signal-task.pdf">
-        <p>This browser does not support PDFs. <a href="./media/repeated-signal-task.pdf">Download to view</a>.</p>
-    </embed>
-</object>
+## Repeated Signal Task
+
+![repeated-signal-task-overview](./media/repeated-signal-task.svg)
+
+### Repeated signal task - experimental configuration
+
+## Directional Signal Task
+
+### Directional signal task - experimental configuration
+
+## Changing Signal Task
+
+![changing-signal-task-overview](./media/changing-signal-task.svg)
+
+### Changing signal task - experimental configuration
+
+## Multicellular Signal-differentiation Task
+
+![multicell-signal-differentiation-task-overview](./media/multicell-differentiation-task.svg)
