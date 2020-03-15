@@ -6,7 +6,7 @@
     </embed>
 </object>
 
-![regulation-example](./media/regulation-example.cartoon.svg)
+![regulation-example](./media/regulation-example-cartoon.svg)
 
 <object data="./media/repeated-signal-task.pdf" type="application/pdf">
     <embed src="./media/repeated-signal-task.pdf">
