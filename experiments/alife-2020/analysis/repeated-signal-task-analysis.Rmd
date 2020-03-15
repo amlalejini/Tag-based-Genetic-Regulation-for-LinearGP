@@ -969,7 +969,7 @@ match_plot <- ggplot(active_data,
                    limits=seq(0, length(active_module_ids)-1, 1),
                    labels=active_module_ids) +
   scale_y_discrete(name="Time Step",
-                   limits=seq(0, 50, 10)) +
+                   limits=seq(0, 30, 10)) +
   # Background
   geom_tile(color="white", 
             size=0.2, 
@@ -1012,7 +1012,7 @@ match_plot <- ggplot(trace_data,
                      labels=c("0%", "25%", "50%", "75%", "100%")) +
   xlab("Function ID") +
   scale_y_discrete(name="Time Step",
-                   limits=seq(0, 50, 10)) +
+                   limits=seq(0, 30, 10)) +
   # Background
   geom_tile(color="white", 
             size=0.2, 
@@ -1046,7 +1046,7 @@ match_plot
 
 We use the igraph package to draw this organism's gene regulatory network.
 
-```{r}
+```{r, message=FALSE}
 # Networks!
 graph_nodes_loc <- paste(data_dir, 
                          "igraphs/reg_graph_id-", trace_id, "_nodes.csv", sep="")

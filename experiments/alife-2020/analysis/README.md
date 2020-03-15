@@ -70,7 +70,7 @@ Also note that [requirements.txt](./requirements.txt) gives the python requireme
   - Data analyses for changing signal task.
 - directionalSigTaskAnalysis.Rmd
   - Data analyses for directional signal task.
-- repeatedSigTaskAnalysis.Rmd
+- repeated-signal-task-analysis.Rmd
   - Data analyses for the repeated signal task.
 - regGraphComp.Rmd
   - Data analyses for comparing regulatory networks evolved in the repeated signal and directional
@@ -90,7 +90,7 @@ Also note that [requirements.txt](./requirements.txt) gives the python requireme
     - => gen_reg_profiles_altsig.R
     - => repeatedSignalTaskAnalysis.Rmd
 - Final data analyses
-  - Experiment output => aggMaxFitAltSig.py => genAltSigGraphs.py => repeatedSignalTaskAnalysis.Rmd
+  - Experiment output => aggMaxFitAltSig.py => genAltSigGraphs.py => repeated-signal-task-analysis.Rmd
 
 ### Changing signal task
 
