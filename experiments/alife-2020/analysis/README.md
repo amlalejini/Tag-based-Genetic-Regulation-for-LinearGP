@@ -72,7 +72,7 @@ Also note that [requirements.txt](./requirements.txt) gives the python requireme
   - Data analyses for directional signal task.
 - repeated-signal-task-analysis.Rmd
   - Data analyses for the repeated signal task.
-- regGraphComp.Rmd
+- regulatory-network-comparison.Rmd
   - Data analyses for comparing regulatory networks evolved in the repeated signal and directional
     signal tasks.
 - diffSigRespTaskAnalysis.Rmd
@@ -109,7 +109,7 @@ Also note that [requirements.txt](./requirements.txt) gives the python requireme
 ### Comparing networks that solve the directional signal task versus the repeated signal task
 
 - Final data analyses
-  - Experiment output => [aggMaxFitDirSig.py, aggMaxFitAltSig.py] => regGraphComp.Rmd
+  - Experiment output => [aggMaxFitDirSig.py, aggMaxFitAltSig.py] => regulatory-network-comparison.Rmd
 
 ### Multicellular signal-differentiation task
 
