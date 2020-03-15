@@ -167,6 +167,28 @@ ggplot(sol_data, aes(x=condition, fill=condition)) +
 Programs capable of achieving a perfect score on the changing signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
 These programs, however, do not necessarily generalize across all possible sequences of environmental signals.
 
+### Does access to regulation slow adaptation?
+
+I.e., did successful programs take longer (more generations) to evolve than those evolved in the regulation-disabled treatment?
+
+```{r}
+ggplot(data, aes(x=condition, y=update, color=condition)) +
+  geom_boxplot() +
+  scale_x_discrete(name="Condition",
+                 breaks=c("memory","both"),
+                 labels=c("Disabled",
+                          "Augmented")) +
+  scale_color_discrete(name="Condition",
+                       breaks=c("memory", "both"),
+                       labels=c("Regulation-disabled",
+                                "Regulation-augmented")) +
+  ylab("Generations to solution") 
+
+print(wilcox.test(formula=update~condition, data=data, exact=FALSE, conf.int=TRUE))
+```
+
+We find no evidence (Wilcoxon rank-sum test) that access to regulation resulted in slower adaptation.
+
 ### Do they generalize?
 
 Note that solutions may or may not generalize beyond the sequence of environmental signals on which they achieved a perfect score (and were thus categorized as a 'solution'). 
@@ -216,7 +238,7 @@ ggplot(sol_cnts, aes(x=type, y=val, fill=type)) +
   theme(legend.position="right",
         axis.text.x = element_text(size=10)) +
   ggtitle("Task generalization")
-  ggsave("./imgs/chg-env-16-generalization.png", width=6,height=3)
+  ggsave("./imgs/chg-env-16-generalization.png", width=6,height=4)
 ```
 
 All programs evolved without access to regulation successfully generalized. However, `r num_solutions_reg - num_generalize_reg` out of `r num_solutions_reg` solutions evolved with access to regulation failed to generalize (statistically significant, Fisher's exact test).
