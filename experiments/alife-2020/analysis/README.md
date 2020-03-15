@@ -66,9 +66,9 @@ Also note that [requirements.txt](./requirements.txt) gives the python requireme
 
 ### Data analysis scripts
 
-- changingSigTaskAnalysis.Rmd
+- changing-signal-task-analysis.Rmd.Rmd
   - Data analyses for changing signal task.
-- directionalSigTaskAnalysis.Rmd
+- directional-signal-task-analysis.Rmd
   - Data analyses for directional signal task.
 - repeated-signal-task-analysis.Rmd
   - Data analyses for the repeated signal task.
@@ -95,16 +95,16 @@ Also note that [requirements.txt](./requirements.txt) gives the python requireme
 ### Changing signal task
 
 - Final data analyses
-  - Experiment output => aggMaxFitChgEnv.py => changingSigTaskAnalysis.Rmd
+  - Experiment output => aggMaxFitChgEnv.py => changing-signal-task-analysis.Rmd.Rmd
 
 ### Directional signal task
 
 - Trace visualizations
   - Experiment output (output of experiment implemented in C++) => aggMaxFitDirSig.py
     - => gen_reg_profiles_dirsig.R
-    - => directionalSigTaskAnalysis.Rmd
+    - => directional-signal-task-analysis.Rmd
 - Final data analyses
-  - Experiment output => aggMaxFitDirSig.py => genDirSigGraphs.py => directionalSigTaskAnalysis.Rmd
+  - Experiment output => aggMaxFitDirSig.py => genDirSigGraphs.py => directional-signal-task-analysis.Rmd
 
 ### Comparing networks that solve the directional signal task versus the repeated signal task
 
