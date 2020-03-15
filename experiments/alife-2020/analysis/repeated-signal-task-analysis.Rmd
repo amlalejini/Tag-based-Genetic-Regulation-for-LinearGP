@@ -1,5 +1,5 @@
 ---
-title: "Repeated Signal Task"
+title: "Repeated Signal Task Analysis"
 output: 
   html_document: 
     keep_md: no
