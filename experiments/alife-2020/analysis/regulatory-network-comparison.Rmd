@@ -1,5 +1,5 @@
 ---
-title: "Demonstrating Genetic Regulation in SignalGP - Analysis - Directional Signal Regulation Graphs vs. Repeated Signal Regulation Graphs"
+title: "Comparing gene regulatory networks evolved to solve the directional signal  tasks and the repeated signal tasks"
 output: 
   html_document: 
     keep_md: no
@@ -14,30 +14,46 @@ output:
     toc_depth: 4
 ---
 
+This document is a companion to our submission to the 2020 Artificial Life conference, 'Genetic regulation facilitates the evolution of signal-response plasticity in digital organisms'. 
+Here, we compare the gene regulatory networks that evolved to solve the repeated signal task with regulatory networks that evolved to solve the directional signal task. 
+See our paper or other documents in this supplemental material for more details on either the repeated signal or directional signal tasks.
+All of our source code for statistical analyses and data visualizations is embedded in this document. 
+Please [file an issue or make a pull request on github](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/issues) to report any mistakes or request more explanation.
+
 ## Overview
 
-todo
+While both the repeated signal and directional signal tasks require signal-response plasticity to solve, the directional signal task is more challenging, requiring a higher degree of response flexibility to solve.
+We evolved 100 replicate populations of 1000 SignalGP digital organisms for 10000 generations to solve each of the directional signal and repeated signal tasks.
+We expect that the simple regulation that evolved to solve the repeated signal task will be insufficient for coping with the branching nature of the directional signal task.
 
-## Setup
+## Analysis Dependencies
 
-Load required libraries/packages.
+Load the required R libraries.
 
 ```{r, message=FALSE}
-library(ggplot2)  # (Wickham, 2009)
-library(tidyr)    # (Wickham and Henry, 2018)
-library(dplyr)    # (Wickham et al., 2018)
-library(cowplot)  # (Wilke, 2018)
-library(viridis)  # (Garnier, 2018)
-library(reshape2)
-library(RColorBrewer)
-library(igraph)
-library(patchwork)
+library(ggplot2)   # (Wickham, 2016)
+library(tidyr)     # (Wickham and Henry, 2020)
+library(dplyr)     # (Wickham et al., 2020)
+library(reshape2)  # (Wickham, 2007)
+library(cowplot)   # (Wilke, 2019)
+library(viridis)   # (Garnier, 2018)
+library(igraph)    # (Csardi and Nepusz, 2006)
+library(patchwork) # (Pedersen, 2020)
 ```
+
+These analyses were conducted in the following computing environment:
+
+```{r}
+print(version)
+```
+
+## Setup
 
 Configure a few global variables.
 
 ```{r}
 theme_set(theme_cowplot())
+
 alpha <- 0.05
 correction_method <- "bonferroni"
 ```
@@ -45,19 +61,23 @@ correction_method <- "bonferroni"
 Load repeated signal task data.
 
 ```{r}
-alt_sig_org_data_loc <- "../data/reg-graph-comps/alt-sig/max_fit_orgs.csv"
+alt_sig_org_data_loc <- "../data/balanced-reg-mult/reg-graph-comps/alt-sig/max_fit_orgs.csv"
 alt_sig_org_data <- read.csv(alt_sig_org_data_loc, na.strings="NONE")
 alt_sig_org_data <- subset(alt_sig_org_data, select = -c(program))
 
-# Specify factors.
-alt_sig_org_data$matchbin_thresh <- factor(alt_sig_org_data$matchbin_thresh,
-                                           levels=c(0, 25, 50, 75))
-alt_sig_org_data$NUM_SIGNAL_RESPONSES <- factor(alt_sig_org_data$NUM_SIGNAL_RESPONSES,
-                                                levels=c(2, 4, 8, 16, 32))
-alt_sig_org_data$NUM_ENV_CYCLES <- factor(alt_sig_org_data$NUM_ENV_CYCLES,
-                                          levels=c(2, 4, 8, 16, 32))
+# Specify factors (not all are relevant to these runs).
+alt_sig_org_data$matchbin_thresh <- 
+  factor(alt_sig_org_data$matchbin_thresh,
+         levels=c(0, 25, 50, 75))
+alt_sig_org_data$NUM_SIGNAL_RESPONSES <-
+  factor(alt_sig_org_data$NUM_SIGNAL_RESPONSES,
+         levels=c(2, 4, 8, 16, 32))
+alt_sig_org_data$NUM_ENV_CYCLES <- 
+  factor(alt_sig_org_data$NUM_ENV_CYCLES,
+         levels=c(2, 4, 8, 16, 32))
 alt_sig_org_data$TAG_LEN <- factor(alt_sig_org_data$TAG_LEN,
                                    levels=c(32, 64, 128))
+
 # Define function to summarize regulation/memory configurations.
 get_con <- function(reg, mem) {
   if (reg == "0" && mem == "0") {
@@ -72,38 +92,48 @@ get_con <- function(reg, mem) {
     return("UNKNOWN")
   }
 }
+
 # Specify experimental condition for each datum.
-alt_sig_org_data$condition <- mapply(get_con, 
-                                     alt_sig_org_data$USE_FUNC_REGULATION,
-                                     alt_sig_org_data$USE_GLOBAL_MEMORY)
-alt_sig_org_data$condition <- factor(alt_sig_org_data$condition, 
-                                     levels=c("regulation", "memory", "none", "both"))
+alt_sig_org_data$condition <- 
+  mapply(get_con, 
+         alt_sig_org_data$USE_FUNC_REGULATION,
+         alt_sig_org_data$USE_GLOBAL_MEMORY)
+alt_sig_org_data$condition <- 
+  factor(alt_sig_org_data$condition, 
+         levels=c("regulation", "memory", "none", "both"))
 
 # Does this program rely on a stochastic strategy?
 alt_sig_org_data$stochastic <- 1 - alt_sig_org_data$consistent 
 
-alt_sig_network_data_loc <- "../data/reg-graph-comps/alt-sig/reg_graphs_summary.csv"
+alt_sig_network_data_loc <-
+  "../data/balanced-reg-mult/reg-graph-comps/alt-sig/reg_graphs_summary.csv"
 alt_sig_network_data <- read.csv(alt_sig_network_data_loc, na.strings="NA")
 ```
 
 Load directional signal task data.
 
 ```{r}
-dir_sig_org_data_loc <- "../data/reg-graph-comps/dir-sig/max_fit_orgs.csv"
+dir_sig_org_data_loc <-
+  "../data/balanced-reg-mult/reg-graph-comps/dir-sig/max_fit_orgs.csv"
 dir_sig_org_data <- read.csv(dir_sig_org_data_loc, na.strings="NONE")
 dir_sig_org_data <- subset(dir_sig_org_data, select = -c(program))
 
 # Specify factors.
-dir_sig_org_data$matchbin_thresh <- factor(dir_sig_org_data$matchbin_thresh,
-                                           levels=c(0, 25, 50, 75))
-dir_sig_org_data$NUM_ENV_UPDATES <- factor(dir_sig_org_data$NUM_ENV_UPDATES,
-                                           levels=c(2, 4, 8, 16, 32))
-dir_sig_org_data$NUM_ENV_STATES <- factor(dir_sig_org_data$NUM_ENV_STATES,
-                                          levels=c(2, 4, 8, 16, 32))
-dir_sig_org_data$TAG_LEN <- factor(dir_sig_org_data$TAG_LEN,
-                                   levels=c(32, 64, 128))
-dir_sig_org_data$MUT_RATE__FUNC_DUP <- factor(dir_sig_org_data$MUT_RATE__FUNC_DUP,
-                                              levels=c("0.01", "0.05", "0.1"))
+dir_sig_org_data$matchbin_thresh <- 
+  factor(dir_sig_org_data$matchbin_thresh,
+         levels=c(0, 25, 50, 75))
+dir_sig_org_data$NUM_ENV_UPDATES <- 
+  factor(dir_sig_org_data$NUM_ENV_UPDATES,
+         levels=c(2, 4, 8, 16, 32))
+dir_sig_org_data$NUM_ENV_STATES <- 
+  factor(dir_sig_org_data$NUM_ENV_STATES,
+         levels=c(2, 4, 8, 16, 32))
+dir_sig_org_data$TAG_LEN <- 
+  factor(dir_sig_org_data$TAG_LEN,
+         levels=c(32, 64, 128))
+dir_sig_org_data$MUT_RATE__FUNC_DUP <- 
+  factor(dir_sig_org_data$MUT_RATE__FUNC_DUP,
+         levels=c("0.01", "0.05", "0.1"))
 
 # Define function to summarize regulation/memory configurations.
 get_con <- function(reg, mem) {
@@ -120,16 +150,20 @@ get_con <- function(reg, mem) {
   }
 }
 # Specify experimental condition for each datum.
-dir_sig_org_data$condition <- mapply(get_con, 
-                                     dir_sig_org_data$USE_FUNC_REGULATION,
-                                     dir_sig_org_data$USE_GLOBAL_MEMORY)
-dir_sig_org_data$condition <- factor(dir_sig_org_data$condition, 
-                                     levels=c("regulation", "memory", "none", "both"))
+dir_sig_org_data$condition <- 
+  mapply(get_con, 
+         dir_sig_org_data$USE_FUNC_REGULATION,
+         dir_sig_org_data$USE_GLOBAL_MEMORY)
+dir_sig_org_data$condition <- 
+  factor(dir_sig_org_data$condition, 
+         levels=c("regulation", "memory", "none", "both"))
 
-dir_sig_network_data_loc <- "../data/reg-graph-comps/dir-sig/reg_graphs_summary.csv"
+dir_sig_network_data_loc <- 
+  "../data/balanced-reg-mult/reg-graph-comps/dir-sig/reg_graphs_summary.csv"
 dir_sig_network_data <- read.csv(dir_sig_network_data_loc, na.strings="NA")
-dir_sig_network_data$test_id <- factor(dir_sig_network_data$test_id,
-                                       levels(factor(dir_sig_network_data$test_id)))
+dir_sig_network_data$test_id <- 
+  factor(dir_sig_network_data$test_id,
+         levels(factor(dir_sig_network_data$test_id)))
 ```
 
 ## How many solutions evolved on each task?
@@ -142,7 +176,8 @@ alt_sig_sol_plot <- ggplot(sol_alt_sigs, aes(x=condition, fill=condition)) +
   xlab("Repeated signal task") +
   scale_y_continuous(name="# solutions",
                      limits=c(0, 100)) +
-  theme(legend.position="none")
+  theme(legend.position="none",
+        axis.text.x = element_blank())
 
 sol_dir_sigs <- filter(dir_sig_org_data, solution=="1")
 dir_sig_sol_plot <- ggplot(sol_dir_sigs, aes(x=condition, fill=condition)) +
@@ -153,34 +188,33 @@ dir_sig_sol_plot <- ggplot(sol_dir_sigs, aes(x=condition, fill=condition)) +
                    limits=c(0, 100)) +
   scale_fill_discrete(direction=-1)+
   theme(legend.position = "none",
+        axis.text.x=element_blank(),
         axis.text.y=element_blank(), 
         axis.title.y=element_blank())
 
 alt_sig_sol_plot | dir_sig_sol_plot
 ```
 
-## Networks?
+## How do evolved regulatory networks compare?
 
 Extract regulatory networks of solutions. 
 
 ```{r}
 # Extract successful runs (solution) of given mutation rate.
+# -- directional signal solutions --
 dir_sig_solutions <- filter(dir_sig_org_data, solution=="1")
-# Isolate networks of successful runs.
 dir_sig_sol_networks <- filter(dir_sig_network_data,  
                                run_id %in% dir_sig_solutions$SEED)
 dir_sig_sol_networks$exp <- "Directional Signal"
-
+# -- repeated signal solutions --
 alt_sig_solutions <- filter(alt_sig_org_data, solution=="1")
 alt_sig_sol_networks <- filter(alt_sig_network_data, run_id %in% alt_sig_solutions$SEED)
 alt_sig_sol_networks$exp <- "Repeated Signal"
-
+# -- our powers rbind! --
 all_sol_networks <- rbind(alt_sig_sol_networks, dir_sig_sol_networks)
 ```
 
-### Visualizing LOTS of simple graph metrics
-
-*simple, except for flow hierarchy, graph density, and reciprocity, which are less simple
+A wall of comparisons!
 
 ```{r}
 # Melt all of the network metrics together, allowing us to facet over them.
@@ -210,7 +244,7 @@ ggplot(network_measures_melted, aes(x=exp, y=network_measure_value, color=exp)) 
   theme(legend.position = "bottom", axis.text.x=element_blank()) +
   ggsave("./imgs/network_measures_all.pdf", width=10, height=10)
 
-# Plot only test_id 
+# Plot only one test_id for directional signal task
 ds_test_id <- 15
 ggplot(filter(network_measures_melted, 
               exp=="Repeated Signal" | 
@@ -223,7 +257,8 @@ ggplot(filter(network_measures_melted,
   ggsave("./imgs/network_measures_all_single_test.pdf", width=10, height=10)
 ```
 
-Okay, from all of this our intuition (see other analysis files) that networks that solve the directional signal are bigger (use more functions) and have more interaction among functions (regulatory relationships). Network vertex count and edge count are sufficient to tell this story.
+Okay, from all of this our intuition (see other analysis files) that networks that solve the directional signal task have more function-function interactions (i.e., more edges).
+We'll take a closer look at network vertices and network edges.
 
 ```{r}
 ## --- All environment sequences ---
@@ -231,54 +266,75 @@ Okay, from all of this our intuition (see other analysis files) that networks th
 plot_nodes <- 
 ggplot(all_sol_networks, aes(x=exp, y=node_cnt, color=exp)) +
   geom_boxplot() +
-  ylab("Vertices") +
+  ylab("# Functions") +
   scale_x_discrete(name="Task",
                  limits=c("Directional Signal", "Repeated Signal"),
                  labels=c("D", "R")) +
-  ylim(0, 120) +
-  theme(legend.position = "none") 
+  ylim(0, 40) +
+  coord_flip() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(size=9),
+        axis.title.x = element_text(size=10)) 
 # edge_cnt
 plot_edges <-
 ggplot(all_sol_networks, aes(x=exp, y=edge_cnt, color=exp)) +
   geom_boxplot() +
-  ylab("Edges") +
+  ylab("# Reg. Connections") +
   scale_x_discrete(name="Task",
                    limits=c("Directional Signal", "Repeated Signal"),
                    labels=c("D", "R")) +
-  ylim(0, 120) +
-  theme(legend.position = "none") 
+  coord_flip() +
+  theme(legend.position = "none",
+        axis.title.y=element_blank(),
+        axis.text.x = element_text(size=9),
+        axis.title.x = element_text(size=10)) 
 plots <- plot_nodes | plot_edges 
 plots
 
-plots + ggsave("./imgs/reg_networks_vertices_and_edges.pdf", width=4, height=3)
+plots + ggsave("./imgs/reg_networks_vertices_and_edges.pdf", width=4, height=2)
 ```
 
 Let's compare node counts and edge counts (wilcoxon rank sum test)
 
+**Vertices**
+
 ```{r}
 wilcox.test(formula=node_cnt ~ exp, data=all_sol_networks, conf.int=TRUE)
-
 ds_test_id=15 # all 'right' environment shifts
-wilcox.test(formula=node_cnt ~ exp, data=filter(all_sol_networks, 
-                                                exp=="Repeated Signal" | 
-                                                  (exp=="Directional Signal" & test_id==ds_test_id)))
-
-wilcox.test(formula=edge_cnt ~ exp, data=all_sol_networks)
-wilcox.test(formula=edge_cnt ~ exp, data=filter(all_sol_networks, 
-                                                exp=="Repeated Signal" | 
-                                                  (exp=="Directional Signal" & test_id==ds_test_id)))
+wilcox.test(formula=node_cnt ~ exp, 
+            data=filter(all_sol_networks, 
+                        exp=="Repeated Signal" |
+                          (exp=="Directional Signal" & test_id==ds_test_id)))
 ```
 
-Yes, differences in number of vertices and the number of edges between networks evolved to solve the repeated signal task versus networks evolved to solve the directional signal task are significant.
+We find no evidence that networks evolved to solve the directional signal task have more vertices than networks evolved to solve the repeated signal task. I.e., directional signal networks do not necessarily involve more total functions than networks evolved to solve the repeated signal task.
+This result makes sense given that both tasks require the same number of _responses_.
 
-## Are evolved solution relying on up-regulation, down-regulation, or both?
+**Edges**
+
+```{r}
+wilcox.test(formula=edge_cnt ~ exp, data=all_sol_networks, conf.int=TRUE)
+wilcox.test(formula=edge_cnt ~ exp, data=filter(all_sol_networks, 
+                                                exp=="Repeated Signal" | 
+                                                  (exp=="Directional Signal" & test_id==ds_test_id)), conf.int=TRUE)
+```
+
+There is, however, a significant difference in the number of edges in networks evolved to solve the repeated signal task compared to the networks evolved to solve the directional signal task.
+
+## Do evolved solutions rely on up-regulation, down-regulation, or both?
+
+We used knockout experiments to determine whether or not evolved gene regulatory networks rely on up-regulation, down-regulation, or both up- and down-regulation.
+
+**Repeated signal task**
 
 ```{r}
 alt_sig_org_sols <- filter(alt_sig_org_data, solution=="1")
 # How many rely only on down-regulation, only on up-regulation, and on both?
-get_reg_relies_on <- function(uses_down, uses_up) {
-  if        (uses_down == "0" && uses_up == "0") {
+get_reg_relies_on <- function(uses_down, uses_up, uses_reg) {
+  if        (uses_down == "0" && uses_up == "0" & uses_reg == "0") {
     return("neither")
+  } else if (uses_down == "0" && uses_up == "0" & uses_reg == "1") {
+    return("either")
   } else if (uses_down == "0" && uses_up == "1") {
     return("up-regulation-only")
   } else if (uses_down == "1" && uses_up == "0") {
@@ -289,41 +345,81 @@ get_reg_relies_on <- function(uses_down, uses_up) {
     return("UNKNOWN")
   }
 }
-alt_sig_org_sols$regulation_type_usage <- mapply(get_reg_relies_on, 
-                                                 alt_sig_org_sols$relies_on_down_reg,
-                                                 alt_sig_org_sols$relies_on_up_reg)
-alt_sig_org_sols$regulation_type_usage <- factor(alt_sig_org_sols$regulation_type_usage, 
-                                                 levels=c("neither", "up-regulation-only", "down-regulation-only", "up-and-down-regulation"))
+alt_sig_org_sols$regulation_type_usage <- 
+  mapply(get_reg_relies_on, 
+         alt_sig_org_sols$relies_on_down_reg, 
+         alt_sig_org_sols$relies_on_up_reg,
+         alt_sig_org_sols$relies_on_regulation)
+alt_sig_org_sols$regulation_type_usage <-
+  factor(alt_sig_org_sols$regulation_type_usage, 
+         levels=c("neither", 
+                  "either",
+                  "up-regulation-only", 
+                  "down-regulation-only", 
+                  "up-and-down-regulation"))
 
 ggplot(alt_sig_org_sols, aes(x=regulation_type_usage, fill=regulation_type_usage)) +
   geom_bar() +
+  geom_text(stat="count", 
+            mapping=aes(label=..count..), 
+            position=position_dodge(0.9), vjust=0) +
   ylim(0, 100) +
   scale_x_discrete(name="Regulation Usage",
-                   limits=c("neither", "up-regulation-only", "down-regulation-only", "up-and-down-regulation"),
-                   labels=c("None", "Only up", "Only down", "Both")) +
-  geom_text(stat="count", aes(label=..count..), position=position_dodge(0.9), vjust=0) 
+                   limits=c("neither", 
+                            "either", 
+                            "up-regulation-only", 
+                            "down-regulation-only", 
+                            "up-and-down-regulation"),
+                   labels=c("None", 
+                            "Either", 
+                            "Only up", 
+                            "Only down", 
+                            "Both")) +
+  theme(legend.position="none")
 ```
 
+The majority of networks evolved to solve the repeated signal task rely exclusively on down-regulation, and all other networks evolved to solve the repeated signal task rely on both down- and up-regulation.
+
+**Directional signal task**
 
 ```{r}
 dir_sig_org_sols <- filter(dir_sig_org_data, solution=="1")
 
-dir_sig_org_sols$regulation_type_usage <- mapply(get_reg_relies_on, 
-                                                 dir_sig_org_sols$relies_on_down_reg,
-                                                 dir_sig_org_sols$relies_on_up_reg)
-dir_sig_org_sols$regulation_type_usage <- factor(dir_sig_org_sols$regulation_type_usage, 
-                                                 levels=c("neither", "up-regulation-only", "down-regulation-only", "up-and-down-regulation"))
+dir_sig_org_sols$regulation_type_usage <- 
+  mapply(get_reg_relies_on, 
+         dir_sig_org_sols$relies_on_down_reg,
+         dir_sig_org_sols$relies_on_up_reg,
+         dir_sig_org_sols$relies_on_regulation)
+
+dir_sig_org_sols$regulation_type_usage <-
+  factor(dir_sig_org_sols$regulation_type_usage, 
+         levels=c("neither", 
+                  "either",
+                  "up-regulation-only", 
+                  "down-regulation-only", 
+                  "up-and-down-regulation"))
 
 ggplot(dir_sig_org_sols, aes(x=regulation_type_usage, fill=regulation_type_usage)) +
   geom_bar() +
+  geom_text(stat="count", 
+            mapping=aes(label=..count..), 
+            position=position_dodge(0.9), vjust=0) +
   ylim(0, 100) +
   scale_x_discrete(name="Regulation Usage",
-                   limits=c("neither", "up-regulation-only", "down-regulation-only", "up-and-down-regulation"),
-                   labels=c("None", "Only up", "Only down", "Both")) +
-  geom_text(stat="count", aes(label=..count..), position=position_dodge(0.9), vjust=0) 
+                   limits=c("neither", 
+                            "either",
+                            "up-regulation-only", 
+                            "down-regulation-only", 
+                            "up-and-down-regulation"),
+                   labels=c("None", "Either", "Only up", "Only down", "Both")) +
+  theme(legend.position="none")
 ```
 
-### How many up-regulation and down-regulation connections exist in regulatory networks?
+All networks that evolved to solve the directional signal task rely on _both_ up- and down-regulation.
+
+### How many up- and down-regulation connections exist in regulatory networks?
+
+We can also look at the distributions of edge types (promoting or repressing) in evolved regulatory networks.
 
 ```{r}
 melted <- melt(all_sol_networks, 
@@ -339,20 +435,19 @@ ggplot(melted, aes(x=exp, y=reg_edge_cnt, color=reg_edge_type)) +
   theme(legend.position = "bottom")
 ```
 
-Compare number of up/down-regulation edges in the regulatory networks that solve the repeated signal solutions task.
+**Repeated signal task**
 
 ```{r}
-wilcox.test(formula=reg_edge_cnt ~ reg_edge_type, data=filter(melted, exp=="Repeated Signal"))
+wilcox.test(formula=reg_edge_cnt ~ reg_edge_type, data=filter(melted, exp=="Repeated Signal"), conf.int=TRUE)
 ```
 
-Compare number of up/down-regulation edges in the regulatory networks that solve the directional signal task (for each possible environment sequence).
+Gene regulatory networks that solve the repeated signal task have significantly more repressing edges than promoting edges.
+
+**Directional signal task**
 
 ```{r}
-test_ids <- levels(factor( filter(melted, exp=="Directional Signal")$test_id ) )
-for (id in test_ids) {
- print(paste("Compare on test sequence", id))
- tst <- wilcox.test(formula=reg_edge_cnt ~ reg_edge_type, 
-             data=filter(melted, exp=="Directional Signal" & test_id==id)) 
- print(tst)
-}
+wilcox.test(formula=reg_edge_cnt ~ reg_edge_type, 
+           data=filter(melted, exp=="Directional Signal"), conf.int=TRUE)
 ```
+
+Likewise, gene regulatory networks evolved to solve the directional signal task have significantly more repressing edges than promoting edges, but the effect is smaller than in the networks evolved to solve the repeated signal task.
