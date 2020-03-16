@@ -1,11 +1,11 @@
 # Target project
 # PROJECT options: alt-signal-exp, chg-env-exp, dir-signal-exp
 # - Repeated signal task -
-# PROJECT := alt-signal-exp
+PROJECT := alt-signal-exp
 # - Changing signal task -
 # PROJECT := chg-env-exp
 # - Directional signal task -
-PROJECT := dir-signal-exp
+# PROJECT := dir-signal-exp
 
 # Dependency directories
 EMP_DIR := ../Empirical/source
@@ -14,7 +14,7 @@ OPEN_SSL_DIR := /usr/local/Cellar/openssl/1.0.2t
 
 # Compile-time parameter configuration (tag metric, matching threshold, matching regulator, tag size)
 # MATCH_METRIC options: hamming, hash, integer, integer-symmetric, streak, streak-exact
-MATCH_METRIC := hash
+MATCH_METRIC := streak
 # MATCH_THRESH options: 0, 25, 50, 75
 MATCH_THRESH := 25
 # MATCH_REG options: add, mult
