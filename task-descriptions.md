@@ -13,6 +13,8 @@ Here, we give a brief description of each of the diagnostic tasks used in this w
   - [Experimental configuration](#experimental-configuration-1)
 - [Changing Signal Task](#changing-signal-task)
   - [Experimental configuration](#experimental-configuration-2)
+    - [General parameters](#general-parameters-1)
+    - [Treatment-specific parameters](#treatment-specific-parameters-1)
 - [Multicellular Signal-differentiation Task](#multicellular-signal-differentiation-task)
 
 <!-- /TOC -->
@@ -199,11 +201,59 @@ is equal to four. Thus, sixteen response sequences are possible.
 
 ## Changing Signal Task
 
+The changing signal task requires organisms to express a unique response for each of _K_ distinct environmental
+signals (i.e., each signal has a distinct tag); the figure below is given as an example.
+Because signals are distinct, organisms do not need to alter their responses to particular signals over
+time.
+Instead, organisms may 'hardware' each of the _K_ possible responses to the appropriate environmental
+signal.
+However, environmental signals are presented in a random order; thus, the correct _order_ of responses
+will vary and cannot be hardcoded.
+As in the repeated signal task, organisms respond by executing one of _K_ response instructions.
+Otherwise, evaluation (and fitness assignment) on the changing signal task mirrors that of the repeated
+signal task.
+
 ![changing-signal-task-overview](./media/changing-signal-task.svg)
+
+Requiring organisms to express a distinct instruction in response to each environmental signal represents
+organisms having to perform distinct behaviors.
+
+We allowed organisms 128 time steps to express the appropriate response after receiving an environmental
+signal.
+Once the allotted time to respond expires or the organism expresses any response, the organism's threads of execution are
+reset, resulting in a loss of all thread-local memory.
+_Only_ the contents of an organism's global memory and each function's regulatory state persist.
+The environment then produces the next signal (distinct from all previous signals) to which the organism
+may respond.
+An organism's fitness is equal to the number of correct responses expressed during evaluation.
+
+We evolved populations of 1000 SignalGP organisms to solve the changing signal task at _K_=16
+(where _K_ denotes the number of environmental signals).
+We evolved populations for 1000 generations or until an organism capable of achieving a perfect score
+during task evaluation (i.e., able to express the appropriate response to each of the _K_ signals) evolved.
+
+We ran 200 replicate populations (each with a distinct random number seed) of each of two experimental
+conditions:
+
+1. a regulation-augmented treatment where organisms have access to genetic regulation.
+2. a regulation-disabled treatment where organisms do not have access to genetic regulation.
+
+Note this task does not require organisms to shift their response to particular signals over time,
+and as such, genetic regulation is unnecessary.
+Further, because organisms experience environmental signals in a random order, erroneous genetic
+regulation can manifest as cryptic variation.
+For example, non-adaptive down-regulation of a particular response function may be neutral given one
+sequence of environmental signals, but may be deleterious in another.
 
 ### Experimental configuration
 
+#### General parameters
 
+#### Treatment-specific parameters
+
+**Regulation-augmented treatment**
+
+**Regulation-disabled treatment**
 
 ## Multicellular Signal-differentiation Task
 
