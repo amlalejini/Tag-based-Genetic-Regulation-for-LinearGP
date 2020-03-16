@@ -38,7 +38,9 @@ the Evolution of Signal-response Plasticity in Digital Organisms.
 ### SignalGP
 
 <!-- ![sgp-cartoon](./media/sgp-cartoon.svg) -->
-<img src="./media/sgp-cartoon.svg" width=400/>
+<span  style="text-align: center; display: block;">
+  <img src="./media/sgp-cartoon.svg" width=400/>
+</span> </br>
 
 SignalGP is a genetic program representation that allows digital organisms to dynamically react to
 signals from the environment or from other agents.
