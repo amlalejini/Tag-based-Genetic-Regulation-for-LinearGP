@@ -102,7 +102,7 @@ Additionally, we investigate whether genetic regulation is functionally incorpor
 
 The source code for experiments using diagnostic tasks (e.g., the repeated-, directional-, and changing- signal tasks) are included in this repository (in the source directory). These experiments are implemented with C++ using the [Empirical library](https://github.com/devosoft/Empirical) and an [external implementation of SignalGP](https://github.com/amlalejini/SignalGP). We ran experiments on high-performance computing systems provided by the [Institute for Cyber-Enabled Research](https://icer.msu.edu/) at Michigan State university.
 [Data analyses](experiments/alife-2020/analysis/) were conducted using a combination of Python scripts (for data aggregation and processing) and R (for statistical analyses and visualizations).
-All DISHTINY experiments were run (TODO).
+We used [this version of DISHTINY](https://github.com/mmore500/dishtiny/tree/53vgh) for our DISHTINY case study.
 
 See [this document](./running-experiments.md) for a step-by-step guide to running the experiments in this repository locally.
 
