@@ -17,7 +17,7 @@
 
 ## Script descriptions
 
-Please excuse the haste in which many of these scripts were written...
+This document is as much for future me as it is for you! Please excuse the haste in which many of these scripts were written...
 
 ### Data aggregation scripts
 
