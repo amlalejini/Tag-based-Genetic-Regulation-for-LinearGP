@@ -1,3 +1,4 @@
 theme: jekyll-theme-slate
+markdown: CommonMarkGhPages
 plugins:
   - jekyll-relative-links
