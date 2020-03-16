@@ -10,7 +10,7 @@
 ########## Command Lines to Run ##########
 EXP=dir-sig
 DATA_DIR=/mnt/scratch/lalejini/data/sgp-regulation/alife-2020/balanced-mult/reg-network-comp/${EXP}
-CONFIG_DIR=/mnt/home/lalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/configs-${EXP}
+CONFIG_DIR=/mnt/home/lalejini/devo_ws/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/configs-${EXP}
 
 ##################################
 # Setup random seed info
