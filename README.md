@@ -26,7 +26,7 @@ the Evolution of Signal-response Plasticity in Digital Organisms.
 
 - [Alexander Lalejini](https://lalejini.com/)
 - [Matthew Andrew Moreno](http://mmore500.com/)
-- Charles Ofria
+- [Charles Ofria](https://ofria.com/)
 
 ### Abstract
 
