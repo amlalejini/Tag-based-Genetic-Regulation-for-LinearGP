@@ -65,3 +65,17 @@ OPEN_SSL_DIR := /usr/local/Cellar/openssl/1.0.2t
 Now, `make debug` should compile in debug mode (will be much slower but have error checking) or use `make native` to compile in release mode (much faster but no error checking).
 
 Note: ignore all of the web-related stuff in the Makefile. As of now, we have not implemented web-versions of our diagnostic experiments.
+
+## Running experiments
+
+Find the configuration details for the diagnostic tasks in our [task descriptions documentation](./task-descriptions.md).
+
+To generate a configuration file (for any of the diagnostic tasks), run the executable with the `--gen` command line argument.
+Any run-time configuration parameter can be set either in the `config.cfg` or set on the command line. For example, to set the `SEED` configuration parameter (random number seed) to 10 on the command line, add the argument `-SEED 10`.
+
+When running the experiment executable, it uses parameter values in the following priority order (higher overrides lower):
+
+1. command line arguments of the form `-PARAMETER VALUE`
+2. parameter values set in the local `config.cfg` file (in the execution directory)
+3. default parameter values specified in the appropriate config header
+  - e.g., source/AltSigConfig.h, source/ChgEnvConfig.h, source/DirSignalConfig.h
