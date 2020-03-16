@@ -320,6 +320,31 @@ Parameters specific to particular experimental treatments.
 
 ## Multicellular Signal-differentiation Task
 
-Note...
+Note that this diagnostic task was cut from the final version of the paper.
+As such, any analyses included in this repository are entirely exploratory.
+
+In the multicellular signal differentiation task, a group of genetically homogeneous cells (demes)
+must develop from a single propagule-cell and solve a simple signal-response differentiation task.
+The figure below is given as an example.
+Each deme is evaluated as a single individual, and the deme's fitness is based on how well cells
+within the deme are able to differentiate their response to an environmental signal; further, we
+reward demes for _clustering_ their response types.
+For example, a deme with responses evenly distributed in space is less fit than a deme where all
+like-responses are adjacent to one another (e.g., the figure below).
 
 ![multicell-signal-differentiation-task-overview](./media/multicell-differentiation-task.svg)
+
+For this task, we evaluate demes in two distinct phases, each for a fixed number of time steps: a
+development phase followed by a response phase.
+At the beginning of the development phase, we initialize the deme with a single propagule SignalGP
+cell.
+During development, cells can self-replicate within their deme (without mutations), communicate with
+neighbors, and differentiate.
+Demes develop spatially on _W_ by _H_ toroidal grids.
+After the time allotted for development expires, we place each cell in a dormant state where only the
+contents of global memory and function regulation persist.
+During the response phase of evaluation, we isolate each cell (i.e., it may not communicate or use sensors)
+and record its response to an environmental signal.
+All cells receive an identical signal (with the same tag); we give each cell a fixed number of time
+steps to respond (or not) to the signal, and we record each cell's response.
+There are _K_ possible responses, and cells express a response by executing one of _K_ response instructions.
