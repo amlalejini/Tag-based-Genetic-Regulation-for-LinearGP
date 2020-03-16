@@ -14,19 +14,43 @@ output:
     toc_depth: 4
 ---
 
+Note that this diagnostic task was cut from the final version of the paper. As such,
+these analyses are entirely exploratory.
+
 ## Overview
 
-## Dependencies
+In the multicellular signal differentiation task, a group of genetically homogeneous cells (demes) must develop from a single propagule-cell and solve a simple signal-response differentiation task.
+The figure below is given as an example.
+Each deme is evaluated as a single individual, and the deme's fitness is based on how well cells within the deme are able to differentiate their response to an environmental signal; further, we reward demes for _clustering_ their response types.
+For example, a deme with reponses evenly distributed in space is less fit than a deme where all like-responses are adjacent to one another (e.g., the figure below).
+
+For this task, we evalaute demes in two distinct phases, each for a fixed number of time steps: a development phase followed by a response phase.
+At the beginning of the development phase, we initialize the deme with a single propagule SignalGP cell.
+During development, cells can self-replicate within their deme (without mutations), communicate with neighbors, and differentiate.
+Demes develop spatially on $W$ by $H$ toroidal grids.
+After the time allotted for development expires, we place each cell in a dormant state where only the contents of global memory and function regulation persist.
+During the reponse phase of evaluation, we isolate each cell (i.e., it may not communicate or use sensors) and record its response to an environmental signal.
+All cells receive an identical signal (with the same tag); we give each cell a fixed number of time steps to respond (or not) to the signal, and we record each cell's response.
+There are $K$ possible reponses, and cells express a response by executing one of $K$ response instructions.
+
+![multicell-signal-differentiation-example](../../../media/multicell-differentiation-task.svg)
+
+To maximize fitness, demes must coordinate to differentiate their responses during the development phase.
+Because demes are clonal and members are not given identifying information (e.g. a location or unique identifier), they must coordinate during development to specialize on different signal-responses.
+As such, they must either respond stochastically or commit to different response-roles during development using either genetic regulation or global memory (as both persist through dormancy).
+
+## Analysis Dependencies
 
 Load all required R libraries.
 
 ```{r, message=FALSE}
-library(ggplot2)  # (Wickham, 2009)
-library(dplyr)    # (Wickham et al., 2018)
-library(cowplot)  # (Wilke, 2018)
+library(ggplot2)  # (Wickham, 2016)
+library(tidyr)    # (Wickham and Henry, 2020)
+library(dplyr)    # (Wickham et al., 2020)
+library(reshape2) # (Wickham, 2007)
+library(cowplot)  # (Wilke, 2019)
 library(viridis)  # (Garnier, 2018)
-library(eulerr)
-library(tidyr)
+library(eulerr)   # (Larsson, 2020)
 ```
 
 ## Setup
@@ -39,17 +63,14 @@ data <- read.csv(data_loc, na.strings="NONE")
 data <- subset(data, select = -c(program))
 
 # Specify factors.
-data$matchbin_thresh <- factor(data$matchbin_thresh,
-                                     levels=c(0, 25, 50, 75))
-
-data$TAG_LEN <- factor(data$TAG_LEN,
-                       levels=c(32, 64, 128))
-data$DEME_SIZE <- data$DEME_HEIGHT*data$DEME_WIDTH
+data$matchbin_thresh <- factor(data$matchbin_thresh,levels=c(0, 25, 50, 75))
+data$TAG_LEN <- factor(data$TAG_LEN, levels=c(32, 64, 128))
 data$relies_on_reg <- factor(data$relies_on_reg, levels=c(0, 1))
 data$relies_on_mem <- factor(data$relies_on_mem, levels=c(0, 1))
 data$relies_on_msg <- factor(data$relies_on_msg, levels=c(0, 1))
 data$relies_on_imprinting <- factor(data$relies_on_imprinting, levels=c(0, 1))
 data$relies_on_repro_tag <- factor(data$relies_on_repro_tag, levels=c(0, 1))
+data$DEME_SIZE <- data$DEME_HEIGHT*data$DEME_WIDTH
 # Define function to summarize regulation/memory configurations.
 get_con <- function(reg, mem) {
   if (reg == "0" && mem == "0") {
@@ -237,7 +258,6 @@ save_plot("./imgs/multi-cell-differentiation-strategy-20x20.png", grid, base_hei
 ```
 
 What is the strategy breakdown (in more detail)? 
-
 
 ```{r}
 usage_data <- filter(data, condition=="both" & DEME_SIZE==400)

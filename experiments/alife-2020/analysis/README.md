@@ -75,7 +75,7 @@ Also note that [requirements.txt](./requirements.txt) gives the python requireme
 - regulatory-network-comparison.Rmd
   - Data analyses for comparing regulatory networks evolved in the repeated signal and directional
     signal tasks.
-- diffSigRespTaskAnalysis.Rmd
+- multicell-differentiation-task.Rmd
   - Data analyses for the multicellular differentiation task.
   - Note that these analyses were cut from the final paper, so, for the sake of space, we do not include
     the data necessary to run these analyses.
@@ -116,4 +116,4 @@ Also note that [requirements.txt](./requirements.txt) gives the python requireme
 - Reponse visualizations
   - Experiment output => aggMaxFitMCReg.py => generateMCResponsePatterns.py => gen_mc_resp_profiles.R
 - Data analyses
-  - Experiment output => aggMaxFitMCReg.py => diffSigRespTaskAnalysis.Rmd
+  - Experiment output => aggMaxFitMCReg.py => multicell-differentiation-task-analysis.Rmd
