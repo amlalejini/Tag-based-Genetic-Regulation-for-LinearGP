@@ -1,4 +1,10 @@
-theme: jekyll-theme-slate
-markdown: CommonMarkGhPages
+title: Genetic Regulation Facilitates the Evolution of Signal-response Plasticity in Digital Organisms
+
+permalink: ':title'
+pygments: true
+
+include:
+  - _documents
+
 plugins:
   - jekyll-relative-links

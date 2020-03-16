@@ -41,3 +41,5 @@ venv/
 # R
 .RData
 .Rhistory
+
+_site/
