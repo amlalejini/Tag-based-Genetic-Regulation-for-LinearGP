@@ -153,6 +153,10 @@ is equal to four. Thus, sixteen response sequences are possible.
 
 ### Experimental configuration
 
+Run-time parameters for the directional signal task can be found in [./source/DirSignalConfig.h](./source/DirSignalConfig.h).
+Generate a configuration file by executing the the directional signal task executable with the `--gen`
+command line option.
+
 | parameter | value | description |
 | --- | --- | --- |
 | matchbin_metric | streak |  Compile-time parameter. Which tag-matching metric should be used for tag-based referencing?  |
@@ -168,13 +172,13 @@ is equal to four. Thus, sixteen response sequences are possible.
 | POP_SIZE | 1000 | How many individuals are in our population? |
 | NUM_ENV_UPDATES | 4 | How many times does the environment change (i.e., produce an environmental signal)? |
 | NUM_ENV_STATES | 4 | How many possible responses are there? |
-| CPU_CYCLES_PER_ENV_UPDATE | 128 | | How many time steps do programs have to respond after receiving an environmental signal? |
+| CPU_CYCLES_PER_ENV_UPDATE | 128 | How many time steps do programs have to respond after receiving an environmental signal? |
 | MAX_ACTIVE_THREAD_CNT | 8 | How many threads are allowed to be running concurrently? |
 | MAX_THREAD_CAPACITY | 16 | How many threads are allowed to be running concurrently + the number allowed to be in a pending state? |
 | USE_GLOBAL_MEMORY | 1 | Do SignalGP digital organisms have access to global memory? |
 | USE_FUNC_REGULATION | 1 | Do SignalGP digital organisms have access to genetic regulation? |
 | SELECTION_MODE | tournament | What selection scheme should we use to select parents to reproduce? |
-| TOURNAMENT_SIZE | 8 | | How many individuals participate in each tournament for parent selection? |
+| TOURNAMENT_SIZE | 8 | How many individuals participate in each tournament for parent selection? |
 | EVAL_TRIAL_CNT | 1 | How many times should we independently evaluate each individual in the population (taking their minimum score)? |
 | TEST_SAMPLE_SIZE | 16 | How many environment sequences (each unique) should we use to evaluate each organism? |
 | MIN_FUNC_CNT | 0 | What is the minimum number of functions allowed in a program (constrains the mutation operators)? |
@@ -247,13 +251,72 @@ sequence of environmental signals, but may be deleterious in another.
 
 ### Experimental configuration
 
+Run-time parameters for the changing signal task can be found in [./source/ChgEnvConfig.h](./source/ChgEnvConfig.h).
+Generate a configuration file by executing the the changing signal task executable with the `--gen`
+command line option.
+
 #### General parameters
+
+Parameters used across conditions.
+
+| parameter | value | description |
+| --- | --- | --- |
+| matchbin_metric | streak |  Compile-time parameter. Which tag-matching metric should be used for tag-based referencing?  |
+| matchbin_thresh | 25 | Compile-time parameter. What is the minimum similarity threshold (as a percentage; e.g., 25 = 25% match) for tag-matches to succeed? |
+| matchbin_regulator | mult | Compile-time parameter. Which tag-matching regulator should be used for genetic regulation? |
+| TAG_LEN | 64 | Compile-time parameter. Number of bits in each tag bit string. |
+| INST_TAG_CNT | 1 | Compile-time parameter. How many argument-tags does each instruction have? |
+| INST_ARG_CNT | 3 | Compile-time parameter. How many numeric arguments does each instruction have? |
+| FUNC_NUM_TAGS | 1 | Compile-time parameter. How many function-tags does each function have? |
+| env_state_tags | Not a set-able parameter. Varied by replicate (randomly generated at beginning of run) | Defines the forward and backward environment signals. |
+| SEED | varied by replicate | Random number generator seed |
+| GENERATIONS | 10000 | How many generations should the population evolve? |
+| POP_SIZE | 1000 | How many individuals are in our population?How many times does the environment change (i.e., how many signals does the environment produce)? |
+| NUM_ENV_UPDATES | 16 | How many times does the environment change (i.e., how many signals does the environment produce)? |
+| NUM_ENV_STATES | 16 | How many possible responses are there? |
+| CPU_CYCLES_PER_ENV_UPDATE | 128 | How many time steps do programs have to respond after receiving an environmental signal? |
+| MAX_ACTIVE_THREAD_CNT | 8 | How many threads are allowed to be running concurrently? |
+| MAX_THREAD_CAPACITY | 16 | How many threads are allowed to be running concurrently + the number allowed to be in a pending state? |
+| TOURNAMENT_SIZE | 8 | How many individuals participate in each tournament for parent selection? |
+| EVAL_TRIAL_CNT | 1 | How many times should we independently evaluate each individual in the population (taking their minimum score)? |
+| MIN_FUNC_CNT | 0 | What is the minimum number of functions allowed in a program (constrains the mutation operators)? |
+| MAX_FUNC_CNT | 128 | What is the maximum number of functions allowed in a program (constrains the mutation operators)? |
+| MIN_FUNC_INST_CNT | 0 | What is the minimum number of instructions allowed in each program function? |
+| MAX_FUNC_INST_CNT | 64 | What is the maximum number of instructions allowed in each program function? |
+| INST_MIN_ARG_VAL | -8 | What is the minimum value for numeric instruction arguments? |
+| INST_MAX_ARG_VAL | 8 | What is the maximum value for numeric instruction arguments? |
+| MUT_RATE__FUNC_TAG_BF | 0.0005 | The per-bit mutation rate for function tags |
+| MUT_RATE__INST_TAG_BF | 0.0005 | The per-bit mutation rate for instruction-argument tags |
+| MUT_RATE__FUNC_DUP | 0.05 | The per-function mutation rate for whole-function duplications |
+| MUT_RATE__FUNC_DEL | 0.05 | The per-function mutation rate for whole-function deletions |
+| MUT_RATE__SEQ_SLIP | 0.05 | The per-function mutation rate for slip mutations (which can result in instruction-sequence duplications and deletions) |
+| MUT_RATE__INST_INS | 0.005 | The per-instruction mutation rate for single-instruction insertions |
+| MUT_RATE__INST_DEL | 0.005 | The per-instruction mutation rate for single-instruction deletions |
+| MUT_RATE__INST_SUB | 0.005 | The per-instruction mutation rate for substitutions |
+| MUT_RATE__INST_ARG_SUB | 0.005 | The per-instruction-argument rate for numeric argument substitutions |
+| OUTPUT_DIR | output | What directory will the experiment write output? |
+| STOP_ON_SOLUTION | 1 | Should we stop running (and output) as soon as a solution is found? |
+| SNAPSHOT_RESOLUTION | 1000 | At what resolution (in generations) should we output 'snapshot' data? |
+| SUMMARY_RESOLUTION | 100 | At what resolution (in generations) should we output summary data? |
+| ANALYZE_ORG_EVAL_TRIALS | 5000 | How many samples of environment sequences should we use to test for generalization? |
 
 #### Treatment-specific parameters
 
+Parameters specific to particular experimental treatments.
+
 **Regulation-augmented treatment**
 
+| parameter | value | description |
+| --- | --- | --- |
+| USE_GLOBAL_MEMORY | 1 | Do SignalGP digital organisms have access to global memory? |
+| USE_FUNC_REGULATION | 1 | Do SignalGP digital organisms have access to genetic regulation? |
+
 **Regulation-disabled treatment**
+
+| parameter | value | description |
+| --- | --- | --- |
+| USE_GLOBAL_MEMORY | 1 | Do SignalGP digital organisms have access to global memory? |
+| USE_FUNC_REGULATION | 0 | Do SignalGP digital organisms have access to genetic regulation? |
 
 ## Multicellular Signal-differentiation Task
 
