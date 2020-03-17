@@ -39,7 +39,7 @@ and this repository's source directory each have been added as includes (`-I` fl
 
 ## Compiling our experiments locally
 
-You should be able use our [Makefile](./Makefile) with some modifications:
+You should be able use our [Makefile](../Makefile) with some modifications:
 
 - Set the `PROJECT` variable to the diagnostic you want to compile
   - `PROJECT := alt-signal-exp` for the repeated signal task
