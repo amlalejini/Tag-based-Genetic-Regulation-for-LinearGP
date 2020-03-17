@@ -4,11 +4,11 @@ library(cowplot)  # (Wilke, 2018)
 library(viridis)  # (Garnier, 2018)
 library(scales)
 
-data_dir <- "/Users/amlalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/data/reg-graph-comps/dir-sig/"
-dump_dir <- "/Users/amlalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/analysis/"
+data_dir <- "/Users/amlalejini/devo_ws/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/data/balanced-reg-mult/reg-graph-comps/dir-sig/"
+dump_dir <- "/Users/amlalejini/devo_ws/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/"
 trace_img_dump_dir <- paste(dump_dir, "imgs/reg-network-comps/dir-sig-traces/", sep="")
-trace_ids <- 201:300
-generation <- 1000
+trace_ids <- 4001:4100
+generation <- 10000
 
 
 max_fit_data_file <- paste(data_dir, "max_fit_orgs.csv", sep="")
@@ -36,9 +36,8 @@ max_fit_data$condition <- mapply(get_con,
 max_fit_data$condition <- factor(max_fit_data$condition, 
                                  levels=c("regulation", "memory", "none", "both"))
 
-# trace_ids <- 203:203
-for (trace_id in trace_ids) {
 
+for (trace_id in trace_ids) {
   org_info <- filter(max_fit_data, SEED==trace_id)
   num_env_states <- org_info$NUM_ENV_STATES
   num_env_updates <- org_info$NUM_ENV_UPDATES
@@ -58,12 +57,13 @@ for (trace_id in trace_ids) {
   trace_data$right_similarity_score <- 1 - trace_data$X1_match_score
   trace_data$triggered <- (trace_data$is_match_cur_dir=="1") & (trace_data$cpu_step == "0")
   trace_data$is_running <- trace_data$is_running > 0 | 
-                           trace_data$triggered | 
-                           trace_data$is_cur_responding_module == "1"
+    trace_data$triggered | 
+    trace_data$is_cur_responding_module == "1"
   
   # Visualize each environment sequence
   test_ids <- levels(factor(trace_data$test_id))
   for (test_num in test_ids) {
+    # test_num <- 0
     test_data <- filter(trace_data, test_id==test_num)
     env_id <- test_num
     env_seq <- test_data$env_seq
@@ -105,7 +105,7 @@ for (trace_id in trace_ids) {
       }
     }
     test_data$regulator_state_simplified <- mapply(categorize_reg_state,
-                                                    test_data$regulator_state)
+                                                   test_data$regulator_state)
     
     
     # Extract only rows that correspond with modules that were active during evaluation.
@@ -152,10 +152,10 @@ for (trace_id in trace_ids) {
                  size=1) +
       # Draw points on triggered modules
       geom_point(data=filter(test_data, triggered==TRUE),
-                 shape=21, colour="black", fill="white", stroke=0.33, size=0.75,
+                 shape=8, colour="black", fill="white", stroke=0.5, size=1.5,
                  position=position_nudge(x = 0, y = 0.01)) +
       geom_point(data=filter(test_data, is_cur_responding_module==TRUE),
-                 shape=21, colour="white", fill="tomato", stroke=0.33, size=0.75,
+                 shape=21, colour="black", fill="white", stroke=0.5, size=1.5,
                  position=position_nudge(x = 0, y = 0.01)) +
       theme(legend.position = "top",
             legend.text = element_text(size=10),
@@ -163,12 +163,10 @@ for (trace_id in trace_ids) {
             axis.text.x = element_text(size=10)) +
       ggtitle(plot_title) +
       ggsave(out_name, height=10, width=8)    
-      
+    
+    
     out_name <- paste(trace_img_dump_dir, "trace-id-", trace_id, "-test-id-", test_num, "-left-similarity-score.pdf", sep="")
-    ggplot(test_data, 
-           aes(x=mod_id_x_pos, 
-               y=time_step, 
-               fill=left_similarity_score)) +
+    ggplot(test_data, aes(x=mod_id_x_pos, y=time_step, fill=left_similarity_score)) +
       scale_fill_viridis(option="plasma",
                          name="Score:  ",
                          limits=c(0, 1.0),
@@ -192,24 +190,21 @@ for (trace_id in trace_ids) {
       geom_hline(yintercept=filter(test_data, cpu_step==0)$time_step-0.5, size=1) +
       # Draw points on triggered modules
       geom_point(data=filter(test_data, triggered==TRUE),
-                 shape=21, colour="black", fill="white", stroke=0.33, size=0.75,
+                 shape=8, colour="black", fill="white", stroke=0.5, size=1.5,
                  position=position_nudge(x = 0, y = 0.01)) +
       geom_point(data=filter(test_data, is_cur_responding_module==TRUE),
-                 shape=21, colour="white", fill="tomato", stroke=0.33, size=0.75,
+                 shape=21, colour="black", fill="white", stroke=0.5, size=1.5,
                  position=position_nudge(x = 0, y = 0.01)) +
       theme(legend.position = "top",
             legend.text = element_text(size=10),
             axis.text.y = element_text(size=10),
             axis.text.x = element_text(size=10)) +
       guides(fill = guide_colourbar(barwidth = 10, barheight = 0.5)) +
-      ggtitle(title) +
+      ggtitle(plot_title) +
       ggsave(out_name, height=10, width=8)
     
     out_name <- paste(trace_img_dump_dir, "trace-id-", trace_id, "-test-id-", test_num, "-right-similarity-score.pdf", sep="")
-    ggplot(test_data, 
-           aes(x=mod_id_x_pos, 
-               y=time_step, 
-               fill=right_similarity_score)) +
+    ggplot(test_data, aes(x=mod_id_x_pos, y=time_step, fill=right_similarity_score)) +
       scale_fill_viridis(option="plasma",
                          name="Score:  ",
                          limits=c(0, 1.0),
@@ -233,17 +228,17 @@ for (trace_id in trace_ids) {
       geom_hline(yintercept=filter(test_data, cpu_step==0)$time_step-0.5, size=1) +
       # Draw points on triggered modules
       geom_point(data=filter(test_data, triggered==TRUE),
-                 shape=21, colour="black", fill="white", stroke=0.33, size=0.75,
+                 shape=8, colour="black", fill="white", stroke=0.5, size=1.5,
                  position=position_nudge(x = 0, y = 0.01)) +
       geom_point(data=filter(test_data, is_cur_responding_module==TRUE),
-                 shape=21, colour="white", fill="tomato", stroke=0.33, size=0.75,
+                 shape=21, colour="black", fill="white", stroke=0.5, size=1.5,
                  position=position_nudge(x = 0, y = 0.01)) +
       theme(legend.position = "top",
             legend.text = element_text(size=10),
             axis.text.y = element_text(size=10),
             axis.text.x = element_text(size=10)) +
       guides(fill = guide_colourbar(barwidth = 10, barheight = 0.5)) +
-      ggtitle(title) +
+      ggtitle(plot_title) +
       ggsave(out_name, height=10, width=8)
   }
 }

@@ -4,11 +4,11 @@ library(cowplot)  # (Wilke, 2018)
 library(viridis)  # (Garnier, 2018)
 library(scales)
 
-data_dir <- "/Users/amlalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/data/reg-graph-comps/alt-sig/"
-dump_dir <- "/Users/amlalejini/devo_ws/signalgp-genetic-regulation/experiments/alife-2020-sgp-reg/analysis/"
-trace_img_dump_dir <- paste(dump_dir, "imgs/reg-network-comps/alt-sig-traces/", sep="")
-trace_ids <- 301:400
-generation <- 1000
+data_dir <- "/Users/amlalejini/devo_ws/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/data/balanced-reg-mult/alt-sig/"
+dump_dir <- "/Users/amlalejini/devo_ws/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/"
+trace_img_dump_dir <- paste(dump_dir, "imgs/balanced-reg-mult/alt-sig/traces/", sep="")
+trace_ids <- 300001:303400
+generation <- 10000
 
 
 max_fit_org_data_loc <- paste(data_dir, "max_fit_orgs.csv", sep="")
@@ -35,10 +35,14 @@ max_fit_org_data$condition <- mapply(get_con,
                                      max_fit_org_data$USE_GLOBAL_MEMORY)
 max_fit_org_data$condition <- factor(max_fit_org_data$condition,
                                      levels=c("regulation", "memory", "none", "both"))
-# trace_id <- 386
+trace_ids <- 300300:303400
 for (trace_id in trace_ids) {
-
+  print(trace_id)
   org_info <- filter(max_fit_org_data, SEED==trace_id)
+  
+  if (nrow(org_info) == 0) {
+    next
+  }
   num_envs <- org_info$NUM_SIGNAL_RESPONSES
   score <- org_info$score
   condition <- org_info$condition
@@ -55,7 +59,7 @@ for (trace_id in trace_ids) {
   trace_data$similarity_score <- 1 - trace_data$match_score
   trace_data$triggered <- (trace_data$env_signal_closest_match == trace_data$module_id) & (trace_data$cpu_step == "0")
   trace_data$is_running <- trace_data$is_running > 0 | trace_data$triggered | trace_data$is_cur_responding_function == "1"
-
+  
   # correct response ids  
   response_time_steps <- levels(factor(filter(trace_data, is_cur_responding_function=="1")$time_step))
   responses_by_env_update <- list()
@@ -83,7 +87,7 @@ for (trace_id in trace_ids) {
     trace_data$module_id %in% response_ids
   
   trace_data$is_cur_responding_function <- trace_data$is_cur_responding_function=="1" &
-                                           trace_data$time_step %in% responses_by_env_update
+    trace_data$time_step %in% responses_by_env_update
   
   categorize_reg_state <- function(reg_state) {
     if (reg_state == 0) {
@@ -144,10 +148,10 @@ for (trace_id in trace_ids) {
                size=1) +
     # Draw points on triggered modules
     geom_point(data=filter(trace_data, triggered==TRUE),
-               shape=21, colour="black", fill="white", stroke=0.33, size=0.75,
+               shape=8, colour="black", fill="white", stroke=0.5, size=1.5,
                position=position_nudge(x = 0, y = 0.01)) +
     geom_point(data=filter(trace_data, is_cur_responding_function==TRUE),
-               shape=21, colour="white", fill="tomato", stroke=0.33, size=0.75,
+               shape=21, colour="black", fill="white", stroke=0.5, size=1.5,
                position=position_nudge(x = 0, y = 0.01)) +
     theme(legend.position = "top",
           legend.text = element_text(size=10),
@@ -184,10 +188,10 @@ for (trace_id in trace_ids) {
     geom_hline(yintercept=filter(trace_data, cpu_step==0)$time_step-0.5, size=1) +
     # Draw points on triggered modules
     geom_point(data=filter(trace_data, triggered==TRUE),
-               shape=21, colour="black", fill="white", stroke=0.33, size=0.75,
+               shape=8, colour="black", fill="white", stroke=0.5, size=1.5,
                position=position_nudge(x = 0, y = 0.01)) +
     geom_point(data=filter(trace_data, is_cur_responding_function==TRUE),
-               shape=21, colour="white", fill="tomato", stroke=0.33, size=0.75,
+               shape=21, colour="black", fill="white", stroke=0.5, size=1.5,
                position=position_nudge(x = 0, y = 0.01)) +
     theme(legend.position = "top",
           legend.text = element_text(size=10),
