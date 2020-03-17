@@ -102,7 +102,7 @@ Additionally, we investigate whether genetic regulation is functionally incorpor
 ## Reproducibility
 
 The source code for experiments using diagnostic tasks (e.g., the repeated-, directional-, and changing- signal tasks) are included in this repository (in the source directory). These experiments are implemented with C++ using the [Empirical library](https://github.com/devosoft/Empirical) and an [external implementation of SignalGP](https://github.com/amlalejini/SignalGP). We ran experiments on high-performance computing systems provided by the [Institute for Cyber-Enabled Research](https://icer.msu.edu/) at Michigan State university.
-[Data analyses](experiments/alife-2020/analysis/) were conducted using a combination of Python scripts (for data aggregation and processing) and R (for statistical analyses and visualizations).
+[Data analyses](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/tree/master/experiments/alife-2020/analysis/) were conducted using a combination of Python scripts (for data aggregation and processing) and R (for statistical analyses and visualizations).
 We used [this git commit version of DISHTINY](https://github.com/mmore500/dishtiny/tree/aa98eba0df4fa055b66fb3e12ceb51dbb7cbfe82) for our DISHTINY case study.
 DISHTINY analysis scripts can be found [here](https://github.com/mmore500/dishtiny/tree/53vgh).
 
@@ -123,10 +123,10 @@ experiments implemented in this repository.
 
 **Repository guide:**
 
-- [./experiments/](./experiments/): contains experiment details for exploratory experiments and experiments described in the paper
-  - [./experiments/alife-2020/analysis/](./experiments/alife-2020/analysis/): contains data aggregation, processing, and analysis scripts for results in the paper
-- [./media/](./media/): contains images used throughout our supplemental material
-- [./source/](./source/): contains the source code for our diagnostic task experiments
+- [./experiments/](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/tree/master/experiments): contains experiment details for exploratory experiments and experiments described in the paper
+  - [./experiments/alife-2020/analysis/](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/tree/master/experiments/alife-2020/analysis/): contains data aggregation, processing, and analysis scripts for results in the paper
+- [./media/](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/tree/master/media/): contains images used throughout our supplemental material
+- [./source/](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/tree/master/source/): contains the source code for our diagnostic task experiments
 
 ## References
 
