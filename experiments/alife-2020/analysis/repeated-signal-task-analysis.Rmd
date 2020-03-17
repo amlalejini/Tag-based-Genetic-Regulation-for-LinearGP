@@ -1,7 +1,7 @@
 ---
 title: "Repeated Signal Task Analysis"
-output: 
-  html_document: 
+output:
+  html_document:
     keep_md: no
     toc: true
     toc_float: true
@@ -14,7 +14,7 @@ output:
     toc_depth: 4
 ---
 
-This document is a companion to our submission to the 2020 Artificial Life conference, 'Genetic regulation facilitates the evolution of signal-response plasticity in digital organisms'. 
+This document is a companion to our submission to the 2020 Artificial Life conference, 'Genetic regulation facilitates the evolution of signal-response plasticity in digital organisms'.
 Here, we give an overview of the repeated signal diagnostic task (mirroring the overview given in the paper), and we provide our data analyses for our repeated signal task experiments. All of our source code for statistical analyses and data visualizations is embedded in this document. Please [file an issue or make a pull request on github](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/issues) to report any mistakes or request more explanation.
 
 ## Overview
@@ -28,17 +28,17 @@ generations <- 10000
 env_complexities <- c(2, 4, 8, 16)
 ```
 
-The repeated signal task is one of several diagnostics we used to evaluate whether genetic regulation faculties contribute to, and potentially detract from, the functionality of evolved SignalGP digital organisms. The repeated signal task, specifically, requires organisms to exhibit signal-response plasticity; that is, they must shift their response to a repeated environmental signal during their lifetime. 
+The repeated signal task is one of several diagnostics we used to evaluate whether genetic regulation faculties contribute to, and potentially detract from, the functionality of evolved SignalGP digital organisms. The repeated signal task, specifically, requires organisms to exhibit signal-response plasticity; that is, they must shift their response to a repeated environmental signal during their lifetime.
 
 The repeated signal task requires organisms to express the appropriate (distinct) response to a single environmental signal each of the $K$ times that it is repeated.
-Organisms express reponses by executing one of $K$ response instructions. For example, if organisms receive four signals from the environment (i.e., $K=2$), a maximally fit organism will express `Response-1` after the first signal, `Response-2` after the second, `Response-3` after the third, and `Response-4` after the fourth. The figure below depicts examples of optimal behavior in two- and four-signal tasks.
+Organisms express responses by executing one of $K$ response instructions. For example, if organisms receive four signals from the environment (i.e., $K=4$), a maximally fit organism will express `Response-1` after the first signal, `Response-2` after the second, `Response-3` after the third, and `Response-4` after the fourth. The figure below depicts examples of optimal behavior in two- and four-signal tasks.
 
 ![repeated-signal-task-overview](../../../media/repeated-signal-task.svg)
 
 Requiring organisms to execute a distinct instruction for each repetition of the environmental signal represents organisms having to perform distinct behaviors.
 Note that each repetition of the environmental signal is identical (i.e., each has an identical tag), and as such, organisms must track how many times the signal has been repeated and dynamically shift their responses accordingly.
 
-We allowed organisms `r time_steps` time steps to express the appropriate response after receiving an environmental signal. Once the allotted time to respond expires or the organism expresses any response, the organism's threads of execution are reset, resulting in a loss of all thread-local memory. 
+We allowed organisms `r time_steps` time steps to express the appropriate response after receiving an environmental signal. Once the allotted time to respond expires or the organism expresses any response, the organism's threads of execution are reset, resulting in a loss of all thread-local memory.
 _Only_ the contents of an organism's global memory and each function's regulatory state persist. The environment then produces the next signal (identical to all previous environment signals) to which the organism may respond.
 An organism must use their global memory buffer or genetic regulation to correctly shift its response to each subsequent environmental signal.
 An organism's fitness is equal to the number of correct responses expressed during evaluation.
@@ -55,7 +55,7 @@ For each number of repeated signals ($K=$ `r env_complexities`), we ran `r repli
 
 Note that in this document, we'll often refer to the treatments with the following shorthand (for space considerations when typing and on graphs):
 
-- Memory-only treatment as: 'mem.' or 'memory', 
+- Memory-only treatment as: 'mem.' or 'memory',
 - Regulation-augmented treatment as: 'both' (i.e., both global memory _and_ genetic regulation)
 - Regulation-only control as: 'reg.' or 'regulation'
 - Control with neither global memory access nor genetic regulation as: 'none' or 'neither'
@@ -118,14 +118,14 @@ get_con <- function(reg, mem) {
 }
 
 # Specify experimental condition for each datum.
-max_fit_org_data$condition <- mapply(get_con, 
+max_fit_org_data$condition <- mapply(get_con,
                                      max_fit_org_data$USE_FUNC_REGULATION,
                                      max_fit_org_data$USE_GLOBAL_MEMORY)
-max_fit_org_data$condition <- factor(max_fit_org_data$condition, 
+max_fit_org_data$condition <- factor(max_fit_org_data$condition,
                                      levels=c("regulation", "memory", "none", "both"))
 
 # Does this program rely on a stochastic strategy?
-max_fit_org_data$stochastic <- 1 - max_fit_org_data$consistent 
+max_fit_org_data$stochastic <- 1 - max_fit_org_data$consistent
 
 
 # Load network data
@@ -137,7 +137,7 @@ alpha <- 0.05
 correction_method <- "bonferroni"
 
 # Configure our default graphing theme
-theme_set(theme_cowplot()) 
+theme_set(theme_cowplot())
 ```
 
 ## What conditions produce solutions to the repeated signal task?
@@ -154,10 +154,10 @@ Note that an organism is categorized as a 'solution' if it can correctly respond
 
 # Labels for each
 label_lu <- c(
-  "2" = "2-signal task", 
-  "4" = "4-signal task", 
-  "8" = "8-signal task", 
-  "16" = "16-signal task", 
+  "2" = "2-signal task",
+  "4" = "4-signal task",
+  "8" = "8-signal task",
+  "16" = "16-signal task",
   "32" ="32-signal task"
 )
 
@@ -166,11 +166,11 @@ sol_data <- filter(max_fit_org_data, solution=="1")
 # Graph the number of solutions evolved in each condition, faceted by environmental complexity
 ggplot(sol_data, aes(x=condition, fill=condition)) +
   geom_bar() +
-  geom_text(stat="count", 
-            mapping=aes(label=..count..), 
+  geom_text(stat="count",
+            mapping=aes(label=..count..),
             position=position_dodge(0.9), vjust=0) +
-  scale_y_continuous(name="# evolved solutions", 
-                     breaks=seq(0, replicates, 10), 
+  scale_y_continuous(name="# evolved solutions",
+                     breaks=seq(0, replicates, 10),
                      limits=c(0, replicates+2)) +
   scale_fill_discrete(name="Condition:",
                       limits=c("regulation", "memory", "both", "none"),
@@ -178,22 +178,22 @@ ggplot(sol_data, aes(x=condition, fill=condition)) +
   scale_x_discrete(name="Condition",
                    limits=c("regulation", "memory", "both", "none"),
                    labels=c("R", "M", "B", "N")) +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES, 
-             nrow=1, 
+  facet_wrap(~ NUM_SIGNAL_RESPONSES,
+             nrow=1,
              labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
   ggtitle("Solution Counts") +
-  theme(legend.position="bottom", 
+  theme(legend.position="bottom",
         axis.title.x=element_blank()) +
-  ggsave("./imgs/repeated-signal-solultion-cnts.png", 
+  ggsave("./imgs/repeated-signal-solultion-cnts.png",
          width=8, height=2.75)
 ```
 
-Note that in the lowest-complexity environment ($K=2$), `r nrow(filter(sol_data, condition=="memory"))` replicates using the original version of SignalGP digital organisms produce solutions. 
-This, in addition to [hand-coded programs](../../../handcoded-examples.md), confirm that it is _possible_ to solve the repeated signal task without regulation. 
-We see many more replicates yield solutions when given access to genetic regulation. 
+Note that in the lowest-complexity environment ($K=2$), `r nrow(filter(sol_data, condition=="memory"))` replicates using the original version of SignalGP digital organisms produce solutions.
+This, in addition to [hand-coded programs](../../../handcoded-examples.md), confirm that it is _possible_ to solve the repeated signal task without regulation.
+We see many more replicates yield solutions when given access to genetic regulation.
 We also do not observe any solutions evolve when given access to neither genetic regulation nor global memory.
 
-We use a Fisher's exact test to determine if there are significant differences (p < `r alpha`) between the numbers of solutions found in the regulation-augmented SignalGP condition and all other conditions (within each environment complexity level). 
+We use a Fisher's exact test to determine if there are significant differences (p < `r alpha`) between the numbers of solutions found in the regulation-augmented SignalGP condition and all other conditions (within each environment complexity level).
 We correct for multiple comparisons using the `r correction_method` method.
 
 ```{r, echo=TRUE, results="asis"}
@@ -203,7 +203,7 @@ We correct for multiple comparisons using the `r correction_method` method.
 for (env in env_complexities) {
   env_data <- filter(max_fit_org_data, NUM_SIGNAL_RESPONSES==env)
   cat("#### ", env, "-signal task - statistical analysis of solution counts  \n")
-  
+
   # Extract successes/fails for each condition.
   mem_success_cnt <- nrow(filter(env_data, solution=="1" & condition=="memory"))
   mem_fail_cnt <- nrow(filter(env_data, condition=="memory")) - mem_success_cnt
@@ -213,44 +213,44 @@ for (env in env_complexities) {
   both_fail_cnt <- nrow(filter(env_data, condition=="both")) - both_success_cnt
   none_success_cnt <- nrow(filter(env_data, solution=="1" & condition=="none"))
   none_fail_cnt <- nrow(filter(env_data, condition=="none")) - none_success_cnt
-  
+
   # Regulation-enabled SGP vs. Classic SGP
-  mem_sgp_table <- matrix(c(both_success_cnt, 
-                            mem_success_cnt, 
-                            both_fail_cnt, 
-                            mem_fail_cnt), 
+  mem_sgp_table <- matrix(c(both_success_cnt,
+                            mem_success_cnt,
+                            both_fail_cnt,
+                            mem_fail_cnt),
                           nrow=2)
   rownames(mem_sgp_table) <- c("both", "mem-only")
   colnames(mem_sgp_table) <- c("success", "fail")
   mem_sgp_fishers <- fisher.test(mem_sgp_table)
-  
+
   # Regulation-enabled SGP vs. Regulation-only SGP
-  reg_sgp_table <- matrix(c(both_success_cnt, 
-                            reg_success_cnt, 
-                            both_fail_cnt, 
+  reg_sgp_table <- matrix(c(both_success_cnt,
+                            reg_success_cnt,
+                            both_fail_cnt,
                             reg_fail_cnt), nrow=2)
   rownames(reg_sgp_table) <- c("both", "reg-only")
   colnames(reg_sgp_table) <- c("success", "fail")
   reg_sgp_fishers <- fisher.test(reg_sgp_table)
-  
+
   # Regulation-enabled SGP vs. No reg/mem SGP
-  none_sgp_table <- matrix(c(both_success_cnt, 
-                             none_success_cnt, 
-                             both_fail_cnt, 
+  none_sgp_table <- matrix(c(both_success_cnt,
+                             none_success_cnt,
+                             both_fail_cnt,
                              none_fail_cnt), nrow=2)
   rownames(none_sgp_table) <- c("both", "none")
   colnames(none_sgp_table) <- c("success", "fail")
   none_sgp_fishers <- fisher.test(none_sgp_table)
-  
+
   # Adjust for multiple comparisons
-  adjusted <- p.adjust(p=c(mem_sgp_fishers$p.value, 
-                           reg_sgp_fishers$p.value, 
-                           none_sgp_fishers$p.value), 
+  adjusted <- p.adjust(p=c(mem_sgp_fishers$p.value,
+                           reg_sgp_fishers$p.value,
+                           none_sgp_fishers$p.value),
                        method=correction_method)
   mem_sgp_fishers$p.adjusted <- adjusted[1]
   reg_sgp_fishers$p.adjusted <- adjusted[2]
   none_sgp_fishers$p.adjusted <- adjusted[3]
-  
+
   # Summarize!
   no_sig_comps <- TRUE
   cat("Significant comparisons (Fisher's exact test, p < ", alpha, ",",
@@ -270,29 +270,29 @@ for (env in env_complexities) {
   if (no_sig_comps) {
     cat("- NONE  \n")
   }
-  
+
   cat("\n")
   cat("**Results - Regulation-augmented SignalGP (both regulation & global memory) vs. global-memory-only SignalGP (original version of SignalGP)**  \n")
   cat("```\n")
   print(mem_sgp_table)
   print(mem_sgp_fishers)
-  cat("p.adjusted = ", mem_sgp_fishers$p.adjusted, 
+  cat("p.adjusted = ", mem_sgp_fishers$p.adjusted,
       " (method = ", correction_method, ")", "  \n")
   cat("```\n")
-  
+
   cat("**Results - Regulation-augmented SignalGP (both regulation & global memory) vs. regulation-only SignalGP (no global memory access)**  \n")
   cat("```\n")
   print(reg_sgp_table)
   print(reg_sgp_fishers)
-  cat("p.adjusted = ", reg_sgp_fishers$p.adjusted, 
+  cat("p.adjusted = ", reg_sgp_fishers$p.adjusted,
       " (method = ", correction_method, ")", "  \n")
   cat("```\n")
-  
+
   cat("**Results - Regulation-augmented SignalGP (both regulation & global memory) vs. regulation- and memory-disabled SignalGP**  \n")
   cat("```\n")
   print(none_sgp_table)
   print(none_sgp_fishers)
-  cat("p.adjusted = ", none_sgp_fishers$p.adjusted, 
+  cat("p.adjusted = ", none_sgp_fishers$p.adjusted,
       " (method = ", correction_method,")", "  \n")
   cat("```\n")
   cat("\n")
@@ -318,10 +318,10 @@ ggplot(max_fit_org_data, aes(x=condition, y=score, color=condition)) +
   scale_x_discrete(name="Condition",
                    breaks=c("regulation", "memory", "none", "both"),
                    labels=c("R", "M", "N", "B")) +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES, 
-             scales="free_y", 
+  facet_wrap(~ NUM_SIGNAL_RESPONSES,
+             scales="free_y",
              labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
- theme(legend.position="bottom", 
+ theme(legend.position="bottom",
       axis.title.x=element_blank()) +
   ggtitle("Task Scores") +
   ggsave("./imgs/repeated-signal-scores.png", width=16,height=8)
@@ -329,12 +329,12 @@ ggplot(max_fit_org_data, aes(x=condition, y=score, color=condition)) +
 
 ## How many generations elapse before solutions arise?
 
-Do some conditions lead to the evolution of effective signal-response plasticity than other conditions? 
-Here, we compare the generation at which solutions arise. Note that it is not a truly fair comparison to make between conditions where an unequal number of replicates produce solutions. 
+Do some conditions lead to the evolution of effective signal-response plasticity than other conditions?
+Here, we compare the generation at which solutions arise. Note that it is not a truly fair comparison to make between conditions where an unequal number of replicates produce solutions.
 **Thus, these comparisons are purely exploratory, and we can make no strong claims based on them.**
 
-If we wanted to make strong claims based on the time it took for solutions to evolve, we should pick an arbitrary threshold, say 50%. 
-Then, re-run a number of replicates for each condition for as long as it takes 50% of them to produce a solution. 
+If we wanted to make strong claims based on the time it took for solutions to evolve, we should pick an arbitrary threshold, say 50%.
+Then, re-run a number of replicates for each condition for as long as it takes 50% of them to produce a solution.
 We could then compare the generations at which solutions evolved in the first 50% of the replicates to produce a solution.
 
 ```{r}
@@ -348,13 +348,13 @@ ggplot(sol_data,
   scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
                    labels=c("R", "M", "N", "B")) +
   scale_y_continuous(name="Generation first solution evolved \n(log scale)",
-                     limits=c(0, 10000), 
-                     breaks=c(0, 10, 100, 1000, 10000), 
+                     limits=c(0, 10000),
+                     breaks=c(0, 10, 100, 1000, 10000),
                      trans="pseudo_log") +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES, 
-             nrow=1, 
+  facet_wrap(~ NUM_SIGNAL_RESPONSES,
+             nrow=1,
              labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
-  theme(legend.position="bottom", 
+  theme(legend.position="bottom",
         axis.title.x=element_blank()) +
   ggsave("./imgs/repeated-signal-solve-time.png",
          width=8,
@@ -370,14 +370,14 @@ ggplot(max_fit_org_data,
   scale_x_discrete(breaks=c("regulation", "memory", "none", "both"),
                    labels=c("R", "M", "N", "B")) +
   scale_y_continuous(name="Generation first solution evolved \n(log scale)",
-                     limits=c(0, 10000), 
-                     breaks=c(0, 10, 100, 1000, 10000), 
+                     limits=c(0, 10000),
+                     breaks=c(0, 10, 100, 1000, 10000),
                      trans="pseudo_log") +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES, 
-             nrow=1, 
+  facet_wrap(~ NUM_SIGNAL_RESPONSES,
+             nrow=1,
              labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
-  theme(legend.position="bottom", 
-        axis.text.x=element_blank(), 
+  theme(legend.position="bottom",
+        axis.text.x=element_blank(),
         axis.title.x=element_blank()) +
   ggsave("./imgs/repeated-signal-solve-time-all.png",
          width=8,
@@ -389,7 +389,7 @@ ggplot(max_fit_org_data,
 Comparing time to solutions evolving (only in successful replicates) in the two-signal task using a Kruskal Wallis test and, if significant, a post-hoc wilcoxon rank-sum test.
 
 ```{r}
-env_2_sol_data <- filter(max_fit_org_data, 
+env_2_sol_data <- filter(max_fit_org_data,
                          solution=="1" & NUM_SIGNAL_RESPONSES==2)
 # First, kruskal-wallis to test for significant differences among groups
 env2_kt <- kruskal.test(update ~ condition,
@@ -398,9 +398,9 @@ print(env2_kt)
 # Next, if kruskal-wallis is significant, perform a pairwise wilcoxon rank-sum test
 if (env2_kt$p.value < alpha) {
   # x: response vector; g: grouping vector
-  env2_wt <- pairwise.wilcox.test(x=env_2_sol_data$update, 
-                                  g=env_2_sol_data$condition, 
-                                  p.adjust.method=correction_method, 
+  env2_wt <- pairwise.wilcox.test(x=env_2_sol_data$update,
+                                  g=env_2_sol_data$condition,
+                                  p.adjust.method=correction_method,
                                   exact=FALSE)
   print(env2_wt)
 } else {
@@ -415,18 +415,18 @@ Solutions evolved with access to genetic regulation arise in fewer generations t
 Comparing time to solutions evolving (only in successful replicates) in the four-signal task using a Kruskal Wallis test and, if significant, a post-hoc wilcoxon rank-sum test.
 
 ```{r}
-env_4_sol_data <- filter(max_fit_org_data, 
+env_4_sol_data <- filter(max_fit_org_data,
                          solution=="1" & NUM_SIGNAL_RESPONSES==4)
 # First, kruskal-wallis to test for significant differences among groups
-env4_kt <- kruskal.test(update ~ condition, 
+env4_kt <- kruskal.test(update ~ condition,
                         data=env_4_sol_data)
 print(env4_kt)
 # Next, if kruskal-wallis is significant, perform a pairwise wilcoxon rank-sum test
 if (env4_kt$p.value < alpha) {
   # x: response vector; g: grouping vector
-  env4_wt <- pairwise.wilcox.test(x=env_4_sol_data$update, 
-                                  g=env_4_sol_data$condition, 
-                                  p.adjust.method=correction_method, 
+  env4_wt <- pairwise.wilcox.test(x=env_4_sol_data$update,
+                                  g=env_4_sol_data$condition,
+                                  p.adjust.method=correction_method,
                                   exact=FALSE)
   print(env4_wt)
 } else {
@@ -444,15 +444,15 @@ Comparing time to solutions evolving (only in successful replicates) in the eigh
 env_8_sol_data <- filter(max_fit_org_data,
                          solution=="1" & NUM_SIGNAL_RESPONSES==8)
 # First, kruskal-wallis to test for significant differences among groups
-env8_kt <- kruskal.test(update ~ condition, 
+env8_kt <- kruskal.test(update ~ condition,
                         data=env_8_sol_data)
 print(env8_kt)
 # Next, if kruskal-wallis is significant, perform a pairwise wilcoxon rank-sum test
 if (env8_kt$p.value < alpha) {
   # x: response vector; g: grouping vector
-  env8_wt <- pairwise.wilcox.test(x=env_8_sol_data$update, 
-                                  g=env_8_sol_data$condition, 
-                                  p.adjust.method=correction_method, 
+  env8_wt <- pairwise.wilcox.test(x=env_8_sol_data$update,
+                                  g=env_8_sol_data$condition,
+                                  p.adjust.method=correction_method,
                                   exact=FALSE)
   print(env8_wt)
 } else {
@@ -468,17 +468,17 @@ Comparing time to solutions evolving (only in successful replicates) in the eigh
 
 ```{r, echo=TRUE}
 # First, kruskal-wallis to test for significant differences among groups
-env_16_sol_data <- filter(max_fit_org_data, 
+env_16_sol_data <- filter(max_fit_org_data,
                           solution=="1" & NUM_SIGNAL_RESPONSES==16)
-env16_kt <- kruskal.test(update ~ condition, 
+env16_kt <- kruskal.test(update ~ condition,
                          data=env_16_sol_data)
 print(env16_kt)
 # Next, if kruskal-wallis is significant, perform a pairwise wilcoxon rank-sum test
 if (env16_kt$p.value < alpha) {
   # x: response vector; g: grouping vector
-  env16_wt <- pairwise.wilcox.test(x=env_16_sol_data$update, 
-                                   g=env_16_sol_data$condition, 
-                                   p.adjust.method=correction_method, 
+  env16_wt <- pairwise.wilcox.test(x=env_16_sol_data$update,
+                                   g=env_16_sol_data$condition,
+                                   p.adjust.method=correction_method,
                                    exact=FALSE)
   print(env16_wt)
 } else {
@@ -493,14 +493,14 @@ There is no significant difference in time for solutions to arise in conditions 
 ### Do solutions rely on genetic regulation or global memory access for signal-response plasticity?
 
 Here, we take a closer at the strategies employed by solutions evolved across environment complexities.
-For each evolved solution, we independently knocked out (disabled) function regulation and global memory access and measured the fitness effects knocking each out. 
+For each evolved solution, we independently knocked out (disabled) function regulation and global memory access and measured the fitness effects knocking each out.
 If a knockout resulted in a decrease in fitness, we labeled that organism as relying on that functionality (global memory or genetic regulation) for success.
 
-The graph below gives the proportion of solutions that rely exclusively on regulation, exclusively on global memory, on both global memory and regulation, and on neither functionality. 
+The graph below gives the proportion of solutions that rely exclusively on regulation, exclusively on global memory, on both global memory and regulation, and on neither functionality.
 
 ```{r}
 # Do a little bit of data processing...
-reg_and_mem_solutions <- filter(max_fit_org_data, 
+reg_and_mem_solutions <- filter(max_fit_org_data,
                                 solution=="1")
 get_strategy <- function(use_reg, use_mem) {
   if (use_reg=="0" && use_mem=="0") {
@@ -517,34 +517,34 @@ get_strategy <- function(use_reg, use_mem) {
 }
 
 # Specify experimental conditions (to make labeling easier).
-reg_and_mem_solutions$strategy <- 
+reg_and_mem_solutions$strategy <-
   mapply(get_strategy,
          reg_and_mem_solutions$relies_on_regulation,
          reg_and_mem_solutions$relies_on_global_memory)
 
 reg_and_mem_solutions$strategy <-
-  factor(reg_and_mem_solutions$strategy, 
-         levels=c("use regulation", 
-                  "use memory", 
-                  "use neither", 
+  factor(reg_and_mem_solutions$strategy,
+         levels=c("use regulation",
+                  "use memory",
+                  "use neither",
                   "use both"))
 
-ggplot(reg_and_mem_solutions, 
+ggplot(reg_and_mem_solutions,
        mapping=aes(x=NUM_SIGNAL_RESPONSES, fill=strategy)) +
   geom_bar(position="fill", stat="count") +
-  geom_text(stat='count', 
-            mapping=aes(label=..count..), 
+  geom_text(stat='count',
+            mapping=aes(label=..count..),
             position=position_fill(vjust=-0.03)) +
   ylab("% of Solutions") +
   xlab("Environment Complexity") +
-  scale_fill_discrete(name="Strategy:", 
-                      breaks=c("use regulation", 
-                               "use memory", 
-                               "use neither", 
+  scale_fill_discrete(name="Strategy:",
+                      breaks=c("use regulation",
+                               "use memory",
+                               "use neither",
                                "use both"),
-                      labels=c("Use regulation (only)", 
-                               "Use global memory (only)", 
-                               "Use neither", 
+                      labels=c("Use regulation (only)",
+                               "Use global memory (only)",
+                               "Use neither",
                                "Use both")) +
   facet_wrap(~condition) +
   theme(legend.position = "bottom") +
@@ -558,7 +558,7 @@ In conditions where memory is the only mechanism for solving the repeated signal
 
 ### Are evolved programs relying on stochastic strategies?
 
-To confirm that evolved organisms are not relying on stochastic approaches to solve the repeated signal task, we tested the most fit individual from each replicate at the end of each run three times. 
+To confirm that evolved organisms are not relying on stochastic approaches to solve the repeated signal task, we tested the most fit individual from each replicate at the end of each run three times.
 If an organism's phenotype was not identical across each of the three trials, we labeled is as using a stochastic strategy.
 
 ```{r}
@@ -575,7 +575,7 @@ ggplot(max_fit_org_data, aes(x=condition, fill=stochastic)) +
   scale_x_discrete(name="Condition",
                    breaks=c("regulation", "memory", "none", "both"),
                    labels=c("Regulation", "Global\nMemory", "Neither", "Both")) +
-  facet_wrap(~ NUM_SIGNAL_RESPONSES, 
+  facet_wrap(~ NUM_SIGNAL_RESPONSES,
              labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu))
 ```
 
@@ -584,7 +584,7 @@ Note, this is unsurprising, as we did not give programs access to instructions c
 
 ### What forms of genetic regulation do evolved digital organisms rely on?
 
-We used two approaches to tease apart forms of genetic regulation that evolved SignalGP digital organisms rely on: 
+We used two approaches to tease apart forms of genetic regulation that evolved SignalGP digital organisms rely on:
 
 1. We traced program execution step-by-step (including each function's regulatory state) during evaluation on the repeated signal task and extracted regulatory interactions between executing functions as a directed graph. We draw a directed edge from function A to function B if B's regulatory state changes while A is executing. We label each edge as up- or down-regulation.
 2. We independently knockout up-regulation and down-regulation and record the fitness of knockout-variants. If fitness decreases when a target functionality is knocked out, we categorize the program as relying on that functionality.
@@ -597,7 +597,7 @@ Below we give the distribution of edge types found in _all_ evolved digital orga
 
 ```{r}
 # The regulatory network data is keyed by run id (or the run's random number seed)
-temp <- filter(max_fit_org_data, 
+temp <- filter(max_fit_org_data,
                solution=="1" & (condition=="both" | condition=="regulation"))
 # Make a lookup function to get each run's environment complexity level.
 get_num_sig_resps <- function(seed) {
@@ -605,13 +605,13 @@ get_num_sig_resps <- function(seed) {
 }
 
 # Process/cleanup the network data
-melted <- melt(filter(reg_network_data, 
-                      run_id %in% temp$SEED), 
+melted <- melt(filter(reg_network_data,
+                      run_id %in% temp$SEED),
                 variable.name = "reg_edge_type",
                 value.name = "reg_edges_cnt",
                 measure.vars=c("repressed_edges_cnt", "promoted_edges_cnt"))
 
-melted$NUM_SIGNAL_RESPONSES <- mapply(get_num_sig_resps, 
+melted$NUM_SIGNAL_RESPONSES <- mapply(get_num_sig_resps,
                                       melted$run_id)
 melted$NUM_SIGNAL_RESPONSES <- factor(melted$NUM_SIGNAL_RESPONSES)
 
@@ -619,7 +619,7 @@ ggplot(melted, aes(x=NUM_SIGNAL_RESPONSES, y=reg_edges_cnt, color=reg_edge_type)
   geom_boxplot() +
   xlab("Environmental Complexity") +
   ylab("# Edges") +
-  scale_color_discrete(name="Edge type:", 
+  scale_color_discrete(name="Edge type:",
                        limits=c("repressed_edges_cnt", "promoted_edges_cnt"),
                        labels=c("Repressing edges", "Promoting edges")) +
   theme(legend.position="bottom",
@@ -648,8 +648,8 @@ How successful programs rely on:
 
 ```{r}
 # Limit the genotypes we're looking at to just solutions from the 'both' and 'regulation' conditions.
-regulation_orgs <- filter(max_fit_org_data, 
-                          solution=="1" & 
+regulation_orgs <- filter(max_fit_org_data,
+                          solution=="1" &
                             (condition=="both" | condition=="regulation"))
 ```
 
@@ -673,47 +673,47 @@ get_reg_relies_on <- function(uses_down, uses_up, uses_reg) {
   }
 }
 
-regulation_orgs$regulation_type_usage <- 
-  mapply(get_reg_relies_on, 
+regulation_orgs$regulation_type_usage <-
+  mapply(get_reg_relies_on,
          regulation_orgs$relies_on_down_reg,
          regulation_orgs$relies_on_up_reg,
          regulation_orgs$relies_on_regulation)
 
 regulation_orgs$regulation_type_usage <-
-  factor(regulation_orgs$regulation_type_usage, 
-         levels=c("neither", 
+  factor(regulation_orgs$regulation_type_usage,
+         levels=c("neither",
                   "either",
-                  "up-regulation-only", 
-                  "down-regulation-only", 
+                  "up-regulation-only",
+                  "down-regulation-only",
                   "up-and-down-regulation"))
 
 ggplot(regulation_orgs, aes(x=regulation_type_usage, fill=regulation_type_usage)) +
   geom_bar() +
-  geom_text(stat="count", 
-          aes(label=..count..), 
+  geom_text(stat="count",
+          aes(label=..count..),
           position=position_dodge(0.9), vjust=0) +
   ylim(0, 2*replicates) +
   scale_x_discrete(name="Regulation Usage",
-                   limits=c("neither", 
+                   limits=c("neither",
                             "either",
-                            "up-regulation-only", 
-                            "down-regulation-only", 
+                            "up-regulation-only",
+                            "down-regulation-only",
                             "up-and-down-regulation"),
-                   labels=c("None", 
+                   labels=c("None",
                             "Either",
-                            "Up\n(only)", 
-                            "Down\n(only)", 
+                            "Up\n(only)",
+                            "Down\n(only)",
                             "Both")) +
   scale_fill_discrete(name="Regulation Usage",
-                      limits=c("neither", 
+                      limits=c("neither",
                                "either",
-                               "up-regulation-only", 
-                               "down-regulation-only", 
+                               "up-regulation-only",
+                               "down-regulation-only",
                                "up-and-down-regulation"),
-                      labels=c("None", 
+                      labels=c("None",
                                "Either",
-                               "Up\n(only)", 
-                               "Down\n(only)", 
+                               "Up\n(only)",
+                               "Down\n(only)",
                                "Both")) +
   facet_wrap(~NUM_SIGNAL_RESPONSES) +
   theme(legend.position="none") +
@@ -723,29 +723,29 @@ ggplot(regulation_orgs, aes(x=regulation_type_usage, fill=regulation_type_usage)
 ggplot(regulation_orgs, aes(x=regulation_type_usage, fill=regulation_type_usage)) +
   geom_bar() +
   geom_text(stat="count",
-            aes(label=..count..), 
+            aes(label=..count..),
             position=position_dodge(0.9), vjust=0) +
   ylim(0, 2*replicates*length(env_complexities)) +
   scale_x_discrete(name="Regulation Usage",
                    limits=c("neither",
                             "either",
-                            "up-regulation-only", 
-                            "down-regulation-only", 
+                            "up-regulation-only",
+                            "down-regulation-only",
                             "up-and-down-regulation"),
-                   labels=c("None", 
-                            "Either", 
-                            "Up\n(only)", 
-                            "Down\n(only)", 
+                   labels=c("None",
+                            "Either",
+                            "Up\n(only)",
+                            "Down\n(only)",
                             "Both")) +
   scale_fill_discrete(name="Regulation Usage",
-                      limits=c("neither", 
-                               "either", 
-                               "up-regulation-only", 
-                               "down-regulation-only", 
+                      limits=c("neither",
+                               "either",
+                               "up-regulation-only",
+                               "down-regulation-only",
                                "up-and-down-regulation"),
-                      labels=c("None", 
-                               "Up\n(only)", 
-                               "Down\n(only)", 
+                      labels=c("None",
+                               "Up\n(only)",
+                               "Down\n(only)",
                                "Both")) +
   theme(legend.position="none") +
   ggtitle("Regulation usage across all environments") +
@@ -766,7 +766,7 @@ Specifically, we'll be looking at the solution evolved in run id `r trace_id`.
 
 ```{r}
 # Extract relevant information about solution of interest.
-org_info <- filter(max_fit_org_data, 
+org_info <- filter(max_fit_org_data,
                    SEED==trace_id)
 num_envs <- org_info$NUM_SIGNAL_RESPONSES
 score <- org_info$score
@@ -791,26 +791,26 @@ for (t in response_time_steps) {
   if (env_update %in% names(responses_by_env_update)) {
     if (as.integer(t) > as.integer(responses_by_env_update[env_update])) {
       responses_by_env_update[env_update] = t
-    } 
+    }
   } else {
     responses_by_env_update[env_update] = t
   }
 }
 
 # Build a list of modules that were triggered & those that responded to a signal
-triggered_ids <- 
+triggered_ids <-
   levels(factor(filter(trace_data, triggered==TRUE)$module_id))
 
-response_ids <- 
+response_ids <-
   levels(factor(filter(trace_data, is_cur_responding_function=="1")$module_id))
 
-trace_data$is_ever_active <- 
-  trace_data$is_ever_active=="1" | 
-  trace_data$is_running | 
-  trace_data$module_id %in% triggered_ids | 
+trace_data$is_ever_active <-
+  trace_data$is_ever_active=="1" |
+  trace_data$is_running |
+  trace_data$module_id %in% triggered_ids |
   trace_data$module_id %in% response_ids
 
-trace_data$is_cur_responding_function <- 
+trace_data$is_cur_responding_function <-
   trace_data$is_cur_responding_function=="1" &
   trace_data$time_step %in% responses_by_env_update
 
@@ -828,7 +828,7 @@ categorize_reg_state <- function(reg_state) {
     return("unknown")
   }
 }
-trace_data$regulator_state_simplified <- 
+trace_data$regulator_state_simplified <-
   mapply(categorize_reg_state, trace_data$regulator_state)
 
 # Omit all in-active rows
@@ -851,19 +851,19 @@ active_data$mod_id_x_pos <- mapply(get_module_x_pos, active_data$module_id)
 First, let's omit all non-active funcitons.
 
 ```{r}
-out_name <- paste("./imgs/case-study-trace-id-", 
-                  trace_id, 
-                  "-regulator-state-vertical.pdf", 
+out_name <- paste("./imgs/case-study-trace-id-",
+                  trace_id,
+                  "-regulator-state-vertical.pdf",
                   sep="")
-reg_plot <- 
-  ggplot(active_data, 
+reg_plot <-
+  ggplot(active_data,
          aes(x=mod_id_x_pos, y=time_step, fill=regulator_state_simplified)) +
   scale_fill_viridis(name="Regulation:",
-                     limits=c("promoted", 
-                              "neutral", 
+                     limits=c("promoted",
+                              "neutral",
                               "repressed"),
-                     labels=c("+", 
-                              "\u00F8", 
+                     labels=c("+",
+                              "\u00F8",
                               "-"),
                      discrete=TRUE, direction=-1) +
   scale_x_discrete(name="Function ID",
@@ -878,10 +878,10 @@ reg_plot <-
             height=1,
             alpha=0.75) +
   # Highlight actively running functions
-  geom_tile(data=filter(active_data, is_running==TRUE | triggered==TRUE), 
+  geom_tile(data=filter(active_data, is_running==TRUE | triggered==TRUE),
             color="black", size=0.8, width=1, height=1) +
   # Environment delimiters
-  geom_hline(yintercept=filter(active_data, cpu_step==0)$time_step - 0.5, 
+  geom_hline(yintercept=filter(active_data, cpu_step==0)$time_step - 0.5,
              size=1.25, color="black") +
   # Draw points on triggered modules
   geom_point(data=filter(active_data, triggered==TRUE),
@@ -905,15 +905,15 @@ reg_plot
 For fun, we can look at the same visualization without omitting unexecuted functions.
 
 ```{r}
-reg_plot <- 
-  ggplot(trace_data, 
+reg_plot <-
+  ggplot(trace_data,
          aes(x=module_id, y=time_step, fill=regulator_state_simplified)) +
   scale_fill_viridis(name="Regulation:",
-                     limits=c("promoted", 
-                              "neutral", 
+                     limits=c("promoted",
+                              "neutral",
                               "repressed"),
-                     labels=c("+", 
-                              "\u00F8", 
+                     labels=c("+",
+                              "\u00F8",
                               "-"),
                      discrete=TRUE, direction=-1) +
   xlab("Function ID") +
@@ -926,10 +926,10 @@ reg_plot <-
             height=1,
             alpha=0.75) +
   # Highlight actively running functions
-  geom_tile(data=filter(trace_data, is_running==TRUE | triggered==TRUE), 
+  geom_tile(data=filter(trace_data, is_running==TRUE | triggered==TRUE),
             color="black", size=0.8, width=1, height=1) +
   # Environment delimiters
-  geom_hline(yintercept=filter(trace_data, cpu_step==0)$time_step - 0.5, 
+  geom_hline(yintercept=filter(trace_data, cpu_step==0)$time_step - 0.5,
              size=1.25, color="black") +
   # Draw points on triggered modules
   geom_point(data=filter(trace_data, triggered==TRUE),
@@ -956,9 +956,9 @@ Again, we'll omit unexecuted functions.
 ```{r}
 
 out_name <- paste("./imgs/case-study-trace-id-", trace_id, "-similarity-score.pdf", sep="")
-match_plot <- ggplot(active_data, 
-                     aes(x=mod_id_x_pos, 
-                         y=time_step, 
+match_plot <- ggplot(active_data,
+                     aes(x=mod_id_x_pos,
+                         y=time_step,
                          fill=similarity_score)) +
   scale_fill_viridis(option="plasma",
                      name="Score:  ",
@@ -971,15 +971,15 @@ match_plot <- ggplot(active_data,
   scale_y_discrete(name="Time Step",
                    limits=seq(0, 30, 10)) +
   # Background
-  geom_tile(color="white", 
-            size=0.2, 
-            width=1, 
+  geom_tile(color="white",
+            size=0.2,
+            width=1,
             height=1) +
   # Module is-running highlights
-  geom_tile(data=filter(active_data, is_running==TRUE | triggered==TRUE), 
-            color="black", 
-            width=1, 
-            height=1, 
+  geom_tile(data=filter(active_data, is_running==TRUE | triggered==TRUE),
+            color="black",
+            width=1,
+            height=1,
             size=0.8) +
   # Environment delimiters
   geom_hline(yintercept=filter(active_data, cpu_step==0)$time_step-0.5, size=1) +
@@ -1001,9 +1001,9 @@ match_plot
 ```
 
 ```{r}
-match_plot <- ggplot(trace_data, 
-                     aes(x=module_id, 
-                         y=time_step, 
+match_plot <- ggplot(trace_data,
+                     aes(x=module_id,
+                         y=time_step,
                          fill=similarity_score)) +
   scale_fill_viridis(option="plasma",
                      name="Score:  ",
@@ -1014,15 +1014,15 @@ match_plot <- ggplot(trace_data,
   scale_y_discrete(name="Time Step",
                    limits=seq(0, 30, 10)) +
   # Background
-  geom_tile(color="white", 
-            size=0.2, 
-            width=1, 
+  geom_tile(color="white",
+            size=0.2,
+            width=1,
             height=1) +
   # Module is-running highlights
-  geom_tile(data=filter(trace_data, is_running==TRUE | triggered==TRUE), 
-            color="black", 
-            width=1, 
-            height=1, 
+  geom_tile(data=filter(trace_data, is_running==TRUE | triggered==TRUE),
+            color="black",
+            width=1,
+            height=1,
             size=0.8) +
   # Environment delimiters
   geom_hline(yintercept=filter(trace_data, cpu_step==0)$time_step-0.5, size=1) +
@@ -1048,15 +1048,15 @@ We use the igraph package to draw this organism's gene regulatory network.
 
 ```{r, message=FALSE}
 # Networks!
-graph_nodes_loc <- paste(data_dir, 
+graph_nodes_loc <- paste(data_dir,
                          "igraphs/reg_graph_id-", trace_id, "_nodes.csv", sep="")
 graph_edges_loc <- paste(data_dir,
                          "igraphs/reg_graph_id-", trace_id, "_edges.csv", sep="")
 graph_nodes_data <- read.csv(graph_nodes_loc, na.strings="NONE")
 graph_edges_data <- read.csv(graph_edges_loc, na.strings="NONE")
 
-network <- graph_from_data_frame(d=graph_edges_data, 
-                                 vertices=graph_nodes_data, 
+network <- graph_from_data_frame(d=graph_edges_data,
+                                 vertices=graph_nodes_data,
                                  directed=TRUE)
 
 # Setup edge styling
@@ -1065,8 +1065,8 @@ E(network)$lty[E(network)$type == "promote"] <- 1
 E(network)$color[E(network)$type == "repress"] <- "#441152"
 E(network)$lty[E(network)$type == "repress"] <- 1
 
-network_out_name <- paste("./imgs/case-study-id-", 
-                          trace_id, 
+network_out_name <- paste("./imgs/case-study-id-",
+                          trace_id,
                           "-network.svg", sep="")
 
 draw_network <- function(net, write_out, out_name) {
@@ -1075,9 +1075,9 @@ draw_network <- function(net, write_out, out_name) {
     # bottom, left, top, right
     par(mar=c(0.2,0,1,0.5))
   }
-  plot(net, 
+  plot(net,
      # main="Regulation Network",
-     edge.arrow.size=0.4, 
+     edge.arrow.size=0.4,
      edge.arrow.width=0.75,
      edge.width=2,
      vertex.size=40,

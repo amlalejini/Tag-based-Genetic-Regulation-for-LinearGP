@@ -1,7 +1,7 @@
 ---
 title: "Differentiated Signal Response Task"
-output: 
-  html_document: 
+output:
+  html_document:
     keep_md: no
     toc: true
     toc_float: true
@@ -22,16 +22,16 @@ these analyses are entirely exploratory.
 In the multicellular signal differentiation task, a group of genetically homogeneous cells (demes) must develop from a single propagule-cell and solve a simple signal-response differentiation task.
 The figure below is given as an example.
 Each deme is evaluated as a single individual, and the deme's fitness is based on how well cells within the deme are able to differentiate their response to an environmental signal; further, we reward demes for _clustering_ their response types.
-For example, a deme with reponses evenly distributed in space is less fit than a deme where all like-responses are adjacent to one another (e.g., the figure below).
+For example, a deme with responses evenly distributed in space is less fit than a deme where all like-responses are adjacent to one another (e.g., the figure below).
 
-For this task, we evalaute demes in two distinct phases, each for a fixed number of time steps: a development phase followed by a response phase.
+For this task, we evaluate demes in two distinct phases, each for a fixed number of time steps: a development phase followed by a response phase.
 At the beginning of the development phase, we initialize the deme with a single propagule SignalGP cell.
 During development, cells can self-replicate within their deme (without mutations), communicate with neighbors, and differentiate.
 Demes develop spatially on $W$ by $H$ toroidal grids.
 After the time allotted for development expires, we place each cell in a dormant state where only the contents of global memory and function regulation persist.
-During the reponse phase of evaluation, we isolate each cell (i.e., it may not communicate or use sensors) and record its response to an environmental signal.
+During the response phase of evaluation, we isolate each cell (i.e., it may not communicate or use sensors) and record its response to an environmental signal.
 All cells receive an identical signal (with the same tag); we give each cell a fixed number of time steps to respond (or not) to the signal, and we record each cell's response.
-There are $K$ possible reponses, and cells express a response by executing one of $K$ response instructions.
+There are $K$ possible responses, and cells express a response by executing one of $K$ response instructions.
 
 ![multicell-signal-differentiation-example](../../../media/multicell-differentiation-task.svg)
 
@@ -168,11 +168,11 @@ save_plot("./imgs/multi-cell-differentiation-strategy-10x10.png", grid, base_hei
 
 Takeaways:
 
-- We can see that all evolved genotypes from this condition rely on regulation. 
-- The majority of genotypes rely on messaging and reproduction tags (i.e., allowing parents to control the 'start' tag for their offspring). 
+- We can see that all evolved genotypes from this condition rely on regulation.
+- The majority of genotypes rely on messaging and reproduction tags (i.e., allowing parents to control the 'start' tag for their offspring).
 - About half of the genotypes rely on function regulation imprinting, but a majority do not.
 
-What is the strategy breakdown (in more detail)? 
+What is the strategy breakdown (in more detail)?
 
 Each genotype may rely on multiple coordination strategies (i.e., messaging, imprinting, reproduction tags, etc) simultaneously. Here, we use a euler diagram to give a more detailed breakdown of coordination strategies.
 
@@ -257,7 +257,7 @@ print(grid)
 save_plot("./imgs/multi-cell-differentiation-strategy-20x20.png", grid, base_height=6, base_width=8)
 ```
 
-What is the strategy breakdown (in more detail)? 
+What is the strategy breakdown (in more detail)?
 
 ```{r}
 usage_data <- filter(data, condition=="both" & DEME_SIZE==400)
@@ -289,8 +289,3 @@ ggplot(reg_data, aes(x=relies_on_msg, y=score, fill=relies_on_msg)) +
   scale_y_continuous(trans="log10") +
   geom_boxplot()
 ```
-
-
-
-
-
