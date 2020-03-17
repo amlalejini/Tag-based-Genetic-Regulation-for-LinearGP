@@ -44,7 +44,6 @@ the Evolution of Signal-response Plasticity in Digital Organisms.
 
 ### SignalGP
 
-<!-- ![sgp-cartoon](./media/sgp-cartoon.svg) -->
 <span style="text-align: center; display: block;">
 <img src="media/sgp-cartoon.svg" width=400/>
 </span>
@@ -105,7 +104,7 @@ The source code for experiments using diagnostic tasks (e.g., the repeated-, dir
 [Data analyses](experiments/alife-2020/analysis/) were conducted using a combination of Python scripts (for data aggregation and processing) and R (for statistical analyses and visualizations).
 We used [this version of DISHTINY](https://github.com/mmore500/dishtiny/tree/53vgh) for our DISHTINY case study.
 
-See [this document](./running-experiments.md) for a step-by-step guide to running the experiments in this repository locally.
+See [this document](./documents/running-experiments.md) for a step-by-step guide to running the experiments in this repository locally.
 
 ## Supplemental Material
 
