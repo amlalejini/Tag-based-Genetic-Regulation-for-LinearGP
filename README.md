@@ -1,4 +1,3 @@
-# Genetic Regulation Facilitates the Evolution of Signal-response Plasticity in Digital Organisms
 
 **Navigation**
 
@@ -88,7 +87,7 @@ A simple example of how genetic regulation works is given in the figure below. F
 
 ### Experiments
 
-We used several [diagnostic tasks](./task-descriptions.md) to explore how genetic regulation faculties contribute to, and potentially detract from, the functionality of evolved SignalGP digital organisms.
+We used several [diagnostic tasks](./documents/task-descriptions.md) to explore how genetic regulation faculties contribute to, and potentially detract from, the functionality of evolved SignalGP digital organisms.
 Additionally, we investigate whether genetic regulation is functionally incorporated into digital multicellular organisms evolved in the [DISHTINY artificial life platform](https://github.com/mmore500/dishtiny) (Moreno and Ofria, 2019).
 
 ### Results
@@ -109,9 +108,9 @@ See [this document](./running-experiments.md) for a step-by-step guide to runnin
 ## Supplemental Material
 
 - Guide to running our software locally: [./running-experiments.md](./running-experiments.md)
-- Diagnostic task descriptions and experiment configurations: [./task-descriptions.md](./task-descriptions.md)
-- Digital organism representation details (instruction set, etc): [./digital-organisms.md](./digital-organisms.md)
-- Handcoded memory-based solutions to the repeated signal task: [./handcoded-examples](./handcoded-examples.md)
+- Diagnostic task descriptions and experiment configurations: [./documents/task-descriptions.md](./documents/task-descriptions.md)
+- Digital organism representation details (instruction set, etc): [./documents/digital-organisms.md](./documents/digital-organisms.md)
+- Handcoded memory-based solutions to the repeated signal task: [./handcoded-examples](./documents/handcoded-examples.md)
 - Fully-detailed data analyses, including source code for statistical analyses and visualizations, from the paper:
   - [Repeated signal task](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/repeated-signal-task-analysis.html)
   - [Directional signal task](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/directional-signal-task-analysis.html)

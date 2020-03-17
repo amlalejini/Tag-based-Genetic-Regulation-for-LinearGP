@@ -1,3 +1,7 @@
+---
+title: Running experiments locally
+---
+
 # Running experiments locally
 
 Here, we provide a brief guide to compiling and running our experiments locally.

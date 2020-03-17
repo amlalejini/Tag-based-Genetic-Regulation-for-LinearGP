@@ -1,3 +1,7 @@
+---
+title: Diagnostic task descriptions
+---
+
 # Diagnostic Tasks
 
 Here, we give a brief description of each of the diagnostic tasks used in this work.

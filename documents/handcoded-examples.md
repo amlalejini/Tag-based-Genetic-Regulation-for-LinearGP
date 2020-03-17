@@ -1,3 +1,7 @@
+---
+title: Hand-coded SignalGP example programs
+---
+
 # Handcoded SignalGP example programs
 
 <!-- TOC -->
