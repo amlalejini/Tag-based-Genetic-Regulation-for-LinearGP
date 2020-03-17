@@ -1,7 +1,3 @@
----
-title: SignalGP Digital Organisms
----
-
 # SignalGP Digital Organisms
 
 Here, we give more details on the setup of the SignalGP digital organisms used in the diagnostic
