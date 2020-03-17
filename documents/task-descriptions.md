@@ -33,7 +33,7 @@ Organisms express responses by executing one of _K_ response instructions.
 For example, if organisms receive four signals from the environment (i.e., _K_=4), a maximally fit organism will express `Response-1` after the first signal, `Response-2` after the second, `Response-3` after the third, and `Response-4` after the fourth.
 The figure below depicts examples of optimal behavior in the repeated two- and four-signal tasks.
 
-![repeated-signal-task-overview](./media/repeated-signal-task.svg)
+![repeated-signal-task-overview](../media/repeated-signal-task.svg)
 
 Requiring organisms to execute a distinct instruction for each repetition of the environmental signal represents organisms having to perform distinct behaviors.
 Note that each repetition of the environmental signal is identical (i.e., each has an identical tag), and as such, organisms must track how many times the signal has been repeated and dynamically shift their responses accordingly.
@@ -53,7 +53,7 @@ For each number of repeated signals (_K_ = 2, 4, 8, and 16), we ran 100 replicat
 
 ### Experimental configuration
 
-Run-time parameters for the repeated signal task can be found in [./source/AltSignalConfig.h](./source/AltSignalConfig.h).
+Run-time parameters for the repeated signal task can be found in [../source/AltSignalConfig.h](../source/AltSignalConfig.h).
 Generate a configuration file by executing the the repeated signal task executable with the `--gen`
 command line option.
 
@@ -157,7 +157,7 @@ is equal to four. Thus, sixteen response sequences are possible.
 
 ### Experimental configuration
 
-Run-time parameters for the directional signal task can be found in [./source/DirSignalConfig.h](./source/DirSignalConfig.h).
+Run-time parameters for the directional signal task can be found in [../source/DirSignalConfig.h](../source/DirSignalConfig.h).
 Generate a configuration file by executing the the directional signal task executable with the `--gen`
 command line option.
 
@@ -221,7 +221,7 @@ As in the repeated signal task, organisms respond by executing one of _K_ respon
 Otherwise, evaluation (and fitness assignment) on the changing signal task mirrors that of the repeated
 signal task.
 
-![changing-signal-task-overview](./media/changing-signal-task.svg)
+![changing-signal-task-overview](../media/changing-signal-task.svg)
 
 Requiring organisms to express a distinct instruction in response to each environmental signal represents
 organisms having to perform distinct behaviors.
@@ -255,7 +255,7 @@ sequence of environmental signals, but may be deleterious in another.
 
 ### Experimental configuration
 
-Run-time parameters for the changing signal task can be found in [./source/ChgEnvConfig.h](./source/ChgEnvConfig.h).
+Run-time parameters for the changing signal task can be found in [../source/ChgEnvConfig.h](../source/ChgEnvConfig.h).
 Generate a configuration file by executing the the changing signal task executable with the `--gen`
 command line option.
 
@@ -336,7 +336,7 @@ reward demes for _clustering_ their response types.
 For example, a deme with responses evenly distributed in space is less fit than a deme where all
 like-responses are adjacent to one another (e.g., the figure below).
 
-![multicell-signal-differentiation-task-overview](./media/multicell-differentiation-task.svg)
+![multicell-signal-differentiation-task-overview](../media/multicell-differentiation-task.svg)
 
 For this task, we evaluate demes in two distinct phases, each for a fixed number of time steps: a
 development phase followed by a response phase.
