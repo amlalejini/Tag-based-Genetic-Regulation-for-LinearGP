@@ -140,7 +140,7 @@ ggplot(data, aes(x=solution, fill=solution)) +
   ggsave("./imgs/directional-signal-solultion-cnts.png", width=8,height=3)
 ```
 
-We see that the majority of replicates (`r nrow(filter(data, solution==1)) / replicates`) yielded a program capable of perfectly solving the directional signal task.
+We see that all replicates (`r nrow(filter(data, solution==1)) / replicates`) yielded a program capable of perfectly solving the directional signal task.
 
 ## How long did it take for solutions to arise?
 
@@ -164,8 +164,8 @@ Let's take a closer look at the behavioral/regulatory profile of a representativ
 
 ```{r}
 # Set trace/test id's we want to use as case study
-trace_id <- 2034
-env_seq_id <- 15
+trace_id <- 4020
+env_seq_id <- 0
 generation <- generations
 
 # Extract some organism information
@@ -255,8 +255,9 @@ test_data$mod_id_x_pos <- mapply(get_module_x_pos, test_data$module_id)
 
 ```{r}
 # Plot!
+max_y <- 50
 out_name <-
-  paste("./imgs/case-study-trace-id-", trace_id, "-env-id-", env_seq_id, "-regulator-state-horizontal.pdf", sep="")
+  paste("./imgs/case-study-trace-id-", trace_id, "-env-id-", env_seq_id, "-regulator-state.pdf", sep="")
 reg_state_plot <-
   ggplot(test_data, aes(x=mod_id_x_pos,
                         y=time_step,
@@ -274,7 +275,7 @@ reg_state_plot <-
                    limits=seq(0, length(active_module_ids)-1, 1),
                    labels=active_module_ids) +
   scale_y_discrete(name="Time Step",
-                     limits=seq(0, 75, 10)) +
+                     limits=seq(0, max_y, 10)) +
   # Background
   geom_tile(color="white",
             size=0.2,
@@ -297,15 +298,17 @@ reg_state_plot <-
   geom_point(data=filter(test_data, is_cur_responding_module==TRUE),
              shape=21, colour="black", fill="white", stroke=0.25, size=0.75,
              position=position_nudge(x = 0, y = 0.01)) +
-  theme(legend.text = element_text(size=9),
+  theme(#legend.position = "none",
+        legend.text = element_text(size=9),
         legend.title=element_text(size=10),
         axis.text.y = element_text(size=8),
+        # axis.title.y = element_blank(),
         axis.title.y = element_text(size=10),
         axis.text.x = element_text(size=8),
         axis.title.x = element_text(size=10),
         plot.title = element_text(hjust = 0.5)) +
   # ggtitle("Regulation Over Time") +
-  ggsave(out_name, width=4, height=2.75)
+  ggsave(out_name, height=4, width=2.75)
 reg_state_plot
 ```
 
@@ -418,8 +421,8 @@ E(network)$lty[E(network)$type == "promote"] <- 1
 E(network)$color[E(network)$type == "repress"] <- "#441152"
 E(network)$lty[E(network)$type == "repress"] <- 1
 
-# this ordering gives us minimal edge crossing...
-vertex_order <- as.character(c(0,  9,  10, 14, 1, 11, 5, 2))
+
+# vertex_order <- as.character(c(0,  9,  10, 14, 1, 11, 5, 2))
 network_out_name <- paste("./imgs/case-study-id-",
                           trace_id,
                           "-env-", env_seq_id, "-network.svg", sep="")
@@ -454,6 +457,31 @@ draw_network <- function(net, write_out, out_name, layout_order) {
     dev.off()
   }
 }
-draw_network(network, TRUE, network_out_name, vertex_order)
+
+draw_network_paper <- function(net, write_out, out_name, layout_order) {
+  if (write_out) {
+    svg(out_name, width=4,height=3)
+    # bottom, left, top, right
+    par(mar=c(0.2,0,1,0.5))
+  }
+  plot(net,
+     edge.arrow.size=0.4,
+     edge.arrow.width=0.75,
+     edge.width=2,
+     vertex.size=30,
+     vertex.label.cex=1.25,
+     curved=TRUE,
+     vertex.color="grey99",
+     vertex.label.color="black",
+     vertex.label.family="sans",
+     layout=layout_in_circle(net,order=layout_order))
+  if (write_out) {
+    dev.flush()
+    dev.off()
+  }
+}
+
+vertex_order <- as.character(c(4, 0, 10, 6, 5, 8, 1, 2))
+draw_network_paper(network, TRUE, network_out_name, vertex_order)
 draw_network(network, FALSE, network_out_name, vertex_order)
 ```
