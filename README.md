@@ -108,10 +108,10 @@ See [this document](./running-experiments.md) for a step-by-step guide to runnin
 
 ## Supplemental Material
 
-- Guide to running our software locally: [./running-experiments.md](./running-experiments.md)
+- Guide to running our software locally: [./documents/running-experiments.md](./documents/running-experiments.md)
 - Diagnostic task descriptions and experiment configurations: [./documents/task-descriptions.md](./documents/task-descriptions.md)
 - Digital organism representation details (instruction set, etc): [./documents/digital-organisms.md](./documents/digital-organisms.md)
-- Handcoded memory-based solutions to the repeated signal task: [./handcoded-examples](./documents/handcoded-examples.md)
+- Handcoded memory-based solutions to the repeated signal task: [./documents/handcoded-examples.md](./documents/handcoded-examples.md)
 - Fully-detailed data analyses, including source code for statistical analyses and visualizations, from the paper:
   - [Repeated signal task](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/repeated-signal-task-analysis.html)
   - [Directional signal task](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/directional-signal-task-analysis.html)
