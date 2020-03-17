@@ -49,7 +49,7 @@ For each number of repeated signals (_K_ = 2, 4, 8, and 16), we ran 100 replicat
 
 ### Experimental configuration
 
-Run-time parameters for the repeated signal task can be found in [../source/AltSignalConfig.h](../source/AltSignalConfig.h).
+Run-time parameters for the repeated signal task can be found in [../source/AltSignalConfig.h](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/blob/master/source/AltSignalConfig.h).
 Generate a configuration file by executing the the repeated signal task executable with the `--gen`
 command line option.
 
@@ -153,7 +153,7 @@ is equal to four. Thus, sixteen response sequences are possible.
 
 ### Experimental configuration
 
-Run-time parameters for the directional signal task can be found in [../source/DirSignalConfig.h](../source/DirSignalConfig.h).
+Run-time parameters for the directional signal task can be found in [../source/DirSignalConfig.h](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/blob/master/source/DirSignalConfig.h).
 Generate a configuration file by executing the the directional signal task executable with the `--gen`
 command line option.
 
@@ -251,7 +251,7 @@ sequence of environmental signals, but may be deleterious in another.
 
 ### Experimental configuration
 
-Run-time parameters for the changing signal task can be found in [../source/ChgEnvConfig.h](../source/ChgEnvConfig.h).
+Run-time parameters for the changing signal task can be found in [../source/ChgEnvConfig.h](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/blob/master/source/ChgEnvConfig.h).
 Generate a configuration file by executing the the changing signal task executable with the `--gen`
 command line option.
 
