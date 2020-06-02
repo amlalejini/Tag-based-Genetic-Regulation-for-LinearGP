@@ -1,7 +1,5 @@
 ## Overview
 
-[![DOI](https://zenodo.org/badge/246925466.svg)](https://zenodo.org/badge/latestdoi/246925466)
-
 
 **Navigation**
 
@@ -20,9 +18,6 @@
 
 <!-- /TOC -->
 
-
-This repository is a companion to our 2020 ALife conference submission, Genetic Regulation Facilitates
-the Evolution of Signal-response Plasticity in Digital Organisms.
 
 ### Contributing authors
 
