@@ -9,7 +9,7 @@
 #include "config/ArgManager.h"
 #include "config/command_line.h"
 
-// #include "../DirSignalWorld.h"
+#include "../BoolCalcWorld.h"
 #include "../BoolCalcConfig.h"
 
 int main(int argc, char* argv[])
@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
   config.Write(std::cout);
   std::cout << "==============================\n" << std::endl;
 
-  // BoolCalcConfig world(config);
-  // world.Setup();
+  BoolCalcWorld world;
+  world.Setup(config);
   // world.Run();
 }
