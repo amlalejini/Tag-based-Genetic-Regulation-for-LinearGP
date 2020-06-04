@@ -1369,6 +1369,29 @@ emp::vector<BoolCalcTestInfo::TestCase> BoolCalcWorld::LoadTestCases(const std::
 
 void BoolCalcWorld::DoPopulationSnapshot() {
   // todo - use container file...
+  using pop_t = emp::vector<emp::Ptr<org_t>>;
+  const size_t cur_update = GetUpdate();
+  emp::ContainerDataFile snapshot_file = emp::MakeContainerDataFile(
+    std::function<pop_t()>([this]() { return pop; }),
+    OUTPUT_DIR + "/pop_" + emp::to_string(cur_update) + ".csv"
+  );
+  // -- update --
+  snapshot_file.AddVar(
+    cur_update,
+    "update"
+  );
+  // -- is solution --
+  snapshot_file.AddContainerFun(
+    std::function<bool(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        return org->GetPhenotype().IsSolution();
+      }
+    ),
+    "is_solution"
+  );
+
+  snapshot_file.PrintHeaderKeys();
+  snapshot_file.Update();
 }
 
 void BoolCalcWorld::DoWorldConfigSnapshot(const config_t & config) {
