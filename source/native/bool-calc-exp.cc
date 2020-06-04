@@ -30,5 +30,5 @@ int main(int argc, char* argv[])
 
   BoolCalcWorld world;
   world.Setup(config);
-  // world.Run();
+  world.Run();
 }

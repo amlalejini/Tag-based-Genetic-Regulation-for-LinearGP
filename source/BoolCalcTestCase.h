@@ -49,12 +49,12 @@ namespace BoolCalcTestInfo {
     using input_sig_t = INPUT_SIGNAL_TYPE;
     using response_t = RESPONSE_TYPE;
 
-    input_sig_t signal_type;
-    std::string operator_str;
-    size_t signal_id;
-    operand_t operand;
-    response_t correct_response_type;
-    operand_t numeric_response;
+    input_sig_t signal_type;          ///< What type of input signal is this? Operand or Operator?
+    std::string operator_str;         ///< String representation of operator (only when signal_type == operator)
+    size_t signal_id;                 ///< ID of this type of input signal (assigned by world)
+    operand_t operand;                ///< If this is an operand signal, what is the operand's value?
+    response_t correct_response_type; ///< What is the correct type of response to this signal?
+    operand_t numeric_response;       ///< If the correct response type is numeric, what value is correct?
 
     TestSignal(operand_t num, response_t resp)
       : signal_type(input_sig_t::OPERAND),
@@ -77,10 +77,15 @@ namespace BoolCalcTestInfo {
     const std::string & GetOperator() const { return operator_str; }
     operand_t GetOperand() const { return operand; }
     input_sig_t GetSignalType() const { return signal_type; }
+    size_t GetSignalID() const { return signal_id; }
     response_t GetCorrectResponseType() const { return correct_response_type; }
     operand_t GetNumericResponse() const { return numeric_response; }
     bool IsOperator() const { return signal_type == input_sig_t::OPERATOR; }
     bool IsOperand() const { return signal_type == input_sig_t::OPERAND; }
+    bool IsCorrect(response_t resp, operand_t num=0) const {
+      return ( resp == correct_response_type ) &&
+             ( (correct_response_type!=response_t::NUMERIC) || (num==numeric_response) );
+    }
 
     void Print(std::ostream & out=std::cout) {
       out << "{";

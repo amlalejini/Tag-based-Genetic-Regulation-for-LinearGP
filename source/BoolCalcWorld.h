@@ -171,7 +171,7 @@ struct BoolCalcCustomHardware {
   void ExpressResult(operand_t val, int func_id=-1) {
     response_type = response_t::NUMERIC;
     response_value = val;
-    responded = false;
+    responded = true;
     response_function_id=func_id;
   }
 
@@ -212,7 +212,7 @@ public:
   using program_t = typename hardware_t::program_t;
   using program_function_t = typename program_t::function_t;
   using mutator_t = MutatorLinearFunctionsProgram<hardware_t, tag_t, inst_arg_t>;
-  using hw_response_type = BoolCalcTestInfo::RESPONSE_TYPE;
+  using hw_response_type_t = BoolCalcTestInfo::RESPONSE_TYPE;
 
   using test_case_t = BoolCalcTestInfo::TestCase;
 
@@ -226,6 +226,7 @@ protected:
   // Evaluation group
   std::string TESTING_SET_FILE;
   std::string TRAINING_SET_FILE;
+  size_t CPU_CYCLES_PER_INPUT_SIGNAL;
   // Selection group
   bool DOWN_SAMPLE;
   double DOWN_SAMPLE_RATE;
@@ -255,15 +256,19 @@ protected:
 
   bool setup=false;
   std::string output_path;
+  bool found_solution=false;
+  size_t max_fit_org_id=0;
 
   emp::Ptr<inst_lib_t> inst_lib;            ///< Manages SignalGP instruction set.
   emp::Ptr<event_lib_t> event_lib;          ///< Manages SignalGP events.
   emp::Ptr<mutator_t> mutator;
   emp::Ptr<hardware_t> eval_hardware;        ///< Used to evaluate programs.
 
-  emp::Signal<void(size_t)> after_eval_sig; ///< Triggered after organism (ID given by size_t argument) evaluation
+  // emp::Signal<void(size_t)> after_eval_sig; ///< Triggered after organism (ID given by size_t argument) evaluation
   emp::Signal<void(void)> end_setup_sig;    ///< Triggered at end of world setup.
   emp::Signal<void(void)> do_selection_sig; ///< Triggered when it's time to do selection!
+
+  emp::Ptr<emp::DataFile> max_fit_file;
 
   emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;  ///< Manages fitness functions if we're doing lexicase selection.
   emp::vector<size_t> training_case_ids;
@@ -293,6 +298,14 @@ protected:
   void InitPop();
   void InitPop_Random();
 
+  void DoEvaluation();
+  void DoSelection();
+  void DoUpdate();
+
+  void EvaluateOrg(org_t & org);
+
+  void ScreenSolution(org_t & org);
+
   /// Output a snapshot of the world's configuration.
   void DoWorldConfigSnapshot(const config_t & config);
 
@@ -301,7 +314,11 @@ protected:
 public:
 
   ~BoolCalcWorld() {
-    // todo
+    if(inst_lib) inst_lib.Delete();
+    if(event_lib) event_lib.Delete();
+    if(mutator) mutator.Delete();
+    if(eval_hardware) eval_hardware.Delete();
+    if(max_fit_file) max_fit_file.Delete();
   }
 
   void RunStep();
@@ -316,7 +333,7 @@ void BoolCalcWorld::Setup(const config_t & config) {
 
   Reset(); // Reset the world
   this->SetAutoMutate(false); // Don't want mutations on population initialization.
-
+  found_solution = false;
   // Localize configuration parameters
   InitConfigs(config);
   // Reset the world's random number seed.
@@ -346,12 +363,136 @@ void BoolCalcWorld::Setup(const config_t & config) {
   // Configure data collection/snapshots
   InitDataCollection();
   DoWorldConfigSnapshot(config);
-
-
+  // End of setup!
+  end_setup_sig.Trigger();
   setup=true;
 }
 
+void BoolCalcWorld::RunStep() {
+  DoEvaluation();
+  DoSelection();
+  DoUpdate();
+}
+
+void BoolCalcWorld::Run() {
+  for (size_t u = 0; u <= GENERATIONS; ++u) {
+    RunStep();
+    if (STOP_ON_SOLUTION & found_solution) break;
+  }
+}
+
 // ---- Internal function implementations ----
+void BoolCalcWorld::DoEvaluation() {
+  // If we're down sampling, shuffle the training cases.
+  if (DOWN_SAMPLE) emp::Shuffle(*random_ptr, training_case_ids);
+  max_fit_org_id = 0;
+  for (size_t org_id = 0; org_id < GetSize(); ++org_id) {
+    emp_assert(IsOccupied(org_id));
+    EvaluateOrg(GetOrg(org_id));
+    if (CalcFitnessID(org_id) > CalcFitnessID(max_fit_org_id)) max_fit_org_id = org_id;
+  }
+}
+
+void BoolCalcWorld::DoSelection() {
+  do_selection_sig.Trigger();
+}
+
+void BoolCalcWorld::DoUpdate() {
+  const double max_score = CalcFitnessID(max_fit_org_id);
+  const double max_passes = GetOrg(max_fit_org_id).GetPhenotype().num_passes;
+  const size_t cur_update = GetUpdate();
+
+  // todo - screen for solution
+  // found_solution = ScreenSolution(GetOrg(max_fit_org_id)); // todo!
+
+  std::cout << "update: " << cur_update << "; ";
+  std::cout << "best score (" << max_fit_org_id << "): " << max_score << "; ";
+  std::cout << "passes: " << max_passes << "; ";
+  std::cout << "solution? " << found_solution << std::endl;
+
+  Update();
+  ClearCache();
+}
+
+// todo - modify this to support running on training, testing, or both
+void BoolCalcWorld::EvaluateOrg(org_t & org) {
+  // Evaluate given organism on each test (num_eval_tests)
+  phenotype_t & phen = org.GetPhenotype();
+  phen.Reset(num_eval_tests);
+  // Ready the hardware
+  eval_hardware->SetProgram(org.GetGenome().program);
+  // Evaluate program on each training example
+  for (size_t eval_index = 0; eval_index < num_eval_tests; ++eval_index) {
+    emp_assert(eval_index < phen.test_scores.size());
+    emp_assert(phen.test_scores[eval_index] == 0);
+    // Reset the matchbin for each test case
+    eval_hardware->ResetMatchBin();
+    // grab the training example id
+    const size_t training_id = training_case_ids[eval_index];
+    phen.test_ids[eval_index] = training_id;
+    // grab the appropriate training example
+    const test_case_t & test_case = training_cases[training_id];
+    // compute amount of partial credit for each correct response to an input signal
+    const double partial_credit = 1.0 / (double)test_case.test_signals.size();
+    size_t num_correct_sig_resps = 0;
+    for (size_t sig_i = 0; sig_i < test_case.test_signals.size(); ++sig_i) {
+      const BoolCalcTestInfo::TestSignal & test_sig = test_case.test_signals[sig_i];
+      const tag_t & test_sig_tag = test_input_signal_tags[test_sig.GetSignalID()];
+      // Reset the hardware
+      eval_hardware->ResetHardwareState();
+      eval_hardware->GetCustomComponent().Reset();
+      emp_assert(eval_hardware->ValidateThreadState());
+      emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
+      emp_assert(eval_hardware->GetNumQueuedEvents() == 0);
+      // Queue calculator button input
+      // MessageEvent(size_t _id, tag_t _tag, const data_t & _data=data_t())
+      if (test_sig.IsOperand()) {
+        eval_hardware->QueueEvent(
+          event_t(event_id_input_sig, test_sig_tag, {{0, (double)test_sig.GetOperand()}})
+        );
+      } else if (test_sig.IsOperator()) {
+        eval_hardware->QueueEvent(
+          event_t(event_id_input_sig, test_sig_tag)
+        );
+      }
+      // Step the hardware forward to process the signal
+      for (size_t step = 0; step < CPU_CYCLES_PER_INPUT_SIGNAL; ++step) {
+        eval_hardware->SingleProcess();
+        // Stop early if no active or pending threads
+        const size_t num_active_threads = eval_hardware->GetNumActiveThreads();
+        const size_t num_pending_threads = eval_hardware->GetNumPendingThreads();
+        if (!( num_active_threads || num_pending_threads )) break;
+      }
+      // How did the organism respond?
+      const bool has_response = eval_hardware->GetCustomComponent().HasResponse();
+      const hw_response_type_t resp_type = eval_hardware->GetCustomComponent().GetResponseType();
+      const operand_t resp_val = eval_hardware->GetCustomComponent().GetResponseValue();
+      const bool is_correct = test_sig.IsCorrect(resp_type, resp_val);
+      if (has_response && is_correct) {
+        phen.test_scores[eval_index] += partial_credit;
+        num_correct_sig_resps += 1;
+      } else if (
+          has_response &&
+          test_sig.GetCorrectResponseType() == hw_response_type_t::NUMERIC &&
+          resp_type == hw_response_type_t::NUMERIC)
+      {
+        phen.test_scores[eval_index] += 0.1*partial_credit; // get some credit
+      } else {
+        // Bail early
+        break;
+      }
+    }
+    // Did the program correctly respond to all input signals?
+    // Update test score if necessary
+    bool pass = num_correct_sig_resps == test_case.test_signals.size();
+    if (pass) phen.test_scores[eval_index] = 1.0;
+    // Update number of passes
+    phen.num_passes += (size_t)pass;
+    // Update aggregate score
+    phen.aggregate_score += phen.test_scores[eval_index];
+  }
+}
+
 void BoolCalcWorld::InitConfigs(const config_t & config) {
   // General
   SEED = config.SEED();
@@ -361,6 +502,7 @@ void BoolCalcWorld::InitConfigs(const config_t & config) {
   // Evaluation
   TESTING_SET_FILE = config.TESTING_SET_FILE();
   TRAINING_SET_FILE = config.TRAINING_SET_FILE();
+  CPU_CYCLES_PER_INPUT_SIGNAL = config.CPU_CYCLES_PER_INPUT_SIGNAL();
   // Selection
   DOWN_SAMPLE = config.DOWN_SAMPLE();
   DOWN_SAMPLE_RATE = config.DOWN_SAMPLE_RATE();
@@ -441,9 +583,26 @@ void BoolCalcWorld::InitInstLib() {
       },
       "Pull global memory into working memory"
     );
+
+    inst_lib->AddInst(
+      "FullWorkingToGlobal",
+      [this](hardware_t & hw, const inst_t & inst) {
+        if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_FullWorkingToGlobal<hardware_t, inst_t>(hw, inst);
+      },
+      "Push all working memory to global memory"
+    );
+    inst_lib->AddInst(
+      "FullGlobalToWorking",
+      [this](hardware_t & hw, const inst_t & inst) {
+        if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_FullGlobalToWorking<hardware_t, inst_t>(hw, inst);
+      },
+      "Pull all global memory into working memory"
+    );
   } else {
     inst_lib->AddInst("Nop-WorkingToGlobal", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "Nop");
     inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "Nop");
+    inst_lib->AddInst("Nop-FullWorkingToGlobal", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "Nop");
+    inst_lib->AddInst("Nop-FullGlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "Nop");
   }
 
   // If we can use regulation, add instructions. Otherwise, nops.
@@ -835,13 +994,23 @@ void BoolCalcWorld::InitSelection() {
 
 void BoolCalcWorld::InitDataCollection() {
   if (setup) {
-    // max_fit_file.Delete();
+    max_fit_file.Delete();
   } else {
     mkdir(OUTPUT_DIR.c_str(), ACCESSPERMS);
     if(OUTPUT_DIR.back() != '/')
         OUTPUT_DIR += '/';
   }
-  // -- bookmark --
+  // -- generally useful functions --
+  std::function<size_t(void)> get_update = [this]() { return this->GetUpdate(); };
+  // -- fitness file --
+  SetupFitnessFile(OUTPUT_DIR + "/fitness.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
+  // -- setup max fit organism file --
+  max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
+  max_fit_file->AddFun(get_update, "update");
+  max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_id; }, "pop_id");
+  // -- TODO --
+
+  max_fit_file->PrintHeaderKeys();
 }
 
 void BoolCalcWorld::InitPop() {
@@ -914,9 +1083,9 @@ emp::vector<BoolCalcTestInfo::TestCase> BoolCalcWorld::LoadTestCases(const std::
       emp_assert(sig_type == "OP" || sig_type == "NUM", "Unrecognized input signal type.", sig_type);
       const std::string sig_val = signal_components[1];
       if (sig_type == "OP") {
-        testcase.test_signals.emplace_back(sig_val, hw_response_type::WAIT);
+        testcase.test_signals.emplace_back(sig_val, hw_response_type_t::WAIT);
       } else if (sig_type == "NUM") {
-        testcase.test_signals.emplace_back(emp::from_string<operand_t>(sig_val), hw_response_type::WAIT);
+        testcase.test_signals.emplace_back(emp::from_string<operand_t>(sig_val), hw_response_type_t::WAIT);
       } else {
         std::cout << "Unrecognized input signal type! Exiting." << std::endl;
         exit(-1);
@@ -926,9 +1095,9 @@ emp::vector<BoolCalcTestInfo::TestCase> BoolCalcWorld::LoadTestCases(const std::
     // (2) Grab, process output
     testcase.output_str = line_components[header_lu["output"]]; // Overall correct output for this test case.
     if (testcase.output_str == "ERROR") {
-      testcase.test_signals.back().correct_response_type = hw_response_type::ERROR;
+      testcase.test_signals.back().correct_response_type = hw_response_type_t::ERROR;
     } else {
-      testcase.test_signals.back().correct_response_type = hw_response_type::NUMERIC;
+      testcase.test_signals.back().correct_response_type = hw_response_type_t::NUMERIC;
       testcase.test_signals.back().numeric_response = emp::from_string<operand_t>(testcase.output_str);
     }
     // update final signal to match appropriate output

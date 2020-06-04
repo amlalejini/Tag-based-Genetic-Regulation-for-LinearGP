@@ -47,9 +47,11 @@ public:
     emp::vector<double> test_scores;  ///< Scores on tests. Each test corresponds to a different signal sequence.
     emp::vector<size_t> test_ids;     ///< Sequence IDs of tests (aligned with test_scores)
     double aggregate_score=0.0;       ///< Aggregate score across all signal sequences tested on (i.e., sum(test_scores))
+    size_t num_passes=0;
 
     void Reset(size_t tests=1) {
       aggregate_score=0.0;         // Reset aggregate score.
+      num_passes=0;
       test_scores.resize(tests);   // Make sure trial scores is right size.
       test_ids.resize(tests);
       std::fill(test_scores.begin(), test_scores.end(), 0); // Fill with zeroes.
@@ -59,11 +61,13 @@ public:
     bool operator==(const this_t & o) const {
       return std::tie(test_scores,
                       test_ids,
-                      aggregate_score
+                      aggregate_score,
+                      num_passes
                       )
           == std::tie(o.test_scores,
                       o.test_ids,
-                      o.aggregate_score
+                      o.aggregate_score,
+                      o.num_passes
                       );
     }
 
@@ -74,11 +78,13 @@ public:
     bool operator<(const this_t & o) const {
       return std::tie(test_scores,
                       test_ids,
-                      aggregate_score
+                      aggregate_score,
+                      num_passes
                     )
             < std::tie(o.test_scores,
                        o.test_ids,
-                       o.aggregate_score
+                       o.aggregate_score,
+                       o.num_passes
                       );
     }
 
