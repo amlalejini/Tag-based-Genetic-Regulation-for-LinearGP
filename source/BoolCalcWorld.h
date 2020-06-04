@@ -276,6 +276,7 @@ protected:
   emp::vector<test_case_t> training_cases;
   emp::vector<test_case_t> testing_cases;
   emp::vector<test_case_t> all_test_cases; ///< Used for screening for solutions
+  emp::vector<std::string> test_case_types;
 
   size_t num_eval_tests;
 
@@ -313,10 +314,47 @@ protected:
 
   bool ScreenSolution(const org_t & org);
 
+  void AnalyzeOrg(const org_t & org, size_t pop_id);
+
   /// Output a snapshot of the world's configuration.
   void DoWorldConfigSnapshot(const config_t & config);
+  void DoPopulationSnapshot();
+
+  void PrintProgramSingleLine(const program_t & prog, std::ostream & out=std::cout);
+  void PrintProgramFunction(const program_function_t & func, std::ostream & out=std::cout);
+  void PrintProgramInstruction(const inst_t & inst, std::ostream & out=std::cout);
 
   emp::vector<test_case_t> LoadTestCases(const std::string & path);
+
+  /// Compute the distribution of test types passed by a phenotype
+  /// NOTE - this only works for phenotypes evaluated on the training set
+  std::map<std::string, size_t> GetPassingTestTypeDistribution(const phenotype_t & phen) {
+    std::map<std::string, size_t> distribution;
+    for (const auto & type : test_case_types) distribution[type] = 0;
+    for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+      const double score = phen.test_scores[i];
+      const size_t test_id = phen.test_ids[i];
+      emp_assert(test_id < training_cases.size());
+      if (score < 1.0) continue;
+      const test_case_t & test_case = training_cases[test_id];
+      distribution[test_case.type_str] += 1;
+    }
+    return distribution;
+  }
+
+  /// Compute the distribution of test types evaluated by a phenotype
+  /// NOTE - this only works for phenotypes evaluated on the training set
+  std::map<std::string, size_t> GetEvalTestTypeDistribution(const phenotype_t & phen) {
+    std::map<std::string, size_t> distribution;
+    for (const auto & type : test_case_types) distribution[type] = 0;
+    for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+      const size_t test_id = phen.test_ids[i];
+      emp_assert(test_id < training_cases.size());
+      const test_case_t & test_case = training_cases[test_id];
+      distribution[test_case.type_str] += 1;
+    }
+    return distribution;
+  }
 
 public:
 
@@ -415,11 +453,30 @@ void BoolCalcWorld::DoUpdate() {
   const size_t cur_update = GetUpdate();
 
   found_solution = ScreenSolution(GetOrg(max_fit_org_id));
+  // Flag this organism as a solution (for output purposes)!
+  GetOrg(max_fit_org_id).GetPhenotype().is_solution = found_solution;
 
   std::cout << "update: " << cur_update << "; ";
   std::cout << "best score (" << max_fit_org_id << "): " << max_score << "; ";
   std::cout << "passes: " << max_passes << "; ";
   std::cout << "solution? " << found_solution << std::endl;
+
+  if (SUMMARY_RESOLUTION) {
+    const bool summarize = (!(cur_update % SUMMARY_RESOLUTION)) || (cur_update == GENERATIONS) || (STOP_ON_SOLUTION & found_solution);
+    if (summarize) {
+      max_fit_file->Update();
+    }
+  }
+
+  if (SNAPSHOT_RESOLUTION) {
+    const bool snapshot = (!(cur_update % SNAPSHOT_RESOLUTION)) || (cur_update == GENERATIONS) || (STOP_ON_SOLUTION & found_solution);
+    if (snapshot) {
+      DoPopulationSnapshot();
+      if (cur_update || (STOP_ON_SOLUTION & found_solution)) {
+        AnalyzeOrg(GetOrg(max_fit_org_id), max_fit_org_id);
+      }
+    }
+  }
 
   Update();
   ClearCache();
@@ -538,6 +595,11 @@ bool BoolCalcWorld::ScreenSolution(const org_t & org) {
   );
   const size_t screen_passes = screen_org.GetPhenotype().num_passes;
   return (screen_passes == all_test_cases.size());
+}
+
+void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
+  // todo
+
 }
 
 void BoolCalcWorld::InitConfigs(const config_t & config) {
@@ -973,21 +1035,33 @@ void BoolCalcWorld::InitSelection() {
   // (3) Associate tags with each type of input signal
   // - Numerics get a tag & all operator types get a tag
   // - First, find all types of operators
+  std::unordered_set<std::string> test_types_set;
   std::unordered_set<std::string> operators;
   operators.emplace("OPERAND");
   for (const auto & test : training_cases) {
+    test_types_set.emplace(test.type_str);
     for (const auto & input_signal : test.test_signals) {
       if (input_signal.IsOperator()) {
         operators.emplace(input_signal.GetOperator());
       }
     }
   }
+  const size_t training_test_types_detected = test_types_set.size();
+  std::cout << "Detected " << training_test_types_detected << " types of training examples." << std::endl;
   for (const auto & test : testing_cases) {
+    test_types_set.emplace(test.type_str);
     for (const auto & input_signal : test.test_signals) {
       if (input_signal.IsOperator()) {
         operators.emplace(input_signal.GetOperator());
       }
     }
+  }
+  if (test_types_set.size() != training_test_types_detected) {
+    std::cout << "WARNING: test case types detected in testing set that are not represented in training set." << std::endl;
+  }
+  // Collect all test case types/categories
+  for (const auto & tst_type : test_types_set) {
+    test_case_types.emplace_back(tst_type);
   }
   // Assign each operator type an id
   for (const auto & op : operators) {
@@ -1059,16 +1133,137 @@ void BoolCalcWorld::InitDataCollection() {
     if(OUTPUT_DIR.back() != '/')
         OUTPUT_DIR += '/';
   }
-  // -- generally useful functions --
+  // ---- generally useful functions ----
   std::function<size_t(void)> get_update = [this]() { return this->GetUpdate(); };
-  // -- fitness file --
+  // ---- fitness file ----
   SetupFitnessFile(OUTPUT_DIR + "/fitness.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
-  // -- setup max fit organism file --
+  // ---- setup max fit organism file ----
   max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
+  // -- update --
   max_fit_file->AddFun(get_update, "update");
-  max_fit_file->template AddFun<size_t>([this]() { return max_fit_org_id; }, "pop_id");
-  // -- TODO --
-
+  // -- pop id --
+  max_fit_file->template AddFun<size_t>(
+    [this]() { return max_fit_org_id; },
+    "pop_id"
+  );
+  // -- is_solution --
+  max_fit_file->template AddFun<bool>(
+    [this]() {
+      return GetOrg(max_fit_org_id).GetPhenotype().IsSolution();
+    }, "is_solution"
+  );
+  // -- agg fitness --
+  max_fit_file->template AddFun<double>(
+    [this]() {
+      return GetOrg(max_fit_org_id).GetPhenotype().GetAggregateScore();
+    },
+    "aggregate_fitness"
+  );
+  // -- num passes --
+  max_fit_file->template AddFun<size_t>(
+    [this]() {
+      return GetOrg(max_fit_org_id).GetPhenotype().num_passes;
+    },
+    "num_passes"
+  );
+  // -- total tests evaluated --
+  max_fit_file->template AddFun<size_t>(
+    [this]() {
+      return GetOrg(max_fit_org_id).GetPhenotype().test_scores.size();
+    },
+    "total_tests"
+  );
+  // -- scores by test ("[]") --
+  max_fit_file->template AddFun<std::string>(
+    [this]() {
+      std::ostringstream stream;
+      const phenotype_t & phen = GetOrg(max_fit_org_id).GetPhenotype();
+      stream << "\"[";
+      for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+        if (i) stream << ",";
+        stream << phen.test_scores[i];
+      }
+      stream << "]\"";
+      return stream.str();
+    },
+    "scores_by_test"
+  );
+  // -- test ids ("[]") --
+  max_fit_file->template AddFun<std::string>(
+    [this]() {
+      std::ostringstream stream;
+      const phenotype_t & phen = GetOrg(max_fit_org_id).GetPhenotype();
+      stream << "\"[";
+      for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+        if (i) stream << ",";
+        stream << phen.test_ids[i];
+      }
+      stream << "]\"";
+      return stream.str();
+    },
+    "test_ids"
+  );
+  // -- distribution of test case passes --
+  max_fit_file->template AddFun<std::string>(
+    [this]() {
+      const phenotype_t & phen = GetOrg(max_fit_org_id).GetPhenotype();
+      std::map<std::string, size_t> distribution(GetPassingTestTypeDistribution(phen));
+      std::ostringstream stream;
+      stream << "\"{";
+      bool comma=false;
+      for (const auto & freq : distribution) {
+        if (comma) { stream << ","; }
+        stream << freq.first << ":" << freq.second;
+        comma = true;
+      }
+      stream << "}\"";
+      return stream.str();
+    },
+    "test_pass_distribution"
+  );
+  // -- distribution of test case fails --
+  max_fit_file->template AddFun<std::string>(
+    [this]() {
+      const phenotype_t & phen = GetOrg(max_fit_org_id).GetPhenotype();
+      std::map<std::string, size_t> distribution(GetEvalTestTypeDistribution(phen));
+      std::ostringstream stream;
+      stream << "\"{";
+      bool comma=false;
+      for (const auto & freq : distribution) {
+        if (comma) { stream << ","; }
+        stream << freq.first << ":" << freq.second;
+        comma = true;
+      }
+      stream << "}\"";
+      return stream.str();
+    },
+    "test_eval_distribution"
+  );
+  // -- num modules --
+  max_fit_file->template AddFun<size_t>(
+    [this]() {
+      return GetOrg(max_fit_org_id).GetGenome().GetProgram().GetSize();
+    },
+    "num_modules"
+  );
+  // -- num instructions --
+  max_fit_file->template AddFun<size_t>(
+    [this]() {
+      return GetOrg(max_fit_org_id).GetGenome().GetProgram().GetInstCount();
+    },
+    "num_instructions"
+  );
+  // -- program --
+  max_fit_file->template AddFun<std::string>(
+    [this]() {
+      std::ostringstream stream;
+      stream << "\"";
+      PrintProgramSingleLine(GetOrg(max_fit_org_id).GetGenome().GetProgram(), stream);
+      stream << "\"";
+      return stream.str();
+    },
+    "program"
+  );
   max_fit_file->PrintHeaderKeys();
 }
 
@@ -1172,6 +1367,10 @@ emp::vector<BoolCalcTestInfo::TestCase> BoolCalcWorld::LoadTestCases(const std::
   return testcases;
 }
 
+void BoolCalcWorld::DoPopulationSnapshot() {
+  // todo - use container file...
+}
+
 void BoolCalcWorld::DoWorldConfigSnapshot(const config_t & config) {
   // Print matchbin metric
   std::cout << "Requested MatchBin Metric: " << STRINGVIEWIFY(MATCH_METRIC) << std::endl;
@@ -1243,6 +1442,50 @@ void BoolCalcWorld::DoWorldConfigSnapshot(const config_t & config) {
     get_cur_value = [&entry]() { return emp::to_string(entry.second->GetValue()); };
     snapshot_file.Update();
   }
+}
+
+void BoolCalcWorld::PrintProgramSingleLine(const program_t & prog, std::ostream & out) {
+  out << "[";
+  for (size_t func_id = 0; func_id < prog.GetSize(); ++func_id) {
+    if (func_id) out << ",";
+    PrintProgramFunction(prog[func_id], out);
+  }
+  out << "]";
+}
+
+void BoolCalcWorld::PrintProgramFunction(const program_function_t & func, std::ostream & out) {
+  out << "{";
+  // print function tags
+  out << "[";
+  for (size_t tag_id = 0; tag_id < func.GetTags().size(); ++tag_id) {
+    if (tag_id) out << ",";
+    func.GetTag(tag_id).Print(out);
+  }
+  out << "]:";
+  // print instruction sequence
+  out << "[";
+  for (size_t inst_id = 0; inst_id < func.GetSize(); ++inst_id) {
+    if (inst_id) out << ",";
+    PrintProgramInstruction(func[inst_id], out);
+  }
+  out << "]";
+  out << "}";
+}
+
+void BoolCalcWorld::PrintProgramInstruction(const inst_t & inst, std::ostream & out) {
+  out << inst_lib->GetName(inst.GetID()) << "[";
+  // print tags
+  for (size_t tag_id = 0; tag_id < inst.GetTags().size(); ++tag_id) {
+    if (tag_id) out << ",";
+    inst.GetTag(tag_id).Print(out);
+  }
+  out << "](";
+  // print args
+  for (size_t arg_id = 0; arg_id < inst.GetArgs().size(); ++arg_id) {
+    if (arg_id) out << ",";
+    out << inst.GetArg(arg_id);
+  }
+  out << ")";
 }
 
 #endif

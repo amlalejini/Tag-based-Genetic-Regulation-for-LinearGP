@@ -48,10 +48,12 @@ public:
     emp::vector<size_t> test_ids;     ///< Sequence IDs of tests (aligned with test_scores)
     double aggregate_score=0.0;       ///< Aggregate score across all signal sequences tested on (i.e., sum(test_scores))
     size_t num_passes=0;
+    bool is_solution=false;
 
     void Reset(size_t tests=1) {
       aggregate_score=0.0;         // Reset aggregate score.
       num_passes=0;
+      is_solution=false;
       test_scores.resize(tests);   // Make sure trial scores is right size.
       test_ids.resize(tests);
       std::fill(test_scores.begin(), test_scores.end(), 0); // Fill with zeroes.
@@ -62,12 +64,14 @@ public:
       return std::tie(test_scores,
                       test_ids,
                       aggregate_score,
-                      num_passes
+                      num_passes,
+                      is_solution
                       )
           == std::tie(o.test_scores,
                       o.test_ids,
                       o.aggregate_score,
-                      o.num_passes
+                      o.num_passes,
+                      o.is_solution
                       );
     }
 
@@ -79,15 +83,17 @@ public:
       return std::tie(test_scores,
                       test_ids,
                       aggregate_score,
-                      num_passes
+                      num_passes,
+                      is_solution
                     )
             < std::tie(o.test_scores,
                        o.test_ids,
                        o.aggregate_score,
-                       o.num_passes
+                       o.num_passes,
+                       o.is_solution
                       );
     }
-
+    bool IsSolution() const { return is_solution; }
     double GetAggregateScore() const { return aggregate_score; }
   };
 
