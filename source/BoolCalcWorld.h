@@ -213,7 +213,7 @@ public:
   using mutator_t = MutatorLinearFunctionsProgram<hardware_t, tag_t, inst_arg_t>;
   using hw_response_type = BoolCalcTestInfo::RESPONSE_TYPE;
 
-  using test_case_t = BoolCalcTestInfo::BoolCalcTestCase;
+  using test_case_t = BoolCalcTestInfo::TestCase;
 
 protected:
   // --- Localized Configuration Settings ---
@@ -730,6 +730,7 @@ void BoolCalcWorld::InitMutator() {
 void BoolCalcWorld::InitSelection() {
 
   // (1) Load testing set
+  LoadTestCases(TRAINING_SET_FILE);
   LoadTestCases(TESTING_SET_FILE);
   // (1.5) Load training set
   // (2) fill out test_set_ids
@@ -766,7 +767,7 @@ void BoolCalcWorld::InitPop_Random() {
   }
 }
 
-emp::vector<BoolCalcTestInfo::BoolCalcTestCase> BoolCalcWorld::LoadTestCases(const std::string & path) {
+emp::vector<BoolCalcTestInfo::TestCase> BoolCalcWorld::LoadTestCases(const std::string & path) {
   std::ifstream tests_fstream(path);
   if (!tests_fstream.is_open()) {
     std::cout << "Failed to open test case file (" << path << "). Exiting..." << std::endl;
@@ -774,6 +775,7 @@ emp::vector<BoolCalcTestInfo::BoolCalcTestCase> BoolCalcWorld::LoadTestCases(con
   }
   std::string cur_line;
   emp::vector<std::string> line_components;
+  emp::vector<std::string> input_components;
   emp::vector<test_case_t> testcases;
   // If file is empty, failure!
   if (tests_fstream.eof()) return testcases;
@@ -794,10 +796,55 @@ emp::vector<BoolCalcTestInfo::BoolCalcTestCase> BoolCalcWorld::LoadTestCases(con
     exit(-1);
   }
   // Extract tests
-  // while (!tests_fstream.eof()) {
+  while (!tests_fstream.eof()) {
+    std::getline(tests_fstream, cur_line);
+    if (cur_line == emp::empty_string()) continue; // skip blank lines
+    emp::left_justify(cur_line);       // Remove leading whitespace
+    emp::right_justify(cur_line);      // Remove trailing whitespace
+    line_components.clear();
+    emp::slice(cur_line, line_components, ',');
+    test_case_t testcase;
+    // (1) Grab, process input
+    testcase.input_str = line_components[header_lu["input"]]; // Input for this test case.
+    std::string test_input = testcase.input_str;
+    input_components.clear();
+    emp::slice(test_input, input_components, ';');
+    // for each component of the test case input, generate a testcase signal
+    for (const std::string & in_comp : input_components) {
+      emp::vector<std::string> signal_components;
+      emp::slice(in_comp, signal_components, ':');
+      emp_assert(signal_components.size() == 2);
+      const std::string sig_type = signal_components[0];
+      emp_assert(sig_type == "OP" || sig_type == "NUM", "Unrecognized input signal type.", sig_type);
+      const std::string sig_val = signal_components[1];
+      if (sig_type == "OP") {
+        testcase.test_signals.emplace_back(sig_val, hw_response_type::WAIT);
+      } else if (sig_type == "NUM") {
+        testcase.test_signals.emplace_back(emp::from_string<operand_t>(sig_val), hw_response_type::WAIT);
+      } else {
+        std::cout << "Unrecognized input signal type! Exiting." << std::endl;
+        exit(-1);
+      }
+    }
 
+    // (2) Grab, process output
+    testcase.output_str = line_components[header_lu["output"]]; // Overall correct output for this test case.
+    if (testcase.output_str == "ERROR") {
+      testcase.test_signals.back().correct_response_type = hw_response_type::ERROR;
+    } else {
+      testcase.test_signals.back().correct_response_type = hw_response_type::NUMERIC;
+      testcase.test_signals.back().numeric_response = emp::from_string<operand_t>(testcase.output_str);
+    }
+    // update final signal to match appropriate output
+    // (3) Grab, process test type
+    testcase.type_str = line_components[header_lu["type"]]; // Category of test case
 
-  // }
+    // for (auto & test_sig : testcase.test_signals) {
+    //   test_sig.Print();
+    //   std::cout << std::endl;
+    // }
+    testcases.emplace_back(testcase);
+  }
   return testcases;
 }
 
