@@ -1389,7 +1389,138 @@ void BoolCalcWorld::DoPopulationSnapshot() {
     ),
     "is_solution"
   );
-
+  // -- agg fitness --
+  snapshot_file.AddContainerFun(
+    std::function<double(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        return org->GetPhenotype().GetAggregateScore();
+      }
+    ),
+    "aggregate_fitness"
+  );
+  // -- num passes --
+  snapshot_file.AddContainerFun(
+    std::function<size_t(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        return org->GetPhenotype().num_passes;
+      }
+    ),
+    "num_passes"
+  );
+  // -- total tests evaluated --
+  snapshot_file.AddContainerFun(
+    std::function<size_t(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        return org->GetPhenotype().test_scores.size();
+      }
+    ),
+    "total_tests"
+  );
+  // -- scores by test ("[]") --
+  snapshot_file.AddContainerFun(
+    std::function<std::string(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        std::ostringstream stream;
+        const phenotype_t & phen = org->GetPhenotype();
+        stream << "\"[";
+        for (size_t i = 0; i < phen.test_scores.size(); ++i) {
+          if (i) stream << ",";
+          stream << phen.test_scores[i];
+        }
+        stream << "]\"";
+        return stream.str();
+      }
+    ),
+    "scores_by_test"
+  );
+  // -- test ids ("[]") --
+  snapshot_file.AddContainerFun(
+    std::function<std::string(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        std::ostringstream stream;
+        const phenotype_t & phen = org->GetPhenotype();
+        stream << "\"[";
+        for (size_t i = 0; i < phen.test_ids.size(); ++i) {
+          if (i) stream << ",";
+          stream << phen.test_ids[i];
+        }
+        stream << "]\"";
+        return stream.str();
+      }
+    ),
+    "test_ids"
+  );
+  // -- distribution of test case passes --
+  snapshot_file.AddContainerFun(
+    std::function<std::string(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        const phenotype_t & phen = org->GetPhenotype();
+        std::map<std::string, size_t> distribution(GetPassingTestTypeDistribution(phen));
+        std::ostringstream stream;
+        stream << "\"{";
+        bool comma=false;
+        for (const auto & freq : distribution) {
+          if (comma) { stream << ","; }
+          stream << freq.first << ":" << freq.second;
+          comma = true;
+        }
+        stream << "}\"";
+        return stream.str();
+      }
+    ),
+    "test_pass_distribution"
+  );
+  // -- distribution of test case fails --
+  snapshot_file.AddContainerFun(
+    std::function<std::string(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        const phenotype_t & phen = org->GetPhenotype();
+        std::map<std::string, size_t> distribution(GetEvalTestTypeDistribution(phen));
+        std::ostringstream stream;
+        stream << "\"{";
+        bool comma=false;
+        for (const auto & freq : distribution) {
+          if (comma) { stream << ","; }
+          stream << freq.first << ":" << freq.second;
+          comma = true;
+        }
+        stream << "}\"";
+        return stream.str();
+      }
+    ),
+    "test_eval_distribution"
+  );
+  // -- num modules --
+  snapshot_file.AddContainerFun(
+    std::function<size_t(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        return org->GetGenome().GetProgram().GetSize();
+      }
+    ),
+    "num_modules"
+  );
+  // -- num instructions --
+  snapshot_file.AddContainerFun(
+    std::function<size_t(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        return org->GetGenome().GetProgram().GetInstCount();
+      }
+    ),
+    "num_instructions"
+  );
+  // -- program --
+  snapshot_file.AddContainerFun(
+    std::function<std::string(emp::Ptr<org_t>)>(
+      [this](emp::Ptr<org_t> org) {
+        std::ostringstream stream;
+        stream << "\"";
+        PrintProgramSingleLine(org->GetGenome().GetProgram(), stream);
+        stream << "\"";
+        return stream.str();
+      }
+    ),
+    "program"
+  );
   snapshot_file.PrintHeaderKeys();
   snapshot_file.Update();
 }
