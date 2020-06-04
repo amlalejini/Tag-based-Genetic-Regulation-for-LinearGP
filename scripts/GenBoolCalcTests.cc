@@ -47,15 +47,15 @@ constexpr operand_t max_numeric=1000000000;
 // - [NUM][1-INPUT-OP] : result
 // - [NUM][2-INPUT-OP][NUM] : result
 // - [NUM][2-INPUT-OP][OP] : error
-constexpr size_t ONE_INPUT_COMPUTATIONS_num_testing_cases=50;
-constexpr size_t TWO_INPUT_COMPUTATIONS_num_testing_cases=50;
-constexpr size_t ERROR_NUM_NUM_num_testing_cases=100;   // ERROR_NUM_NUM
-constexpr size_t ERROR_OP_OP_num_testing_cases=10;   // ERROR_OP_OP (per valid combination)
+constexpr size_t ONE_INPUT_COMPUTATIONS_num_testing_cases=500;
+constexpr size_t TWO_INPUT_COMPUTATIONS_num_testing_cases=500;
+constexpr size_t ERROR_NUM_NUM_num_testing_cases=200;   // ERROR_NUM_NUM
+constexpr size_t ERROR_OP_OP_num_testing_cases=20;   // ERROR_OP_OP (per valid combination)
 
-constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=500;
-constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=500;
-constexpr size_t ERROR_NUM_NUM_num_training_cases=200;
-constexpr size_t ERROR_OP_OP_num_training_cases=20; // (per valid combination)
+constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=50;
+constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=50;
+constexpr size_t ERROR_NUM_NUM_num_training_cases=100;
+constexpr size_t ERROR_OP_OP_num_training_cases=10; // (per valid combination)
 
 struct TestCaseStr {
   std::string input="";
@@ -139,11 +139,11 @@ operand_t Execute(const Input & input) {
 }
 
 TestCaseStr GenOPErrorTestCase(const std::string & op) {
-  return {op, "ERROR", "ERROR_OP"};
+  return {"OP:" + op, "ERROR", "ERROR_OP"};
 }
 
 TestCaseStr GenNumNumErrorTestCase(operand_t a, operand_t b) {
-  return {emp::to_string(a) + ";" + emp::to_string(b),  // Input
+  return {"NUM:" + emp::to_string(a) + ";" + "NUM:" + emp::to_string(b),  // Input
           "ERROR",                                      // Output
           "ERROR_NUM_NUM"};                             // Type
 }
@@ -153,7 +153,7 @@ TestCaseStr GenNumOpOpErrorTestCase(const std::string & op_a,
                                    operand_t num)
 {
   return {
-    emp::to_string(num) + ";" + op_a + ";" + op_b,
+    "NUM:" + emp::to_string(num) + ";OP:" + op_a + ";OP:" + op_b,
     "ERROR",
     "ERROR_OP_OP"
   };
@@ -161,7 +161,7 @@ TestCaseStr GenNumOpOpErrorTestCase(const std::string & op_a,
 
 TestCaseStr GenOneInputValidTestCase(const std::string & op, operand_t a) {
   return {
-    emp::to_string(a) + ";" + op,       // Input
+    "NUM:" + emp::to_string(a) + ";OP:" + op,       // Input
     emp::to_string(Execute({op, {a}})), // Output
     op                                  // Type
   };
@@ -171,7 +171,7 @@ TestCaseStr GenTwoInputValidTestCase(const std::string & op,
                                      const std::pair<operand_t, operand_t> operands)
 {
   return {
-    emp::to_string(operands.first) + ";" + op + ";" + emp::to_string(operands.second), // Input
+    "NUM:" + emp::to_string(operands.first) + ";OP:" + op + ";" + "NUM:" + emp::to_string(operands.second), // Input
     emp::to_string(Execute({op, {operands.first, operands.second}})),                  // Output
     op                                                                                 // Type
   };
