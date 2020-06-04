@@ -51,6 +51,7 @@ namespace BoolCalcTestInfo {
 
     input_sig_t signal_type;
     std::string operator_str;
+    size_t signal_id;
     operand_t operand;
     response_t correct_response_type;
     operand_t numeric_response;
@@ -58,6 +59,7 @@ namespace BoolCalcTestInfo {
     TestSignal(operand_t num, response_t resp)
       : signal_type(input_sig_t::OPERAND),
         operator_str(""),
+        signal_id(0),
         operand(num),
         correct_response_type(resp),
         numeric_response(0)
@@ -66,6 +68,7 @@ namespace BoolCalcTestInfo {
     TestSignal(const std::string & op, response_t resp)
       : signal_type(input_sig_t::OPERATOR),
         operator_str(op),
+        signal_id(0),
         operand(0),
         correct_response_type(resp),
         numeric_response(0)
@@ -82,6 +85,7 @@ namespace BoolCalcTestInfo {
     void Print(std::ostream & out=std::cout) {
       out << "{";
       out << "signal-type:" << InputSignalTypeStr(signal_type) << ",";
+      out << "signal-id:" << signal_id << ",";
       if (IsOperator())
         out << "operator:" <<  operator_str << ",";
       if (IsOperand())

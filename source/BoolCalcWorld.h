@@ -40,6 +40,7 @@
 #include "hardware/SignalGP/utils/MemoryModel.h"
 #include "hardware/SignalGP/utils/linear_program_instructions_impls.h"
 #include "hardware/SignalGP/utils/linear_functions_program_instructions_impls.h"
+#include "random_utils.h"
 
 #include "BoolCalcConfig.h"
 #include "BoolCalcOrg.h"
@@ -266,6 +267,13 @@ protected:
 
   emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;  ///< Manages fitness functions if we're doing lexicase selection.
   emp::vector<size_t> training_case_ids;
+  emp::vector<test_case_t> training_cases;
+  emp::vector<test_case_t> testing_cases;
+  size_t num_eval_tests;
+
+  emp::vector<tag_t> test_input_signal_tags;        ///< Stored by ID
+  emp::vector<std::string> test_input_signals;      ///< ...
+  std::unordered_map<std::string, size_t> test_input_signal_lu;
 
   bool KO_REGULATION=false;       ///< Is regulation knocked out right now?
   bool KO_UP_REGULATION=false;    ///< Is up-regulation knocked out right now?
@@ -284,6 +292,9 @@ protected:
 
   void InitPop();
   void InitPop_Random();
+
+  /// Output a snapshot of the world's configuration.
+  void DoWorldConfigSnapshot(const config_t & config);
 
   emp::vector<test_case_t> LoadTestCases(const std::string & path);
 
@@ -327,10 +338,14 @@ void BoolCalcWorld::Setup(const config_t & config) {
     std::cout << " Done." << std::endl;
     this->SetAutoMutate(); // Set to automutate after initialization.
   });
-
-
-
-
+  // Misc. world configuration
+  this->SetPopStruct_Mixed(true);
+  this->SetFitFun([this](org_t & org) {
+    return org.GetPhenotype().GetAggregateScore();
+  });
+  // Configure data collection/snapshots
+  InitDataCollection();
+  DoWorldConfigSnapshot(config);
 
 
   setup=true;
@@ -729,23 +744,104 @@ void BoolCalcWorld::InitMutator() {
 
 void BoolCalcWorld::InitSelection() {
 
-  // (1) Load testing set
-  LoadTestCases(TRAINING_SET_FILE);
-  LoadTestCases(TESTING_SET_FILE);
-  // (1.5) Load training set
-  // (2) fill out test_set_ids
-  // (3) initialize lexicase fitness functions
+  // (1) Load training and testing sets
+  training_cases = LoadTestCases(TRAINING_SET_FILE);
+  testing_cases = LoadTestCases(TESTING_SET_FILE);
 
-  // // How should we do selection?
-  // if (DOWN_SAMPLE) {
-  //   //
-  // } else {
-  //   // todo - what are fit funs?
-  //   do_selection_sig.AddAction([this]() {
-  //     emp::LexicaseSelect(*this, lexicase_fit_funs, POP_SIZE);
-  //   });
+  // (2) fill out test_set_ids
+  training_case_ids.resize(training_cases.size());
+  std::iota(training_case_ids.begin(), training_case_ids.end(), 0);
+
+  // (3) Associate tags with each type of input signal
+  // - Numerics get a tag & all operator types get a tag
+  // - First, find all types of operators
+  std::unordered_set<std::string> operators;
+  operators.emplace("OPERAND");
+  for (const auto & test : training_cases) {
+    for (const auto & input_signal : test.test_signals) {
+      if (input_signal.IsOperator()) {
+        operators.emplace(input_signal.GetOperator());
+      }
+    }
+  }
+  for (const auto & test : testing_cases) {
+    for (const auto & input_signal : test.test_signals) {
+      if (input_signal.IsOperator()) {
+        operators.emplace(input_signal.GetOperator());
+      }
+    }
+  }
+  // Assign each operator type an id
+  for (const auto & op : operators) {
+    test_input_signal_lu[op] = test_input_signals.size();
+    test_input_signals.emplace_back(op);
+  }
+  // Annotate each testing/training case signal with signal id
+  for (auto & test : training_cases) {
+    for (auto & input_signal : test.test_signals) {
+      if (input_signal.IsOperator()) {
+        input_signal.signal_id = test_input_signal_lu[input_signal.GetOperator()];
+      } else {
+        input_signal.signal_id = test_input_signal_lu["OPERAND"];
+      }
+    }
+  }
+  for (auto & test : testing_cases) {
+    for (auto & input_signal : test.test_signals) {
+      if (input_signal.IsOperator()) {
+        input_signal.signal_id = test_input_signal_lu[input_signal.GetOperator()];
+      } else {
+        input_signal.signal_id = test_input_signal_lu["OPERAND"];
+      }
+    }
+  }
+
+  // Generate random tags for each input signal
+  constexpr size_t tag_len = BoolCalcWorldDefs::TAG_LEN;
+  test_input_signal_tags = emp::RandomBitSets<tag_len>(*random_ptr, test_input_signals.size(), true);
+
+  // for (auto & test : training_cases) {
+  //   std::cout << "---TEST---" << std::endl;
+  //   for (auto & input_signal : test.test_signals) {
+  //     input_signal.Print();
+  //     std::cout << std::endl;
+  //   }
   // }
 
+  // (4) initialize lexicase fitness functions
+  //  - Compute number of tests used during evaluation.
+  if (DOWN_SAMPLE) {
+    num_eval_tests = (size_t)((double)training_case_ids.size() * DOWN_SAMPLE_RATE);
+  } else {
+    num_eval_tests = training_case_ids.size();
+  }
+  emp_assert(num_eval_tests > 0);
+  //  - Initialize fitness function set
+  for (size_t i = 0; i < num_eval_tests; ++i) {
+    lexicase_fit_funs.push_back([i](org_t & org) {
+      emp_assert(i < org.GetPhenotype().test_scores.size(), i, org.GetPhenotype().test_scores.size());
+      const double score = org.GetPhenotype().test_scores[i];
+      return score;
+    });
+  }
+
+  // (5) Wire up selection
+  do_selection_sig.AddAction([this]() {
+    emp::LexicaseSelect(*this, lexicase_fit_funs, POP_SIZE);
+  });
+
+  // TODO - output environment (as part of configuration)
+}
+
+void BoolCalcWorld::InitDataCollection() {
+  if (setup) {
+    // max_fit_file.Delete();
+  } else {
+    mkdir(OUTPUT_DIR.c_str(), ACCESSPERMS);
+    if(OUTPUT_DIR.back() != '/')
+        OUTPUT_DIR += '/';
+  }
+  // -- bookmark --
 }
 
 void BoolCalcWorld::InitPop() {
@@ -846,6 +942,79 @@ emp::vector<BoolCalcTestInfo::TestCase> BoolCalcWorld::LoadTestCases(const std::
     testcases.emplace_back(testcase);
   }
   return testcases;
+}
+
+void BoolCalcWorld::DoWorldConfigSnapshot(const config_t & config) {
+  // Print matchbin metric
+  std::cout << "Requested MatchBin Metric: " << STRINGVIEWIFY(MATCH_METRIC) << std::endl;
+  std::cout << "Requested MatchBin Match Thresh: " << STRINGVIEWIFY(MATCH_THRESH) << std::endl;
+  std::cout << "Requested MatchBin Regulator: " << STRINGVIEWIFY(MATCH_REG) << std::endl;
+  // Make a new data file for snapshot.
+  emp::DataFile snapshot_file(OUTPUT_DIR + "/run_config.csv");
+  std::function<std::string()> get_cur_param;
+  std::function<std::string()> get_cur_value;
+  snapshot_file.template AddFun<std::string>([&get_cur_param]() -> std::string { return get_cur_param(); }, "parameter");
+  snapshot_file.template AddFun<std::string>([&get_cur_value]() -> std::string { return get_cur_value(); }, "value");
+  snapshot_file.PrintHeaderKeys();  // param, value
+  // matchbin metric
+  get_cur_param = []() { return "matchbin_metric"; };
+  get_cur_value = []() { return emp::to_string(STRINGVIEWIFY(MATCH_METRIC)); };
+  snapshot_file.Update();
+  // matchbin threshold
+  get_cur_param = []() { return "matchbin_thresh"; };
+  get_cur_value = []() { return emp::to_string(STRINGVIEWIFY(MATCH_THRESH)); };
+  snapshot_file.Update();
+  // matchbin regulator
+  get_cur_param = []() { return "matchbin_regulator"; };
+  get_cur_value = []() { return emp::to_string(STRINGVIEWIFY(MATCH_REG)); };
+  snapshot_file.Update();
+  // TAG_LEN
+  get_cur_param = []() { return "TAG_LEN"; };
+  get_cur_value = []() { return emp::to_string(BoolCalcWorldDefs::TAG_LEN); };
+  snapshot_file.Update();
+  // INST_TAG_CNT
+  get_cur_param = []() { return "INST_TAG_CNT"; };
+  get_cur_value = []() { return emp::to_string(BoolCalcWorldDefs::INST_TAG_CNT); };
+  snapshot_file.Update();
+  // INST_ARG_CNT
+  get_cur_param = []() { return "INST_ARG_CNT"; };
+  get_cur_value = []() { return emp::to_string(BoolCalcWorldDefs::INST_ARG_CNT); };
+  snapshot_file.Update();
+  // FUNC_NUM_TAGS
+  get_cur_param = []() { return "FUNC_NUM_TAGS"; };
+  get_cur_value = []() { return emp::to_string(BoolCalcWorldDefs::FUNC_NUM_TAGS); };
+  snapshot_file.Update();
+  // input signals
+  get_cur_param = []() { return "input_signals"; };
+  get_cur_value = [this]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < test_input_signals.size(); ++i) {
+      if (i) stream << ",";
+      stream << test_input_signals[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  };
+  snapshot_file.Update();
+  get_cur_param = []() { return "input_signal_tags"; };
+  get_cur_value = [this]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < test_input_signal_tags.size(); ++i) {
+      if (i) stream << ",";
+      test_input_signal_tags[i].Print(stream);
+    }
+    stream << "]\"";
+    return stream.str();
+  };
+  snapshot_file.Update();
+
+  for (const auto & entry : config) {
+    get_cur_param = [&entry]() { return entry.first; };
+    get_cur_value = [&entry]() { return emp::to_string(entry.second->GetValue()); };
+    snapshot_file.Update();
+  }
 }
 
 #endif
