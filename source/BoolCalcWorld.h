@@ -272,8 +272,11 @@ protected:
 
   emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;  ///< Manages fitness functions if we're doing lexicase selection.
   emp::vector<size_t> training_case_ids;
+  emp::vector<size_t> all_test_case_ids;
   emp::vector<test_case_t> training_cases;
   emp::vector<test_case_t> testing_cases;
+  emp::vector<test_case_t> all_test_cases; ///< Used for screening for solutions
+
   size_t num_eval_tests;
 
   emp::vector<tag_t> test_input_signal_tags;        ///< Stored by ID
@@ -302,9 +305,13 @@ protected:
   void DoSelection();
   void DoUpdate();
 
-  void EvaluateOrg(org_t & org);
+  void EvaluateOrg(org_t & org,
+                   const emp::vector<test_case_t> & tests,
+                   const emp::vector<size_t> & test_eval_order,
+                   size_t num_tests=0,
+                   bool bail_on_fail=false);
 
-  void ScreenSolution(org_t & org);
+  bool ScreenSolution(const org_t & org);
 
   /// Output a snapshot of the world's configuration.
   void DoWorldConfigSnapshot(const config_t & config);
@@ -388,7 +395,12 @@ void BoolCalcWorld::DoEvaluation() {
   max_fit_org_id = 0;
   for (size_t org_id = 0; org_id < GetSize(); ++org_id) {
     emp_assert(IsOccupied(org_id));
-    EvaluateOrg(GetOrg(org_id));
+    EvaluateOrg(
+      GetOrg(org_id),
+      training_cases,
+      training_case_ids,
+      num_eval_tests
+    );
     if (CalcFitnessID(org_id) > CalcFitnessID(max_fit_org_id)) max_fit_org_id = org_id;
   }
 }
@@ -402,8 +414,7 @@ void BoolCalcWorld::DoUpdate() {
   const double max_passes = GetOrg(max_fit_org_id).GetPhenotype().num_passes;
   const size_t cur_update = GetUpdate();
 
-  // todo - screen for solution
-  // found_solution = ScreenSolution(GetOrg(max_fit_org_id)); // todo!
+  found_solution = ScreenSolution(GetOrg(max_fit_org_id));
 
   std::cout << "update: " << cur_update << "; ";
   std::cout << "best score (" << max_fit_org_id << "): " << max_score << "; ";
@@ -415,23 +426,34 @@ void BoolCalcWorld::DoUpdate() {
 }
 
 // todo - modify this to support running on training, testing, or both
-void BoolCalcWorld::EvaluateOrg(org_t & org) {
+void BoolCalcWorld::EvaluateOrg(
+  org_t & org,
+  const emp::vector<test_case_t> & tests,
+  const emp::vector<size_t> & test_eval_order,
+  size_t num_tests/*=0*/,
+  bool bail_on_fail/*=false*/
+) {
   // Evaluate given organism on each test (num_eval_tests)
+  if (!num_tests) num_tests = test_eval_order.size();
+  emp_assert(num_tests < test_eval_order.size());
+  emp_assert(num_tests < tests.size());
+
   phenotype_t & phen = org.GetPhenotype();
-  phen.Reset(num_eval_tests);
+  phen.Reset(num_tests);
+
   // Ready the hardware
   eval_hardware->SetProgram(org.GetGenome().program);
   // Evaluate program on each training example
-  for (size_t eval_index = 0; eval_index < num_eval_tests; ++eval_index) {
+  for (size_t eval_index = 0; eval_index < num_tests; ++eval_index) {
     emp_assert(eval_index < phen.test_scores.size());
     emp_assert(phen.test_scores[eval_index] == 0);
     // Reset the matchbin for each test case
     eval_hardware->ResetMatchBin();
-    // grab the training example id
-    const size_t training_id = training_case_ids[eval_index];
-    phen.test_ids[eval_index] = training_id;
+    // grab the test case id
+    const size_t test_id = test_eval_order[eval_index];
+    phen.test_ids[eval_index] = test_id;
     // grab the appropriate training example
-    const test_case_t & test_case = training_cases[training_id];
+    const test_case_t & test_case = tests[test_id];
     // compute amount of partial credit for each correct response to an input signal
     const double partial_credit = 1.0 / (double)test_case.test_signals.size();
     size_t num_correct_sig_resps = 0;
@@ -485,12 +507,37 @@ void BoolCalcWorld::EvaluateOrg(org_t & org) {
     // Did the program correctly respond to all input signals?
     // Update test score if necessary
     bool pass = num_correct_sig_resps == test_case.test_signals.size();
-    if (pass) phen.test_scores[eval_index] = 1.0;
+    if (pass) { phen.test_scores[eval_index] = 1.0; }
+    else if (bail_on_fail) { break; } // Organism failed test and we want to bail on first fail.
+
     // Update number of passes
     phen.num_passes += (size_t)pass;
+
     // Update aggregate score
     phen.aggregate_score += phen.test_scores[eval_index];
   }
+}
+
+bool BoolCalcWorld::ScreenSolution(const org_t & org) {
+  // How many tests did this organism pass?
+  const size_t max_passes = org.GetPhenotype().num_passes;
+  // Did this organism pass all the tests it was run on?
+  const bool sol_candidate = max_passes >= org.GetPhenotype().test_scores.size();
+  if (!sol_candidate) return false;
+  // This organism passed all things it was tested on, so we'll screen it on the full training/testing sets.
+
+  org_t screen_org(org);
+  emp_assert(screen_org.GetGenome() == org.GetGenome());
+  emp_assert(all_test_case_ids.size() == all_test_cases.size());
+  EvaluateOrg(
+    screen_org,               // Organism to evaluate
+    all_test_cases,           // Test cases to evaluate organism on
+    all_test_case_ids,        // Order to evaluate tests in (doesn't super matter)
+    all_test_cases.size(),    // Number of tests (all of them for screening)
+    true                      // Bail on fail?
+  );
+  const size_t screen_passes = screen_org.GetPhenotype().num_passes;
+  return (screen_passes == all_test_cases.size());
 }
 
 void BoolCalcWorld::InitConfigs(const config_t & config) {
@@ -906,10 +953,22 @@ void BoolCalcWorld::InitSelection() {
   // (1) Load training and testing sets
   training_cases = LoadTestCases(TRAINING_SET_FILE);
   testing_cases = LoadTestCases(TESTING_SET_FILE);
+  all_test_cases.clear();
+  for (const auto & test : testing_cases) { // Put testing cases first to maximize changes to bail screens early
+    all_test_cases.emplace_back(test);
+  }
+  for (const auto & test : training_cases) {
+    all_test_cases.emplace_back(test);
+  }
+  std::cout << "# training cases: " << training_cases.size() << std::endl;
+  std::cout << "# testing cases: " << testing_cases.size() << std::endl;
+  std::cout << "# total cases: " << all_test_cases.size() << std::endl;
 
   // (2) fill out test_set_ids
   training_case_ids.resize(training_cases.size());
   std::iota(training_case_ids.begin(), training_case_ids.end(), 0);
+  all_test_case_ids.resize(all_test_cases.size());
+  std::iota(all_test_case_ids.begin(), all_test_case_ids.end(), 0);
 
   // (3) Associate tags with each type of input signal
   // - Numerics get a tag & all operator types get a tag
