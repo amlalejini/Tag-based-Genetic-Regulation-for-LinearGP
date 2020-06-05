@@ -48,7 +48,7 @@ EMP_BUILD_CONFIG(BoolCalcConfig,
     VALUE(OUTPUT_DIR, std::string, "output", "where should we dump output?"),
     VALUE(SUMMARY_RESOLUTION, size_t, 10, "How often should we output summary statistics?"),
     VALUE(SNAPSHOT_RESOLUTION, size_t, 100, "How often should we snapshot the population?"),
-
+    VALUE(OUTPUT_PROGRAMS, bool, false, "Should we output programs as fields in data files?"),
 )
 
 #endif

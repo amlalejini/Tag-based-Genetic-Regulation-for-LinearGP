@@ -253,6 +253,7 @@ protected:
   std::string OUTPUT_DIR;
   size_t SUMMARY_RESOLUTION;
   size_t SNAPSHOT_RESOLUTION;
+  bool OUTPUT_PROGRAMS;
 
   bool setup=false;
   std::string output_path;
@@ -492,8 +493,8 @@ void BoolCalcWorld::EvaluateOrg(
 ) {
   // Evaluate given organism on each test (num_eval_tests)
   if (!num_tests) num_tests = test_eval_order.size();
-  emp_assert(num_tests < test_eval_order.size());
-  emp_assert(num_tests < tests.size());
+  emp_assert(num_tests <= test_eval_order.size(), num_tests, test_eval_order.size());
+  emp_assert(num_tests <= tests.size(), num_tests, tests.size());
 
   phenotype_t & phen = org.GetPhenotype();
   phen.Reset(num_tests);
@@ -524,7 +525,6 @@ void BoolCalcWorld::EvaluateOrg(
       emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
       emp_assert(eval_hardware->GetNumQueuedEvents() == 0);
       // Queue calculator button input
-      // MessageEvent(size_t _id, tag_t _tag, const data_t & _data=data_t())
       if (test_sig.IsOperand()) {
         eval_hardware->QueueEvent(
           event_t(event_id_input_sig, test_sig_tag, {{0, (double)test_sig.GetOperand()}})
@@ -563,7 +563,7 @@ void BoolCalcWorld::EvaluateOrg(
     }
     // Did the program correctly respond to all input signals?
     // Update test score if necessary
-    bool pass = num_correct_sig_resps == test_case.test_signals.size();
+    const bool pass = (num_correct_sig_resps == test_case.test_signals.size());
     if (pass) { phen.test_scores[eval_index] = 1.0; }
     else if (bail_on_fail) { break; } // Organism failed test and we want to bail on first fail.
 
@@ -582,7 +582,6 @@ bool BoolCalcWorld::ScreenSolution(const org_t & org) {
   const bool sol_candidate = max_passes >= org.GetPhenotype().test_scores.size();
   if (!sol_candidate) return false;
   // This organism passed all things it was tested on, so we'll screen it on the full training/testing sets.
-
   org_t screen_org(org);
   emp_assert(screen_org.GetGenome() == org.GetGenome());
   emp_assert(all_test_case_ids.size() == all_test_cases.size());
@@ -608,7 +607,7 @@ void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
     training_case_ids,
     training_case_ids.size()
   );
-  ScreenSolution(test_org);
+  test_org.GetPhenotype().is_solution = ScreenSolution(test_org);
 
   // Run with knockouts
   // - ko memory
@@ -623,7 +622,7 @@ void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
     training_case_ids,
     training_case_ids.size()
   );
-  ScreenSolution(ko_mem_org);
+  ko_mem_org.GetPhenotype().is_solution = ScreenSolution(ko_mem_org);
 
   // - ko regulation
   KO_GLOBAL_MEMORY=false;
@@ -637,7 +636,7 @@ void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
     training_case_ids,
     training_case_ids.size()
   );
-  ScreenSolution(ko_reg_org);
+  ko_reg_org.GetPhenotype().is_solution = ScreenSolution(ko_reg_org);
 
   // - ko memory & regulation
   KO_GLOBAL_MEMORY=true;
@@ -651,7 +650,7 @@ void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
     training_case_ids,
     training_case_ids.size()
   );
-  ScreenSolution(ko_all_org);
+  ko_all_org.GetPhenotype().is_solution = ScreenSolution(ko_all_org);
 
   // - ko up regulation
   KO_GLOBAL_MEMORY=false;
@@ -665,7 +664,7 @@ void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
     training_case_ids,
     training_case_ids.size()
   );
-  ScreenSolution(ko_down_reg_org);
+  ko_down_reg_org.GetPhenotype().is_solution = ScreenSolution(ko_down_reg_org);
 
   // - ko down regulation
   KO_GLOBAL_MEMORY=false;
@@ -679,7 +678,7 @@ void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
     training_case_ids,
     training_case_ids.size()
   );
-  ScreenSolution(ko_up_reg_org);
+  ko_up_reg_org.GetPhenotype().is_solution = ScreenSolution(ko_up_reg_org);
 
   // reset knockout variables
   KO_GLOBAL_MEMORY=false;
@@ -870,6 +869,7 @@ void BoolCalcWorld::InitConfigs(const config_t & config) {
   OUTPUT_DIR = config.OUTPUT_DIR();
   SUMMARY_RESOLUTION = config.SUMMARY_RESOLUTION();
   SNAPSHOT_RESOLUTION = config.SNAPSHOT_RESOLUTION();
+  OUTPUT_PROGRAMS = config.OUTPUT_PROGRAMS();
 }
 
 void BoolCalcWorld::InitInstLib() {
@@ -1247,22 +1247,11 @@ void BoolCalcWorld::InitSelection() {
   // (1) Load training and testing sets
   training_cases = LoadTestCases(TRAINING_SET_FILE);
   testing_cases = LoadTestCases(TESTING_SET_FILE);
-  all_test_cases.clear();
-  for (const auto & test : testing_cases) { // Put testing cases first to maximize changes to bail screens early
-    all_test_cases.emplace_back(test);
-  }
-  for (const auto & test : training_cases) {
-    all_test_cases.emplace_back(test);
-  }
-  std::cout << "# training cases: " << training_cases.size() << std::endl;
-  std::cout << "# testing cases: " << testing_cases.size() << std::endl;
-  std::cout << "# total cases: " << all_test_cases.size() << std::endl;
+
 
   // (2) fill out test_set_ids
   training_case_ids.resize(training_cases.size());
   std::iota(training_case_ids.begin(), training_case_ids.end(), 0);
-  all_test_case_ids.resize(all_test_cases.size());
-  std::iota(all_test_case_ids.begin(), all_test_case_ids.end(), 0);
 
   // (3) Associate tags with each type of input signal
   // - Numerics get a tag & all operator types get a tag
@@ -1324,13 +1313,19 @@ void BoolCalcWorld::InitSelection() {
   constexpr size_t tag_len = BoolCalcWorldDefs::TAG_LEN;
   test_input_signal_tags = emp::RandomBitSets<tag_len>(*random_ptr, test_input_signals.size(), true);
 
-  // for (auto & test : training_cases) {
-  //   std::cout << "---TEST---" << std::endl;
-  //   for (auto & input_signal : test.test_signals) {
-  //     input_signal.Print();
-  //     std::cout << std::endl;
-  //   }
-  // }
+  // Build combined test bank (used for solution screenings)
+  all_test_cases.clear();
+  for (const auto & test : testing_cases) { // Put testing cases first to maximize changes to bail screens early
+    all_test_cases.emplace_back(test);
+  }
+  for (const auto & test : training_cases) {
+    all_test_cases.emplace_back(test);
+  }
+  std::cout << "# training cases: " << training_cases.size() << std::endl;
+  std::cout << "# testing cases: " << testing_cases.size() << std::endl;
+  std::cout << "# total cases: " << all_test_cases.size() << std::endl;
+  all_test_case_ids.resize(all_test_cases.size());
+  std::iota(all_test_case_ids.begin(), all_test_case_ids.end(), 0);
 
   // (4) initialize lexicase fitness functions
   //  - Compute number of tests used during evaluation.
@@ -1486,16 +1481,18 @@ void BoolCalcWorld::InitDataCollection() {
     "num_instructions"
   );
   // -- program --
-  max_fit_file->template AddFun<std::string>(
-    [this]() {
-      std::ostringstream stream;
-      stream << "\"";
-      PrintProgramSingleLine(GetOrg(max_fit_org_id).GetGenome().GetProgram(), stream);
-      stream << "\"";
-      return stream.str();
-    },
-    "program"
-  );
+  if (OUTPUT_PROGRAMS) {
+    max_fit_file->template AddFun<std::string>(
+      [this]() {
+        std::ostringstream stream;
+        stream << "\"";
+        PrintProgramSingleLine(GetOrg(max_fit_org_id).GetGenome().GetProgram(), stream);
+        stream << "\"";
+        return stream.str();
+      },
+      "program"
+    );
+  }
   max_fit_file->PrintHeaderKeys();
 }
 
@@ -1741,18 +1738,20 @@ void BoolCalcWorld::DoPopulationSnapshot() {
     "num_instructions"
   );
   // -- program --
-  snapshot_file.AddContainerFun(
-    std::function<std::string(emp::Ptr<org_t>)>(
-      [this](emp::Ptr<org_t> org) {
-        std::ostringstream stream;
-        stream << "\"";
-        PrintProgramSingleLine(org->GetGenome().GetProgram(), stream);
-        stream << "\"";
-        return stream.str();
-      }
-    ),
-    "program"
-  );
+  if (OUTPUT_PROGRAMS) {
+    snapshot_file.AddContainerFun(
+      std::function<std::string(emp::Ptr<org_t>)>(
+        [this](emp::Ptr<org_t> org) {
+          std::ostringstream stream;
+          stream << "\"";
+          PrintProgramSingleLine(org->GetGenome().GetProgram(), stream);
+          stream << "\"";
+          return stream.str();
+        }
+      ),
+      "program"
+    );
+  }
   snapshot_file.PrintHeaderKeys();
   snapshot_file.Update();
 }
