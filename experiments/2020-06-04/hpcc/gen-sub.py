@@ -33,9 +33,7 @@ base_resub_script = \
 EXEC=<<EXEC>>
 CONFIG_DIR=<<CONFIG_DIR>>
 
-module load GCC/7.3.0-2.30
-module load OpenMPI/3.1.1
-module load Python/3.7.0
+module load GCC/9.3.0
 
 <<RESUBMISSION_LOGIC>>
 
