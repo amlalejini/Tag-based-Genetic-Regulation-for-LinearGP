@@ -33,7 +33,7 @@ base_resub_script = \
 EXEC=<<EXEC>>
 CONFIG_DIR=<<CONFIG_DIR>>
 
-module load GCC/9.3.0
+module load GCCcore/9.3.0
 
 <<RESUBMISSION_LOGIC>>
 
