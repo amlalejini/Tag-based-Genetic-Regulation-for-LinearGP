@@ -598,8 +598,240 @@ bool BoolCalcWorld::ScreenSolution(const org_t & org) {
 }
 
 void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
-  // todo
+  // Analyze organism w/knockouts
+  org_t test_org(org);
 
+  // Run normally
+  EvaluateOrg(
+    test_org,
+    training_cases,
+    training_case_ids,
+    training_case_ids.size()
+  );
+  ScreenSolution(test_org);
+
+  // Run with knockouts
+  // - ko memory
+  KO_GLOBAL_MEMORY=true;
+  KO_REGULATION=false;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=false;
+  org_t ko_mem_org(org);
+  EvaluateOrg(
+    ko_mem_org,
+    training_cases,
+    training_case_ids,
+    training_case_ids.size()
+  );
+  ScreenSolution(ko_mem_org);
+
+  // - ko regulation
+  KO_GLOBAL_MEMORY=false;
+  KO_REGULATION=true;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=false;
+  org_t ko_reg_org(org);
+  EvaluateOrg(
+    ko_reg_org,
+    training_cases,
+    training_case_ids,
+    training_case_ids.size()
+  );
+  ScreenSolution(ko_reg_org);
+
+  // - ko memory & regulation
+  KO_GLOBAL_MEMORY=true;
+  KO_REGULATION=true;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=false;
+  org_t ko_all_org(org);
+  EvaluateOrg(
+    ko_all_org,
+    training_cases,
+    training_case_ids,
+    training_case_ids.size()
+  );
+  ScreenSolution(ko_all_org);
+
+  // - ko up regulation
+  KO_GLOBAL_MEMORY=false;
+  KO_REGULATION=false;
+  KO_DOWN_REGULATION=true;
+  KO_UP_REGULATION=false;
+  org_t ko_down_reg_org(org);
+  EvaluateOrg(
+    ko_down_reg_org,
+    training_cases,
+    training_case_ids,
+    training_case_ids.size()
+  );
+  ScreenSolution(ko_down_reg_org);
+
+  // - ko down regulation
+  KO_GLOBAL_MEMORY=false;
+  KO_REGULATION=false;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=true;
+  org_t ko_up_reg_org(org);
+  EvaluateOrg(
+    ko_up_reg_org,
+    training_cases,
+    training_case_ids,
+    training_case_ids.size()
+  );
+  ScreenSolution(ko_up_reg_org);
+
+  // reset knockout variables
+  KO_GLOBAL_MEMORY=false;
+  KO_REGULATION=false;
+  KO_DOWN_REGULATION=false;
+  KO_UP_REGULATION=false;
+
+  emp::DataFile analysis_file(
+    OUTPUT_DIR + "/analysis_org_" + emp::to_string(pop_id) + "_update_" + emp::to_string(GetUpdate()) + ".csv"
+  );
+
+  // solution
+  analysis_file.AddFun(
+    std::function<bool()>(
+      [&test_org]() {
+        return test_org.GetPhenotype().IsSolution();
+      }
+    ),
+    "solution"
+  );
+  // solution_ko_regulation
+  analysis_file.AddFun(
+    std::function<bool()>(
+      [&ko_reg_org]() {
+        return ko_reg_org.GetPhenotype().IsSolution();
+      }
+    ),
+    "solution_ko_regulation"
+  );
+  // solution_ko_global_memory
+  analysis_file.AddFun(
+    std::function<bool()>(
+      [&ko_mem_org]() {
+        return ko_mem_org.GetPhenotype().IsSolution();
+      }
+    ),
+    "solution_ko_global_memory"
+  );
+  // solution_ko_all
+  analysis_file.AddFun(
+    std::function<bool()>(
+      [&ko_all_org]() {
+        return ko_all_org.GetPhenotype().IsSolution();
+      }
+    ),
+    "solution_ko_all"
+  );
+  // solution_ko_up_reg
+  analysis_file.AddFun(
+    std::function<bool()>(
+      [&ko_up_reg_org]() {
+        return ko_up_reg_org.GetPhenotype().IsSolution();
+      }
+    ),
+    "solution_ko_up_reg"
+  );
+  // solution_ko_down_reg
+  analysis_file.AddFun(
+    std::function<bool()>(
+      [&ko_down_reg_org]() {
+        return ko_down_reg_org.GetPhenotype().IsSolution();
+      }
+    ),
+    "solution_ko_down_reg"
+  );
+  // aggregate_score
+  analysis_file.AddFun(
+    std::function<double()>(
+      [&test_org]() {
+        return test_org.GetPhenotype().GetAggregateScore();
+      }
+    ),
+    "aggregate_score"
+  );
+  // ko_regulation_aggregate_score
+  analysis_file.AddFun(
+    std::function<double()>(
+      [&ko_reg_org]() {
+        return ko_reg_org.GetPhenotype().GetAggregateScore();
+      }
+    ),
+    "ko_regulation_aggregate_score"
+  );
+  // ko_global_memory_aggregate_score
+  analysis_file.AddFun(
+    std::function<double()>(
+      [&ko_mem_org]() {
+        return ko_mem_org.GetPhenotype().GetAggregateScore();
+      }
+    ),
+    "ko_global_memory_aggregate_score"
+  );
+  // ko_all_aggregate_score
+  analysis_file.AddFun(
+    std::function<double()>(
+      [&ko_all_org]() {
+        return ko_all_org.GetPhenotype().GetAggregateScore();
+      }
+    ),
+    "ko_all_aggregate_score"
+  );
+  // ko_up_reg_aggregate_score
+  analysis_file.AddFun(
+    std::function<double()>(
+      [&ko_up_reg_org]() {
+        return ko_up_reg_org.GetPhenotype().GetAggregateScore();
+      }
+    ),
+    "ko_up_reg_aggregate_score"
+  );
+  // ko_down_reg_aggregate_score
+  analysis_file.AddFun(
+    std::function<double()>(
+      [&ko_down_reg_org]() {
+        return ko_down_reg_org.GetPhenotype().GetAggregateScore();
+      }
+    ),
+    "ko_down_reg_aggregate_score"
+  );
+  // num_modules
+  analysis_file.AddFun(
+    std::function<size_t()>(
+      [&test_org]() {
+        return test_org.GetGenome().GetProgram().GetSize();
+      }
+    ),
+    "num_modules"
+  );
+  // num_instructions
+  analysis_file.AddFun(
+    std::function<size_t()>(
+      [&test_org]() {
+        return test_org.GetGenome().GetProgram().GetInstCount();
+      }
+    ),
+    "num_instructions"
+  );
+  // program
+  analysis_file.AddFun(
+    std::function<std::string()>(
+      [this, &test_org]() {
+        std::ostringstream stream;
+        stream << "\"";
+        PrintProgramSingleLine(test_org.GetGenome().GetProgram(), stream);
+        stream << "\"";
+        return stream.str();
+      }
+    ),
+    "program"
+  );
+  analysis_file.PrintHeaderKeys();
+  analysis_file.Update();
 }
 
 void BoolCalcWorld::InitConfigs(const config_t & config) {
