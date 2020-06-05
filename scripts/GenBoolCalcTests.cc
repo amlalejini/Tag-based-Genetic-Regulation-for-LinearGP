@@ -33,7 +33,7 @@
 #include "tools/string_utils.h"
 
 std::unordered_set<std::string> one_input_ops{"ECHO", "NOT"};
-std::unordered_set<std::string> two_input_ops{"NAND"};
+std::unordered_set<std::string> two_input_ops{"NAND","OR_NOT","AND","OR","AND_NOT","NOR","XOR","EQU"};
 
 using operand_t = uint32_t;
 using operand_set_t = std::unordered_set<operand_t>;
@@ -52,10 +52,10 @@ constexpr size_t TWO_INPUT_COMPUTATIONS_num_testing_cases=500;
 constexpr size_t ERROR_NUM_NUM_num_testing_cases=200;   // ERROR_NUM_NUM
 constexpr size_t ERROR_OP_OP_num_testing_cases=20;   // ERROR_OP_OP (per valid combination)
 
-constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=50;
-constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=50;
-constexpr size_t ERROR_NUM_NUM_num_training_cases=100;
-constexpr size_t ERROR_OP_OP_num_training_cases=10; // (per valid combination)
+constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=10;
+constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=10;
+constexpr size_t ERROR_NUM_NUM_num_training_cases=10;
+constexpr size_t ERROR_OP_OP_num_training_cases=5;    // (per valid combination)
 
 struct TestCaseStr {
   std::string input="";
