@@ -1,7 +1,8 @@
 # Target project
 # PROJECT options: alt-signal-exp, chg-env-exp, dir-signal-exp
+PROJECT := bool-calc-exp
 # - Repeated signal task -
-PROJECT := alt-signal-exp
+# PROJECT := alt-signal-exp
 # - Changing signal task -
 # PROJECT := chg-env-exp
 # - Directional signal task -
@@ -10,17 +11,17 @@ PROJECT := alt-signal-exp
 # Dependency directories
 EMP_DIR := ../Empirical/source
 SGP_DIR := ../SignalGP/source
-OPEN_SSL_DIR := /usr/local/Cellar/openssl/1.0.2t
+OPEN_SSL_DIR := /usr/local/Cellar/openssl@1.1/1.1.1g
 
 # Compile-time parameter configuration (tag metric, matching threshold, matching regulator, tag size)
 # MATCH_METRIC options: hamming, hash, integer, integer-symmetric, streak, streak-exact
 MATCH_METRIC := streak
 # MATCH_THRESH options: 0, 25, 50, 75
-MATCH_THRESH := 25
+MATCH_THRESH := 0
 # MATCH_REG options: add, mult
 MATCH_REG := mult
 # TAG_NUM_BITS
-TAG_NUM_BITS := 64
+TAG_NUM_BITS := 128
 
 # Executable name
 # combine it all into the executable name
