@@ -230,6 +230,7 @@ protected:
   // Selection group
   bool DOWN_SAMPLE;
   double DOWN_SAMPLE_RATE;
+  bool SAMPLE_BY_TEST_TYPE;
   // Program group
   bool USE_FUNC_REGULATION;
   bool USE_GLOBAL_MEMORY;
@@ -277,7 +278,13 @@ protected:
   emp::vector<test_case_t> training_cases;
   emp::vector<test_case_t> testing_cases;
   emp::vector<test_case_t> all_test_cases; ///< Used for screening for solutions
-  emp::vector<std::string> test_case_types;
+
+  emp::vector<std::string> test_case_types;                      ///< The list of all _types_ of test cases (e.g., NAND, NOT, ERROR_NUM_NUM, etc)
+  std::unordered_map<std::string, size_t> test_case_type_ids;    ///< Lookup test case type id by type string
+  emp::vector< emp::vector<size_t> > training_case_ids_by_type;  ///< training cases categorized by type
+  // pre-compute sampling by type?
+  emp::vector<size_t> training_case_sample_size_by_test_case_type; // todo - initselection this
+  emp::vector<size_t> sampled_training_case_ids;
 
   size_t num_eval_tests;
 
@@ -326,6 +333,25 @@ protected:
   void PrintProgramInstruction(const inst_t & inst, std::ostream & out=std::cout);
 
   emp::vector<test_case_t> LoadTestCases(const std::string & path);
+
+  void ShuffleTrainingSampleByType() {
+    // this function only works if we're down sampling by test type
+    emp_assert(DOWN_SAMPLE && SAMPLE_BY_TEST_TYPE);
+    // all test case types must be represented in training case sample types
+    emp_assert(test_case_types.size() == training_case_sample_size_by_test_case_type.size());
+    size_t sample_id = 0;
+    for (size_t type_id = 0; type_id < test_case_types.size(); ++type_id) {
+      const size_t type_sample_size = training_case_sample_size_by_test_case_type[type_id];
+      emp::Shuffle(*random_ptr, training_case_ids_by_type[type_id]);
+      emp_assert(type_sample_size <= training_case_ids_by_type[type_id].size());
+      for (size_t i = 0; i < type_sample_size; ++i) {
+        emp_assert(sample_id < sampled_training_case_ids.size());
+        sampled_training_case_ids[sample_id] = training_case_ids_by_type[type_id][i];
+        ++sample_id;
+      }
+    }
+    // std::cout << "Sampled training case ids: " << sampled_training_case_ids << std::endl;
+  }
 
   /// Compute the distribution of test types passed by a phenotype
   /// NOTE - this only works for phenotypes evaluated on the training set
@@ -430,14 +456,20 @@ void BoolCalcWorld::Run() {
 // ---- Internal function implementations ----
 void BoolCalcWorld::DoEvaluation() {
   // If we're down sampling, shuffle the training cases.
-  if (DOWN_SAMPLE) emp::Shuffle(*random_ptr, training_case_ids);
+  const bool use_samples_by_type = DOWN_SAMPLE && SAMPLE_BY_TEST_TYPE;
+  if (use_samples_by_type) {
+    ShuffleTrainingSampleByType();
+  } else if (DOWN_SAMPLE) {
+    emp::Shuffle(*random_ptr, training_case_ids);
+  }
+
   max_fit_org_id = 0;
   for (size_t org_id = 0; org_id < GetSize(); ++org_id) {
     emp_assert(IsOccupied(org_id));
     EvaluateOrg(
       GetOrg(org_id),
       training_cases,
-      training_case_ids,
+      (use_samples_by_type) ? sampled_training_case_ids : training_case_ids,
       num_eval_tests
     );
     if (CalcFitnessID(org_id) > CalcFitnessID(max_fit_org_id)) max_fit_org_id = org_id;
@@ -495,7 +527,6 @@ void BoolCalcWorld::EvaluateOrg(
   if (!num_tests) num_tests = test_eval_order.size();
   emp_assert(num_tests <= test_eval_order.size(), num_tests, test_eval_order.size());
   emp_assert(num_tests <= tests.size(), num_tests, tests.size());
-
   phenotype_t & phen = org.GetPhenotype();
   phen.Reset(num_tests);
 
@@ -846,6 +877,7 @@ void BoolCalcWorld::InitConfigs(const config_t & config) {
   // Selection
   DOWN_SAMPLE = config.DOWN_SAMPLE();
   DOWN_SAMPLE_RATE = config.DOWN_SAMPLE_RATE();
+  SAMPLE_BY_TEST_TYPE = config.SAMPLE_BY_TEST_TYPE();
   // Program
   USE_FUNC_REGULATION = config.USE_FUNC_REGULATION();
   USE_GLOBAL_MEMORY = config.USE_GLOBAL_MEMORY();
@@ -1281,9 +1313,21 @@ void BoolCalcWorld::InitSelection() {
     std::cout << "WARNING: test case types detected in testing set that are not represented in training set." << std::endl;
   }
   // Collect all test case types/categories
+  test_case_type_ids.clear();
+  test_case_types.clear();
   for (const auto & tst_type : test_types_set) {
+    test_case_type_ids[tst_type] = test_case_types.size();
     test_case_types.emplace_back(tst_type);
   }
+  training_case_ids_by_type.clear();
+  training_case_ids_by_type.resize(test_case_types.size(), emp::vector<size_t>());
+  for (size_t training_id = 0; training_id < training_cases.size(); ++training_id) {
+    test_case_t & test_case = training_cases[training_id];
+    const size_t test_type_id = test_case_type_ids[test_case.type_str];
+    test_case.type_id = test_type_id;
+    training_case_ids_by_type[test_type_id].emplace_back(training_id);
+  }
+
   // Assign each operator type an id
   for (const auto & op : operators) {
     test_input_signal_lu[op] = test_input_signals.size();
@@ -1330,11 +1374,40 @@ void BoolCalcWorld::InitSelection() {
   // (4) initialize lexicase fitness functions
   //  - Compute number of tests used during evaluation.
   if (DOWN_SAMPLE) {
+    emp_assert(DOWN_SAMPLE_RATE <= 1.0 && DOWN_SAMPLE_RATE >= 0.0, "Invalid DOWN_SAMPLE_RATE", DOWN_SAMPLE_RATE);
     num_eval_tests = (size_t)((double)training_case_ids.size() * DOWN_SAMPLE_RATE);
   } else {
     num_eval_tests = training_case_ids.size();
   }
   emp_assert(num_eval_tests > 0);
+  // inject support for sampling by test type (guaranteeing we evaluate each organism on each type of test)
+  training_case_sample_size_by_test_case_type.resize(test_case_types.size(), 0);
+  if (DOWN_SAMPLE && SAMPLE_BY_TEST_TYPE) {
+    num_eval_tests = 0; // Recompute this.
+    for (const auto & type : test_case_type_ids) {
+      const std::string & type_str = type.first;
+      const size_t type_id = type.second;
+      const size_t num_type_training_cases = training_case_ids_by_type[type_id].size();
+      const size_t num_type_eval =  std::ceil(DOWN_SAMPLE_RATE * (double)num_type_training_cases);
+      training_case_sample_size_by_test_case_type[type_id] = num_type_eval;
+      num_eval_tests += num_type_eval;
+      emp_assert(num_type_eval > 0, "No training case representation for test case type", type_str);
+    }
+    sampled_training_case_ids.resize(num_eval_tests, 0);
+  }
+
+  // Print test case counts by type
+  std::cout << "Number of training examples to evaluate each generation: " << num_eval_tests << std::endl;
+  for (const auto & type_id : test_case_type_ids) {
+    std::cout << "  Test case type: " << type_id.first;
+    std::cout << "; TypeID: " << type_id.second;
+    std::cout << "; # training cases: " << training_case_ids_by_type[type_id.second].size();
+    std::cout << "; # training sample eval: " << training_case_sample_size_by_test_case_type[type_id.second];
+    // print associated ids
+    std::cout << "; training ids: " << training_case_ids_by_type[type_id.second];
+    std::cout << std::endl;
+  }
+
   //  - Initialize fitness function set
   for (size_t i = 0; i < num_eval_tests; ++i) {
     lexicase_fit_funs.push_back([i](org_t & org) {
@@ -1597,7 +1670,6 @@ emp::vector<BoolCalcTestInfo::TestCase> BoolCalcWorld::LoadTestCases(const std::
 }
 
 void BoolCalcWorld::DoPopulationSnapshot() {
-  // todo - use container file...
   using pop_t = emp::vector<emp::Ptr<org_t>>;
   const size_t cur_update = GetUpdate();
   emp::ContainerDataFile snapshot_file = emp::MakeContainerDataFile(

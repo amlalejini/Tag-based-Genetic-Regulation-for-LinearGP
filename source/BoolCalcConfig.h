@@ -18,6 +18,7 @@ EMP_BUILD_CONFIG(BoolCalcConfig,
   GROUP(SELECTION_GROUP, "Selection settings"),
     VALUE(DOWN_SAMPLE, bool, false, "Should we down-sample the testing set for evaluation?"),
     VALUE(DOWN_SAMPLE_RATE, double, 0.25, "What proportion of the test cases should we use each generation?"),
+    VALUE(SAMPLE_BY_TEST_TYPE, bool, true, "Should we down sample each test case type instead of naively sampling all test cases?"),
 
   GROUP(PROGRAM_GROUP, "Program settings"),
     VALUE(USE_FUNC_REGULATION, bool, true, "Do programs have access to function regulation instructions?"),

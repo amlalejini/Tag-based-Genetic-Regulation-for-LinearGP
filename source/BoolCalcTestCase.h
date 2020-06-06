@@ -104,9 +104,10 @@ namespace BoolCalcTestInfo {
 
   /// Represents a single test case for the boolean logic calculator problem.
   struct TestCase {
-    std::string input_str; // original input string descriptor
+    std::string input_str;  // original input string descriptor
     std::string output_str;
     std::string type_str;
+    size_t type_id;         // filled out by the world
     emp::vector<TestSignal> test_signals; // Interpretted test signal sequence.
   };
 
