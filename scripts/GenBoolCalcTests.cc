@@ -33,7 +33,8 @@
 #include "tools/string_utils.h"
 
 std::unordered_set<std::string> one_input_ops{"ECHO", "NOT"};
-std::unordered_set<std::string> two_input_ops{"NAND","OR_NOT","AND","OR","AND_NOT","NOR","XOR","EQU"};
+// std::unordered_set<std::string> two_input_ops{"NAND","OR_NOT","AND","OR","AND_NOT","NOR","XOR","EQU"};
+std::unordered_set<std::string> two_input_ops{"NAND","ORNOT","AND","OR","ANDNOT"};
 
 using operand_t = uint32_t;
 using operand_set_t = std::unordered_set<operand_t>;
@@ -55,7 +56,7 @@ constexpr size_t ERROR_OP_OP_num_testing_cases=20;   // ERROR_OP_OP (per valid c
 constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=10;
 constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=10;
 constexpr size_t ERROR_NUM_NUM_num_training_cases=10;
-constexpr size_t ERROR_OP_OP_num_training_cases=5;    // (per valid combination)
+constexpr size_t ERROR_OP_OP_num_training_cases=2;    // (per valid combination)
 
 struct TestCaseStr {
   std::string input="";
@@ -128,10 +129,10 @@ operand_t Execute(const Input & input) {
   if      (op == "ECHO")    { return ECHO(input.operands[0]); }
   else if (op == "NAND")    { return NAND(input.operands[0], input.operands[1]); }
   else if (op == "NOT")     { return NOT(input.operands[0]); }
-  else if (op == "OR_NOT")  { return OR_NOT(input.operands[0], input.operands[1]); }
+  else if (op == "ORNOT")  { return OR_NOT(input.operands[0], input.operands[1]); }
   else if (op == "AND")     { return AND(input.operands[0], input.operands[1]); }
   else if (op == "OR")      { return OR(input.operands[0], input.operands[1]); }
-  else if (op == "AND_NOT") { return AND_NOT(input.operands[0], input.operands[1]); }
+  else if (op == "ANDNOT") { return AND_NOT(input.operands[0], input.operands[1]); }
   else if (op == "NOR")     { return NOR(input.operands[0], input.operands[1]); }
   else if (op == "XOR")     { return XOR(input.operands[0], input.operands[1]); }
   else if (op == "EQU")     { return EQU(input.operands[0], input.operands[1]); }
@@ -139,7 +140,7 @@ operand_t Execute(const Input & input) {
 }
 
 TestCaseStr GenOPErrorTestCase(const std::string & op) {
-  return {"OP:" + op, "ERROR", "ERROR_OP"};
+  return {"OP:" + op, "ERROR", "ERROR_"+op};
 }
 
 TestCaseStr GenNumNumErrorTestCase(operand_t a, operand_t b) {
@@ -155,7 +156,7 @@ TestCaseStr GenNumOpOpErrorTestCase(const std::string & op_a,
   return {
     "NUM:" + emp::to_string(num) + ";OP:" + op_a + ";OP:" + op_b,
     "ERROR",
-    "ERROR_OP_OP"
+    "ERROR_"+op_a+"_"+op_b
   };
 }
 
