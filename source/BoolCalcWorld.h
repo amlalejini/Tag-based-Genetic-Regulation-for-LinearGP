@@ -1385,7 +1385,7 @@ void BoolCalcWorld::InitSelection() {
   if (DOWN_SAMPLE && SAMPLE_BY_TEST_TYPE) {
     num_eval_tests = 0; // Recompute this.
     for (const auto & type : test_case_type_ids) {
-      const std::string & type_str = type.first;
+      // const std::string & type_str = type.first;
       const size_t type_id = type.second;
       const size_t num_type_training_cases = training_case_ids_by_type[type_id].size();
       const size_t num_type_eval =  std::ceil(DOWN_SAMPLE_RATE * (double)num_type_training_cases);
@@ -1404,7 +1404,7 @@ void BoolCalcWorld::InitSelection() {
     std::cout << "; # training cases: " << training_case_ids_by_type[type_id.second].size();
     std::cout << "; # training sample eval: " << training_case_sample_size_by_test_case_type[type_id.second];
     // print associated ids
-    std::cout << "; training ids: " << training_case_ids_by_type[type_id.second];
+    // std::cout << "; training ids: " << training_case_ids_by_type[type_id.second];
     std::cout << std::endl;
   }
 
