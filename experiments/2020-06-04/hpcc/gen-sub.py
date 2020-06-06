@@ -9,7 +9,7 @@ default_num_replicates = 50
 job_time_request = "24:00:00"
 job_memory_request = "8G"
 job_name = "bcalc"
-executable = "bool-calc-exp_tag-len-128_match-metric-streak_thresh-0_reg-mult"
+executable = "bool-calc-exp_tag-len-64_match-metric-streak_thresh-0_reg-mult"
 
 config = {
     "PROGRAM": [
