@@ -53,10 +53,10 @@ constexpr size_t TWO_INPUT_COMPUTATIONS_num_testing_cases=500;
 constexpr size_t ERROR_NUM_NUM_num_testing_cases=200;   // ERROR_NUM_NUM
 constexpr size_t ERROR_OP_OP_num_testing_cases=20;   // ERROR_OP_OP (per valid combination)
 
-constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=10;
-constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=10;
+constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=20;
+constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=20;
 constexpr size_t ERROR_NUM_NUM_num_training_cases=10;
-constexpr size_t ERROR_OP_OP_num_training_cases=2;    // (per valid combination)
+constexpr size_t ERROR_OP_OP_num_training_cases=5;            // (per valid combination)
 
 struct TestCaseStr {
   std::string input="";
