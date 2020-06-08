@@ -49,8 +49,8 @@ constexpr size_t TWO_INPUT_COMPUTATIONS_num_testing_cases=500;
 constexpr size_t ERROR_ONE_ARG_num_testing_cases=200;   // ERROR_NUM_NUM
 constexpr size_t ERROR_NO_OP_num_testing_cases=20;   // ERROR_OP_OP (per valid combination)
 
-constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=20;
-constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=20;
+constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=40;
+constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=40;
 constexpr size_t ERROR_ONE_ARG_num_training_cases=20;
 constexpr size_t ERROR_NO_OP_num_training_cases=20;
 
@@ -140,7 +140,7 @@ TestCaseStr GenOPErrorTestCase(const std::string & op) {
 }
 
 TestCaseStr GenAllNumErrorTestCase(operand_t a, operand_t b, operand_t c) {
-  return {"NUM:" + emp::to_string(a) + ";NUM:" + emp::to_string(b) + ";NUM: " + emp::to_string(c),  // Input
+  return {"NUM:" + emp::to_string(a) + ";NUM:" + emp::to_string(b) + ";NUM:" + emp::to_string(c),  // Input
           "ERROR",                                      // Output
           "ERROR_ALL_NUM"};                             // Type
 }
