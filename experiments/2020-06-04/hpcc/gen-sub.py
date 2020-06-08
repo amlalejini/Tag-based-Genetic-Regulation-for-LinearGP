@@ -4,12 +4,12 @@ Generate slurm job submission script
 
 import argparse, os, sys, errno, subprocess, csv
 
-seed_offset = 1000
+seed_offset = 3000
 default_num_replicates = 50
-job_time_request = "24:00:00"
+job_time_request = "72:00:00"
 job_memory_request = "8G"
 job_name = "bcalc"
-executable = "bool-calc-exp_tag-len-64_match-metric-streak_thresh-0_reg-mult"
+executable = "bool-calc-exp_tag-len-128_match-metric-streak_thresh-0_reg-mult"
 
 config = {
     "PROGRAM": [
@@ -33,7 +33,7 @@ base_resub_script = \
 EXEC=<<EXEC>>
 CONFIG_DIR=<<CONFIG_DIR>>
 
-module load GCCcore/9.3.0
+module load GCCcore/9.1.0
 
 <<RESUBMISSION_LOGIC>>
 
