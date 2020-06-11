@@ -531,7 +531,7 @@ void BoolCalcWorld::EvaluateOrg(
   phen.Reset(num_tests);
 
   // Ready the hardware
-  eval_hardware->SetProgram(org.GetGenome().program);
+  eval_hardware->SetProgram(org.GetGenome().program); // This resets the hardware completely.
   // Evaluate program on each training example
   for (size_t eval_index = 0; eval_index < num_tests; ++eval_index) {
     emp_assert(eval_index < phen.test_scores.size());
