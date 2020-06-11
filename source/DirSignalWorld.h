@@ -1103,7 +1103,7 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
         const bool dir = env_seq.Get(env_update);
         const size_t cur_env_state = (dir) ? eval_environment.ShiftRight() : eval_environment.ShiftLeft();
         // Reset the hardware!
-        eval_hardware->ResetHardwareState();
+        eval_hardware->ResetBaseHardwareState();
         eval_hardware->GetCustomComponent().Reset();
         emp_assert(eval_hardware->ValidateThreadState());
         emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);

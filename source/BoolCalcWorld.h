@@ -550,7 +550,7 @@ void BoolCalcWorld::EvaluateOrg(
       const BoolCalcTestInfo::TestSignal & test_sig = test_case.test_signals[sig_i];
       const tag_t & test_sig_tag = test_input_signal_tags[test_sig.GetSignalID()];
       // Reset the hardware
-      eval_hardware->ResetHardwareState();
+      eval_hardware->ResetBaseHardwareState(); // Only reset threads, not global memory
       eval_hardware->GetCustomComponent().Reset();
       emp_assert(eval_hardware->ValidateThreadState());
       emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);

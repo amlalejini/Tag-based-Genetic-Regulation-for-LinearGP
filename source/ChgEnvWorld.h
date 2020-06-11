@@ -932,7 +932,7 @@ void ChgEnvWorld::EvaluateOrg(org_t & org, bool shuffle_env/*=true*/) {
     // Evaluate the organism in the environment.
     for (size_t env_update = 0; env_update < NUM_ENV_UPDATES; ++env_update) {
       // Reset the hardware!
-      eval_hardware->ResetHardwareState();
+      eval_hardware->ResetBaseHardwareState();
       eval_hardware->GetCustomComponent().Reset();
       emp_assert(eval_hardware->ValidateThreadState());
       emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
