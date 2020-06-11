@@ -33,8 +33,8 @@
 #include "tools/string_utils.h"
 
 std::unordered_set<std::string> one_input_ops{"ECHO", "NOT"};
-// std::unordered_set<std::string> two_input_ops{"NAND","OR_NOT","AND","OR","AND_NOT","NOR","XOR","EQU"};
-std::unordered_set<std::string> two_input_ops{"NAND","ORNOT","AND","OR","ANDNOT"};
+std::unordered_set<std::string> two_input_ops{"NAND","ORNOT","AND","OR","ANDNOT","NOR","XOR","EQU"};
+// std::unordered_set<std::string> two_input_ops{"NAND","ORNOT","AND","OR","ANDNOT"};
 
 using operand_t = uint32_t;
 using operand_set_t = std::unordered_set<operand_t>;
