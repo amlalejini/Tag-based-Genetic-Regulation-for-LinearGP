@@ -52,4 +52,20 @@ Goal: Exploratory experiments with the freshly implemented Boolean Calculator Wo
 - Changes
   - Seed offset: 4000
   - Add all logic tasks
-  - Fix bug where global memory was getting reset inappropriately
+  - Fix bug where global memory was getting reset inappropriately (making the task much harder?)
+- Results
+  - Still need to decrease tag mutation rate (or instruction mutation rate?)
+  - Also maybe increase number of functions per organism?
+  - 31/39 training passes => best seen
+
+## 2020-06-15 - Explorations
+
+- Changes
+  - Seed offset: 5000
+  - Increase max function count
+  - MAX_FUNC_CNT: 128 to 256
+  - tag size: 128 to 256
+  - MUT_RATE__INST_ARG_SUB: 0.005 to 0.002
+  - MUT_RATE__INST_SUB: 0.005 to 0.002
+  - MUT_RATE__INST_INS: 0.005 to 0.002
+  - MUT_RATE__INST_DEL: 0.005 to 0.002
