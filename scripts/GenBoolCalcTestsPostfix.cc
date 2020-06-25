@@ -34,25 +34,29 @@
 
 std::unordered_set<std::string> one_input_ops{"ECHO", "NOT"};
 std::unordered_set<std::string> two_input_ops{"NAND","ORNOT","AND","OR","ANDNOT","NOR","XOR","EQU"};
-// std::unordered_set<std::string> two_input_ops{"NAND","ORNOT","AND","OR","ANDNOT"};
 
 using operand_t = uint32_t;
 using operand_set_t = std::unordered_set<operand_t>;
 using operand_pair_set_t = std::set<std::pair<operand_t,operand_t>>;
 
-constexpr operand_t min_numeric=0;
+constexpr operand_t min_numeric=1;          // We manually add 0 cases in
 constexpr operand_t max_numeric=1000000000;
 
 
 constexpr size_t ONE_INPUT_COMPUTATIONS_num_testing_cases=500;
 constexpr size_t TWO_INPUT_COMPUTATIONS_num_testing_cases=500;
-constexpr size_t ERROR_ONE_ARG_num_testing_cases=200;   // ERROR_NUM_NUM
-constexpr size_t ERROR_NO_OP_num_testing_cases=20;   // ERROR_OP_OP (per valid combination)
+constexpr size_t ERROR_NUM_NUM_NUM_num_testing_cases=200;
+constexpr size_t ERROR_NUM_NUM_OP1_num_testing_cases=200;
+constexpr size_t ERROR_NUM_OP2_num_testing_cases=200;
+
+constexpr size_t num_testing_edge_cases=50;
+constexpr size_t num_training_edge_cases=5;
 
 constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=40;
 constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=40;
-constexpr size_t ERROR_ONE_ARG_num_training_cases=20;
-constexpr size_t ERROR_NO_OP_num_training_cases=20;
+constexpr size_t ERROR_NUM_NUM_NUM_num_training_cases=20;
+constexpr size_t ERROR_NUM_NUM_OP1_num_training_cases=20;
+constexpr size_t ERROR_NUM_OP2_num_training_cases=20;
 
 struct TestCaseStr {
   std::string input="";
@@ -145,6 +149,7 @@ TestCaseStr GenAllNumErrorTestCase(operand_t a, operand_t b, operand_t c) {
           "ERROR_ALL_NUM"};                             // Type
 }
 
+// op_a is a two-input operator, but only gets one argument (ERROR)
 TestCaseStr GenOneArgErrorTestCase(const std::string & op_a,
                                    operand_t num)
 {
@@ -152,6 +157,18 @@ TestCaseStr GenOneArgErrorTestCase(const std::string & op_a,
     "NUM:" + emp::to_string(num) + ";OP:" + op_a,
     "ERROR",
     "ERROR_NUM_"+op_a
+  };
+}
+
+// op_a is a one-input operator, but gets two arguments (ERROR)
+TestCaseStr GenTwoArgErrorTestCase(const std::string & op_a,
+                                   operand_t a,
+                                   operand_t b)
+{
+  return {
+    "NUM:" + emp::to_string(a) + ";NUM:" + emp::to_string(b) + ";OP:" + op_a,
+    "ERROR",
+    "ERROR_NUM_NUM_"+op_a
   };
 }
 
@@ -235,38 +252,111 @@ int main() {
 
   // (2) Generate all ([NUM][1-INPUT-OP]: Result) tests
   for (const std::string & op : one_input_ops) {
+
     auto testing_vals = GenUniqueValues(random, ONE_INPUT_COMPUTATIONS_num_testing_cases);
-    auto training_vals = GenUniqueValues(random, ONE_INPUT_COMPUTATIONS_num_training_cases, testing_vals);
     for (const auto & val : testing_vals) {
       testing_set.emplace_back(GenOneInputValidTestCase(op, val));
     }
+    testing_set.emplace_back(GenOneInputValidTestCase(op, 0)); // Guarantee 'OP(0)' in set
+
+    auto training_vals = GenUniqueValues(random, ONE_INPUT_COMPUTATIONS_num_training_cases, testing_vals);
     for (const auto & val : training_vals) {
       training_set.emplace_back(GenOneInputValidTestCase(op, val));
     }
+    training_set.emplace_back(GenOneInputValidTestCase(op, 0));
+
   }
 
   // (3) Generate all ([NUM][NUM][2-INPUT-OP]: Result) tests
   for (const std::string & op : two_input_ops) {
+    // --- testing set ---
     auto testing_pairs = GenUniquePairs(random, TWO_INPUT_COMPUTATIONS_num_testing_cases);
-    auto training_pairs = GenUniquePairs(random, TWO_INPUT_COMPUTATIONS_num_training_cases, testing_pairs);
     for (const auto & pair : testing_pairs) {
       testing_set.emplace_back(GenTwoInputValidTestCase(op, pair));
     }
+    // Add 00 (10), 0X (10), and X0 (10) test cases
+    // 00
+    testing_set.emplace_back(GenTwoInputValidTestCase(op, {0,0})); // 0,0
+    auto testing_vals0X = GenUniqueValues(random, num_testing_edge_cases);
+    auto testing_valsX0 = GenUniqueValues(random, num_testing_edge_cases);
+    std::for_each(testing_vals0X.begin(), testing_vals0X.end(), [&testing_set, op](operand_t val) {
+      testing_set.emplace_back(GenTwoInputValidTestCase(op, {0,val}));
+    });
+    // X0
+    std::for_each(testing_valsX0.begin(), testing_valsX0.end(), [&testing_set, op](operand_t val) {
+      testing_set.emplace_back(GenTwoInputValidTestCase(op, {val,0}));
+    });
+
+    // --- Training set ---
+    auto training_pairs = GenUniquePairs(random, TWO_INPUT_COMPUTATIONS_num_training_cases, testing_pairs);
     for (const auto & pair : training_pairs) {
       training_set.emplace_back(GenTwoInputValidTestCase(op, pair));
     }
+    // Add 00 (10), 0X (10), and X0 (10) test cases
+    // 00
+    training_set.emplace_back(GenTwoInputValidTestCase(op, {0,0})); // 0,0
+    auto training_vals0X = GenUniqueValues(random, num_training_edge_cases, testing_vals0X);
+    auto training_valsX0 = GenUniqueValues(random, num_training_edge_cases, testing_valsX0);
+    std::for_each(training_vals0X.begin(), training_vals0X.end(), [&training_set, op](operand_t val) {
+      training_set.emplace_back(GenTwoInputValidTestCase(op, {0,val}));
+    });
+    // X0
+    std::for_each(training_valsX0.begin(), training_valsX0.end(), [&training_set, op](operand_t val) {
+      training_set.emplace_back(GenTwoInputValidTestCase(op, {val,0}));
+    });
   }
 
-  // (4) Generate all ([NUM][2-INPUT-OP]: Error) tests
+  // (4) Generate all ([NUM][NUM][1-INPUT-OP]: Error) tests
+  for (const std::string & op : one_input_ops) {
+    // --- testing ---
+    auto testing_pairs = GenUniquePairs(random, ERROR_NUM_NUM_OP1_num_testing_cases);
+    for (const auto & pair : testing_pairs) {
+      testing_set.emplace_back(GenTwoArgErrorTestCase(op, pair.first, pair.second));
+    }
+    // Add 00 (10), 0X (10), and X0 (10) test cases
+    // 00
+    testing_set.emplace_back(GenTwoArgErrorTestCase(op, 0,0)); // 0,0
+    auto testing_vals0X = GenUniqueValues(random, num_testing_edge_cases);
+    auto testing_valsX0 = GenUniqueValues(random, num_testing_edge_cases);
+    std::for_each(testing_vals0X.begin(), testing_vals0X.end(), [&testing_set, op](operand_t val) {
+      testing_set.emplace_back(GenTwoArgErrorTestCase(op, 0,val));
+    });
+    // X0
+    std::for_each(testing_valsX0.begin(), testing_valsX0.end(), [&testing_set, op](operand_t val) {
+      testing_set.emplace_back(GenTwoArgErrorTestCase(op, val,0));
+    });
+    // --- training ---
+    auto training_pairs = GenUniquePairs(random, ERROR_NUM_NUM_OP1_num_training_cases, testing_pairs);
+    for (const auto & pair : training_pairs) {
+      training_set.emplace_back(GenTwoArgErrorTestCase(op, pair.first, pair.second));
+    }
+    // Add 00 (10), 0X (10), and X0 (10) test cases
+    // 00
+    training_set.emplace_back(GenTwoArgErrorTestCase(op, 0,0)); // 0,0
+    auto training_vals0X = GenUniqueValues(random, num_training_edge_cases, testing_vals0X);
+    auto training_valsX0 = GenUniqueValues(random, num_training_edge_cases, testing_valsX0);
+    std::for_each(training_vals0X.begin(), training_vals0X.end(), [&training_set, op](operand_t val) {
+      training_set.emplace_back(GenTwoArgErrorTestCase(op, 0,val));
+    });
+    // X0
+    std::for_each(training_valsX0.begin(), training_valsX0.end(), [&training_set, op](operand_t val) {
+      training_set.emplace_back(GenTwoArgErrorTestCase(op, val,0));
+    });
+  }
+
+  // (5) Generate all ([NUM][2-INPUT-OP]: Error) tests
   for (const std::string & op : two_input_ops) {
-    auto testing_vals = GenUniqueValues(random, ERROR_ONE_ARG_num_testing_cases);
-    auto training_vals = GenUniqueValues(random, ERROR_ONE_ARG_num_training_cases, testing_vals);
+    auto testing_vals = GenUniqueValues(random, ERROR_NUM_OP2_num_testing_cases);
+    auto training_vals = GenUniqueValues(random, ERROR_NUM_OP2_num_training_cases, testing_vals);
     for (const auto & val : testing_vals) {
       testing_set.emplace_back(GenOneArgErrorTestCase(op, val));
     }
+    testing_set.emplace_back(GenOneArgErrorTestCase(op, 0));
+
     for (const auto & val : training_vals) {
       training_set.emplace_back(GenOneArgErrorTestCase(op, val));
     }
+    training_set.emplace_back(GenOneArgErrorTestCase(op, 0));
   }
 
   // (5) [NUM][NUM][NUM]: Error
@@ -277,30 +367,61 @@ int main() {
       return emp::vector<operand_t>(in.begin(), in.end());
     };
 
-
   // ... such ugly code ...
-  auto testing_pos0 = GenUniqueValues(random, ERROR_NO_OP_num_testing_cases);
+  auto testing_pos0 = GenUniqueValues(random, ERROR_NUM_NUM_NUM_num_testing_cases);
   auto testing_pos0_vec = to_vec(testing_pos0);
-  auto testing_pos1 = GenUniqueValues(random, ERROR_NO_OP_num_testing_cases);
+  auto testing_pos1 = GenUniqueValues(random, ERROR_NUM_NUM_NUM_num_testing_cases);
   auto testing_pos1_vec = to_vec(testing_pos1);
-  auto testing_pos2 = GenUniqueValues(random, ERROR_NO_OP_num_testing_cases);
+  auto testing_pos2 = GenUniqueValues(random, ERROR_NUM_NUM_NUM_num_testing_cases);
   auto testing_pos2_vec = to_vec(testing_pos2);
 
-  auto training_pos0 = GenUniqueValues(random, ERROR_NO_OP_num_training_cases, testing_pos0);
+  auto training_pos0 = GenUniqueValues(random, ERROR_NUM_NUM_NUM_num_training_cases, testing_pos0);
   auto training_pos0_vec = to_vec(training_pos0);
-  auto training_pos1 = GenUniqueValues(random, ERROR_NO_OP_num_training_cases, testing_pos1);
+  auto training_pos1 = GenUniqueValues(random, ERROR_NUM_NUM_NUM_num_training_cases, testing_pos1);
   auto training_pos1_vec = to_vec(training_pos1);
-  auto training_pos2 = GenUniqueValues(random, ERROR_NO_OP_num_training_cases, testing_pos2);
+  auto training_pos2 = GenUniqueValues(random, ERROR_NUM_NUM_NUM_num_training_cases, testing_pos2);
   auto training_pos2_vec = to_vec(training_pos2);
 
-  for (size_t i = 0; i < ERROR_NO_OP_num_testing_cases; ++i) {
+  for (size_t i = 0; i < ERROR_NUM_NUM_NUM_num_testing_cases; ++i) {
     testing_set.emplace_back(GenAllNumErrorTestCase(testing_pos0_vec[i],testing_pos1_vec[i],testing_pos2_vec[i]));
   }
-
-  for (size_t i = 0; i < ERROR_NO_OP_num_training_cases; ++i) {
+  for (size_t i = 0; i < ERROR_NUM_NUM_NUM_num_training_cases; ++i) {
     training_set.emplace_back(GenAllNumErrorTestCase(training_pos0_vec[i],training_pos1_vec[i],training_pos2_vec[i]));
   }
 
+  // xx0, x0x, 0xx, x00, 0x0, 00x, 000
+  // 000
+  testing_set.emplace_back(GenAllNumErrorTestCase(0,0,0));
+  // 00x
+  auto testing_vals = GenUniqueValues(random, num_testing_edge_cases);
+  auto training_vals = GenUniqueValues(random, num_training_edge_cases, testing_vals);
+  std::for_each(testing_vals.begin(), testing_vals.end(), [&testing_set](auto val) {testing_set.emplace_back(GenAllNumErrorTestCase(0,0,val));});
+  std::for_each(training_vals.begin(), training_vals.end(), [&training_set](auto val) {training_set.emplace_back(GenAllNumErrorTestCase(0,0,val));});
+  // 0x0
+  testing_vals = GenUniqueValues(random, num_testing_edge_cases);
+  training_vals = GenUniqueValues(random, num_training_edge_cases, testing_vals);
+  std::for_each(testing_vals.begin(), testing_vals.end(), [&testing_set](auto val) {testing_set.emplace_back(GenAllNumErrorTestCase(0,val,0));});
+  std::for_each(training_vals.begin(), training_vals.end(), [&training_set](auto val) {training_set.emplace_back(GenAllNumErrorTestCase(0,val,0));});
+  // x00
+  testing_vals = GenUniqueValues(random, num_testing_edge_cases);
+  training_vals = GenUniqueValues(random, num_training_edge_cases, testing_vals);
+  std::for_each(testing_vals.begin(), testing_vals.end(), [&testing_set](auto val) {testing_set.emplace_back(GenAllNumErrorTestCase(val,0,0));});
+  std::for_each(training_vals.begin(), training_vals.end(), [&training_set](auto val) {training_set.emplace_back(GenAllNumErrorTestCase(val,0,0));});
+  // 0xx
+  auto testing_pairs = GenUniquePairs(random, num_testing_edge_cases);
+  auto training_pairs = GenUniquePairs(random, num_training_edge_cases, testing_pairs);
+  std::for_each(testing_pairs.begin(), testing_pairs.end(), [&testing_set](auto val) {testing_set.emplace_back(GenAllNumErrorTestCase(0,val.first,val.second));});
+  std::for_each(training_pairs.begin(), training_pairs.end(), [&training_set](auto val) {training_set.emplace_back(GenAllNumErrorTestCase(0,val.first,val.second));});
+  // x0x
+  testing_pairs = GenUniquePairs(random, num_testing_edge_cases);
+  training_pairs = GenUniquePairs(random, num_training_edge_cases, testing_pairs);
+  std::for_each(testing_pairs.begin(), testing_pairs.end(), [&testing_set](auto val) {testing_set.emplace_back(GenAllNumErrorTestCase(val.first,0,val.second));});
+  std::for_each(training_pairs.begin(), training_pairs.end(), [&training_set](auto val) {training_set.emplace_back(GenAllNumErrorTestCase(val.first,0,val.second));});
+  // xx0
+  testing_pairs = GenUniquePairs(random, num_testing_edge_cases);
+  training_pairs = GenUniquePairs(random, num_training_edge_cases, testing_pairs);
+  std::for_each(testing_pairs.begin(), testing_pairs.end(), [&testing_set](auto val) {testing_set.emplace_back(GenAllNumErrorTestCase(val.first,val.second,0));});
+  std::for_each(training_pairs.begin(), training_pairs.end(), [&training_set](auto val) {training_set.emplace_back(GenAllNumErrorTestCase(val.first,val.second,0));});
 
   std::function<std::string(TestCaseStr)> get_input = [](TestCaseStr test) { return test.input; };
   std::function<std::string(TestCaseStr)> get_output = [](TestCaseStr test) { return test.output; };
