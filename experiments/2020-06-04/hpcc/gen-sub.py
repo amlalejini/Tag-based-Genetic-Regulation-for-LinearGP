@@ -4,7 +4,7 @@ Generate slurm job submission script
 
 import argparse, os, sys, errno, subprocess, csv
 
-seed_offset = 6000
+seed_offset = 7000
 default_num_replicates = 50
 job_time_request = "72:00:00"
 job_memory_request = "8G"

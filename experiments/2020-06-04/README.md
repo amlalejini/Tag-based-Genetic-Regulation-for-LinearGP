@@ -69,3 +69,31 @@ Goal: Exploratory experiments with the freshly implemented Boolean Calculator Wo
   - MUT_RATE__INST_SUB: 0.005 to 0.002
   - MUT_RATE__INST_INS: 0.005 to 0.002
   - MUT_RATE__INST_DEL: 0.005 to 0.002
+
+## 2020-06-17 - Explorations
+
+- Changes
+  - Increase population size: 500=>1000
+  - Seed offset: 6000
+  - Lower mutation rate
+  - MUT_RATE__INST_ARG_SUB 0.001
+  - MUT_RATE__INST_SUB 0.001
+  - MUT_RATE__INST_INS 0.001
+  - MUT_RATE__INST_DEL 0.001
+  - MUT_RATE__SEQ_SLIP 0.05
+  - MUT_RATE__FUNC_DUP 0.05
+  - MUT_RATE__FUNC_DEL 0.05
+  - MUT_RATE__INST_TAG_BF 0.00005
+  - MUT_RATE__FUNC_TAG_BF 0.00005
+- Outcomes
+  - A solution evolved! Large population + low mutation rate helps population maintain high fitness
+    individuals (in the face of mutational meltdown on regulatory networks).
+  - Global memory solutions & regulation solutions evolve
+    - global memory solutions leverage fact that I don't include 0 as an input value
+
+## 2020-06-25 - Explorations
+
+- Changes
+  - Seed offset: 7000
+  - Guarantee 0 as a possible input value for each computation type
+  - Add NUM,NUM,OP1=ERR examples
