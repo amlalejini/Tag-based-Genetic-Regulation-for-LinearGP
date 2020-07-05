@@ -4,17 +4,20 @@ Generate slurm job submission script
 
 import argparse, os, sys, errno, subprocess, csv
 
-seed_offset = 7000
+seed_offset = 9000
 default_num_replicates = 50
-job_time_request = "72:00:00"
+job_time_request = "96:00:00"
 job_memory_request = "8G"
 job_name = "bcalc"
 executable = "bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-mult"
 
 config = {
     "PROGRAM": [
-        "-USE_FUNC_REGULATION 1 -USE_GLOBAL_MEMORY 1",
-        "-USE_FUNC_REGULATION 0 -USE_GLOBAL_MEMORY 1"
+        "-USE_FUNC_REGULATION 1 -USE_GLOBAL_MEMORY 1 -MUT_RATE__INST_TAG_SINGLE_BF 0.05 -MUT_RATE__FUNC_TAG_SINGLE_BF 0.05 -MUT_RATE__INST_TAG_SEQ_RAND 0.05 -MUT_RATE__FUNC_TAG_SEQ_RAND 0.05",
+        "-USE_FUNC_REGULATION 1 -USE_GLOBAL_MEMORY 1 -MUT_RATE__INST_TAG_SINGLE_BF 0.1 -MUT_RATE__FUNC_TAG_SINGLE_BF 0.1 -MUT_RATE__INST_TAG_SEQ_RAND 0.05 -MUT_RATE__FUNC_TAG_SEQ_RAND 0.05",
+        "-USE_FUNC_REGULATION 1 -USE_GLOBAL_MEMORY 1 -MUT_RATE__INST_TAG_SINGLE_BF 0.1 -MUT_RATE__FUNC_TAG_SINGLE_BF 0.1 -MUT_RATE__INST_TAG_SEQ_RAND 0.1 -MUT_RATE__FUNC_TAG_SEQ_RAND 0.1",
+        "-USE_FUNC_REGULATION 1 -USE_GLOBAL_MEMORY 1 -MUT_RATE__INST_TAG_SINGLE_BF 0.2 -MUT_RATE__FUNC_TAG_SINGLE_BF 0.2 -MUT_RATE__INST_TAG_SEQ_RAND 0.05 -MUT_RATE__FUNC_TAG_SEQ_RAND 0.05"
+        # "-USE_FUNC_REGULATION 0 -USE_GLOBAL_MEMORY 1"
     ]
 }
 
