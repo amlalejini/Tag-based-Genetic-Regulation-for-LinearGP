@@ -250,6 +250,10 @@ protected:
   double MUT_RATE__FUNC_DEL;
   double MUT_RATE__INST_TAG_BF;
   double MUT_RATE__FUNC_TAG_BF;
+  double MUT_RATE__INST_TAG_SINGLE_BF;
+  double MUT_RATE__FUNC_TAG_SINGLE_BF;
+  double MUT_RATE__INST_TAG_SEQ_RAND;
+  double MUT_RATE__FUNC_TAG_SEQ_RAND;
   // Data collection group
   std::string OUTPUT_DIR;
   size_t SUMMARY_RESOLUTION;
@@ -897,6 +901,10 @@ void BoolCalcWorld::InitConfigs(const config_t & config) {
   MUT_RATE__FUNC_DEL = config.MUT_RATE__FUNC_DEL();
   MUT_RATE__INST_TAG_BF = config.MUT_RATE__INST_TAG_BF();
   MUT_RATE__FUNC_TAG_BF = config.MUT_RATE__FUNC_TAG_BF();
+  MUT_RATE__INST_TAG_SINGLE_BF = config.MUT_RATE__INST_TAG_SINGLE_BF();
+  MUT_RATE__FUNC_TAG_SINGLE_BF = config.MUT_RATE__FUNC_TAG_SINGLE_BF();
+  MUT_RATE__INST_TAG_SEQ_RAND = config.MUT_RATE__INST_TAG_SEQ_RAND();
+  MUT_RATE__FUNC_TAG_SEQ_RAND = config.MUT_RATE__FUNC_TAG_SEQ_RAND();
   // Data collection
   OUTPUT_DIR = config.OUTPUT_DIR();
   SUMMARY_RESOLUTION = config.SUMMARY_RESOLUTION();
@@ -1265,6 +1273,11 @@ void BoolCalcWorld::InitMutator() {
   mutator->SetRateFuncDup(MUT_RATE__FUNC_DUP);
   mutator->SetRateFuncDel(MUT_RATE__FUNC_DEL);
   mutator->SetRateFuncTagBF(MUT_RATE__FUNC_TAG_BF);
+  mutator->SetRateInstTagSingleBF(MUT_RATE__INST_TAG_SINGLE_BF);
+  mutator->SetRateFuncTagSingleBF(MUT_RATE__FUNC_TAG_SINGLE_BF);
+  mutator->SetRateInstTagSeqRand(MUT_RATE__INST_TAG_SEQ_RAND);
+  mutator->SetRateFuncTagSeqRand(MUT_RATE__FUNC_TAG_SEQ_RAND);
+
   // Set world mutation function.
   this->SetMutFun([this](org_t & org, emp::Random & rnd) {
     // org.ResetMutations();                // Reset organism's recorded mutations.
@@ -1391,7 +1404,7 @@ void BoolCalcWorld::InitSelection() {
       const size_t num_type_eval =  std::ceil(DOWN_SAMPLE_RATE * (double)num_type_training_cases);
       training_case_sample_size_by_test_case_type[type_id] = num_type_eval;
       num_eval_tests += num_type_eval;
-      emp_assert(num_type_eval > 0, "No training case representation for test case type", type_str);
+      emp_assert(num_type_eval > 0, "No training case representation for test case type", type.first);
     }
     sampled_training_case_ids.resize(num_eval_tests, 0);
   }

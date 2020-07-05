@@ -18,6 +18,8 @@ public:
 };
 
 /// Mutator for SignalGP programs that use bitstrings for tags and ints as instruction arguments.
+// the slow add-on of mutation types has caused this class to bloat. Future projects should re-design
+// the mutator (to make managing many mutation types simpler).
 template<typename HARDWARE_T, size_t TAG_W>
 class MutatorLinearFunctionsProgram<HARDWARE_T, emp::BitSet<TAG_W>, int> {
 public:
@@ -32,6 +34,7 @@ public:
   enum class MUTATION_TYPES {
     INST_ARG_SUB = 0,
     INST_TAG_BIT_FLIP,
+    INST_TAG_BIT_SEQ_RANDOMIZATION,
     INST_SUB,
     INST_INS,
     INST_DEL,
@@ -39,7 +42,8 @@ public:
     SEQ_SLIP_DEL,
     FUNC_DUP,
     FUNC_DEL,
-    FUNC_TAG_BIT_FLIP
+    FUNC_TAG_BIT_FLIP,
+    FUNC_TAG_BIT_SEQ_RANDOMIZATION
   };
 
 protected:
@@ -55,16 +59,22 @@ protected:
   size_t prog_inst_num_tags=1;  ///< How many tags should each instruction have?
   // Rates
   double rate_inst_arg_sub=0.0;
-  double rate_inst_tag_bit_flip=0.0;
+  double rate_inst_tag_bit_flips=0.0;
   double rate_inst_sub=0.0;
   double rate_inst_ins=0.0;
   double rate_inst_del=0.0;
   double rate_seq_slip=0.0;
   double rate_func_dup=0.0;
   double rate_func_del=0.0;
-  double rate_func_tag_bit_flip=0.0;
+  double rate_func_tag_bit_flips=0.0;
+  double rate_func_tag_single_bit_flip=0.0; ///< Per-tag
+  double rate_inst_tag_single_bit_flip=0.0; ///< Probability of a *single* bit flip (in random location), applied per-tag.
+  double rate_func_tag_seq_rand=0.0;  ///< Per-tag
+  double rate_inst_tag_seq_rand=0.0;  ///< Per-tag
 
   std::unordered_map<MUTATION_TYPES, int> last_mutation_tracker;
+
+  // emp::vector<std::function<size_t(emp::Random &, program_t &)>> active_mutations;
 
 public:
   MutatorLinearFunctionsProgram(inst_lib_t & ilib)
@@ -97,14 +107,19 @@ public:
   void SetInstNumArgs(size_t val) { prog_inst_num_args = val; }
   void SetInstNumTags(size_t val) { prog_inst_num_tags = val; }
   void SetRateInstArgSub(double val) { rate_inst_arg_sub = val; }
-  void SetRateInstTagBF(double val) { rate_inst_tag_bit_flip = val; }
+  void SetRateInstTagBF(double val) { rate_inst_tag_bit_flips = val; }
   void SetRateInstSub(double val) { rate_inst_sub = val; }
   void SetRateInstIns(double val) { rate_inst_ins = val; }
   void SetRateInstDel(double val) { rate_inst_del = val; }
   void SetRateSeqSlip(double val) { rate_seq_slip = val; }
   void SetRateFuncDup(double val) { rate_func_dup = val; }
   void SetRateFuncDel(double val) { rate_func_del = val; }
-  void SetRateFuncTagBF(double val) { rate_func_tag_bit_flip = val; }
+  void SetRateFuncTagBF(double val) { rate_func_tag_bit_flips = val; }
+
+  void SetRateFuncTagSingleBF(double val) { rate_func_tag_single_bit_flip = val; }
+  void SetRateInstTagSingleBF(double val) { rate_inst_tag_single_bit_flip = val; }
+  void SetRateFuncTagSeqRand(double val) { rate_func_tag_seq_rand = val; }
+  void SetRateInstTagSeqRand(double val) { rate_inst_tag_seq_rand = val; }
 
   const emp::Range<size_t> & GetProgFunctionCntRange() const { return prog_func_cnt_range; }
   const emp::Range<size_t> & GetProgFunctionInstCntRange() const { return prog_func_inst_range; }
@@ -114,14 +129,19 @@ public:
   size_t GetInstNumArgs() const { return prog_inst_num_args; }
   size_t GetInstNumTags() const { return prog_inst_num_tags; }
   double GetRateInstArgSub() const { return rate_inst_arg_sub; }
-  double GetRateInstTagBF() const { return rate_inst_tag_bit_flip; }
+  double GetRateInstTagBF() const { return rate_inst_tag_bit_flips; }
   double GetRateInstSub() const { return rate_inst_sub; }
   double GetRateInstIns() const { return rate_inst_ins; }
   double GetRateInstDel() const { return rate_inst_del; }
   double GetRateSeqSlip() const { return rate_seq_slip; }
   double GetRateFuncDup() const { return rate_func_dup; }
   double GetRateFuncDel() const { return rate_func_del; }
-  double GetRateFuncTagBF() const { return rate_func_tag_bit_flip; }
+  double GetRateFuncTagBF() const { return rate_func_tag_bit_flips; }
+
+  double GetRateFuncTagSingleBF() const { return rate_func_tag_single_bit_flip; }
+  double GetRateInstTagSingleBF() const { return rate_inst_tag_single_bit_flip; }
+  double GetRateFuncTagSeqRand() const { return rate_func_tag_seq_rand; }
+  double GetRateInstTagSeqRand() const { return rate_inst_tag_seq_rand; }
 
   /// Applies all mutation operators at current rates.
   /// Will reset mutation tracking before applying mutations.
@@ -137,7 +157,7 @@ public:
   }
 
   /// Apply bit flips to tag @ per-bit rate.
-  size_t ApplyTagBitFlips(emp::Random & rnd, tag_t & tag, double rate) {
+  size_t ApplyTagBitFlipsPerBit(emp::Random & rnd, tag_t & tag, double rate) {
     size_t mut_cnt = 0;
     for (size_t k = 0; k < tag.GetSize(); ++k) {
       if (rnd.P(rate)) {
@@ -148,24 +168,63 @@ public:
     return mut_cnt;
   }
 
+  /// Apply specified number of tag bit flips.
+  size_t ApplyTagBitFlipsFixed(emp::Random & rnd, tag_t & tag, size_t num_flips) {
+    return tag.Mutate(rnd, num_flips);
+  }
+
+  /// Pick two random locations in the tag, randomize everything in between.
+  size_t ApplyTagSeqRandomization(emp::Random & rnd, tag_t & tag) {
+    const size_t a = rnd.GetUInt(tag.GetSize());
+    const size_t b = rnd.GetUInt(tag.GetSize());
+    const size_t pos_1 = emp::Min(a, b);
+    const size_t pos_2 = emp::Max(a, b);
+    emp_assert(pos_1 < tag.size());
+    emp_assert(pos_2 < tag.size());
+    emp_assert(pos_1 <= pos_2);
+    // Mutate positions [pos_1:pos_2] (inclusive)
+    // NOTE - we could speed this up with bit magic
+    for (size_t pos = pos_1; pos <= pos_2; ++pos) {
+      tag.Set(pos, rnd.P(0.5));
+    }
+    return (pos_2 - pos_1) + 1;
+  }
+
   /// Apply instruction substitutions (operator, argument, tag).
   size_t ApplyInstSubs(emp::Random & rnd, program_t & program) {
     size_t mut_cnt = 0;
     for (size_t fID = 0; fID < program.GetSize(); ++fID) {
       for (size_t iID = 0; iID < program[fID].GetSize(); ++iID) {
         inst_t & inst = program[fID][iID];
+
         // Mutate instruction tag(s).
+        size_t tag_bf_cnt = 0;
         for (tag_t & tag : inst.GetTags()) {
-          const size_t tag_bf_cnt = ApplyTagBitFlips(rnd, tag, rate_inst_tag_bit_flip);
-          mut_cnt += tag_bf_cnt;
-          last_mutation_tracker[MUTATION_TYPES::INST_TAG_BIT_FLIP] += tag_bf_cnt;
+          // Apply per-bit substitution mutations
+          if (rate_inst_tag_bit_flips > 0.0) {
+            tag_bf_cnt += ApplyTagBitFlipsPerBit(rnd, tag, rate_inst_tag_bit_flips);
+          }
+          // Apply per-tag substitution mutations
+          if (rate_inst_tag_single_bit_flip > 0.0 && rnd.P(rate_inst_tag_single_bit_flip)) {
+            tag_bf_cnt += ApplyTagBitFlipsFixed(rnd, tag, 1);
+          }
+          // Apply per-tag sequence randomization mutations
+          if (rate_inst_tag_seq_rand > 0.0 && rnd.P(rate_inst_tag_seq_rand)) {
+            ApplyTagSeqRandomization(rnd, tag);
+            ++mut_cnt;  // Count this as only one mutation
+            ++last_mutation_tracker[MUTATION_TYPES::INST_TAG_BIT_SEQ_RANDOMIZATION];
+          }
         }
+        mut_cnt += tag_bf_cnt;
+        last_mutation_tracker[MUTATION_TYPES::INST_TAG_BIT_FLIP] += tag_bf_cnt;
+
         // Mutate instruction operation.
         if (rnd.P(rate_inst_sub)) {
           inst.id = rnd.GetUInt(inst_lib.GetSize());
           ++last_mutation_tracker[MUTATION_TYPES::INST_SUB];
           ++mut_cnt;
         }
+
         // Mutate instruction arguments.
         for (size_t k = 0; k < inst.GetArgs().size(); ++k) {
           if (rnd.P(rate_inst_arg_sub)) {
@@ -328,11 +387,25 @@ public:
     size_t mut_cnt = 0;
     // Perform function tag mutations!
     for (size_t fID = 0; fID < program.GetSize(); ++fID) {
+      size_t tag_bfs = 0;
       for (tag_t & tag : program[fID].GetTags()) {
-        const size_t tag_bfs = ApplyTagBitFlips(rnd, tag, rate_func_tag_bit_flip);
-        mut_cnt += tag_bfs;
-        last_mutation_tracker[MUTATION_TYPES::FUNC_TAG_BIT_FLIP] += tag_bfs;
+        // Apply per-bit substitution mutations
+        if (rate_func_tag_bit_flips > 0.0) {
+          tag_bfs += ApplyTagBitFlipsPerBit(rnd, tag, rate_func_tag_bit_flips);
+        }
+        // Apply per-tag single-bit substitutions
+        if (rate_func_tag_single_bit_flip > 0.0 && rnd.P(rate_func_tag_single_bit_flip)) {
+          tag_bfs += ApplyTagBitFlipsFixed(rnd, tag, 1);
+        }
+        // Apply per-tag sequence randomization substitutions
+        if (rate_func_tag_seq_rand > 0.0 && rnd.P(rate_func_tag_seq_rand)) {
+          ApplyTagSeqRandomization(rnd, tag);
+          ++mut_cnt;
+          ++last_mutation_tracker[MUTATION_TYPES::FUNC_TAG_BIT_SEQ_RANDOMIZATION];
+        }
       }
+      mut_cnt += tag_bfs;
+      last_mutation_tracker[MUTATION_TYPES::FUNC_TAG_BIT_FLIP] += tag_bfs;
     }
     return mut_cnt;
   }
