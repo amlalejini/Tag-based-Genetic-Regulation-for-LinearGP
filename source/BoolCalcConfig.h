@@ -14,6 +14,7 @@ EMP_BUILD_CONFIG(BoolCalcConfig,
     VALUE(TESTING_SET_FILE, std::string, "./test_cases.csv", "Path to the csv containing test cases to use to evaluate programs."),
     VALUE(TRAINING_SET_FILE, std::string, "./training_cases.csv", "Path to the csv containing training test cases to use to determine if a program is a solution."),
     VALUE(CPU_CYCLES_PER_INPUT_SIGNAL, size_t, 128, "How many cpu cycles do we give programs to respond to each input signal?"),
+    VALUE(CATEGORICAL_OUTPUT, bool, false, "Output numbers represent discrete categories?"),
 
   GROUP(SELECTION_GROUP, "Selection settings"),
     VALUE(DOWN_SAMPLE, bool, false, "Should we down-sample the testing set for evaluation?"),

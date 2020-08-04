@@ -5,6 +5,9 @@
  *
  * Implements the boolean logic calculator program synthesis experiment
  * todo - add description here
+
+ * Note that support for custom categorical output was added after fully implementing this to support
+ * the boolean logic calculator problem.
  **/
 
 #ifndef BOOL_CALC_WORLD_H
@@ -227,6 +230,8 @@ protected:
   std::string TESTING_SET_FILE;
   std::string TRAINING_SET_FILE;
   size_t CPU_CYCLES_PER_INPUT_SIGNAL;
+  bool CATEGORICAL_OUTPUT;
+
   // Selection group
   bool DOWN_SAMPLE;
   double DOWN_SAMPLE_RATE;
@@ -295,6 +300,8 @@ protected:
   emp::vector<tag_t> test_input_signal_tags;        ///< Stored by ID
   emp::vector<std::string> test_input_signals;      ///< ...
   std::unordered_map<std::string, size_t> test_input_signal_lu;
+
+  std::unordered_set<size_t> output_categories; ///< Used when CATEGORICAL_OUTPUT is true
 
   bool KO_REGULATION=false;       ///< Is regulation knocked out right now?
   bool KO_UP_REGULATION=false;    ///< Is up-regulation knocked out right now?
@@ -415,6 +422,8 @@ void BoolCalcWorld::Setup(const config_t & config) {
   // Reset the world's random number seed.
   random_ptr->ResetSeed(SEED);
 
+  // Initialize selection
+  InitSelection();
   // Create instruction/event libraries
   InitInstLib();
   InitEventLib();
@@ -422,8 +431,7 @@ void BoolCalcWorld::Setup(const config_t & config) {
   InitHardware();
   // Initialize the program mutator
   InitMutator();
-  // Initialize selection
-  InitSelection();
+
   // How should the population be initialized?
   end_setup_sig.AddAction([this]() {
     std::cout << "Initializing the population..." << std::endl;
@@ -878,6 +886,7 @@ void BoolCalcWorld::InitConfigs(const config_t & config) {
   TESTING_SET_FILE = config.TESTING_SET_FILE();
   TRAINING_SET_FILE = config.TRAINING_SET_FILE();
   CPU_CYCLES_PER_INPUT_SIGNAL = config.CPU_CYCLES_PER_INPUT_SIGNAL();
+  CATEGORICAL_OUTPUT = config.CATEGORICAL_OUTPUT();
   // Selection
   DOWN_SAMPLE = config.DOWN_SAMPLE();
   DOWN_SAMPLE_RATE = config.DOWN_SAMPLE_RATE();
@@ -1196,26 +1205,48 @@ void BoolCalcWorld::InitInstLib() {
     "Express ERROR response."
   );
 
-  inst_lib->AddInst(
-    "ExpressResult",
-    [](hardware_t & hw, const inst_t & inst) {
-      auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
-      auto & mem_state = call_state.GetMemory();
-      const auto & flow = call_state.GetTopFlow();
-      const size_t mp = flow.GetMP();
-      // Get result
-      const operand_t res = (operand_t)mem_state.AccessWorking(inst.GetArg(0));
-      // Mark response on hardware.
-      hw.GetCustomComponent().ExpressResult(res, (int)mp);
-      // Remove all pending threads
-      hw.RemoveAllPendingThreads();
-      // Mark all active threads as dead.
-      for (size_t thread_id : hw.GetActiveThreadIDs()) {
-        hw.GetThread(thread_id).SetDead();
-      }
-    },
-    "Express RESULT response."
-  );
+  // If output is categorical, create a separate instruction for each output category.
+  if (CATEGORICAL_OUTPUT) {
+    for (size_t resp : output_categories) {
+      inst_lib->AddInst(
+        "ExpressResp-" + emp::to_string(resp),
+        [resp](hardware_t & hw, const inst_t & inst) {
+          auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
+          const auto & flow = call_state.GetTopFlow();
+          const size_t mp = flow.GetMP();
+          // Mark response on hardware.
+          hw.GetCustomComponent().ExpressResult(resp, (int)mp);
+          // Remove all pending threads
+          hw.RemoveAllPendingThreads();
+          // Mark all active threads as dead.
+          for (size_t thread_id : hw.GetActiveThreadIDs()) {
+            hw.GetThread(thread_id).SetDead();
+          }
+        }, "Express categorical RESULT response."
+      );
+    }
+  } else {
+    inst_lib->AddInst(
+      "ExpressResult",
+      [](hardware_t & hw, const inst_t & inst) {
+        auto & call_state = hw.GetCurThread().GetExecState().GetTopCallState();
+        auto & mem_state = call_state.GetMemory();
+        const auto & flow = call_state.GetTopFlow();
+        const size_t mp = flow.GetMP();
+        // Get result
+        const operand_t res = (operand_t)mem_state.AccessWorking(inst.GetArg(0));
+        // Mark response on hardware.
+        hw.GetCustomComponent().ExpressResult(res, (int)mp);
+        // Remove all pending threads
+        hw.RemoveAllPendingThreads();
+        // Mark all active threads as dead.
+        for (size_t thread_id : hw.GetActiveThreadIDs()) {
+          hw.GetThread(thread_id).SetDead();
+        }
+      },
+      "Express RESULT response."
+    );
+  }
 }
 
 void BoolCalcWorld::InitEventLib() {
@@ -1324,6 +1355,9 @@ void BoolCalcWorld::InitSelection() {
   }
   if (test_types_set.size() != training_test_types_detected) {
     std::cout << "WARNING: test case types detected in testing set that are not represented in training set." << std::endl;
+  }
+  if (CATEGORICAL_OUTPUT) {
+    std::cout << "Detected " << output_categories.size() << " output categories." << std::endl;
   }
   // Collect all test case types/categories
   test_case_type_ids.clear();
@@ -1669,6 +1703,7 @@ emp::vector<BoolCalcTestInfo::TestCase> BoolCalcWorld::LoadTestCases(const std::
       testcase.test_signals.back().correct_response_type = hw_response_type_t::NUMERIC;
       testcase.test_signals.back().numeric_response = emp::from_string<operand_t>(testcase.output_str);
     }
+
     // update final signal to match appropriate output
     // (3) Grab, process test type
     testcase.type_str = line_components[header_lu["type"]]; // Category of test case
@@ -1679,6 +1714,13 @@ emp::vector<BoolCalcTestInfo::TestCase> BoolCalcWorld::LoadTestCases(const std::
     // }
     testcases.emplace_back(testcase);
   }
+
+  if (CATEGORICAL_OUTPUT) {
+    for (auto & testcase : testcases) {
+      output_categories.emplace(testcase.test_signals.back().numeric_response);
+    }
+  }
+
   return testcases;
 }
 
