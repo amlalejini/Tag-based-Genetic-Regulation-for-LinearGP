@@ -154,7 +154,7 @@ def main():
             seed = seed_offset + (condition_id * num_replicates) + i
             # Generate run parameters, use to name run.
             example_path = os.path.join(config_dir, "examples_S4.csv")
-            run_params = condition_params + f" -SEED {seed}" + f"-TESTING_SET_FILE {example_path} -TRAINING_SET_FILE {example_path}"
+            run_params = condition_params + f" -SEED {seed}" + f" -TESTING_SET_FILE {example_path} -TRAINING_SET_FILE {example_path}"
             run_name = f"SEED_{seed}"
             run_dir = os.path.join(data_dir, run_name)
             # (1) Does the run directory exist?
