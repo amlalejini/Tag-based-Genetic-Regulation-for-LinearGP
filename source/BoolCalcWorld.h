@@ -548,8 +548,8 @@ void BoolCalcWorld::EvaluateOrg(
   for (size_t eval_index = 0; eval_index < num_tests; ++eval_index) {
     emp_assert(eval_index < phen.test_scores.size());
     emp_assert(phen.test_scores[eval_index] == 0);
-    // Reset the matchbin for each test case
-    eval_hardware->ResetMatchBin();
+    eval_hardware->ResetMatchBin();       // Reset matchbin (regulation) between tests
+    eval_hardware->ResetHardwareState();  // Reset global memory between tests
     // grab the test case id
     const size_t test_id = test_eval_order[eval_index];
     phen.test_ids[eval_index] = test_id;

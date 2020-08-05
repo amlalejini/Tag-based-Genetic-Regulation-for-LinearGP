@@ -1095,6 +1095,7 @@ void DirSigWorld::EvaluateOrg(org_t & org) {
       eval_environment.ResetEnv();
       // Reset the hardware matchbin between trials.
       eval_hardware->ResetMatchBin();
+      eval_hardware->ResetHardwareState();
       // Evaluate the organism in the current environment sequence.
       emp_assert(env_seq.GetSize() == NUM_ENV_UPDATES);
       emp_assert(trial_phen.test_scores[sample_id] == 0);

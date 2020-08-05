@@ -929,6 +929,7 @@ void ChgEnvWorld::EvaluateOrg(org_t & org, bool shuffle_env/*=true*/) {
     if (shuffle_env) { emp::Shuffle(*random_ptr, eval_environment.env_schedule); }
     // reset hardware matchbin between trials
     eval_hardware->ResetMatchBin();
+    eval_hardware->ResetHardwareState();
     // Evaluate the organism in the environment.
     for (size_t env_update = 0; env_update < NUM_ENV_UPDATES; ++env_update) {
       // Reset the hardware!
