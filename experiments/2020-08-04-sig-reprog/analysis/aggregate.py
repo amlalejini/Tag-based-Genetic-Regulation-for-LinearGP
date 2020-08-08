@@ -25,7 +25,8 @@ field_exclude = {
     "scores_by_test",
     "test_ids",
     "test_pass_distribution",
-    "test_eval_distribution"
+    "test_eval_distribution",
+    "program"
 }
 
 """
