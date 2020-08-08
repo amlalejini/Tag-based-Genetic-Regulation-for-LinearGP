@@ -144,7 +144,6 @@ def main():
 
         # extract run settings
         run_settings = extract_settings(run_config_path)
-        run_settings.sort()
 
         # ========= extract analysis file info =========
         content = None
@@ -195,6 +194,7 @@ def main():
         analysis_fields = [field for field in analysis_header if (field not in field_exclude) and (field not in field_set)]
         field_set.union(set(analysis_fields))
         config_fields = [field for field in run_settings if (field not in config_exclude) and (field not in field_set)]
+        config_fields.sort()
         field_set.union(set(config_fields))
 
         fields = analysis_fields + extra_fields + config_fields
