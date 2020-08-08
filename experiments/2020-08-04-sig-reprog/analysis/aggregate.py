@@ -135,7 +135,7 @@ def main():
         print(f"Extracting information from {run}")
         run_config_path = os.path.join(run, "output", "run_config.csv")
         org_analysis_path = find_org_analysis_path(run, update if update >= 0 else None)
-        update = org_analysis_path.split(".")[0].split("_")[-1]
+        org_update = org_analysis_path.split(".")[0].split("_")[-1]
         # does the run config file exist?
         if not os.path.exists(run_config_path):
             print(f"Failed to find run parameters ({run_config_path})")
@@ -191,7 +191,7 @@ def main():
             "ko_all_delta": ko_all_delta,
             "ko_up_reg_delta": ko_up_reg_delta,
             "ko_down_reg_delta": ko_down_reg_delta,
-            "update": update
+            "update": org_update
         }
 
         # config_exclude field_exclude
