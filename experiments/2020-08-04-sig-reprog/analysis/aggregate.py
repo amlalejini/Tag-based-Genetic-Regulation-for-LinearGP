@@ -14,11 +14,13 @@ run_dir_identifier = "SEED_" # all legit run directories will have this substrin
 config_exclude = {
     "STOP_ON_SOLUTION",
     "TESTING_SET_FILE",
-    "TRAINING_SET_FILE"
+    "TRAINING_SET_FILE",
     "OUTPUT_DIR",
     "SUMMARY_RESOLUTION",
     "SNAPSHOT_RESOLUTION",
-    "OUTPUT_PROGRAMS"
+    "OUTPUT_PROGRAMS",
+    "input_signals",
+    "input_signal_tags"
 }
 
 field_exclude = {
