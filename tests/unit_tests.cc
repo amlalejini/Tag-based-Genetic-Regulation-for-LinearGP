@@ -4,23 +4,26 @@
 
 #include <limits>
 
-#include "tools/BitSet.h"
-#include "tools/math.h"
-#include "tools/Random.h"
-#include "tools/MatchBin.h"
-#include "tools/matchbin_utils.h"
-#include "tools/Range.h"
+#include "emp/bits/BitSet.hpp"
+#include "emp/math/math.hpp"
+#include "emp/math/Random.hpp"
+#include "emp/matchbin/MatchBin.hpp"
+#include "emp/matchbin/matchbin_utils.hpp"
+#include "emp/math/Range.hpp"
 
 #include "mutation_utils.h"
 
 #include "AltSignalWorld.h"
 #include "AltSignalConfig.h"
 
-#include "MCRegWorld.h"
-#include "MCRegConfig.h"
-
 #include "ChgEnvConfig.h"
 #include "ChgEnvWorld.h"
+
+#include "BoolCalcConfig.h"
+#include "BoolCalcWorld.h"
+
+#include "DirSignalWorld.h"
+#include "DirSignalConfig.h"
 
 TEST_CASE( "Hello World", "[general]" ) {
   std::cout << "Hello tests!" << std::endl;
