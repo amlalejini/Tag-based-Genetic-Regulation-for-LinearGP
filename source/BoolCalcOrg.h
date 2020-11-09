@@ -1,5 +1,5 @@
-#ifndef DIR_SIG_DIGITAL_ORGANISM_H
-#define DIR_SIG_DIGITAL_ORGANISM_H
+#ifndef BOOL_CALC_DIGITAL_ORGANISM_H
+#define BOOL_CALC_DIGITAL_ORGANISM_H
 
 #include <tuple>
 #include <algorithm>
