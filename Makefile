@@ -30,7 +30,7 @@ EXEC_NAME := $(PROJECT)_tag-len-$(TAG_NUM_BITS)_match-metric-$(MATCH_METRIC)_thr
 # CFLAGS_openssl := -I$(OPEN_SSL_DIR)/include -L$(OPEN_SSL_DIR)/lib
 CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/
 CFLAGS_links := -lssl -lcrypto
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) -DTAG_NUM_BITS=$(TAG_NUM_BITS) $(CFLAGS_openssl) $(CFLAGS_includes) $(CFLAGS_links)
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DEMP_HAS_CRYPTO -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) -DTAG_NUM_BITS=$(TAG_NUM_BITS) $(CFLAGS_openssl) $(CFLAGS_includes) $(CFLAGS_links)
 
 # Native compiler information
 CXX_nat := g++
