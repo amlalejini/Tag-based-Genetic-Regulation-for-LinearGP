@@ -2,7 +2,7 @@
 #define BOOL_CALC_TEST_CASE_H
 
 #include <string>
-#include "base/vector.h"
+#include "emp/base/vector.hpp"
 
 namespace BoolCalcTestInfo {
 

@@ -27,13 +27,13 @@
 #include <string_view>
 #include <limits>
 // Empirical
-#include "tools/BitSet.h"
-#include "tools/MatchBin.h"
-#include "tools/matchbin_utils.h"
-#include "tools/string_utils.h"
-#include "control/Signal.h"
-#include "Evolve/World.h"
-#include "Evolve/World_select.h"
+#include "emp/tools/BitSet.hpp"
+#include "emp/tools/MatchBin.hpp"
+#include "emp/tools/matchbin_utils.hpp"
+#include "emp/tools/string_utils.hpp"
+#include "emp/control/Signal.hpp"
+#include "emp/Evolve/World.hpp"
+#include "emp/Evolve/World_select.hpp"
 // SignalGP includes
 #include "hardware/SignalGP/impls/SignalGPLinearFunctionsProgram.h"
 #include "hardware/SignalGP/utils/LinearFunctionsProgram.h"

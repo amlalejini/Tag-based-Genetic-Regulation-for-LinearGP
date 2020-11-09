@@ -6,7 +6,7 @@
 #include <ostream>
 #include <unordered_map>
 // Empirical includes
-#include "tools/BitSet.h"
+#include "emp/bits/BitSet.hpp"
 // SignalGP includes
 #include "hardware/SignalGP/impls/SignalGPLinearFunctionsProgram.h"
 

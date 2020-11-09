@@ -1,7 +1,7 @@
 #ifndef BOOL_CALC_WORLD_CONFIG_H
 #define BOOL_CALC_WORLD_CONFIG_H
 
-#include "config/config.h"
+#include "emp/config/config.hpp"
 
 EMP_BUILD_CONFIG(BoolCalcConfig,
   GROUP(DEFAULT_GROUP, "General Settings"),

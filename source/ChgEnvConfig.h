@@ -1,7 +1,7 @@
 #ifndef CHG_ENV_WORLD_CONFIG_H
 #define CHG_ENV_WORLD_CONFIG_H
 
-#include "config/config.h"
+#include "emp/config/config.hpp"
 
 EMP_BUILD_CONFIG(ChgEnvConfig,
   GROUP(DEFAULT_GROUP, "General settings"),

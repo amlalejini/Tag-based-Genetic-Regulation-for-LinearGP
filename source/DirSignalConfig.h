@@ -1,7 +1,7 @@
 #ifndef DIR_SIG_WORLD_CONFIG_H
 #define DIR_SIG_WORLD_CONFIG_H
 
-#include "config/config.h"
+#include "emp/config/config.hpp"
 
 EMP_BUILD_CONFIG(DirSigConfig,
   GROUP(DEFAULT_GROUP, "General settings"),

@@ -1,7 +1,7 @@
 #ifndef ALT_SIGNAL_WORLD_CONFIG_H
 #define ALT_SIGNAL_WORLD_CONFIG_H
 
-#include "config/config.h"
+#include "emp/config/config.hpp"
 
 EMP_BUILD_CONFIG(AltSignalConfig,
   GROUP(DEFAULT_GROUP, "General settings"),

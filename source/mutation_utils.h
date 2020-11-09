@@ -2,10 +2,10 @@
 #define _SIGNALGP_MUTATION_UTILS_H
 
 #include <unordered_map>
-#include "tools/BitSet.h"
-#include "tools/Random.h"
-#include "tools/random_utils.h"
-#include "tools/Range.h"
+#include "emp/bits/BitSet.hpp"
+#include "emp/math/Random.hpp"
+#include "emp/math/random_utils.hpp"
+#include "emp/math/Range.hpp"
 
 #include "hardware/SignalGP/utils/LinearFunctionsProgram.h"
 
