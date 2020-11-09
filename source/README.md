@@ -21,8 +21,11 @@ this readme, web versions of experiments do not exist, and as such, the web dire
 ## External Library Dependencies
 
 - Empirical
+  - repository: <https://github.com/devosoft/Empirical>
+  - commit: `d4306d33d5e68a3a52b304bd4b1ea394958dd8bd`
 - SignalGP implementation
-  - We use a new implementation
+  - repository: <https://github.com/amlalejini/SignalGP>
+  - commit: `63d1966ca7fa98d3de634e5e8c316099ab9f68be`
 
 ## Repeated Signal Task
 
@@ -52,25 +55,6 @@ Experiment-specific source files:
 - DirSignalWorld.h
 - DirSignalConfig.h
 - DirSignalOrg.h
-
-## Multicellular Differentiation Task
-
-Also called 'multicellular regulation environment'.
-
-Experiment-specific source files:
-
-- MCRegWorld.h
-- MCRegConfig.h
-- MCRegDeme.h
-- MCRegOrg.h
-
-As mentioned above, this task was cut from the ALife 2020 contribution when we scoped-down the paper.
-We used this task to do initial explorations into the effects/value of epigenetic inheritance of regulatory
-elements in a simple multicellular differentiation task. In brief, genetically homogeneous groups of
-SignalGP cells were evaluated as individuals, and fitness was assigned based on how well cells differentiated
-their response to an environmental signal and, optionally, how _clustered_ responses were.
-
-Because this experiment was cut from the paper, the task's implementation lags the other tasks' implementations.
 
 ## Cross-task Utilities
 
