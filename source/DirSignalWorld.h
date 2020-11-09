@@ -71,6 +71,10 @@ namespace DirSigWorldDefs {
   #endif
   using matchbin_val_t = size_t;  ///< SignalGP function ID type (how are functions identified in the matchbin?)
 
+
+  using org_t = DirSigOrganism<emp::BitSet<TAG_LEN>,int>;
+  using config_t = DirSigConfig;
+
   // What match threshold should we use?
   // Remember, the ranked selector threshold is in terms of DISTANCE, not similarity. Thus, unintuitive template values.
   using matchbin_selector_t =
@@ -94,17 +98,17 @@ namespace DirSigWorldDefs {
   using matchbin_metric_t =
   #ifdef MATCH_METRIC
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer",
-      emp::UnifMod<emp::AsymmetricWrapMetric<TAG_LEN>>,
+      emp::AsymmetricWrapMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer-symmetric",
-      emp::UnifMod<emp::SymmetricWrapMetric<TAG_LEN>>,
+      emp::SymmetricWrapMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hamming",
-      emp::UnifMod<emp::HammingMetric<TAG_LEN>>,
+      emp::HammingMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hash",
-      emp::UnifMod<emp::CryptoHashMetric<TAG_LEN>>,
+      emp::CryptoHashMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak",
-      emp::UnifMod<emp::StreakMetric<TAG_LEN>>,
+      emp::StreakMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak-exact",
-      emp::UnifMod<emp::ExactDualStreakMetric<TAG_LEN>>,
+      emp::ExactDualStreakMetric<TAG_LEN>,
     std::enable_if<false>
     >::type
     >::type
@@ -126,8 +130,6 @@ namespace DirSigWorldDefs {
     >::type;
   #endif
 
-  using org_t = DirSigOrganism<emp::BitSet<TAG_LEN>,int>;
-  using config_t = DirSigConfig;
 }
 
 /// Custom hardware component for SignalGP.
@@ -308,7 +310,7 @@ protected:
   size_t max_fit_org_id=0;
   bool found_solution=false;
 
-  emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;  ///< Manages fitness functions if we're doing lexicase selection.
+  emp::vector< std::function<double(const org_t &)> > lexicase_fit_funs;  ///< Manages fitness functions if we're doing lexicase selection.
 
   bool KO_REGULATION=false;       ///< Is regulation knocked out right now?
   bool KO_UP_REGULATION=false;    ///< Is up-regulation knocked out right now?
@@ -1903,7 +1905,7 @@ void DirSigWorld::Setup(const config_t & config) {
   } else if (SELECTION_MODE == "lexicase") {
     lexicase_fit_funs.clear();
     for (size_t i = 0; i < TEST_SAMPLE_SIZE; ++i) {
-      lexicase_fit_funs.emplace_back([i](org_t & org) {
+      lexicase_fit_funs.emplace_back([i](const org_t & org) {
         emp_assert(i < org.GetPhenotype().test_scores.size());
         return org.GetPhenotype().test_scores[i];
       });

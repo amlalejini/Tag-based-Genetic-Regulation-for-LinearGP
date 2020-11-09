@@ -93,17 +93,17 @@ namespace AltSignalWorldDefs {
   using matchbin_metric_t =
   #ifdef MATCH_METRIC
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer",
-      emp::UnifMod<emp::AsymmetricWrapMetric<TAG_LEN>>,
+      emp::AsymmetricWrapMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer-symmetric",
-      emp::UnifMod<emp::SymmetricWrapMetric<TAG_LEN>>,
+      emp::SymmetricWrapMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hamming",
-      emp::UnifMod<emp::HammingMetric<TAG_LEN>>,
+      emp::HammingMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hash",
-      emp::UnifMod<emp::CryptoHashMetric<TAG_LEN>>,
+      emp::CryptoHashMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak",
-      emp::UnifMod<emp::StreakMetric<TAG_LEN>>,
+      emp::StreakMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak-exact",
-      emp::UnifMod<emp::ExactDualStreakMetric<TAG_LEN>>,
+      emp::ExactDualStreakMetric<TAG_LEN>,
     std::enable_if<false>
     >::type
     >::type
@@ -800,71 +800,81 @@ void AltSignalWorld::InitDataCollection() {
     return emp::to_string(taxon.GetData().GetPhenotype().GetNoResponses());
   }, "no_signal_responses", "How many correct responses did most recent member of taxon give?");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-    if (taxon.GetData().HasMutationType("inst_arg_sub")) {
-      return emp::to_string(taxon.GetData().GetMutationCount("inst_arg_sub"));
+    // if (taxon.GetData().HasMutationType("inst_arg_sub")) {
+    if (emp::Has(taxon.GetData().mut_counts, "inst_arg_sub")) {
+      return emp::to_string(taxon.GetData().mut_counts.at("inst_arg_sub"));
     } else {
       return "0";
     }
   }, "inst_arg_sub_mut_cnt", "How many mutations from parent taxon to this taxon?");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (taxon.GetData().HasMutationType("inst_tag_bit_flip")) {
-        return emp::to_string(taxon.GetData().GetMutationCount("inst_tag_bit_flip"));
+      if (emp::Has(taxon.GetData().mut_counts, "inst_tag_bit_flip")) {
+      // if (taxon.GetData().HasMutationType("inst_tag_bit_flip")) {
+        return emp::to_string(taxon.GetData().mut_counts.at("inst_tag_bit_flip"));
       } else {
         return "0";
       }
     }, "inst_tag_bit_flip_mut_cnt", "Mutation count");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (taxon.GetData().HasMutationType("inst_sub")) {
-        return emp::to_string(taxon.GetData().GetMutationCount("inst_sub"));
+      // if (taxon.GetData().HasMutationType("inst_sub")) {
+      if (emp::Has(taxon.GetData().mut_counts, "inst_sub")) {
+        return emp::to_string(taxon.GetData().mut_counts.at("inst_sub"));
       } else {
         return "0";
       }
     }, "inst_sub_mut_cnt", "Mutation count");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (taxon.GetData().HasMutationType("inst_ins")) {
-        return emp::to_string(taxon.GetData().GetMutationCount("inst_ins"));
+      // if (taxon.GetData().HasMutationType("inst_ins")) {
+      if (emp::Has(taxon.GetData().mut_counts, "inst_ins")) {
+        return emp::to_string(taxon.GetData().mut_counts.at("inst_ins"));
       } else {
         return "0";
       }
     }, "inst_ins_mut_cnt", "Mutation count");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (taxon.GetData().HasMutationType("inst_del")) {
-        return emp::to_string(taxon.GetData().GetMutationCount("inst_del"));
+      // if (taxon.GetData().HasMutationType("inst_del")) {
+      if (emp::Has(taxon.GetData().mut_counts, "inst_del")) {
+        return emp::to_string(taxon.GetData().mut_counts.at("inst_del"));
       } else {
         return "0";
       }
     }, "inst_del_mut_cnt", "Mutation count");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (taxon.GetData().HasMutationType("seq_slip_dup")) {
-        return emp::to_string(taxon.GetData().GetMutationCount("seq_slip_dup"));
+      // if (taxon.GetData().HasMutationType("seq_slip_dup")) {
+      if (emp::Has(taxon.GetData().mut_counts, "seq_slip_dup")) {
+        return emp::to_string(taxon.GetData().mut_counts.at("seq_slip_dup"));
       } else {
         return "0";
       }
     }, "seq_slip_dup_mut_cnt", "Mutation count");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (taxon.GetData().HasMutationType("seq_slip_del")) {
-        return emp::to_string(taxon.GetData().GetMutationCount("seq_slip_del"));
+      // if (taxon.GetData().HasMutationType("seq_slip_del")) {
+      if (emp::Has(taxon.GetData().mut_counts, "seq_slip_del")) {
+        return emp::to_string(taxon.GetData().mut_counts.at("seq_slip_del"));
       } else {
         return "0";
       }
     }, "seq_slip_del_mut_cnt", "Mutation count");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (taxon.GetData().HasMutationType("func_dup")) {
-        return emp::to_string(taxon.GetData().GetMutationCount("func_dup"));
+      // if (taxon.GetData().HasMutationType("func_dup")) {
+      if (emp::Has(taxon.GetData().mut_counts, "func_dup")) {
+        return emp::to_string(taxon.GetData().mut_counts.at("func_dup"));
       } else {
         return "0";
       }
     }, "func_dup_mut_cnt", "Mutation count");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (taxon.GetData().HasMutationType("func_del")) {
-        return emp::to_string(taxon.GetData().GetMutationCount("func_del"));
+      // if (taxon.GetData().HasMutationType("func_del")) {
+      if (emp::Has(taxon.GetData().mut_counts, "func_del")) {
+        return emp::to_string(taxon.GetData().mut_counts.at("func_del"));
       } else {
         return "0";
       }
     }, "func_del_mut_cnt", "Mutation count");
   sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (taxon.GetData().HasMutationType("func_tag_bit_flip")) {
-        return emp::to_string(taxon.GetData().GetMutationCount("func_tag_bit_flip"));
+      // if (taxon.GetData().HasMutationType("func_tag_bit_flip")) {
+      if (emp::Has(taxon.GetData().mut_counts, "func_tag_bit_flip")) {
+        return emp::to_string(taxon.GetData().mut_counts.at("func_tag_bit_flip"));
       } else {
         return "0";
       }

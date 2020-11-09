@@ -97,15 +97,15 @@ namespace BoolCalcWorldDefs {
   using matchbin_metric_t =
   #ifdef MATCH_METRIC
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer",
-      emp::UnifMod<emp::AsymmetricWrapMetric<TAG_LEN>>,
+      emp::AsymmetricWrapMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "integer-symmetric",
-      emp::UnifMod<emp::SymmetricWrapMetric<TAG_LEN>>,
+      emp::SymmetricWrapMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "hamming",
-      emp::UnifMod<emp::HammingMetric<TAG_LEN>>,
+      emp::HammingMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak",
-      emp::UnifMod<emp::StreakMetric<TAG_LEN>>,
+      emp::StreakMetric<TAG_LEN>,
     std::conditional<STRINGVIEWIFY(MATCH_METRIC) == "streak-exact",
-      emp::UnifMod<emp::ExactDualStreakMetric<TAG_LEN>>,
+      emp::ExactDualStreakMetric<TAG_LEN>,
     std::enable_if<false>
     >::type
     >::type
@@ -281,7 +281,7 @@ protected:
 
   emp::Ptr<emp::DataFile> max_fit_file;
 
-  emp::vector< std::function<double(org_t &)> > lexicase_fit_funs;  ///< Manages fitness functions if we're doing lexicase selection.
+  emp::vector< std::function<double(const org_t &)> > lexicase_fit_funs;  ///< Manages fitness functions if we're doing lexicase selection.
   emp::vector<size_t> training_case_ids;
   emp::vector<size_t> all_test_case_ids;
   emp::vector<test_case_t> training_cases;
@@ -1457,7 +1457,7 @@ void BoolCalcWorld::InitSelection() {
 
   //  - Initialize fitness function set
   for (size_t i = 0; i < num_eval_tests; ++i) {
-    lexicase_fit_funs.push_back([i](org_t & org) {
+    lexicase_fit_funs.push_back([i](const org_t & org) {
       emp_assert(i < org.GetPhenotype().test_scores.size(), i, org.GetPhenotype().test_scores.size());
       const double score = org.GetPhenotype().test_scores[i];
       return score;
