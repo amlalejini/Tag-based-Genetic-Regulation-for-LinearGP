@@ -3,6 +3,8 @@
 
 #include <cmath>
 #include <ratio>
+#include <algorithm>
+#include <utility>
 #include "emp/matchbin/MatchBin.hpp"
 #include "emp/matchbin/matchbin_regulators.hpp"
 #include "emp/math/math.hpp"
@@ -14,7 +16,7 @@ template <typename Base=std::ratio<11,10>, size_t STATE_LIMIT=100>
 struct ExponentialCountdownRegulator : emp::RegulatorBase<double, double, double> {
 
   static constexpr double max_state = STATE_LIMIT;
-  static constexpr double min_state = -1 * STATE_LIMIT;
+  static constexpr double min_state = -1.0 * static_cast<double>(STATE_LIMIT);
   static constexpr double base = (
     static_cast<double>(Base::num) / static_cast<double>(Base::den)
   );
@@ -40,12 +42,10 @@ struct ExponentialCountdownRegulator : emp::RegulatorBase<double, double, double
   /// and a negative value upregulates the item.
   bool Set(const double & set) override {
     timer = 1;
-    const double new_state = emp::Max( emp::Min(max_state, set), min_state );
-    const bool change = new_state != state;
-    state = new_state;
+    const double new_state = emp::ToRange(set, min_state, max_state);
     // return whether regulator value changed
     // (i.e., we need to purge the cache)
-    return change;
+    return std::exchange(state, new_state) != new_state;
   }
 
   /// A negative value upregulates the item,
@@ -53,14 +53,10 @@ struct ExponentialCountdownRegulator : emp::RegulatorBase<double, double, double
   /// and a postive value downregulates the item.
   bool Adj(const double & amt) override {
     timer = 1;
-
-    const double new_state = emp::Max( emp::Min(max_state, state + amt), min_state );
-    const bool change = new_state != state;
-    state = new_state;
-
+    const double new_state = emp::ToRange(state + amt, min_state, max_state);
     // return whether regulator value changed
     // (i.e., we need to purge the cache)
-    return change;
+    return std::exchange(state, new_state) != new_state;
   }
 
   /// Timer decay.
