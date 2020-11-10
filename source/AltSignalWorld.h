@@ -248,7 +248,7 @@ protected:
   emp::Signal<void(void)> end_setup_sig;    ///< Triggered after setup is done.
 
   emp::Ptr<emp::DataFile> max_fit_file; ///< Manages max fitness organism file (output at SUMMARY_RESOLUTION)
-  emp::Ptr<systematics_t> sys_ptr;      ///< Shortcut pointer to correctly-typed systematics manager. Base world class will be responsible for memory management.
+  // emp::Ptr<systematics_t> sys_ptr;      ///< Shortcut pointer to correctly-typed systematics manager. Base world class will be responsible for memory management.
 
   bool KO_REGULATION=false;       ///< Is regulation knocked out?
   bool KO_UP_REGULATION=false;    ///< Is up-regulation knocked out?
@@ -771,127 +771,127 @@ void AltSignalWorld::InitDataCollection() {
   SetupFitnessFile(OUTPUT_DIR + "/fitness.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
 
   // --- Systematics tracking ---
-  sys_ptr = emp::NewPtr<systematics_t>([](const org_t & o) { return o.GetGenome(); });
-  // We want to record phenotype information AFTER organism is evaluated.
-  // - for this, we need to find the appropriate taxon post-evaluation
-  after_eval_sig.AddAction([this](size_t pop_id) {
-    emp::Ptr<taxon_t> taxon = sys_ptr->GetTaxonAt(pop_id);
-    taxon->GetData().RecordFitness(this->CalcFitnessID(pop_id));
-    taxon->GetData().RecordPhenotype(this->GetOrg(pop_id).GetPhenotype());
-  });
-  // We want to record mutations when organism is added to the population
-  // - because mutations are applied automatically by this->DoBirth => this->AddOrgAt => sys->OnNew
-  std::function<void(emp::Ptr<taxon_t>, org_t&)> record_taxon_mut_data =
-    [this](emp::Ptr<taxon_t> taxon, org_t & org) {
-      taxon->GetData().RecordMutation(org.GetMutations());
-    };
-  sys_ptr->OnNew(record_taxon_mut_data);
-  // Add snapshot functions
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
-    return emp::to_string(taxon.GetData().GetFitness());
-  }, "fitness", "Taxon fitness");
-  sys_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
-    const bool is_sol = taxon.GetData().GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;
-    return (is_sol) ? "1" : "0";
-  }, "is_solution", "Is this a solution?");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
-    return emp::to_string(taxon.GetData().GetPhenotype().GetResources());
-  }, "resources_collected", "How many resources did most recent member of taxon collect?");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
-    return emp::to_string(taxon.GetData().GetPhenotype().GetCorrectResponses());
-  }, "correct_signal_responses", "How many correct responses did most recent member of taxon give?");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
-    return emp::to_string(taxon.GetData().GetPhenotype().GetNoResponses());
-  }, "no_signal_responses", "How many correct responses did most recent member of taxon give?");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-    // if (taxon.GetData().HasMutationType("inst_arg_sub")) {
-    if (emp::Has(taxon.GetData().mut_counts, "inst_arg_sub")) {
-      return emp::to_string(taxon.GetData().mut_counts.at("inst_arg_sub"));
-    } else {
-      return "0";
-    }
-  }, "inst_arg_sub_mut_cnt", "How many mutations from parent taxon to this taxon?");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      if (emp::Has(taxon.GetData().mut_counts, "inst_tag_bit_flip")) {
-      // if (taxon.GetData().HasMutationType("inst_tag_bit_flip")) {
-        return emp::to_string(taxon.GetData().mut_counts.at("inst_tag_bit_flip"));
-      } else {
-        return "0";
-      }
-    }, "inst_tag_bit_flip_mut_cnt", "Mutation count");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      // if (taxon.GetData().HasMutationType("inst_sub")) {
-      if (emp::Has(taxon.GetData().mut_counts, "inst_sub")) {
-        return emp::to_string(taxon.GetData().mut_counts.at("inst_sub"));
-      } else {
-        return "0";
-      }
-    }, "inst_sub_mut_cnt", "Mutation count");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      // if (taxon.GetData().HasMutationType("inst_ins")) {
-      if (emp::Has(taxon.GetData().mut_counts, "inst_ins")) {
-        return emp::to_string(taxon.GetData().mut_counts.at("inst_ins"));
-      } else {
-        return "0";
-      }
-    }, "inst_ins_mut_cnt", "Mutation count");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      // if (taxon.GetData().HasMutationType("inst_del")) {
-      if (emp::Has(taxon.GetData().mut_counts, "inst_del")) {
-        return emp::to_string(taxon.GetData().mut_counts.at("inst_del"));
-      } else {
-        return "0";
-      }
-    }, "inst_del_mut_cnt", "Mutation count");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      // if (taxon.GetData().HasMutationType("seq_slip_dup")) {
-      if (emp::Has(taxon.GetData().mut_counts, "seq_slip_dup")) {
-        return emp::to_string(taxon.GetData().mut_counts.at("seq_slip_dup"));
-      } else {
-        return "0";
-      }
-    }, "seq_slip_dup_mut_cnt", "Mutation count");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      // if (taxon.GetData().HasMutationType("seq_slip_del")) {
-      if (emp::Has(taxon.GetData().mut_counts, "seq_slip_del")) {
-        return emp::to_string(taxon.GetData().mut_counts.at("seq_slip_del"));
-      } else {
-        return "0";
-      }
-    }, "seq_slip_del_mut_cnt", "Mutation count");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      // if (taxon.GetData().HasMutationType("func_dup")) {
-      if (emp::Has(taxon.GetData().mut_counts, "func_dup")) {
-        return emp::to_string(taxon.GetData().mut_counts.at("func_dup"));
-      } else {
-        return "0";
-      }
-    }, "func_dup_mut_cnt", "Mutation count");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      // if (taxon.GetData().HasMutationType("func_del")) {
-      if (emp::Has(taxon.GetData().mut_counts, "func_del")) {
-        return emp::to_string(taxon.GetData().mut_counts.at("func_del"));
-      } else {
-        return "0";
-      }
-    }, "func_del_mut_cnt", "Mutation count");
-  sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
-      // if (taxon.GetData().HasMutationType("func_tag_bit_flip")) {
-      if (emp::Has(taxon.GetData().mut_counts, "func_tag_bit_flip")) {
-        return emp::to_string(taxon.GetData().mut_counts.at("func_tag_bit_flip"));
-      } else {
-        return "0";
-      }
-    }, "func_tag_bit_flip_mut_cnt", "Mutation count");
-  sys_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
-    std::ostringstream stream;
-    stream << "\"";
-    this->PrintProgramSingleLine(taxon.GetInfo().GetProgram(), stream);
-    stream << "\"";
-    return stream.str();
-  }, "program", "Program representing this taxon");
-  AddSystematics(sys_ptr);
-  SetupSystematicsFile(0, OUTPUT_DIR + "/systematics.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
+  // sys_ptr = emp::NewPtr<systematics_t>([](const org_t & o) { return o.GetGenome(); });
+  // // We want to record phenotype information AFTER organism is evaluated.
+  // // - for this, we need to find the appropriate taxon post-evaluation
+  // after_eval_sig.AddAction([this](size_t pop_id) {
+  //   emp::Ptr<taxon_t> taxon = sys_ptr->GetTaxonAt(pop_id);
+  //   taxon->GetData().RecordFitness(this->CalcFitnessID(pop_id));
+  //   taxon->GetData().RecordPhenotype(this->GetOrg(pop_id).GetPhenotype());
+  // });
+  // // We want to record mutations when organism is added to the population
+  // // - because mutations are applied automatically by this->DoBirth => this->AddOrgAt => sys->OnNew
+  // std::function<void(emp::Ptr<taxon_t>, org_t&)> record_taxon_mut_data =
+  //   [this](emp::Ptr<taxon_t> taxon, org_t & org) {
+  //     taxon->GetData().RecordMutation(org.GetMutations());
+  //   };
+  // sys_ptr->OnNew(record_taxon_mut_data);
+  // // Add snapshot functions
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+  //   return emp::to_string(taxon.GetData().GetFitness());
+  // }, "fitness", "Taxon fitness");
+  // sys_ptr->AddSnapshotFun([this](const taxon_t & taxon) -> std::string {
+  //   const bool is_sol = taxon.GetData().GetPhenotype().GetCorrectResponses() == NUM_ENV_CYCLES;
+  //   return (is_sol) ? "1" : "0";
+  // }, "is_solution", "Is this a solution?");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+  //   return emp::to_string(taxon.GetData().GetPhenotype().GetResources());
+  // }, "resources_collected", "How many resources did most recent member of taxon collect?");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+  //   return emp::to_string(taxon.GetData().GetPhenotype().GetCorrectResponses());
+  // }, "correct_signal_responses", "How many correct responses did most recent member of taxon give?");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) {
+  //   return emp::to_string(taxon.GetData().GetPhenotype().GetNoResponses());
+  // }, "no_signal_responses", "How many correct responses did most recent member of taxon give?");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //   // if (taxon.GetData().HasMutationType("inst_arg_sub")) {
+  //   if (emp::Has(taxon.GetData().mut_counts, "inst_arg_sub")) {
+  //     return emp::to_string(taxon.GetData().mut_counts.at("inst_arg_sub"));
+  //   } else {
+  //     return "0";
+  //   }
+  // }, "inst_arg_sub_mut_cnt", "How many mutations from parent taxon to this taxon?");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //     if (emp::Has(taxon.GetData().mut_counts, "inst_tag_bit_flip")) {
+  //     // if (taxon.GetData().HasMutationType("inst_tag_bit_flip")) {
+  //       return emp::to_string(taxon.GetData().mut_counts.at("inst_tag_bit_flip"));
+  //     } else {
+  //       return "0";
+  //     }
+  //   }, "inst_tag_bit_flip_mut_cnt", "Mutation count");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //     // if (taxon.GetData().HasMutationType("inst_sub")) {
+  //     if (emp::Has(taxon.GetData().mut_counts, "inst_sub")) {
+  //       return emp::to_string(taxon.GetData().mut_counts.at("inst_sub"));
+  //     } else {
+  //       return "0";
+  //     }
+  //   }, "inst_sub_mut_cnt", "Mutation count");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //     // if (taxon.GetData().HasMutationType("inst_ins")) {
+  //     if (emp::Has(taxon.GetData().mut_counts, "inst_ins")) {
+  //       return emp::to_string(taxon.GetData().mut_counts.at("inst_ins"));
+  //     } else {
+  //       return "0";
+  //     }
+  //   }, "inst_ins_mut_cnt", "Mutation count");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //     // if (taxon.GetData().HasMutationType("inst_del")) {
+  //     if (emp::Has(taxon.GetData().mut_counts, "inst_del")) {
+  //       return emp::to_string(taxon.GetData().mut_counts.at("inst_del"));
+  //     } else {
+  //       return "0";
+  //     }
+  //   }, "inst_del_mut_cnt", "Mutation count");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //     // if (taxon.GetData().HasMutationType("seq_slip_dup")) {
+  //     if (emp::Has(taxon.GetData().mut_counts, "seq_slip_dup")) {
+  //       return emp::to_string(taxon.GetData().mut_counts.at("seq_slip_dup"));
+  //     } else {
+  //       return "0";
+  //     }
+  //   }, "seq_slip_dup_mut_cnt", "Mutation count");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //     // if (taxon.GetData().HasMutationType("seq_slip_del")) {
+  //     if (emp::Has(taxon.GetData().mut_counts, "seq_slip_del")) {
+  //       return emp::to_string(taxon.GetData().mut_counts.at("seq_slip_del"));
+  //     } else {
+  //       return "0";
+  //     }
+  //   }, "seq_slip_del_mut_cnt", "Mutation count");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //     // if (taxon.GetData().HasMutationType("func_dup")) {
+  //     if (emp::Has(taxon.GetData().mut_counts, "func_dup")) {
+  //       return emp::to_string(taxon.GetData().mut_counts.at("func_dup"));
+  //     } else {
+  //       return "0";
+  //     }
+  //   }, "func_dup_mut_cnt", "Mutation count");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //     // if (taxon.GetData().HasMutationType("func_del")) {
+  //     if (emp::Has(taxon.GetData().mut_counts, "func_del")) {
+  //       return emp::to_string(taxon.GetData().mut_counts.at("func_del"));
+  //     } else {
+  //       return "0";
+  //     }
+  //   }, "func_del_mut_cnt", "Mutation count");
+  // sys_ptr->AddSnapshotFun([](const taxon_t & taxon) -> std::string {
+  //     // if (taxon.GetData().HasMutationType("func_tag_bit_flip")) {
+  //     if (emp::Has(taxon.GetData().mut_counts, "func_tag_bit_flip")) {
+  //       return emp::to_string(taxon.GetData().mut_counts.at("func_tag_bit_flip"));
+  //     } else {
+  //       return "0";
+  //     }
+  //   }, "func_tag_bit_flip_mut_cnt", "Mutation count");
+  // sys_ptr->AddSnapshotFun([this](const taxon_t & taxon) {
+  //   std::ostringstream stream;
+  //   stream << "\"";
+  //   this->PrintProgramSingleLine(taxon.GetInfo().GetProgram(), stream);
+  //   stream << "\"";
+  //   return stream.str();
+  // }, "program", "Program representing this taxon");
+  // AddSystematics(sys_ptr);
+  // SetupSystematicsFile(0, OUTPUT_DIR + "/systematics.csv").SetTimingRepeat(SUMMARY_RESOLUTION);
 
   // --- Dominant File ---
   max_fit_file = emp::NewPtr<emp::DataFile>(OUTPUT_DIR + "/max_fit_org.csv");
@@ -958,7 +958,7 @@ void AltSignalWorld::DoUpdate() {
     if (!(cur_update % SNAPSHOT_RESOLUTION) || cur_update == GENERATIONS || (STOP_ON_SOLUTION & found_solution)) {
       DoPopulationSnapshot();
       if (cur_update || (STOP_ON_SOLUTION & found_solution)) {
-        sys_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
+        // sys_ptr->Snapshot(OUTPUT_DIR + "/phylo_" + emp::to_string(cur_update) + ".csv");
         AnalyzeOrg(GetOrg(max_fit_org_tracker.org_id), max_fit_org_tracker.org_id); // Fully analyze max fitness organism
       }
     }
