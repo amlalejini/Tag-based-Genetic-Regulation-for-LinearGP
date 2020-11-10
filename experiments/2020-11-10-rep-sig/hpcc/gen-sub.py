@@ -47,15 +47,11 @@ module load GCCcore/9.1.0
 mkdir -p ${RUN_DIR}
 cd ${RUN_DIR}
 cp ${CONFIG_DIR}/config.cfg .
-cp ${CONFIG_DIR}/training_set.csv .
-cp ${CONFIG_DIR}/testing_set.csv .
 cp ${CONFIG_DIR}/${EXEC} .
 
 ./${EXEC} ${RUN_PARAMS} > run.log
 
 rm config.cfg
-rm training_set.csv
-rm testing_set.csv
 rm ${EXEC}
 
 """
