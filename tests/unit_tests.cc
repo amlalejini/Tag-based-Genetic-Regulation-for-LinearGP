@@ -22,11 +22,27 @@
 #include "BoolCalcConfig.h"
 #include "BoolCalcWorld.h"
 
-#include "DirSignalWorld.h"
-#include "DirSignalConfig.h"
+// #include "DirSignalWorld.h"
+// #include "DirSignalConfig.h"
 
 TEST_CASE( "Hello World", "[general]" ) {
   std::cout << "Hello tests!" << std::endl;
+}
+
+TEST_CASE( "ExponentialCountdownRegulator", "[matchbin]") {
+  ExponentialCountdownRegulator<std::ratio<11, 10>, 10> regulator;
+  regulator.Set(0);
+  REQUIRE(regulator.View() == 0.0);
+  REQUIRE(regulator.Set(100)); // change state to 10
+  REQUIRE(regulator.View() == 10.0);
+  REQUIRE(regulator.Set(-100)); // change state to -10
+  REQUIRE(regulator.View() == -10.0);
+  REQUIRE(regulator.Adj(-1) == false); // no state change
+  REQUIRE(regulator.View() == -10.0);
+  REQUIRE(regulator.Adj(10)); // change state to 0
+  REQUIRE(regulator.View() == 0.0);
+  REQUIRE(regulator.Adj(20)); // change state to 10
+  REQUIRE(regulator.View() == 10.0);
 }
 
 /*
@@ -344,16 +360,17 @@ TEST_CASE( "MCRegWorld ") {
 }
 */
 
-TEST_CASE( "ChgEnvWorld ") {
-  ChgEnvConfig config;
-  config.SEED(2);
-  config.POP_SIZE(100);
-  config.GENERATIONS(10);
-  config.NUM_ENV_STATES(2);
-  config.NUM_ENV_UPDATES(4);
-  config.CPU_CYCLES_PER_ENV_UPDATE(32);
-  emp::Random random(config.SEED());
-  ChgEnvWorld world(random);
-  world.Setup(config);
-  world.Run();
-}
+// TEST_CASE( "ChgEnvWorld ") {
+//   ChgEnvConfig config;
+//   config.SEED(2);
+//   config.POP_SIZE(100);
+//   config.SNAPSHOT_RESOLUTION(10);
+//   config.GENERATIONS(10);
+//   config.NUM_ENV_STATES(2);
+//   config.NUM_ENV_UPDATES(4);
+//   config.CPU_CYCLES_PER_ENV_UPDATE(32);
+//   emp::Random random(config.SEED());
+//   ChgEnvWorld world(random);
+//   world.Setup(config);
+//   world.Run();
+// }
