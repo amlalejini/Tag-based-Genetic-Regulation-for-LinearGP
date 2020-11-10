@@ -1,8 +1,8 @@
 # Target project
 # PROJECT options: alt-signal-exp, chg-env-exp, dir-signal-exp
-PROJECT := bool-calc-exp
+# PROJECT := bool-calc-exp
 # - Repeated signal task -
-# PROJECT := alt-signal-exp
+PROJECT := alt-signal-exp
 # - Changing signal task -
 # PROJECT := chg-env-exp
 # - Directional signal task -
@@ -17,8 +17,8 @@ SGP_DIR := ../SignalGP/source
 MATCH_METRIC := streak
 # MATCH_THRESH options: 0, 25, 50, 75
 MATCH_THRESH := 0
-# MATCH_REG options: add, mult
-MATCH_REG := mult
+# MATCH_REG options: add, mult, exp
+MATCH_REG := exp
 # TAG_NUM_BITS
 TAG_NUM_BITS := 128
 
@@ -30,7 +30,7 @@ EXEC_NAME := $(PROJECT)_tag-len-$(TAG_NUM_BITS)_match-metric-$(MATCH_METRIC)_thr
 # CFLAGS_openssl := -I$(OPEN_SSL_DIR)/include -L$(OPEN_SSL_DIR)/lib
 CFLAGS_includes := -I./source/ -I$(EMP_DIR)/ -I$(SGP_DIR)/
 CFLAGS_links := -lssl -lcrypto
-CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DEMP_HAS_CRYPTO -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) -DTAG_NUM_BITS=$(TAG_NUM_BITS) $(CFLAGS_openssl) $(CFLAGS_includes) $(CFLAGS_links)
+CFLAGS_all := -Wall -Wno-unused-function -pedantic -std=c++17 -DEMP_HAS_CRYPTO=1 -DMATCH_METRIC=$(MATCH_METRIC) -DMATCH_THRESH=$(MATCH_THRESH) -DMATCH_REG=$(MATCH_REG) -DTAG_NUM_BITS=$(TAG_NUM_BITS) $(CFLAGS_openssl) $(CFLAGS_includes) $(CFLAGS_links)
 
 # Native compiler information
 CXX_nat := g++

@@ -45,6 +45,7 @@
 #include "AltSignalConfig.h"
 #include "mutation_utils.h"
 #include "Event.h"
+#include "matchbin_regulators.h"
 
 #include "reg_ko_instr_impls.h"
 
@@ -120,7 +121,10 @@ namespace AltSignalWorldDefs {
       emp::AdditiveCountdownRegulator<>,
     std::conditional<STRINGVIEWIFY(MATCH_REG) == "mult",
       emp::MultiplicativeCountdownRegulator<>,
+    std::conditional<STRINGVIEWIFY(MATCH_REG) == "exp",
+      ExponentialCountdownRegulator<>,
     std::enable_if<false>
+    >::type
     >::type
     >::type;
   #endif

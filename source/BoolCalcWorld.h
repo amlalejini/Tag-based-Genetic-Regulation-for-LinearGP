@@ -51,6 +51,7 @@
 #include "Event.h"
 #include "reg_ko_instr_impls.h"
 #include "mutation_utils.h"
+#include "matchbin_regulators.h"
 
 /// Globally-scoped, static variables.
 namespace BoolCalcWorldDefs {
@@ -121,7 +122,10 @@ namespace BoolCalcWorldDefs {
       emp::AdditiveCountdownRegulator<>,
     std::conditional<STRINGVIEWIFY(MATCH_REG) == "mult",
       emp::MultiplicativeCountdownRegulator<>,
-      std::enable_if<false>
+    std::conditional<STRINGVIEWIFY(MATCH_REG) == "exp",
+      ExponentialCountdownRegulator<>,
+    std::enable_if<false>
+    >::type
     >::type
     >::type;
   #endif
