@@ -9,7 +9,7 @@ default_num_replicates = 50
 job_time_request = "96:00:00"
 job_memory_request = "8G"
 job_name = "rep-sig"
-executable = "alt-sig-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp"
+executable = "alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp"
 
 config = {
     "PROGRAM": [
