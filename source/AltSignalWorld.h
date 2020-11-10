@@ -1302,13 +1302,13 @@ void AltSignalWorld::DoPopulationSnapshot() {
   snapshot_file.template AddFun<size_t>([this, &cur_org_id]() {
     return this->GetOrg(cur_org_id).GetGenome().GetProgram().GetInstCount();
   }, "num_instructions");
-  snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
-    std::ostringstream stream;
-    stream << "\"";
-    this->PrintProgramSingleLine(this->GetOrg(cur_org_id).GetGenome().GetProgram(), stream);
-    stream << "\"";
-    return stream.str();
-  }, "program");
+  // snapshot_file.template AddFun<std::string>([this, &cur_org_id]() {
+  //   std::ostringstream stream;
+  //   stream << "\"";
+  //   this->PrintProgramSingleLine(this->GetOrg(cur_org_id).GetGenome().GetProgram(), stream);
+  //   stream << "\"";
+  //   return stream.str();
+  // }, "program");
   snapshot_file.PrintHeaderKeys();
   for (cur_org_id = 0; cur_org_id < GetSize(); ++cur_org_id) {
     emp_assert(IsOccupied(cur_org_id));
