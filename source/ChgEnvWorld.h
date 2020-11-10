@@ -428,18 +428,42 @@ void ChgEnvWorld::InitInstLib() {
   inst_lib->AddInst("Terminal", sgp::inst_impl::Inst_Terminal<hardware_t, inst_t,
                                                             std::ratio<1>, std::ratio<-1>>, "");
 
-  // If global memory access is allowed, add access instructions; otherwise, add an equivalent number
-  // of no-operation instructions.
+  // If we can use global memory, give programs access. Otherwise, nops.
   if (USE_GLOBAL_MEMORY) {
-    inst_lib->AddInst("WorkingToGlobal", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>(hw, inst);
-    }, "");
-    inst_lib->AddInst("GlobalToWorking", [this](hardware_t & hw, const inst_t & inst) {
-      if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>(hw, inst);
-    }, "");
+    inst_lib->AddInst(
+      "WorkingToGlobal",
+      [this](hardware_t & hw, const inst_t & inst) {
+        if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_WorkingToGlobal<hardware_t, inst_t>(hw, inst);
+      },
+      "Push working memory to global memory"
+    );
+    inst_lib->AddInst(
+      "GlobalToWorking",
+      [this](hardware_t & hw, const inst_t & inst) {
+        if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_GlobalToWorking<hardware_t, inst_t>(hw, inst);
+      },
+      "Pull global memory into working memory"
+    );
+
+    inst_lib->AddInst(
+      "FullWorkingToGlobal",
+      [this](hardware_t & hw, const inst_t & inst) {
+        if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_FullWorkingToGlobal<hardware_t, inst_t>(hw, inst);
+      },
+      "Push all working memory to global memory"
+    );
+    inst_lib->AddInst(
+      "FullGlobalToWorking",
+      [this](hardware_t & hw, const inst_t & inst) {
+        if (!KO_GLOBAL_MEMORY) sgp::inst_impl::Inst_FullGlobalToWorking<hardware_t, inst_t>(hw, inst);
+      },
+      "Pull all global memory into working memory"
+    );
   } else {
-    inst_lib->AddInst("Nop-WorkingToGlobal", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
-    inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "");
+    inst_lib->AddInst("Nop-WorkingToGlobal", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "Nop");
+    inst_lib->AddInst("Nop-GlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "Nop");
+    inst_lib->AddInst("Nop-FullWorkingToGlobal", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "Nop");
+    inst_lib->AddInst("Nop-FullGlobalToWorking", sgp::inst_impl::Inst_Nop<hardware_t, inst_t>, "Nop");
   }
 
   // If we can use regulation, add regulation instructions; otherwise, add an equivalent number of
