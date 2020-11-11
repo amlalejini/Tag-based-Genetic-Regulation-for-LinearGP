@@ -45,6 +45,7 @@
 #include "ChgEnvConfig.h"
 #include "mutation_utils.h"
 #include "Event.h"
+#include "matchbin_regulators.h"
 
 /// Globally-scoped, static variables.
 namespace ChgEnvWorldDefs {
