@@ -17,7 +17,7 @@ config = {
         "-USE_FUNC_REGULATION 1 -USE_GLOBAL_MEMORY 1",
     ],
     "ENVIRONMENT": [
-        "-NUM_SIGNAL_RESPONSES 16 -NUM_ENV_CYCLES 16",
+        "-NUM_ENV_STATES 16 -NUM_ENV_UPDATES 16",
     ]
 }
 
