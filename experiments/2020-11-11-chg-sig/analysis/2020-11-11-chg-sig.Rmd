@@ -1,0 +1,258 @@
+---
+title: "Changing Signal Task Analysis"
+output:
+  html_document:
+    keep_md: no
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    collapsed: false
+    theme: default
+    code_folding: hide
+  pdf_document:
+    toc: true
+    toc_depth: 4
+---
+
+This document is a companion to our submission to the 2020 Artificial Life conference, 'Genetic regulation facilitates the evolution of signal-response plasticity in digital organisms'.
+Here, we give an overview of the changing signal diagnostic task (mirroring the overview given in the paper), and we provide our data analyses for related experiments.
+All of our source code for statistical analyses and data visualizations is embedded in this document.
+Please [file an issue or make a pull request on github](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/issues) to report any mistakes or request more explanation.
+
+## Overview
+
+```{r}
+# Experimental parameters referenced in-text all in one convenient place.
+time_steps <- 128
+replicates <- 200
+population_size <- 1000
+generations <- 10000
+env_complexities <- c(16)
+```
+
+The changing signal task requires organisms to express a unique response for each of $K$ distinct environmental signals (i.e., each signal has a distinct tag); the figure below is given as an example.
+Because signals are distinct, organisms do not need to alter their responses to particular signals over time.
+Instead, organisms may 'hardware' each of the $K$ possible responses to the appropriate environmental signal.
+However, environmental signals are presented in a random order; thus, the correct _order_ of responses will vary and cannot be hardcoded.
+As in the repeated signal task, organisms respond by executing one of $K$ response instructions.
+Otherwise, evaluation (and fitness assignment) on the changing signal task mirrors that of the repeated signal task.
+
+![changing-signal-task-overview](../../../media/changing-signal-task.svg)
+
+Requiring organisms to express a distinct instruction in response to each environmental signal represents organisms having to perform distinct behaviors.
+
+We allowed organisms `r time_steps` time steps to express the appropriate response after receiving an environmental signal.
+Once the allotted time to respond expires or the organism expresses any response, the organism's threads of execution are reset, resulting in a loss of all thread-local memory.
+_Only_ the contents of an organism's global memory and each function's regulatory state persist.
+The environment then produces the next signal (distinct from all previous signals) to which the organism may respond.
+An organism's fitness is equal to the number of correct responses expressed during evaluation.
+
+We evolved populations of `r population_size` SignalGP organisms to solve the changing signal task at $K=16$ (where $K$ denotes the number of environmental signals).
+We evolved populations for `r generations` generations or until an organism capable of achieving a perfect score during task evaluation (i.e., able to express the appropriate response to each of the $K$ signals) evolved.
+
+We ran `r replicates` replicate populations (each with a distinct random number seed) of each of two experimental conditions:
+
+1. a regulation-augmented treatment where organisms have access to genetic regulation.
+2. a regulation-disabled treatment where organisms do not have access to genetic regulation.
+
+Note this task does not require organisms to shift their response to particular signals over time, and as such, genetic regulation is unnecessary.
+Further, because organisms experience environmental signals in a random order, erroneous genetic regulation can manifest as cryptic variation.
+For example, non-adaptive down-regulation of a particular response function may be neutral given one sequence of environmental signals, but may be deleterious in another.
+**We expected regulation-enabled SignalGP to exhibit non-adaptive plasticity, potentially resulting in slower adaptation and non-general solutions.**
+
+## Analysis Dependencies
+
+Load all required R libraries.
+
+```{r, message=FALSE}
+library(ggplot2)  # (Wickham, 2009)
+library(dplyr)    # (Wickham et al., 2018)
+library(cowplot)  # (Wilke, 2018)
+library(viridis)  # (Garnier, 2018)
+```
+
+These analyses were conducted in the following computing environment:
+
+```{r}
+print(version)
+```
+
+## Setup
+
+Load data, initial data cleanup, configure some global settings.
+
+```{r}
+data_loc <- "data/max_fit_orgs.csv"
+data <- read.csv(data_loc, na.strings="NONE")
+
+# Specify factors (not all of these matter for this set of runs).
+data$matchbin_thresh <-
+  factor(data$matchbin_thresh,
+         levels=c(0, 25, 50, 75))
+data$NUM_ENV_STATES <-
+  factor(data$NUM_ENV_STATES,
+         levels=c(2, 4, 8, 16, 32))
+data$NUM_ENV_UPDATES <-
+  factor(data$NUM_ENV_UPDATES,
+         levels=c(2, 4, 8, 16, 32))
+data$TAG_LEN <-
+  factor(data$TAG_LEN,
+         levels=c(32, 64, 128))
+
+# Define function to summarize regulation/memory configurations.
+get_con <- function(reg, mem) {
+  if (reg == "0" && mem == "0") {
+    return("none")
+  } else if (reg == "0" && mem=="1") {
+    return("memory")
+  } else if (reg=="1" && mem=="0") {
+    return("regulation")
+  } else if (reg=="1" && mem=="1") {
+    return("both")
+  } else {
+    return("UNKNOWN")
+  }
+}
+# Specify experimental condition for each datum.
+data$condition <- mapply(get_con,
+                         data$USE_FUNC_REGULATION,
+                         data$USE_GLOBAL_MEMORY)
+data$condition <- factor(data$condition,
+                         levels=c("regulation", "memory", "none", "both"))
+
+# A lookup table for task complexities
+task_label_lu <- c(
+  "2" = "2-signal task",
+  "4" = "4-signal task",
+  "8" = "8-signal task",
+  "16" = "16-signal task",
+  "32" ="32-signal task"
+)
+
+# Settings for statistical analyses.
+alpha <- 0.05
+correction_method <- "bonferroni"
+
+# Configure our default graphing theme
+theme_set(theme_cowplot())
+```
+
+## Does regulation hinder the evolution of successful genotypes?
+
+Here, we look at the number of solutions evolved with access and without access to genetic regulation.
+An organism is categorized as a 'solution' if it can correctly respond in each of the $K$ environmental signals _during evaluation_.
+
+```{r, echo=TRUE}
+# Filter data to include only replicates labeled as solutions
+sol_data <- filter(data, solution=="1")
+# Graph the number of solutions evolved in each condition, faceted by environmental complexity
+ggplot(sol_data, aes(x=condition, fill=condition)) +
+  geom_bar() +
+  geom_text(stat="count",
+            mapping=aes(label=..count..),
+            position=position_dodge(0.9), vjust=0) +
+  scale_x_discrete(name="Condition",
+                   breaks=c("memory","both"),
+                   labels=c("Disabled",
+                            "Augmented")) +
+  scale_fill_discrete(name="Condition",
+                      breaks=c("memory", "both"),
+                      labels=c("Regulation-disabled",
+                               "Regulation-augmented")) +
+  ylab("# successful replciates (/200)") +
+  theme(legend.position = "bottom") +
+  ggtitle("Successful replicates")
+```
+
+Programs capable of achieving a perfect score on the changing signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
+These programs, however, do not necessarily generalize across all possible sequences of environmental signals.
+
+### Does access to regulation slow adaptation?
+
+I.e., did successful programs take longer (more generations) to evolve than those evolved in the regulation-disabled treatment?
+
+```{r}
+ggplot(data, aes(x=condition, y=update, color=condition)) +
+  geom_boxplot() +
+  scale_x_discrete(name="Condition",
+                 breaks=c("memory","both"),
+                 labels=c("Disabled",
+                          "Augmented")) +
+  scale_color_discrete(name="Condition",
+                       breaks=c("memory", "both"),
+                       labels=c("Regulation-disabled",
+                                "Regulation-augmented")) +
+  ylab("Generations to solution")
+
+print(wilcox.test(formula=update~condition, data=data, exact=FALSE, conf.int=TRUE))
+```
+
+We find no evidence (Wilcoxon rank-sum test) that access to regulation resulted in slower adaptation.
+
+### Do they generalize?
+
+Note that solutions may or may not generalize beyond the sequence of environmental signals on which they achieved a perfect score (and were thus categorized as a 'solution').
+We re-evaluated each 'solution' on a random sample of 5000 sequences of environmental signals to test for generalization.
+We deem organisms as having successfully generalized only if they responded correctly in all 5000 tests.
+Additionally, we measured generalization in the regulation-augmented condition with regulation knocked out.
+
+```{r, echo=TRUE}
+
+# Grab count data to make bar plot life easier
+num_solutions_reg <-
+  length(filter(data, condition=="both" & solution=="1")$SEED)
+num_generalize_reg <-
+  length(filter(data, condition=="both" & all_solution=="1")$SEED)
+num_generalize_ko_reg <-
+  length(filter(data, condition=="both" & all_solution_ko_reg=="1")$SEED)
+
+num_generalize_mem <-
+  length(filter(data, condition=="memory" & all_solution=="1")$SEED)
+
+sol_cnts <- data.frame(x=1:3)
+sol_cnts$type <- c("reg_generalize", "reg_generalize_ko_reg", "mem_generalize")
+sol_cnts$val <- c(num_generalize_reg, num_generalize_ko_reg, num_generalize_mem)
+
+ggplot(sol_cnts, aes(x=type, y=val, fill=type)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(label=val),
+            stat="identity",
+            position=position_dodge(0.75), vjust=-0.01) +
+  scale_x_discrete(name="Condition",
+                   limits=c("mem_generalize",
+                            "reg_generalize",
+                            "reg_generalize_ko_reg"),
+                   labels=c("Disabled",
+                            "Augmented",
+                            "Augmented\nKO")) +
+  scale_fill_discrete(name="Condition",
+                      limits=c("mem_generalize",
+                               "reg_generalize",
+                               "reg_generalize_ko_reg"),
+                      labels=c("Regulation-disabled",
+                               "Regulation-augmented",
+                               "Regulation-augmented\n(reg. knockout)")) +
+  scale_y_continuous(name="# of replicates that generalize",
+                     limits=c(0, 210),
+                     breaks=seq(0,200,20)) +
+  theme(legend.position="right",
+        axis.text.x = element_text(size=10)) +
+  ggtitle("Task generalization") +
+  ggsave("./imgs/chg-env-16-generalization.png", width=6,height=4)
+```
+
+All programs evolved without access to regulation successfully generalized. However, `r num_solutions_reg - num_generalize_reg` out of `r num_solutions_reg` solutions evolved with access to regulation failed to generalize (statistically significant, Fisher's exact test).
+
+```{r}
+table <- matrix(c(num_generalize_reg,
+                  num_generalize_mem,
+                  replicates - num_generalize_reg,
+                  replicates - num_generalize_mem),
+                nrow=2)
+rownames(table) <- c("reg-augmented", "reg-disabled")
+colnames(table) <- c("success", "fail")
+fisher.test(table)
+```
+
+Moreover, `r (num_solutions_reg - num_generalize_reg) - (num_solutions_reg - num_generalize_ko_reg)` of the `r num_solutions_reg - num_generalize_reg` non-generalizing programs generalize when we knockout genetic regulation.
+Upon close inspection, the other `r num_solutions_reg - num_generalize_ko_reg` non-general programs relied on genetic regulation to achieve initial success but failed to generalize to arbitrary environment signal sequences.
