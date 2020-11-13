@@ -50,7 +50,7 @@ constexpr size_t ERROR_NUM_NUM_OP1_num_testing_cases=200;
 constexpr size_t ERROR_NUM_OP2_num_testing_cases=200;
 
 constexpr size_t num_testing_edge_cases=50;
-constexpr size_t num_training_edge_cases=1;
+constexpr size_t num_training_edge_cases=2;
 
 constexpr size_t ONE_INPUT_COMPUTATIONS_num_training_cases=40;
 constexpr size_t TWO_INPUT_COMPUTATIONS_num_training_cases=40;
