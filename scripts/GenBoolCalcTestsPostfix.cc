@@ -26,11 +26,11 @@
 #include <set>
 #include <iostream>
 
-#include "base/vector.h"
-#include "data/DataFile.h"
-#include "tools/Random.h"
-#include "tools/set_utils.h"
-#include "tools/string_utils.h"
+#include "emp/base/vector.hpp"
+#include "emp/data/DataFile.hpp"
+#include "emp/math/Random.hpp"
+#include "emp/datastructs/set_utils.hpp"
+#include "emp/tools/string_utils.hpp"
 
 std::unordered_set<std::string> one_input_ops{"ECHO", "NOT"};
 std::unordered_set<std::string> two_input_ops{"NAND","ORNOT","AND","OR","ANDNOT","NOR","XOR","EQU"};
