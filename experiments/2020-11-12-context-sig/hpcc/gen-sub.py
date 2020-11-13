@@ -82,7 +82,6 @@ def extract_settings(run_config_path):
     configs = [l for l in csv.reader(content, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)]
     return {param[header_lu["parameter"]]:param[header_lu["value"]] for param in configs}
 
-# todo - fix
 def is_run_complete(path):
     # (1) Does the run directory exist?
     print(f"    Run dir? {os.path.exists(path)}")
