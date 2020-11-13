@@ -9,7 +9,7 @@ import json
 
 csv.field_size_limit(sys.maxsize)
 
-run_dir_identifier = "SEED_" # all legit run directories will have this substring in their name
+run_dir_identifier = "RUN_" # all legit run directories will have this substring in their name
 
 config_exclude = {
     "STOP_ON_SOLUTION",
