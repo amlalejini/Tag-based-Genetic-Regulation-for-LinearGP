@@ -90,31 +90,36 @@ def is_run_complete(path):
     # (2) If the run directory exists, did the run complete?
     #     Is there a run config file?
     run_config_path = os.path.join(path, "output", "run_config.csv")
-    print(f"    Run config? {os.path.exists(run_config_path)}")
     if not os.path.exists(run_config_path): return False
     #    The run config file exists, extract parameters.
-
     run_params = extract_settings(run_config_path)
+
     final_gen = run_params["GENERATIONS"] # We'll look for this generation in the fitness.csv file
-    fitness_file_path = os.path.join(path, "output", "fitness.csv")
-    print(f"    Fitness file? {os.path.exists(fitness_file_path)}")
-    if not os.path.exists(fitness_file_path): return False
+    max_fit_fpath = os.path.join(path, "output", "max_fit_org.csv")
 
-    fitness_contents = None
-    with open(fitness_file_path, "r") as fp:
-        fitness_contents = fp.read().strip().split("\n")
-    if len(fitness_contents) == 0: return False
-
-    header = fitness_contents[0].split(",")
+    if not os.path.exists(max_fit_fpath): return False
+    content = None
+    with open(max_fit_fpath, "r") as fp:
+        content = fp.read().strip().split("\n")
+    header = content[0].split(",")
     header_lu = {header[i].strip():i for i in range(0, len(header))}
-    last_line = fitness_contents[-1].split(",")
-    print(f"    len(header) == len(last_line)? {len(header) == len(last_line)}")
-    if len(header) != len(last_line): return False
+    content = content[1:]
+    content = [l for l in csv.reader(content, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)]
+    if len(content) == 0: return False
 
-    final_fitness_update = last_line[header_lu["update"]]
-    print(f"    {final_fitness_update} =?= {final_gen}")
-    if final_fitness_update != final_gen: return False
-    return True
+    final_org = content[-1] # final organism
+
+    if len(header) != len(final_org): return False
+
+    final_update = final_org[header_lu["update"]]
+    is_solution = final_org[header_lu["is_solution"]]
+    # print(f"    {final_fitness_update} =?= {final_gen}")
+    if is_solution == "1" or final_update == final_gen:
+        print("    DONE")
+        return True
+    print("   NOT DONE")
+    return False
+
 
 def main():
     parser = argparse.ArgumentParser(description="Run submission script.")
