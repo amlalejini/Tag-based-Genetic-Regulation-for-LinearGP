@@ -97,7 +97,7 @@ data$NUM_ENV_UPDATES <-
          levels=c(2, 4, 8, 16, 32))
 data$TAG_LEN <-
   factor(data$TAG_LEN,
-         levels=c(32, 64, 128))
+         levels=c(32, 64, 128, 256))
 
 # Define function to summarize regulation/memory configurations.
 get_con <- function(reg, mem) {

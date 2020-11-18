@@ -1,0 +1,166 @@
+---
+title: "Boolean Calculator Problem Analysis"
+output:
+  html_document:
+    keep_md: no
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    collapsed: false
+    theme: default
+    code_folding: hide
+  pdf_document:
+    toc: true
+    toc_depth: 4
+---
+
+## Analysis Dependencies
+
+Load all required R libraries.
+
+```{r, message=FALSE}
+library(ggplot2)  # (Wickham, 2009)
+library(dplyr)    # (Wickham et al., 2018)
+library(cowplot)  # (Wilke, 2018)
+library(viridis)  # (Garnier, 2018)
+```
+
+These analyses were conducted in the following computing environment:
+
+```{r}
+print(version)
+```
+
+## Setup
+
+Load data, initial data cleanup, configure some global settings.
+
+```{r}
+data_loc <- "data/max_fit_orgs.csv"
+data <- read.csv(data_loc, na.strings="NONE")
+
+# Specify factors (not all of these matter for this set of runs).
+data$matchbin_thresh <-
+  factor(data$matchbin_thresh,
+         levels=c(0, 25, 50, 75))
+data$TAG_LEN <-
+  factor(data$TAG_LEN,
+         levels=c(32, 64, 128, 256))
+
+# Define function to summarize regulation/memory configurations.
+get_con <- function(reg, mem) {
+  if (reg == "0" && mem == "0") {
+    return("none")
+  } else if (reg == "0" && mem=="1") {
+    return("memory")
+  } else if (reg=="1" && mem=="0") {
+    return("regulation")
+  } else if (reg=="1" && mem=="1") {
+    return("both")
+  } else {
+    return("UNKNOWN")
+  }
+}
+# Specify experimental condition for each datum.
+data$condition <- mapply(get_con,
+                         data$USE_FUNC_REGULATION,
+                         data$USE_GLOBAL_MEMORY)
+data$condition <- factor(data$condition,
+                         levels=c("regulation", "memory", "none", "both"))
+
+
+# Settings for statistical analyses.
+alpha <- 0.05
+correction_method <- "bonferroni"
+
+# Configure our default graphing theme
+theme_set(theme_cowplot())
+```
+
+```{r, echo=TRUE}
+# Filter data to include only replicates labeled as solutions
+sol_data <- filter(data, solution=="1")
+# Graph the number of solutions evolved in each condition, faceted by environmental complexity
+ggplot(sol_data, aes(x=condition, fill=condition)) +
+  geom_bar() +
+  geom_text(stat="count",
+            mapping=aes(label=..count..),
+            position=position_dodge(0.9), vjust=0) +
+  scale_x_discrete(name="Condition",
+                   breaks=c("memory","both"),
+                   labels=c("Disabled",
+                            "Augmented")) +
+  scale_fill_discrete(name="Condition",
+                      breaks=c("memory", "both"),
+                      labels=c("Regulation-disabled",
+                               "Regulation-augmented")) +
+  ylab("# successful replciates (/200)") +
+  ylim(0, 200) +
+  theme(legend.position = "bottom") +
+  ggtitle("Successful replicates")
+```
+
+```{r}
+ggplot(sol_data, aes(x=condition, y=update, color=condition)) +
+  geom_boxplot() +
+  scale_x_discrete(name="Condition",
+                 breaks=c("memory","both"),
+                 labels=c("Disabled",
+                          "Augmented")) +
+  scale_color_discrete(name="Condition",
+                       breaks=c("memory", "both"),
+                       labels=c("Regulation-disabled",
+                                "Regulation-augmented")) +
+  ylab("Generations to solution")
+
+print(wilcox.test(formula=update~condition, data=data, exact=FALSE, conf.int=TRUE))
+```
+
+```{r}
+# Do a little bit of data processing...
+get_strategy <- function(use_reg, use_mem) {
+  if (use_reg=="0" && use_mem=="0") {
+    return("use neither")
+  } else if (use_reg=="0" && use_mem=="1") {
+    return("use memory")
+  } else if (use_reg=="1" && use_mem=="0") {
+    return("use regulation")
+  } else if (use_reg=="1" && use_mem=="1") {
+    return("use both")
+  } else {
+    return("UNKNOWN")
+  }
+}
+
+# Specify experimental conditions (to make labeling easier).
+sol_data$strategy <-
+  mapply(get_strategy,
+         sol_data$relies_on_regulation,
+         sol_data$relies_on_global_memory)
+
+sol_data$strategy <-
+  factor(sol_data$strategy,
+         levels=c("use regulation",
+                  "use memory",
+                  "use neither",
+                  "use both"))
+
+ggplot(sol_data,
+       mapping=aes(x=condition, fill=strategy)) +
+  geom_bar(position="fill", stat="count") +
+  geom_text(stat='count',
+            mapping=aes(label=..count..),
+            position=position_fill(vjust=0.05)) +
+            # position=position_dodge(0.9)
+  ylab("% of Solutions") +
+  scale_fill_discrete(name="Strategy:",
+                      breaks=c("use regulation",
+                               "use memory",
+                               "use neither",
+                               "use both"),
+                      labels=c("Use regulation (only)",
+                               "Use global memory (only)",
+                               "Use neither",
+                               "Use both")) +
+  theme(legend.position = "bottom") 
+```
