@@ -59,6 +59,7 @@ def find_org_analysis_path(run_path, update=None):
     output_path = os.path.join(run_path, "output")
     # Find all org analysis files (e.g., analysis_org_0_update_1000.csv)
     analysis_files = [fname for fname in os.listdir(output_path) if "analysis_org_" in fname]
+    if len(analysis_files) == 0: return None
     def max_key(s):
         u = int(s.split("_update_")[-1].split(".")[0])
         if update == None:
@@ -141,6 +142,10 @@ def main():
         if not os.path.exists(run_config_path):
             print(f"Failed to find run parameters ({run_config_path})")
             exit(-1)
+
+        if not org_analysis_path:
+            print(" >> no analysis files")
+            continue
 
         # find organism analysis file
         if not os.path.exists(org_analysis_path):
