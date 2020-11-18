@@ -137,7 +137,6 @@ def main():
         print(f"Extracting information from {run}")
         run_config_path = os.path.join(run, "output", "run_config.csv")
         org_analysis_path = find_org_analysis_path(run, update if update >= 0 else None)
-        org_update = org_analysis_path.split(".")[0].split("_")[-1]
         # does the run config file exist?
         if not os.path.exists(run_config_path):
             print(f"Failed to find run parameters ({run_config_path})")
@@ -153,6 +152,7 @@ def main():
             exit(-1)
 
         # extract run settings
+        org_update = org_analysis_path.split(".")[0].split("_")[-1]
         run_settings = extract_settings(run_config_path)
         input_notation = run_settings["TRAINING_SET_FILE"].split("/")[-1].split(".")[0].replace("training_set", "")
 
