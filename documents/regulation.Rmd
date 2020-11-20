@@ -1,0 +1,97 @@
+---
+title: "Exploring the effect of regulation on tag-match scores"
+output:
+  html_document:
+    keep_md: no
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    collapsed: false
+    theme: default
+    code_folding: hide
+  pdf_document:
+    toc: true
+    toc_depth: 4
+---
+
+## Analysis Dependencies
+
+Load all required R libraries.
+
+```{r, message=FALSE}
+library(ggplot2)  # (Wickham, 2009)
+library(dplyr)    # (Wickham et al., 2018)
+library(tidyr)
+library(cowplot)  # (Wilke, 2018)
+library(viridis)  # (Garnier, 2018)
+library(metR)
+
+# Configure our default graphing theme
+theme_set(theme_cowplot())
+```
+
+These analyses were conducted in the following computing environment:
+
+```{r}
+print(version)
+```
+
+Define a function to apply regulation to match score.
+
+```{r}
+exp_base <- 1.1
+# Exponential regulator
+exp_regulator <- function(raw_match, modifier, base=1.1) {
+  return(raw_match * (base**modifier));
+}
+```
+
+```{r}
+# generate data to visualize
+data <- expand_grid(
+  raw_match=seq(0, 1.0, 0.01),
+  reg_modifier=seq(-50, 50, 0.1)
+)
+
+data <- as.data.frame(data)
+data$regulated_match <- mapply(
+  exp_regulator,
+  data$raw_match,
+  data$reg_modifier,
+  exp_base
+)
+data$above_perfect <- data$regulated_match > 1.0
+
+# # attempt to compute gradient field
+# sampled <- filter(
+#   data,
+#   row_number() %% 5 == 1
+# )
+# sampled$x <- sampled$reg_modifier
+# sampled$y <- sampled$raw_match
+# sampled$value <- sampled$regulated_match
+# TODO - should we add gradient arrows (so graph can be interpretted w/out color?)
+```
+
+```{r}
+ggplot(data, aes(y=reg_modifier, x=raw_match, fill=regulated_match)) +
+  geom_raster() +
+  geom_hline(yintercept=0) +
+  # geom_arrow(
+  #   aes(
+  #     dx=delta_reg_modifier,
+  #     dy=delta_raw_match
+  #   )
+  # ) +
+  scale_fill_viridis(
+    # breaks=c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000),
+    # labels=c(0, 0.001, 0.01, 0.1, 1, 10, 100, 1000),
+    trans="log10"
+  ) +
+  ggsave("exp-reg-match.pdf", width=10, height=10)
+
+ggplot(data, aes(y=reg_modifier, x=raw_match, fill=above_perfect)) +
+  geom_tile() +
+  ggsave("exp-reg-above-perfect.pdf", width=10, height=10)
+
+```
