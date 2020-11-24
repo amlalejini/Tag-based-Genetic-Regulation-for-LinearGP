@@ -1328,7 +1328,6 @@ ChgEnvWorld::HardwareStatePrintInfo ChgEnvWorld::GetHardwareStatePrintInfo(hardw
   std::ostringstream gmem_stream;
   hw.GetMemoryModel().PrintMemoryBuffer(hw.GetMemoryModel().GetGlobalBuffer(), gmem_stream);
   print_info.global_mem_str = gmem_stream.str();
-
   // number of modules
   print_info.num_modules = hw.GetNumModules();
   // module regulator states & timers
@@ -1382,6 +1381,14 @@ ChgEnvWorld::HardwareStatePrintInfo ChgEnvWorld::GetHardwareStatePrintInfo(hardw
       stream << ",flow_stack:[";
       for (size_t f = 0; f < flow_stack.size(); ++f) {
         auto & flow = flow_stack[f];
+        std::string cur_inst_name=""; // get the name of the current instruction
+        if (hw.IsValidProgramPosition(flow.mp, flow.ip)) {
+          emp_assert(hw.GetProgram().IsValidPosition(flow.mp, flow.ip));
+          const size_t inst_type_id = hw.GetProgram()[flow.mp][flow.ip].GetID();
+          cur_inst_name = inst_lib->GetName(inst_type_id);
+        } else {
+          cur_inst_name = "NONE";
+        }
         if (f) stream << ",";
         stream << "{";
         // type
@@ -1395,6 +1402,8 @@ ChgEnvWorld::HardwareStatePrintInfo ChgEnvWorld::GetHardwareStatePrintInfo(hardw
         stream << "mp:" << flow.mp << ",";
         // ip
         stream << "ip:" << flow.ip << ",";
+        // inst name
+        stream << "inst_name:" << cur_inst_name << ",";
         // begin
         stream << "begin:" << flow.begin << ",";
         // end
