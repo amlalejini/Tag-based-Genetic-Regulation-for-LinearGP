@@ -342,9 +342,9 @@ def main():
             thread_state = thread_states[step_i]
             executing_instructions = []
             for thread in thread_state:
-                if len(thread["call_stack"]):
-                    if len(thread["call_stack"][0]["flow_stack"]):
-                        executing_instructions.append(thread["call_stack"][0]["flow_stack"][0]["inst_name"].strip(","))
+                if len(thread["call_stack"]) and thread["state"].strip(",") == "running":
+                    if len(thread["call_stack"][-1]["flow_stack"]):
+                        executing_instructions.append(thread["call_stack"][-1]["flow_stack"][-1]["inst_name"].strip(","))
             line_info["active_instructions"] = f"\"[{','.join(executing_instructions)}]\""
             exec_trace_out_lines.append(",".join([str(line_info[field]) for field in exec_trace_fields]))
 
