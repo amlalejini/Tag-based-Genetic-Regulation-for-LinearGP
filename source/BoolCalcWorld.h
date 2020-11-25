@@ -223,6 +223,16 @@ public:
 
   using test_case_t = BoolCalcTestInfo::TestCase;
 
+  /// Struct used as intermediary for printing/outputting SignalGP hardware state at a given time step.
+  struct HardwareStatePrintInfo {
+    std::string global_mem_str="";      ///< String representation of global memory.
+    size_t num_modules=0;               ///< Number of modules in the program loaded on hardware.
+    emp::vector<double> module_regulator_states; ///< State of regulation for each module.
+    emp::vector<size_t> module_regulator_timers; ///< Regulation timer for each module.
+    size_t num_active_threads=0;        ///< How many active threads are running?
+    std::string thread_state_str="";    ///< String representation of state of all threads.
+  };
+
 protected:
   // --- Localized Configuration Settings ---
   // Default group
@@ -339,6 +349,8 @@ protected:
 
   void AnalyzeOrg(const org_t & org, size_t pop_id);
 
+  void TraceOrganism(const org_t & org, size_t org_id=0); // TODO
+
   /// Output a snapshot of the world's configuration.
   void DoWorldConfigSnapshot(const config_t & config);
   void DoPopulationSnapshot();
@@ -346,6 +358,8 @@ protected:
   void PrintProgramSingleLine(const program_t & prog, std::ostream & out=std::cout);
   void PrintProgramFunction(const program_function_t & func, std::ostream & out=std::cout);
   void PrintProgramInstruction(const inst_t & inst, std::ostream & out=std::cout);
+  /// Output utility - extract hardware state information from given SignalGP virtual hardware.
+  HardwareStatePrintInfo GetHardwareStatePrintInfo(hardware_t & hw);
 
   emp::vector<test_case_t> LoadTestCases(const std::string & path);
 
@@ -656,6 +670,8 @@ void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
   );
   test_org.GetPhenotype().is_solution = ScreenSolution(test_org);
 
+  TraceOrganism(org, pop_id);
+
   // Run with knockouts
   // - ko memory
   KO_GLOBAL_MEMORY=true;
@@ -878,6 +894,251 @@ void BoolCalcWorld::AnalyzeOrg(const org_t & org, size_t pop_id) {
   );
   analysis_file.PrintHeaderKeys();
   analysis_file.Update();
+}
+
+void BoolCalcWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
+  org_t trace_org(org); // Make a copy of the the given organism so we don't mess with any of the original's
+                        // data.
+  // Data file to store trace information.
+  emp::DataFile trace_file(OUTPUT_DIR + "/trace_org_" + emp::to_string(org_id) + "_update_" + emp::to_string((int)GetUpdate()) + ".csv");
+  // Add functions to trace file.
+  HardwareStatePrintInfo hw_state_info;
+
+  size_t cpu_step=0;
+  size_t cur_test_id=0;
+  size_t num_test_inputs=0;
+  size_t cur_test_input=0;
+  tag_t cur_test_input_tag=tag_t();
+  BoolCalcTestInfo::TestSignal cur_test_signal=BoolCalcTestInfo::TestSignal(0, hw_response_type_t::NONE);
+
+
+  // ----- Timing information -----
+  trace_file.template AddFun<size_t>([&cur_test_id]() {
+    return cur_test_id;
+  }, "cur_test_id");
+
+  trace_file.template AddFun<size_t>([&cpu_step]() {
+    return cpu_step;
+  }, "cpu_step");
+
+  // test information
+  // - test id, input, input-sig-tag, current response
+
+  // ----- Environment Information -----
+  //    * num_test_inputs
+  trace_file.template AddFun<size_t>([&num_test_inputs]() {
+    return num_test_inputs;
+  }, "num_test_inputs");
+
+  //    * cur_test_input
+  trace_file.template AddFun<size_t>([&cur_test_input]() {
+    return cur_test_input;
+  }, "cur_test_input");
+
+  //    * cur_test_input_tag
+  trace_file.template AddFun<std::string>([&cur_test_input_tag]() {
+    std::ostringstream stream;
+    cur_test_input_tag.Print(stream);
+    return stream.str();
+  }, "cur_test_input_tag");
+
+  //    * cur_test_signal
+  trace_file.template AddFun<std::string>([&cur_test_signal]() {
+    std::ostringstream stream;
+    stream << "\"";
+    cur_test_signal.Print(stream);
+    stream << "\"";
+    return stream.str();
+  }, "cur_test_signal");
+
+// HasResponse
+// GetResponseType
+// GetResponseValue
+// GetResponseFunctionID
+  // ----- Hardware Information -----
+  //    * current response
+  trace_file.template AddFun<int>([this]() {
+    return eval_hardware->GetCustomComponent().GetResponseValue();
+  }, "cur_response_value");
+
+  trace_file.template AddFun<std::string>([this]() {
+    return BoolCalcTestInfo::ResponseStr(eval_hardware->GetCustomComponent().GetResponseType());
+  }, "cur_response_type");
+
+  trace_file.template AddFun<int>([this]() {
+    return eval_hardware->GetCustomComponent().GetResponseFunctionID();
+  }, "cur_responding_function");
+
+  //    * correct responses
+  trace_file.template AddFun<bool>([&trace_org, &cur_test_signal, this]() {
+    return cur_test_signal.IsCorrect(
+      eval_hardware->GetCustomComponent().GetResponseType(),
+      eval_hardware->GetCustomComponent().GetResponseValue()
+    );
+  }, "has_correct_response");
+
+  //    * num_modules
+  trace_file.template AddFun<size_t>([&hw_state_info]() {
+    return hw_state_info.num_modules;
+  }, "num_modules");
+
+  //    * module_regulator_states
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < hw_state_info.module_regulator_states.size(); ++i) {
+      if (i) stream << ",";
+      stream << hw_state_info.module_regulator_states[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "module_regulator_states");
+
+
+  //    * module_regulator_timers
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    std::ostringstream stream;
+    stream << "\"[";
+    for (size_t i = 0; i < hw_state_info.module_regulator_timers.size(); ++i) {
+      if (i) stream << ",";
+      stream << hw_state_info.module_regulator_timers[i];
+    }
+    stream << "]\"";
+    return stream.str();
+  }, "module_regulator_timers");
+
+  //    * global_mem_str
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    return "\"" + hw_state_info.global_mem_str + "\"";
+  }, "global_mem");
+
+  //    * num_active_threads
+  trace_file.template AddFun<size_t>([&hw_state_info]() {
+    return hw_state_info.num_active_threads;
+  }, "num_active_threads");
+
+  //    * thread_state_str
+  trace_file.template AddFun<std::string>([&hw_state_info]() {
+    return "\"" + hw_state_info.thread_state_str + "\"";
+  }, "thread_state_info");
+
+  trace_file.PrintHeaderKeys();
+
+  // -------------- Do an traced-evaluation --------------
+
+  // If we're down sampling, shuffle the training cases.
+  const bool use_samples_by_type = DOWN_SAMPLE && SAMPLE_BY_TEST_TYPE;
+  if (use_samples_by_type) {
+    ShuffleTrainingSampleByType();
+  } else if (DOWN_SAMPLE) {
+    emp::Shuffle(*random_ptr, training_case_ids);
+  }
+
+  const size_t num_tests = num_eval_tests;
+  const emp::vector<test_case_t> & tests = training_cases;
+  const emp::vector<size_t> & test_eval_order = (use_samples_by_type) ? sampled_training_case_ids : training_case_ids;
+
+  phenotype_t & phen = trace_org.GetPhenotype();
+  phen.Reset(num_tests);
+
+  // Ready the hardware
+  eval_hardware->SetProgram(trace_org.GetGenome().program); // This resets the hardware completely.
+  // Evaluate program on each training example
+  // cpu_step
+  // cur_test_id [x]
+  // num_test_inputs [x]
+  // size_t cur_test_input
+  // tag_t cur_test_input_tag
+  // TestSignal cur_test_signal
+  for (size_t eval_index = 0; eval_index < num_tests; ++eval_index) {
+    emp_assert(eval_index < phen.test_scores.size());
+    emp_assert(phen.test_scores[eval_index] == 0);
+    eval_hardware->ResetMatchBin();       // Reset matchbin (regulation) between tests
+    eval_hardware->ResetHardwareState();  // Reset global memory between tests
+    // grab the test case id
+    const size_t test_id = test_eval_order[eval_index];
+    phen.test_ids[eval_index] = test_id;
+    cur_test_id = test_id;
+    // grab the appropriate training example
+    const test_case_t & test_case = tests[test_id];
+    num_test_inputs = test_case.test_signals.size();
+
+    // compute amount of partial credit for each correct response to an input signal
+    const double partial_credit = 1.0 / (double)test_case.test_signals.size();
+    size_t num_correct_sig_resps = 0;
+    for (size_t sig_i = 0; sig_i < test_case.test_signals.size(); ++sig_i) {
+
+      const BoolCalcTestInfo::TestSignal & test_sig = test_case.test_signals[sig_i];
+      const tag_t & test_sig_tag = test_input_signal_tags[test_sig.GetSignalID()];
+      cur_test_input = sig_i;
+      cur_test_signal = test_sig;
+      cur_test_input_tag = test_sig_tag;
+
+      // Reset the hardware
+      eval_hardware->ResetBaseHardwareState(); // Only reset threads, not global memory
+      eval_hardware->GetCustomComponent().Reset();
+      emp_assert(eval_hardware->ValidateThreadState());
+      emp_assert(eval_hardware->GetActiveThreadIDs().size() == 0);
+      emp_assert(eval_hardware->GetNumQueuedEvents() == 0);
+      // Queue calculator button input
+      if (test_sig.IsOperand()) {
+        eval_hardware->QueueEvent(
+          event_t(event_id_input_sig, test_sig_tag, {{0, (double)test_sig.GetOperand()}})
+        );
+      } else if (test_sig.IsOperator()) {
+        eval_hardware->QueueEvent(
+          event_t(event_id_input_sig, test_sig_tag)
+        );
+      }
+
+      cpu_step = 0;
+      hw_state_info = GetHardwareStatePrintInfo(*eval_hardware);
+      trace_file.Update();
+
+      // Step the hardware forward to process the signal
+      while (cpu_step < CPU_CYCLES_PER_INPUT_SIGNAL) {
+        eval_hardware->SingleProcess();
+        ++cpu_step;
+        hw_state_info = GetHardwareStatePrintInfo(*eval_hardware);
+        trace_file.Update();
+        // Stop early if no active or pending threads
+        const size_t num_active_threads = eval_hardware->GetNumActiveThreads();
+        const size_t num_pending_threads = eval_hardware->GetNumPendingThreads();
+        if (!( num_active_threads || num_pending_threads )) break;
+      }
+
+      // How did the organism respond?
+      const bool has_response = eval_hardware->GetCustomComponent().HasResponse();
+      const hw_response_type_t resp_type = eval_hardware->GetCustomComponent().GetResponseType();
+      const operand_t resp_val = eval_hardware->GetCustomComponent().GetResponseValue();
+      const bool is_correct = test_sig.IsCorrect(resp_type, resp_val);
+      if (has_response && is_correct) {
+        phen.test_scores[eval_index] += partial_credit;
+        num_correct_sig_resps += 1;
+      } else if (
+          has_response &&
+          test_sig.GetCorrectResponseType() == hw_response_type_t::NUMERIC &&
+          resp_type == hw_response_type_t::NUMERIC
+        )
+      {
+        phen.test_scores[eval_index] += 0.1*partial_credit; // get some credit
+      } else {
+        // Bail early
+        break;
+      }
+    }
+
+    // Did the program correctly respond to all input signals?
+    // Update test score if necessary
+    const bool pass = (num_correct_sig_resps == test_case.test_signals.size());
+    if (pass) { phen.test_scores[eval_index] = 1.0; }
+
+    // Update number of passes
+    phen.num_passes += (size_t)pass;
+
+    // Update aggregate score
+    phen.aggregate_score += phen.test_scores[eval_index];
+  }
 }
 
 void BoolCalcWorld::InitConfigs(const config_t & config) {
@@ -2003,5 +2264,106 @@ void BoolCalcWorld::PrintProgramInstruction(const inst_t & inst, std::ostream & 
   }
   out << ")";
 }
+
+BoolCalcWorld::HardwareStatePrintInfo BoolCalcWorld::GetHardwareStatePrintInfo(hardware_t & hw) {
+  HardwareStatePrintInfo print_info;
+  // Collect global memory
+  std::ostringstream gmem_stream;
+  hw.GetMemoryModel().PrintMemoryBuffer(hw.GetMemoryModel().GetGlobalBuffer(), gmem_stream);
+  print_info.global_mem_str = gmem_stream.str();
+  // number of modules
+  print_info.num_modules = hw.GetNumModules();
+  // module regulator states & timers
+  print_info.module_regulator_states.resize(hw.GetNumModules());
+  print_info.module_regulator_timers.resize(hw.GetNumModules());
+  for (size_t module_id = 0; module_id < hw.GetNumModules(); ++module_id) {
+    const auto reg_state = hw.GetMatchBin().GetRegulator(module_id).state;
+    const auto reg_timer = hw.GetMatchBin().GetRegulator(module_id).timer;
+    print_info.module_regulator_states[module_id] = reg_state;
+    print_info.module_regulator_timers[module_id] = reg_timer;
+  }
+  // number of active threads
+  print_info.num_active_threads = hw.GetNumActiveThreads();
+  // for each thread: {thread_id: {priority: ..., callstack: [...]}}
+  // - priority
+  // - callstack: [callstate, callstate, etc]
+  //   - callstate: [memory, flowstack]
+  //     - flowstack: [type, mp, ip, begin, end]
+  print_info.thread_state_str = "[";
+  bool comma = false;
+  for (size_t thread_id : hw.GetThreadExecOrder()) {
+    auto & thread = hw.GetThread(thread_id);
+    std::ostringstream stream;
+    if (comma) { stream << ","; }
+    stream << "{";
+    stream << "id:" << thread_id << ",";
+    // thread priority
+    stream << "priority:" << thread.GetPriority() << ",";
+    // thread state
+    stream << "state:";
+    if (thread.IsDead()) { stream << "dead,"; }
+    else if (thread.IsPending()) { stream << "pending,"; }
+    else if (thread.IsRunning()) { stream << "running,"; }
+    else { stream << "unknown,"; }
+    // call stack
+    stream << "call_stack:[";
+    auto & call_stack = thread.GetExecState().GetCallStack();
+    for (size_t i = 0; i < call_stack.size(); ++i) {
+      auto & mem_state = thread.GetExecState().GetCallStack()[i].memory;
+      auto & flow_stack = thread.GetExecState().GetCallStack()[i].flow_stack;
+      if (i) stream << ",";
+      // - call state -
+      stream << "{";
+      stream << "working_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetWorkingMemory(), stream);
+      stream << ",input_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetInputMemory(), stream);
+      stream << ",output_memory:";
+      hw.GetMemoryModel().PrintMemoryBuffer(mem_state.GetOutputMemory(), stream);
+      // - call state - flow stack -
+      stream << ",flow_stack:[";
+      for (size_t f = 0; f < flow_stack.size(); ++f) {
+        auto & flow = flow_stack[f];
+        std::string cur_inst_name=""; // get the name of the current instruction
+        if (hw.IsValidProgramPosition(flow.mp, flow.ip)) {
+          emp_assert(hw.GetProgram().IsValidPosition(flow.mp, flow.ip));
+          const size_t inst_type_id = hw.GetProgram()[flow.mp][flow.ip].GetID();
+          cur_inst_name = inst_lib->GetName(inst_type_id);
+        } else {
+          cur_inst_name = "NONE";
+        }
+        if (f) stream << ",";
+        stream << "{";
+        // type
+        stream << "type:";
+        if (flow.IsBasic()) { stream << "basic,"; }
+        else if (flow.IsWhileLoop()) { stream << "whileloop,"; }
+        else if (flow.IsRoutine()) { stream << "routine,"; }
+        else if (flow.IsCall()) { stream << "call,"; }
+        else { stream << "unknown,"; }
+        // mp
+        stream << "mp:" << flow.mp << ",";
+        // ip
+        stream << "ip:" << flow.ip << ",";
+        // inst name
+        stream << "inst_name:" << cur_inst_name << ",";
+        // begin
+        stream << "begin:" << flow.begin << ",";
+        // end
+        stream << "end:" << flow.end;
+        stream << "}";
+      }
+      stream << "]";
+      stream << "}";
+    }
+    stream << "]";
+    stream << "}";
+    print_info.thread_state_str += stream.str();
+    if (!comma) { comma=true; }
+  }
+  print_info.thread_state_str += "]";
+  return print_info;
+}
+
 
 #endif
