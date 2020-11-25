@@ -43,3 +43,5 @@ venv/
 .Rhistory
 
 _site/
+
+data/
