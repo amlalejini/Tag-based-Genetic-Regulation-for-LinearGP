@@ -3,6 +3,8 @@
 The repeated signal task provides a simple evaluation of a representation's capacity to evolve programs capable of adjusting their response to an input signal during execution.
 In this experiment, we compare the capacity for regulation-enabled and regulation-disabled SignalGP to yield programs capable of solving the repeated signal task at a range of difficulty levels.
 
+Note that instruction execution auditing is slightly inaccurate because of the way SignalGP processes instructions after a signal triggers a function call (i.e., some instructions don't show up in the printed out thread state). As a result, I added a way to accurately audit instruction execution to the SignalGP instruction library, and I modified the TraceOrganism function in this experiment class accordingly.
+
 Configuration details:
 
 - General
