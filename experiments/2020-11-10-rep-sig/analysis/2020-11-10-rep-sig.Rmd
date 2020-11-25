@@ -143,7 +143,7 @@ max_fit_org_data$stochastic <- 1 - max_fit_org_data$consistent
 
 
 # Load network data
-reg_network_data <- read.csv("data/graphs/reg_graphs_summary.csv", na.strings="NA")
+reg_network_data <- read.csv("data/reg_graphs_summary.csv", na.strings="NA")
 
 # Settings for statistical analyses.
 alpha <- 0.05
@@ -562,11 +562,60 @@ ggplot(reg_and_mem_solutions,
                                "Use neither",
                                "Use both")) +
   facet_wrap(~condition) +
+  # coord_flip() +
   theme(legend.position = "bottom") +
   ggsave("./imgs/repeated-signal-strategies.png",
          width=8,
          height=4)
+
+
 ```
+
+```{r}
+# https://www.r-graph-gallery.com/128-ring-or-donut-plot.html
+donut_data <- data.frame(
+  env=character(),
+  count=numeric(),
+  category=character()
+)
+
+for (env in env_complexities) {
+  env_donut_data  <- data.frame(
+    env=c(env, env, env, env),
+    count=c(
+      nrow(filter(reg_and_mem_solutions, condition=="both" & NUM_SIGNAL_RESPONSES==env & strategy=="use neither")),
+      nrow(filter(reg_and_mem_solutions, condition=="both" & NUM_SIGNAL_RESPONSES==env & strategy=="use memory")),
+      nrow(filter(reg_and_mem_solutions, condition=="both" & NUM_SIGNAL_RESPONSES==env & strategy=="use regulation")),
+      nrow(filter(reg_and_mem_solutions, condition=="both" & NUM_SIGNAL_RESPONSES==env & strategy=="use both"))
+    ),
+    category=c("use neither", "use memory", "use regulation", "use both")
+  )
+
+  env_donut_data <- filter(env_donut_data, count > 0)
+  env_donut_data$fraction <- env_donut_data$count / sum(env_donut_data$count)
+  env_donut_data$ymax <- cumsum(env_donut_data$fraction)
+  env_donut_data$ymin <- c(0, head(env_donut_data$ymax, n=-1))
+  env_donut_data$labelPosition <- (env_donut_data$ymax + env_donut_data$ymin) / 2
+  env_donut_data$label <- paste0(env_donut_data$count, " ", env_donut_data$category)
+  
+  donut_data<-rbind(donut_data, env_donut_data)
+
+}
+
+ggplot(donut_data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
+  geom_rect() +
+  geom_text( x=2, aes(y=labelPosition, label=label, color=category), size=4) + # x here controls label position (inner / outer)
+  # scale_fill_brewer(palette=4) +
+  # scale_color_brewer(palette=4) +
+  coord_polar(theta="y") +
+  xlim(c(-1, 4)) +
+  theme_void() +
+  theme(legend.position = "none") +
+  facet_wrap(~env) +
+  ggsave("imgs/donut-test.pdf", width=10, height=10)
+```
+
+
 
 We can see that in conditions where organisms have access to regulation, evolved solutions rely exclusively on regulation for signal-response plasticity.
 In conditions where memory is the only mechanism for solving the repeated signal task, we see that all evolved solutions (only `r nrow(filter(reg_and_mem_solutions, condition=="memory"))`) rely exclusively on global memory access for signal-response plasticity.
@@ -616,7 +665,7 @@ temp <- filter(max_fit_org_data,
                solution=="1" & (condition=="both" | condition=="regulation"))
 # Make a lookup function to get each run's environment complexity level.
 get_num_sig_resps <- function(seed) {
-  return(filter(temp, SEED==seed)$NUM_SIGNAL_RESPONSES)
+  return(filter(max_fit_org_data, SEED==seed)$NUM_SIGNAL_RESPONSES)
 }
 
 # Process/cleanup the network data
@@ -637,6 +686,23 @@ ggplot(melted, aes(x=NUM_SIGNAL_RESPONSES, y=reg_edges_cnt, color=reg_edge_type)
   scale_color_discrete(name="Edge type:",
                        limits=c("repressed_edges_cnt", "promoted_edges_cnt"),
                        labels=c("Repressing edges", "Promoting edges")) +
+  theme(legend.position="bottom",
+        legend.text=element_text(size=9),
+        legend.title=element_text(size=10),
+        axis.title.x=element_text(size=12)) +
+  ggsave("./imgs/repeated-signal-regulation-edge-types.png", width=4, height=3)
+
+reg_network_data$NUM_SIGNAL_RESPONSES <- mapply(
+  get_num_sig_resps,
+  reg_network_data$run_id
+)
+reg_network_data$NUM_SIGNAL_RESPONSES <- factor(reg_network_data$NUM_SIGNAL_RESPONSES)
+
+# reg_network_data$NUM_SIGNAL_RESPONSES <- factor(melted$NUM_SIGNAL_RESPONSES)
+ggplot(filter(reg_network_data, run_id %in% temp$SEED ), aes(x=NUM_SIGNAL_RESPONSES, y=edge_cnt)) +
+  geom_boxplot() +
+  xlab("Environmental Complexity") +
+  ylab("# Edges") +
   theme(legend.position="bottom",
         legend.text=element_text(size=9),
         legend.title=element_text(size=10),
@@ -774,7 +840,7 @@ Overall (aggregating all environment levels), the majority of digital organisms 
 Let's take a closer look at the behavioral/regulatory profile of a representative digital organism that solves the four-signal version of the repeated signal task.
 
 ```{r}
-trace_id <- 301003
+trace_id <- 10111
 ```
 
 Specifically, we'll be looking at the solution evolved in run id `r trace_id`.
@@ -790,7 +856,7 @@ is_sol <- org_info$solution
 num_modules <- org_info$num_modules
 
 # Load trace file associated with this solution.
-trace_file <- paste(data_dir, "traces/trace_update-10000_run-id-", trace_id, ".csv", sep="")
+trace_file <- paste("data/traces/trace_update-10000_run-id-", trace_id, ".csv", sep="")
 trace_data <- read.csv(trace_file, na.strings="NONE")
 trace_data$similarity_score <- 1 - trace_data$match_score
 
@@ -1063,10 +1129,8 @@ We use the igraph package to draw this organism's gene regulatory network.
 
 ```{r, message=FALSE}
 # Networks!
-graph_nodes_loc <- paste(data_dir,
-                         "igraphs/reg_graph_id-", trace_id, "_nodes.csv", sep="")
-graph_edges_loc <- paste(data_dir,
-                         "igraphs/reg_graph_id-", trace_id, "_edges.csv", sep="")
+graph_nodes_loc <- paste("data/igraphs/reg_graph_id-", trace_id, "_nodes.csv", sep="")
+graph_edges_loc <- paste("data/igraphs/reg_graph_id-", trace_id, "_edges.csv", sep="")
 graph_nodes_data <- read.csv(graph_nodes_loc, na.strings="NONE")
 graph_edges_data <- read.csv(graph_edges_loc, na.strings="NONE")
 
