@@ -1095,6 +1095,14 @@ void ChgEnvWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
   HardwareStatePrintInfo hw_state_info;
   size_t env_update=0;
   size_t cpu_step=0;
+  emp::vector<inst_t> executed_instructions;
+
+  inst_lib->OnBeforeInstExec(
+    [&executed_instructions](hardware_t & hw, const inst_t & inst) {
+      executed_instructions.emplace_back(inst);
+    }
+  );
+
   // ----- Timing information -----
   trace_file.template AddFun<size_t>([&env_update]() {
     return env_update;
@@ -1184,6 +1192,22 @@ void ChgEnvWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
   trace_file.template AddFun<size_t>([&hw_state_info]() {
     return hw_state_info.num_active_threads;
   }, "num_active_threads");
+
+  trace_file.template AddFun<std::string>(
+    [&executed_instructions, this]() {
+      std::ostringstream stream;
+      stream << "\"[";
+      for (size_t i = 0; i < executed_instructions.size(); ++i) {
+        if (i) stream << ",";
+        stream << inst_lib->GetName(executed_instructions[i].GetID());
+      }
+      stream << "]\"";
+      executed_instructions.clear();
+      return stream.str();
+    },
+    "executed_instructions"
+  );
+
   //    * thread_state_str
   trace_file.template AddFun<std::string>([&hw_state_info]() {
     return "\"" + hw_state_info.thread_state_str + "\"";
@@ -1236,6 +1260,8 @@ void ChgEnvWorld::TraceOrganism(const org_t & org, size_t org_id/*=0*/) {
     }
   }
   trace_phen.score = (double)trace_phen.env_matches; // Score = number of times organism matched environment.
+
+  inst_lib->ResetBeforeInstExecSignal();
 }
 
 void ChgEnvWorld::DoEvaluation() {
