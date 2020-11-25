@@ -285,7 +285,7 @@ def main():
         match_delta_in_env_cycle[cur_env] = [final - baseline for baseline, final in zip(baseline_match_scores, final_match_scores)]
         ######### NEW ###########
 
-        # ========= build trace out file for this run =========
+        # ========= build regulation trace out file for this run =========
         # - There's one trace output file per run
         # - Extra fields:
         #   - module_id
@@ -293,7 +293,7 @@ def main():
         #   - currently_running/in the call stack
         #   - match_score__mid_[:]
         #   - regulator_state__mid_[:]
-        trace_out_name = f"trace_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
+        trace_out_name = f"trace-reg_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
         orig_fields = ["env_cycle","cpu_step","num_env_states","cur_env_state","cur_response","has_correct_response","num_modules","env_signal_closest_match","num_active_threads"]
         derived_fields = ["module_id", "time_step", "is_in_call_stack", "is_running", "is_cur_responding_function", "is_match", "is_ever_active", "match_score", "regulator_state"]
         trace_header = ",".join(orig_fields + derived_fields)
@@ -328,7 +328,31 @@ def main():
         with open(os.path.join(dump_dir, trace_out_name), "w") as fp:
             fp.write("\n".join([trace_header] + trace_out_lines))
         print("  Wrote out:", os.path.join(dump_dir, trace_out_name))
+        trace_out_lines = None
 
+        # ========= build execution trace out file for this run =========
+        exec_trace_out_name = f"trace-exec_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
+        exec_trace_orig_fields = ["env_cycle","cpu_step","num_env_states","cur_env_state","cur_response","has_correct_response","num_modules","num_active_threads"]
+        exec_trace_fields = exec_trace_orig_fields + ["time_step", "active_instructions"]
+        exec_trace_out_lines = [",".join(exec_trace_fields)]
+        for step_i in range(0, len(steps)):
+            step_info = steps[step_i]
+            line_info = {field:step_info[trace_header_lu[field]] for field in exec_trace_orig_fields}
+            line_info["time_step"] = step_i
+            thread_state = thread_states[step_i]
+            executing_instructions = []
+            for thread in thread_state:
+                if len(thread["call_stack"]):
+                    if len(thread["call_stack"][0]["flow_stack"]):
+                        executing_instructions.append(thread["call_stack"][0]["flow_stack"][0]["inst_name"].strip(","))
+            line_info["active_instructions"] = f"\"[{','.join(executing_instructions)}]\""
+            exec_trace_out_lines.append(",".join([str(line_info[field]) for field in exec_trace_fields]))
+
+        with open(os.path.join(dump_dir, exec_trace_out_name), "w") as fp:
+            fp.write("\n".join( exec_trace_out_lines ))
+
+        #################################################################################
+        # Regulation graph
         env_cycle_graph_out_name = f"reg-graph_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
         env_cycle_graph_fields = ["state_id", "env_cycle", "time_step", "module_triggered", "module_responded", "active_modules", "promoted", "repressed", "match_scores" , "match_deltas", "reg_deltas"]
         lines = [",".join(env_cycle_graph_fields)]
