@@ -145,9 +145,43 @@ max_fit_org_data$stochastic <- 1 - max_fit_org_data$consistent
 # Load network data
 reg_network_data <- read.csv("data/reg_graphs_summary.csv", na.strings="NA")
 
+# Load instruction execution data
+inst_exec_data <- read.csv("data/exec_trace_summary.csv", na.strings="NA")
+inst_exec_data$condition <- mapply(
+  get_con,
+  inst_exec_data$USE_FUNC_REGULATION,
+  inst_exec_data$USE_GLOBAL_MEMORY
+)
+inst_exec_data$condition <- factor(
+  inst_exec_data$condition,
+  levels=c("regulation", "memory", "none", "both")
+)
+inst_exec_data$NUM_SIGNAL_RESPONSES <- factor(
+  inst_exec_data$NUM_SIGNAL_RESPONSES,
+  levels=c(2, 4, 8, 16, 32)
+)
+
+inst_exec_data$NUM_ENV_CYCLES <- factor(
+  inst_exec_data$NUM_ENV_CYCLES,
+  levels=c(2, 4, 8, 16, 32)
+)
+
 # Settings for statistical analyses.
 alpha <- 0.05
 correction_method <- "bonferroni"
+
+
+# Labels for each
+label_lu <- c(
+  "2" = "2-signal task",
+  "4" = "4-signal task",
+  "8" = "8-signal task",
+  "16" = "16-signal task",
+  "32" ="32-signal task"
+)
+
+# Filter data to include only replicates labeled as solutions
+sol_data <- filter(max_fit_org_data, solution=="1")
 
 # Configure our default graphing theme
 theme_set(theme_cowplot())
@@ -165,19 +199,6 @@ We can look at (1) the number of successful replicates (i.e., replicates in whic
 Note that an organism is categorized as a 'solution' if it can correctly respond to each of repetition of the environment signal.
 
 ```{r, echo=TRUE}
-
-# Labels for each
-label_lu <- c(
-  "2" = "2-signal task",
-  "4" = "4-signal task",
-  "8" = "8-signal task",
-  "16" = "16-signal task",
-  "32" ="32-signal task"
-)
-
-# Filter data to include only replicates labeled as solutions
-sol_data <- filter(max_fit_org_data, solution=="1")
-
 # Graph the number of solutions evolved in each condition, faceted by environmental complexity
 ggplot(sol_data, aes(x=condition, fill=condition)) +
   geom_bar() +
@@ -645,6 +666,77 @@ ggplot(max_fit_org_data, aes(x=condition, fill=stochastic)) +
 
 We see no evidence of evolved organisms relying on stochastic strategies to solve the repeated signal task: all organisms responded consistently across trials.
 Note, this is unsurprising, as we did not give programs access to instructions capable of generating random values and ensured that the version of SignalGP virtual hardware used in this work operated in a deterministic manner.
+
+### What distribution of instructions do evolved digital organsims execute?
+
+```{r}
+# only want solutions
+solutions_inst_exec_data <- filter(inst_exec_data, SEED %in% sol_data$SEED)
+
+ggplot(solutions_inst_exec_data,
+       aes(x=condition, y=total_execution_time, color=condition)) +
+  geom_boxplot() +
+  scale_color_discrete(name="Condition: ",
+                       breaks=c("regulation", "memory", "both"),
+                       labels=c("Regulation (R)", "Global memory (M)", "Both (B)")) +
+  scale_x_discrete(breaks=c("regulation", "memory", "both"),
+                   labels=c("R", "M", "B")) +
+  facet_wrap(~ NUM_SIGNAL_RESPONSES,
+             nrow=1,
+             labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
+  theme(legend.position="bottom",
+        axis.title.x=element_blank())
+
+# Process/cleanup the network data
+melted <- melt(
+  solutions_inst_exec_data,
+  variable.name = "inst_type",
+  value.name = "inst_type_prop",
+  measure.vars=c(
+    "math_inst_prop",
+    "module_inst_prop",
+    "memory_inst_prop",
+    "regulation_inst_prop",
+    "control_flow_inst_prop",
+    "thread_inst_prop",
+    "task_inst_prop",
+    "nop_inst_prop"
+  )
+)
+
+ggplot(melted,
+       aes(x=inst_type, y=inst_type_prop, color=condition)) +
+  geom_boxplot() +
+  scale_color_discrete(name="Condition: ",
+                       breaks=c("regulation", "memory", "both"),
+                       labels=c("Regulation (R)", "Global memory (M)", "Both (B)")) +
+  # scale_x_discrete(breaks=c("regulation", "memory", "both"),
+  #                  labels=c("R", "M", "B")) +
+  facet_wrap(~ NUM_SIGNAL_RESPONSES,
+             nrow=1,
+             labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
+  coord_flip() +
+  theme(legend.position="bottom",
+        axis.title.x=element_blank()) 
+
+
+ggplot(solutions_inst_exec_data,
+       aes(x=condition, y=regulation_inst_cnt, color=condition)) +
+  geom_boxplot() +
+  scale_color_discrete(name="Condition: ",
+                       breaks=c("regulation", "memory", "both"),
+                       labels=c("Regulation (R)", "Global memory (M)", "Both (B)")) +
+  scale_x_discrete(breaks=c("regulation", "memory", "both"),
+                   labels=c("R", "M", "B")) +
+  facet_wrap(~ NUM_SIGNAL_RESPONSES,
+             nrow=1,
+             labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)) +
+  theme(legend.position="bottom",
+        axis.title.x=element_blank()) 
+
+```
+
+NOTE: do I actually want the proportion of non-nop instructions?
 
 ### What forms of genetic regulation do evolved digital organisms rely on?
 

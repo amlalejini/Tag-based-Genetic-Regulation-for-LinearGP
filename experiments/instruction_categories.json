@@ -59,11 +59,33 @@
     "incregulator": "regulation",
     "incownregulator": "regulation",
     "decregulator": "regulation",
-    "decownregulator": "regulation"
+    "decownregulator": "regulation",
+
+    "nop-workingtoglobal": "memory",
+    "nop-globaltoworking": "memory",
+    "nop-fullworkingtoglobal": "memory",
+    "nop-fullglobaltoworking": "memory",
+    "nop-setregulator": "regulation",
+    "nop-setregulator-": "regulation",
+    "nop-setownregulator": "regulation",
+    "nop-setownregulator-": "regulation",
+    "nop-adjregulator": "regulation",
+    "nop-adjregulator-": "regulation",
+    "nop-adjownregulator": "regulation",
+    "nop-adjownregulator-": "regulation",
+    "nop-clearregulator": "regulation",
+    "nop-clearownregulator": "regulation",
+    "nop-senseregulator": "regulation",
+    "nop-senseownregulator": "regulation",
+    "nop-incregulator": "regulation",
+    "nop-incownregulator": "regulation",
+    "nop-decregulator": "regulation",
+    "nop-decownregulator": "regulation"
+
+
   },
 
   "partial_instructions": {
-    "nop": "nop",
     "response-": "task"
   }
 }
