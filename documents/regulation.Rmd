@@ -76,7 +76,7 @@ data$above_perfect <- data$regulated_match > 1.0
 ```{r}
 ggplot(data, aes(y=reg_modifier, x=raw_match, fill=regulated_match)) +
   geom_raster() +
-  geom_hline(yintercept=0) +
+  geom_hline(yintercept=0, size=1.2) +
   # geom_arrow(
   #   aes(
   #     dx=delta_reg_modifier,
