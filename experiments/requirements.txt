@@ -1,1 +1,2 @@
-hjson==3.0.1
+hjson==3.0.2
+networkx
