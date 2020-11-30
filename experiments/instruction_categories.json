@@ -19,6 +19,7 @@
     "mult": "math",
     "div": "math",
     "mod": "math",
+    "nand": "math",
     "testequ": "math",
     "testnequ": "math",
     "testless": "math",
@@ -80,12 +81,15 @@
     "nop-incregulator": "regulation",
     "nop-incownregulator": "regulation",
     "nop-decregulator": "regulation",
-    "nop-decownregulator": "regulation"
+    "nop-decownregulator": "regulation",
 
-
+    "expresswait": "task",
+    "expresserror": "task",
+    "expressresult": "task"
   },
 
   "partial_instructions": {
-    "response-": "task"
+    "response-": "task",
+    "expressresp-": "task"
   }
 }
