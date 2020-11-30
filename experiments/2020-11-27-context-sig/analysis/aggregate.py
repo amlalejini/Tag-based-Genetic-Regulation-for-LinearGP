@@ -79,16 +79,16 @@ def find_org_analysis_path(run_path, update=None):
             return u if u <= update else -1
     return os.path.join(output_path, max(analysis_files, key=max_key))
 
-def find_trace_dir(run_path, update):
+def find_trace_path(run_path, update):
     output_path = os.path.join(run_path, "output")
-    trace_dirs = [fname for fname in os.listdir(output_path) if "trace-" in fname]
+    trace_files = [fname for fname in os.listdir(output_path) if "trace_org_" in fname]
     def max_key(s):
-        u = int(s.split("-")[-1])
+        u = int(s.split("_update_")[-1].split(".")[0])
         if update == None:
             return u
         else:
             return u if u <= update else -1
-    return os.path.join(output_path, max(trace_dirs, key=max_key))
+    return os.path.join(output_path, max(trace_files, key=max_key))
 
 """
 Aggregate!
@@ -169,7 +169,7 @@ def main():
         # Extract organism update from analysis file.
         org_update = org_analysis_path.split(".")[0].split("_")[-1]
 
-        org_trace_path = find_trace_dir(run, update if update >= 0 else None)
+        org_trace_path = find_trace_path(run, update if update >= 0 else None)
         trace_update = org_trace_path.split("/")[-1].split("_update_")[-1].split(".")[0]
         if org_update != trace_update:
             print(f"Analysis file and trace file updates do not match: \n  * {org_update}\n  * {trace_update}\n")
