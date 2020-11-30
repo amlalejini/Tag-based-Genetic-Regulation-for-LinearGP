@@ -318,7 +318,16 @@ def main():
         # ============================= build instruction execution trace =============================
         ################################################################################################
         exec_trace_out_name = f"trace-exec_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
-        exec_trace_orig_fields = ["env_cycle","cpu_step","num_env_states","cur_env_state","cur_response","has_correct_response","num_modules","num_active_threads"]
+        exec_trace_orig_fields = ["cur_test_id",
+                                  "cpu_step",
+                                  "num_test_inputs",
+                                  "cur_test_input",
+                                  "cur_response_value",
+                                  "cur_response_type",
+                                  "has_correct_response",
+                                  "num_modules",
+                                  "num_active_threads"
+                                  ]
         exec_trace_fields = exec_trace_orig_fields + ["time_step", "active_instructions"]
         exec_trace_out_lines = [",".join(exec_trace_fields)]
         for step_i in range(0, len(trace_steps)):
