@@ -389,6 +389,7 @@ def main():
             # if current active modules or current env cycle don't match previous, output what happened since last time we output
             if (( active_modules != prev_active_modules and len(active_modules) != 0 )
                 or (step_i == (len(trace_steps) - 1))
+                or (prev_testcase_id != testcase_id)
                 or (len(promoted_modules) != 0)
                 or (len(repressed_modules) != 0)):
 
