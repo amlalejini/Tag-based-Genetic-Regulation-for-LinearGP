@@ -6,6 +6,7 @@ For each run, grab the maximum fitness organism at end of run.
 
 import argparse, os, copy, errno, csv, re, sys
 import json
+import hjson
 
 csv.field_size_limit(sys.maxsize)
 
@@ -140,7 +141,9 @@ def main():
         "ko_up_reg_delta",
         "ko_down_reg_delta",
         "update",
-        "task"
+        "task",
+        "calls_with_promoters",
+        "calls_with_repressors"
     ]
 
     for run in run_dirs:
@@ -165,6 +168,13 @@ def main():
 
         # Extract organism update from analysis file.
         org_update = org_analysis_path.split(".")[0].split("_")[-1]
+
+        org_trace_path = find_trace_dir(run, update if update >= 0 else None)
+        trace_update = org_trace_path.split("/")[-1].split("_update_")[-1].split(".")[0]
+        if org_update != trace_update:
+            print(f"Analysis file and trace file updates do not match: \n  * {org_update}\n  * {trace_update}\n")
+            exit(-1)
+
         # extract run settings
         run_settings = extract_settings(run_config_path)
         # extract task id from the training set file path
@@ -232,9 +242,179 @@ def main():
             org_info[field] = org[field]
         for field in config_fields:
             org_info[field] = run_settings[field]
-
-        analysis_org_infos.append(",".join([str(org_info[field]) for field in fields]))
         ################################################################################################
+
+
+        ################################################################################################
+        # ================================= extract trace information =================================
+        ################################################################################################
+        trace_steps = read_csv(org_trace_path)
+        time_steps = [i for i in range(len(trace_steps))]
+
+        # We want to work with the thread state information as a python dictionary, so
+        #  raw string ==[hjson]==> OrderedDict ==[json]==> python dictionary
+        thread_states = [step["thread_state_info"].replace(",", ",\n") for step in trace_steps]
+        thread_states = [list(json.loads(json.dumps(hjson.loads(state)))) for state in thread_states]
+        if len(set([len(thread_states), len(time_steps), len(trace_steps)])) != 1:
+            print("Trace steps do not match among components.")
+            exit(-1)
+
+        # How many test cases do we have in the trace?
+        num_testcases = len({step["cur_test_id"] for step in trace_steps})
+        # How many modules in the program?
+        num_modules = int(org["num_modules"])
+
+        modules_active_ever = set()
+        modules_run_by_test = [set() for _ in range(num_testcases)]
+
+        modules_present_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(time_steps))]
+        modules_active_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(time_steps))]
+        # modules_triggered_by_step = [None for i in range(0, len(time_steps))]
+        modules_responded_by_step = [None for i in range(0, len(time_steps))]
+
+        # Extract which module responded to each input signal.
+        for i in range(0, len(time_steps)):
+            step = trace_steps[i]
+            cur_response_module_id = int(step["cur_responding_function"])
+            # cur_test_case = int(step["cur_test_id"])
+            if cur_response_module_id != -1:
+                modules_responded_by_step[i] = cur_response_module_id
+
+        # cur_testcase = int(trace_steps[0]["cur_test_id"])
+        for i in range(0, len(trace_steps)):
+            step_info = trace_steps[i]
+            threads = thread_states[i]
+            testcase_id = int(step_info["cur_test_id"])
+            # Extract what modules are running
+            active_modules = []
+            present_modules = []
+            # any module that responded, is guaranteed to have been running.
+            # (but by responding, it would have been removed from threads)
+            if modules_responded_by_step[i] != None:
+                active_modules.append(int(modules_responded_by_step[i]))
+                present_modules.append(int(modules_responded_by_step[i]))
+            for thread in threads:
+                call_stack = thread["call_stack"]
+                # active modules are at the top of the flow stack on the top of the call stack
+                active_module = None
+                if len(call_stack):
+                    if len(call_stack[-1]["flow_stack"]):
+                        active_module = call_stack[-1]["flow_stack"][-1]["mp"]
+                if active_module != None:
+                    active_modules.append(int(active_module))
+                    modules_active_ever.add(int(active_module))
+                # add ALL modules to present modules
+                present_modules += list({flow["mp"] for call in call_stack for flow in call["flow_stack"]})
+            # Add present modules for this test case
+            for module_id in present_modules: modules_run_by_test[testcase_id].add(int(module_id))
+            # Add active modules for this step
+            for module_id in active_modules: modules_active_by_step[i][module_id] += 1
+            # Add present modules for this step
+            for module_id in present_modules: modules_present_by_step[i][module_id] += 1
+        ################################################################################################
+
+
+        ################################################################################################
+        # ============================= build instruction execution trace =============================
+        ################################################################################################
+        exec_trace_out_name = f"trace-exec_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
+        exec_trace_orig_fields = ["env_cycle","cpu_step","num_env_states","cur_env_state","cur_response","has_correct_response","num_modules","num_active_threads"]
+        exec_trace_fields = exec_trace_orig_fields + ["time_step", "active_instructions"]
+        exec_trace_out_lines = [",".join(exec_trace_fields)]
+        for step_i in range(0, len(trace_steps)):
+            step_info = trace_steps[step_i]
+            line_info = {field:step_info[field] for field in exec_trace_orig_fields}
+            line_info["time_step"] = step_i
+            thread_state = thread_states[step_i]
+            executing_instructions = []
+            for thread in thread_state:
+                if len(thread["call_stack"]) and thread["state"].strip(",") == "running":
+                    if len(thread["call_stack"][-1]["flow_stack"]):
+                        executing_instructions.append(thread["call_stack"][-1]["flow_stack"][-1]["inst_name"].strip(","))
+            line_info["active_instructions"] = f"\"[{','.join(executing_instructions)}]\""
+            exec_trace_out_lines.append(",".join([str(line_info[field]) for field in exec_trace_fields]))
+
+        with open(os.path.join(dump_dir, exec_trace_out_name), "w") as fp:
+            fp.write("\n".join( exec_trace_out_lines ))
+        ################################################################################################
+
+        ################################################################################################
+        # ============================== build regulation network graphs ==============================
+        ################################################################################################
+        reg_graph_out_name = f"reg-graph_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
+        reg_graph_fields = ["state_id", "testcase_id", "time_step", "active_modules", "promoted", "repressed" , "reg_deltas"]
+        reg_graph_lines = [",".join(reg_graph_fields)]
+
+        # == build env cycle reg graph ==
+        state_i = None
+        prev_testcase_id = None
+        prev_active_modules = None
+        prev_reg_state = None
+        found_first_module = False
+
+        calls_with_repressors = 0
+        calls_with_promotors = 0
+
+        for step_i in range(0, len(trace_steps)):
+            step_info = trace_steps[step_i]
+            # Get the current test case id
+            testcase_id = int(step_info["cur_test_id"])
+            # Extract active modules (top of call stacks)
+            active_modules = {i for i in range(0, num_modules) if modules_active_by_step[step_i][i] > 0}
+            reg_state = list(map(float, step_info["module_regulator_states"].strip("[]").split(",")))
+            # if this is the first time step, setup 'previous' state
+            if step_i == 0:
+                state_i = 0
+                prev_testcase_id = testcase_id
+                prev_active_modules = active_modules
+                prev_reg_state = reg_state
+            if not found_first_module:
+                prev_active_modules = active_modules
+                found_first_module = len(active_modules) > 0
+
+            # Has anything been repressed/promoted?
+            reg_deltas = [reg_state[i] - prev_reg_state[i] for i in range(0, num_modules)]
+            promoted_modules = { i for i in range(0, num_modules) if reg_state[i] < prev_reg_state[i] }
+            repressed_modules = { i for i in range(0, num_modules) if reg_state[i] > prev_reg_state[i] }
+
+            # if current active modules or current env cycle don't match previous, output what happened since last time we output
+            if (( active_modules != prev_active_modules and len(active_modules) != 0 )
+                or (step_i == (len(trace_steps) - 1))
+                or (len(promoted_modules) != 0)
+                or (len(repressed_modules) != 0)):
+
+                calls_with_repressors += len(repressed_modules)
+                calls_with_promotors += len(promoted_modules)
+                promoted_str = "\"" + str(list(promoted_modules)).replace(" ", "") + "\""
+                repressed_str = "\"" + str(list(repressed_modules)).replace(" ", "") + "\""
+                reg_deltas_str = "\"" + str(reg_deltas).replace(" ", "") + "\""
+                active_modules_str = "\"" + str(list(prev_active_modules)).replace(" ", "") + "\"" # active modules _during_ this state
+
+                line_info["state_id"] = state_i
+                line_info["testcase_id"] = testcase_id
+                line_info["time_step"] = step_i
+                line_info["active_modules"] = active_modules_str
+                line_info["promoted"] = promoted_str
+                line_info["repressed"] = repressed_str
+                line_info["reg_deltas"] = reg_deltas_str
+
+                reg_graph_lines.append( ",".join([str(line_info[field]) for field in reg_graph_fields]) )
+
+                prev_active_modules = active_modules
+                prev_testcase_id = testcase_id
+                prev_reg_state = reg_state
+                state_i += 1
+
+        with open(os.path.join(dump_dir, reg_graph_out_name), "w") as fp:
+            fp.write("\n".join(reg_graph_lines))
+        print("  Wrote out:", os.path.join(dump_dir, reg_graph_out_name))
+
+        ################################################################################################
+        org_info["calls_with_promoters"] = calls_with_promotors
+        org_info["calls_with_repressors"] = calls_with_repressors
+
+        # append csv line (as a list) for analysis orgs
+        analysis_org_infos.append(",".join([str(org_info[field]) for field in fields]))
 
     # Output analysis org infos
     out_content = list(analysis_header_set)[0] + "\n"
