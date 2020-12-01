@@ -179,6 +179,8 @@ def main():
         run_settings = extract_settings(run_config_path)
         # extract task id from the training set file path
         task = run_settings["TRAINING_SET_FILE"].split(".")[0].split("_")[-1]
+        # not enough runs finish for task s5, skip
+        if task == "S5": continue
 
         ################################################################################################
         # ================================= extract analysis file info =================================
