@@ -260,12 +260,13 @@ def main():
             exit(-1)
 
         # How many test cases do we have in the trace?
-        num_testcases = len({step["cur_test_id"] for step in trace_steps})
+        testcase_ids = {step["cur_test_id"] for step in trace_steps}
+        # num_testcases = len(testcase_ids)
         # How many modules in the program?
         num_modules = int(org["num_modules"])
 
         modules_active_ever = set()
-        modules_run_by_test = [set() for _ in range(num_testcases)]
+        modules_run_by_test = {testcase:set() for testcase in testcase_ids}
 
         modules_present_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(time_steps))]
         modules_active_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(time_steps))]
