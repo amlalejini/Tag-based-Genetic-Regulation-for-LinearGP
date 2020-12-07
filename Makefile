@@ -1,16 +1,16 @@
 # Target project
 # PROJECT options: alt-signal-exp, chg-env-exp, dir-signal-exp
-# PROJECT := bool-calc-exp
+PROJECT := bool-calc-exp
 # - Repeated signal task -
-PROJECT := alt-signal-exp
+# PROJECT := alt-signal-exp
 # - Changing signal task -
 # PROJECT := chg-env-exp
 # - Directional signal task -
 # PROJECT := dir-signal-exp
 
 # Dependency directories
-EMP_DIR := ../Empirical/include
-SGP_DIR := ../SignalGP/source
+EMP_DIR := ../Empirical/include		# Path to Empirical include directory.
+SGP_DIR := ../SignalGP/source			# Path to SignalGP source directory.
 
 # Compile-time parameter configuration (tag metric, matching threshold, matching regulator, tag size)
 # MATCH_METRIC options: hamming, hash, integer, integer-symmetric, streak, streak-exact
@@ -20,7 +20,7 @@ MATCH_THRESH := 0
 # MATCH_REG options: add, mult, exp
 MATCH_REG := exp
 # TAG_NUM_BITS
-TAG_NUM_BITS := 128
+TAG_NUM_BITS := 256
 
 # Executable name
 # combine it all into the executable name
@@ -37,43 +37,19 @@ CXX_nat := g++
 CFLAGS_nat := -O3 -DNDEBUG $(CFLAGS_all)
 CFLAGS_nat_debug := -g $(CFLAGS_all)
 
-# Emscripten compiler information
-CXX_web := emcc
-OFLAGS_web_all := -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']" -s TOTAL_MEMORY=67108864 --js-library $(EMP_DIR)/emp/web/library_emp.js -s EXPORTED_FUNCTIONS="['_main', '_empCppCallback']" -s DISABLE_EXCEPTION_CATCHING=1 -s NO_EXIT_RUNTIME=1 #--embed-file configs
-OFLAGS_web := -Oz -DNDEBUG
-OFLAGS_web_debug := -g4 -Oz -Wno-dollar-in-identifier-extension
-
-CFLAGS_web := $(CFLAGS_all) $(OFLAGS_web) $(OFLAGS_web_all)
-CFLAGS_web_debug := $(CFLAGS_all) $(OFLAGS_web_debug) $(OFLAGS_web_all)
-
 default: $(PROJECT)
 native: $(PROJECT)
-web: $(PROJECT).js
-all: $(PROJECT) $(PROJECT).js
+all: $(PROJECT)
 
 debug:	CFLAGS_nat := $(CFLAGS_nat_debug)
 debug:	$(PROJECT)
 
-debug-web:	CFLAGS_web := $(CFLAGS_web_debug)
-debug-web:	$(PROJECT).js
-
-web-debug:	debug-web
-
 $(PROJECT):	source/native/$(PROJECT).cc
 	$(CXX_nat) $(CFLAGS_nat) source/native/$(PROJECT).cc -o $(EXEC_NAME)
-	@echo To build the web version use: make web
-
-$(PROJECT).js: source/web/$(PROJECT)-web.cc
-	$(CXX_web) $(CFLAGS_web) source/web/$(PROJECT)-web.cc -o web/$(PROJECT).js
-
-.PHONY: clean test serve
-
-serve:
-	python3 -m http.server
 
 clean:
 	rm -rf $(PROJECT)_*.dSYM
-	rm -f $(PROJECT) $(PROJECT)_match-metric-* web/$(PROJECT).js web/*.js.map web/*.js.map *~ source/*.o web/*.wasm web/*.wast test_debug.out test_optimized.out unit_tests.gcda unit_tests.gcno
+	rm -f $(PROJECT) $(PROJECT)_tag-len-*_match-metric-* *~ source/*.o test_debug.out test_optimized.out unit_tests.gcda unit_tests.gcno
 	rm -rf test_debug.out.dSYM
 
 test: clean
