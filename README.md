@@ -1,61 +1,67 @@
 ## Overview
 
+<!-- TODO: This repository is the supplemental material associated with the following research article: ... -->
+
 
 **Navigation**
 
 <!-- TOC -->
 
 - [Overview](#overview)
-  - [Contributing authors](#contributing-authors)
   - [Abstract](#abstract)
+  - [Tag-based Referencing](#tag-based-referencing)
+  - [Tag-based Regulation](#tag-based-regulation)
   - [SignalGP](#signalgp)
-  - [Genetic Regulation in SignalGP](#genetic-regulation-in-signalgp)
+    - [Genetic Regulation in SignalGP](#genetic-regulation-in-signalgp)
   - [Experiments](#experiments)
   - [Results](#results)
 - [Reproducibility](#reproducibility)
 - [Supplemental Material](#supplemental-material)
 - [References](#references)
+- [Contributing authors](#contributing-authors)
 
 <!-- /TOC -->
 
-
-### Contributing authors
-
-- [Alexander Lalejini](https://lalejini.com/)
-- [Matthew Andrew Moreno](http://mmore500.com/)
-- [Charles Ofria](https://ofria.com/)
-
 ### Abstract
 
-> In digital evolution, self-replicating computer programs (digital organisms) mutate, compete, and evolve _in silico_.
-  Traditional forms of digital organisms execute procedurally, starting at the top of their program (genome) and proceeding in sequence.
-  SignalGP (Signal-driven Genetic Programs) allows digital organisms to automatically respond to signals from the environment or other agents in a biologically-inspired manner.
-  We augment SignalGP with genetic regulation, allowing organisms to dynamically adjust their response to signals during their lifetime.
-  We demonstrate that this capacity for arbitrary gene regulatory networks facilitates the evolution of signal-response plasticity in digital organisms on simple diagnostic tasks.
-  We find that more challenging diagnostic environments select for larger, more interconnected regulatory networks.
-  We also observe that when signal-response plasticity is not required, erroneous regulation can manifest as maladaptive cryptic variation, impeding task generalization.
-  In addition to exploring the effects of regulation on well-understood tasks, we evaluate whether digital organisms evolve to functionally incorporate genetic regulation in a less-prescribed domain where
-  fraternal transitions in individuality can evolve _de novo_.
-  We identify several multicellular lineages that adaptively employ genetic regulation and demonstrate that genetic regulation can enable evolved mechanisms for mutual exclusion.
-  As SignalGP digital organisms become more lifelike, we broaden digital evolution's repertoire of experimental possibilities, allowing us to engage in more realistic studies of evolutionary dynamics.
+> **We introduce and experimentally demonstrate tag-based genetic regulation, a new genetic programming (GP) technique that allows evolving programs to regulate code modules.**
+Tags are evolvable labels that provide a flexible mechanism for labeling and referring to code modules.
+Tag-based genetic regulation extends existing tag-based naming schemes to allow programs to ''promote'' and ''repress'' code modules.
+This extension allows evolution to form arbitrary gene regulatory networks in a program where genes are program modules and program instructions mediate regulation.
+We demonstrate the functionality of tag-based genetic regulation on several diagnostic tasks as well as a more challenging program synthesis problem.
+We find that tag-based regulation improves problem-solving performance on problems responses to particular inputs must change over time (e.g., based on local context).
+We also observe that our implementation of tag-based genetic regulation can impede adaptive evolution when expected outputs are not context-dependent (i.e., the correct response to a particular input remains static over time).
+Tag-based genetic regulation is immediately applicable to existing tag-enabled GP systems, and broadens our repertoire of techniques for evolving more dynamic programs.
+
+### Tag-based Referencing
+
+
+Tags are evolvable labels that can be mutated, and the similarity (or dissimilarity) between any two tags can be quantified.
+Tags are most commonly represented as floating point or integer numeric values \citep{keijzer_run_2004,spector_tag-based_2011} or as bit strings \citep{lalejini_evolving_2018}, and like traditional naming schemes, tags can provide an arbitrarily large address space.
+Unlike traditional naming schemes, however, tags allow for \textit{inexact} addressing.
+A referring tag targets the tagged entity (\textit{e.g.}, a module) with the \textit{closest matching} tag;
+this ensures that all possible tags are potentially valid references.
+Further, mutations to tags do not necessarily damage existing references.
+For example, mutating a referring tag will have no phenotypic effect if those mutations do not change which target tag is matched.
+As such, this technique allows the naming and use of modularized code fragments to incrementally co-evolve \citep{spector_tag-based_2011}.
+
+<!-- ![tag-based-referencing-example](./media/tag-based-referencing.svg) -->
+<div style="text-align:center">
+  <figure>
+    <img src="media/tag-based-referencing.svg" alt="tag-based-referencing-example" width="400"/>
+    <figcaption style="text-align:left"><b>Figure:</b> Tag-based referencing example. The call instruction uses tag 1001 to reference the closest-matching module (in this case, the yellow module tagged 0001).</figcaption>
+  </figure>
+</div>
+
+### Tag-based Regulation
 
 ### SignalGP
 
 ![sgp-cartoon](./media/sgp-cartoon.svg)
-<!-- <span style="text-align: center; display: block;">
-<img src="media/sgp-cartoon.svg" width=400/>
-</span>
-</br> -->
 
-SignalGP is a genetic program representation that allows digital organisms to dynamically react to
-signals from the environment or from other agents.
-In traditional digital organisms, programs comprise linear instruction sequences that are executed
-procedurally: instructions are processed one at a time in a single chain of execution, and instructions
-must explicitly check for new sensory information.
-As such, these forms of traditional digital organisms must generate explicit queries to identify (and
-respond to) changes in their environment.
 
-In SignalGP, program expression is signal-driven.
+
+In SignalGP, program execution is signal-driven.
 Programs are segmented into genetic modules (or functions), and each module can be independently triggered
 in response to a signal.
 Each module associates a tag with a linear sequence of instructions.
@@ -74,7 +80,7 @@ Signals trigger the function with the closest matching tag.
 For a more detailed description of the SignalGP representation (albeit in more of a evolutionary computation/
 genetic programming vein), see [(Lalejini and Ofria, 2018)](https://doi.org/10.1145/3205455.3205523).
 
-### Genetic Regulation in SignalGP
+#### Genetic Regulation in SignalGP
 
 In this work, we augment the SignalGP representation with genetic regulation, allowing digital organisms
 to alter their responses to signals during their lifetime.
@@ -134,3 +140,9 @@ Lalejini, A., & Ofria, C. (2018). Evolving event-driven programs with SignalGP. 
 Moreno, M. A., & Ofria, C. (2019). Toward Open-Ended Fraternal Transitions in Individuality. Artificial Life, 25(2), 117–133. [https://doi.org/10.1162/artl_a_00284](https://doi.org/10.1162/artl_a_00284)
 
 Spector, L., Martin, B., Harrington, K., & Helmuth, T. (2011). Tag-based modules in genetic programming. Proceedings of the 13th Annual Conference on Genetic and Evolutionary Computation - GECCO ’11, 1419. [https://doi.org/10.1145/2001576.2001767](https://doi.org/10.1145/2001576.2001767)
+
+## Contributing authors
+
+- [Alexander Lalejini](https://lalejini.com/)
+- [Matthew Andrew Moreno](http://mmore500.com/)
+- [Charles Ofria](https://ofria.com/)
