@@ -118,6 +118,10 @@ We conducted our experiments using the high-performance computing resources prov
 
 We provide a step-by-step guide for compiling and running the software we used to run our experiments (including requisite dependencies): [./documents/running-experiments.md](./documents/running-experiments.md).
 
+We conducted our data analyses using a combination of Python (version 3.8.6) and R (version 4.0.2).
+Python is used primarily for data wrangling, and R is used for stats and graphs/visualizations.
+We compiled our data analyses into nifty HTML web pages (using R markdown and knitr), which are one-stop-shops for all of our R source code, statistical results, and data visualizations; these pages are linked below in [Supplemental Material](#supplemental-material)
+
 ## Supplemental Material
 
 todo
