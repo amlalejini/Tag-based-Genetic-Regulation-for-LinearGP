@@ -35,15 +35,13 @@ Tag-based genetic regulation is immediately applicable to existing tag-enabled G
 
 ### Tag-based Referencing
 
-
 Tags are evolvable labels that can be mutated, and the similarity (or dissimilarity) between any two tags can be quantified.
-Tags are most commonly represented as floating point or integer numeric values \citep{keijzer_run_2004,spector_tag-based_2011} or as bit strings \citep{lalejini_evolving_2018}, and like traditional naming schemes, tags can provide an arbitrarily large address space.
-Unlike traditional naming schemes, however, tags allow for \textit{inexact} addressing.
-A referring tag targets the tagged entity (\textit{e.g.}, a module) with the \textit{closest matching} tag;
+Tags allow for _inexact_ addressing.
+A referring tag targets the tagged entity (_e.g._, a module) with the _closest matching_ tag;
 this ensures that all possible tags are potentially valid references.
 Further, mutations to tags do not necessarily damage existing references.
 For example, mutating a referring tag will have no phenotypic effect if those mutations do not change which target tag is matched.
-As such, this technique allows the naming and use of modularized code fragments to incrementally co-evolve \citep{spector_tag-based_2011}.
+As such, this technique allows the naming and use of modularized code fragments to incrementally co-evolve.
 
 <!-- ![tag-based-referencing-example](./media/tag-based-referencing.svg) -->
 <div style="text-align:center">
@@ -56,20 +54,24 @@ In the tag-based referencing example above, the call instruction uses tag 1001 t
 
 ### Tag-based Regulation
 
+Tag-based regulation allows evolving programs to instantiate gene regulatory networks using tag-based referencing.
+This functionality allows programs to dynamically adjust which module is triggered by a particular call based on prior inputs.
+Specifically, we implemented tag-based genetic regulation in the context of a linear GP system (SignalGP); however, our approach is applicable to any tag-enabled GP system.
+
+To implement tag-based genetic regulation, we supplement the instruction set with promoter and repressor instructions that, when executed, adjust how well subsequent tag-based references match with a target module.
+Intuitively, promoters increase a target module's tag-match score with subsequent references, thereby increasing its chances of being triggered; repressors have the opposite effect.
+When determining which module to reference in response to a call instruction, each module's tag-match score is a function of how well the module's tag matches the call instruction's tag as well as the module's regulatory value.
+
+
 ### SignalGP
 
 ![sgp-cartoon](./media/sgp-cartoon.svg)
 
-
-
+SignalGP defines a way of organizing and interpreting genetic programs to afford computational evolution access to the [event-driven programming paradigm](https://en.wikipedia.org/wiki/Event-driven_programming).
 In SignalGP, program execution is signal-driven.
-Programs are segmented into genetic modules (or functions), and each module can be independently triggered
-in response to a signal.
+Programs are segmented into genetic modules (or functions), and each module can be independently triggered in response to a signal.
 Each module associates a tag with a linear sequence of instructions.
-Tags are labels that can mutate and evolve, and the similarity (or dissimilarity) between any two tags
-can be computed.
-In this work, tags are represented as fixed-length bit strings, and we compute the similarity, or match-score,
-between any two tags using the streak metric (Downing, 2015).
+In this work, tags are represented as fixed-length bit strings.
 
 SignalGP makes the concept of events or signals explicit: all signals contain a tag and any associated
 data.
@@ -78,8 +80,7 @@ We use tag-based referencing (Spector et al., 2011) to determine the most approp
 response to a signal.
 Signals trigger the function with the closest matching tag.
 
-For a more detailed description of the SignalGP representation (albeit in more of a evolutionary computation/
-genetic programming vein), see [(Lalejini and Ofria, 2018)](https://doi.org/10.1145/3205455.3205523).
+For a more detailed description of the SignalGP representation, see [(Lalejini and Ofria, 2018)](https://doi.org/10.1145/3205455.3205523).
 
 #### Genetic Regulation in SignalGP
 
