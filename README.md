@@ -93,27 +93,34 @@ A simple example of how genetic regulation works (in an event-handling context) 
 
 ### Experiments
 
-<!-- We used several [diagnostic tasks](./documents/task-descriptions.md) to explore how genetic regulation faculties contribute to, and potentially detract from, the functionality of evolved SignalGP digital organisms.
-Additionally, we investigate whether genetic regulation is functionally incorporated into digital multicellular organisms evolved in the [DISHTINY artificial life platform](https://github.com/mmore500/dishtiny) (Moreno and Ofria, 2019). -->
+We compared the performance of regulation-enabled and regulation-disabled SignalGP on five problems:
+
+- Repeated-signal Problem
+- Contextual-signal Problem
+- Changing-signal Problem
+- Boolean Logic Calculator Problem (prefix notation)
+- Boolean Logic Calculator Problem (postfix notation)
+
+The repeated-signal, contextual-signal, and prefix notation calculator problems each required programs to dynamically adjust their responses to particular inputs over time.
+The changing-signal and postfix notation calculator problems did not require programs to adjust responses to inputs over time.
 
 ### Results
 
-<!-- - We find that genetic regulation readily facilitates the evolution of signal-response plasticity in tasks that require organisms to shift their response to a repeated signal over time.
-- We find that more challenging tasks (requiring higher degrees of signal-response plasticity) promote the evolution of more interconnected gene regulatory networks.
-- We observe erroneous regulation manifest as maladaptive plasticity on a task that does not require organisms to alter their response to particular signals during their lifetime.
-- Through a case study, we observe genetic regulation enabling a mechanism for mutual exclusion in a digital multicell evolved in the DISHTINY platform. -->
+- Proof of method: we observed the evolution of programs capable of leveraging tag-based regulation to dynamically adjust module associations over time.
+- We found that tag-based regulation improved problem-solving performance on context-dependent problems (i.e., problems in which the appropriate response to a particular input changes over time).
+- We found that our implementation of tag-based regulation can impede adaptive evolution on problems that do not require programs to adjust responses to particular inputs over time.
 
 ## Reproducibility
 
-<!-- The source code for experiments using diagnostic tasks (e.g., the repeated-, directional-, and changing- signal tasks) are included in this repository (in the source directory). These experiments are implemented with C++ using the [Empirical library](https://github.com/devosoft/Empirical) and an [external implementation of SignalGP](https://github.com/amlalejini/SignalGP). We ran experiments on high-performance computing systems provided by the [Institute for Cyber-Enabled Research](https://icer.msu.edu/) at Michigan State university.
-[Data analyses](https://github.com/amlalejini/ALife-2020--SignalGP-Genetic-Regulation/tree/master/experiments/alife-2020/analysis/) were conducted using a combination of Python scripts (for data aggregation and processing) and R (for statistical analyses and visualizations).
-We used [this git commit version of DISHTINY](https://github.com/mmore500/dishtiny/tree/aa98eba0df4fa055b66fb3e12ceb51dbb7cbfe82) for our DISHTINY case study.
-DISHTINY analysis scripts can be found [here](https://github.com/mmore500/dishtiny/tree/53vgh).
+The source code for our experiments is included in this repository (in the [source/](./source/) directory).
+Our experiments are implemented in C++ using the [Empirical library](https://github.com/devosoft/Empirical) and an [external implementation of SignalGP](https://github.com/amlalejini/SignalGP).
+We conducted our experiments using the high-performance computing resources providing by the [Institute for Cyber-Enabled Research](https://icer.msu.edu/) at Michigan State University.
 
-See [this document](./documents/running-experiments.md) for a step-by-step guide to locally running the
-experiments implemented in this repository. -->
+We provide a step-by-step guide for compiling and running the software we used to run our experiments (including requisite dependencies): [./documents/running-experiments.md](./documents/running-experiments.md).
 
 ## Supplemental Material
+
+todo
 
 <!-- - Guide to running our software locally: [./documents/running-experiments.md](./documents/running-experiments.md)
 - Diagnostic task descriptions and experiment configurations: [./documents/task-descriptions.md](./documents/task-descriptions.md)
