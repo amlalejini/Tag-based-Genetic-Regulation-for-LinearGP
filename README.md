@@ -49,9 +49,10 @@ As such, this technique allows the naming and use of modularized code fragments 
 <div style="text-align:center">
   <figure>
     <img src="media/tag-based-referencing.svg" alt="tag-based-referencing-example" width="400"/>
-    <figcaption style="text-align:left"><b>Figure:</b> Tag-based referencing example. The call instruction uses tag 1001 to reference the closest-matching module (in this case, the yellow module tagged 0001).</figcaption>
   </figure>
 </div>
+
+In the tag-based referencing example above, the call instruction uses tag 1001 to reference the closest-matching module (in this case, the yellow module tagged 0001).
 
 ### Tag-based Regulation
 
