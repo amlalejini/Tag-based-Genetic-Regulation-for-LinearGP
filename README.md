@@ -17,6 +17,7 @@
   - [Results](#results)
 - [Reproducibility](#reproducibility)
 - [Supplemental Material](#supplemental-material)
+  - [Repository guide](#repository-guide)
 - [References](#references)
 - [Contributing authors](#contributing-authors)
 
@@ -124,7 +125,10 @@ We compiled our data analyses into nifty HTML web pages (using R markdown and kn
 
 ## Supplemental Material
 
-todo
+In addition to our source code (found in this repository), we compiled our data analyses and supplemental documentation into a nifty web-hosted book using [bookdown](https://bookdown.org) and [GitHub pages](https://pages.github.com/).
+
+:arrow_right: **[Find our supplemental material here](https://lalejini.com/Tag-based-Genetic-Regulation-for-LinearGP/supplemental/)** :arrow_left:
+
 
 <!-- - Guide to running our software locally: [./documents/running-experiments.md](./documents/running-experiments.md)
 - Diagnostic task descriptions and experiment configurations: [./documents/task-descriptions.md](./documents/task-descriptions.md)
@@ -135,6 +139,13 @@ todo
   - [Directional signal task](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/directional-signal-task-analysis.html)
   - [Comparing evolved repeated-signal and directional-signal regulatory networks](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/regulatory-network-comparison.html)
   - [Changing signal task](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/changing-signal-task-analysis.html) -->
+
+### Repository guide
+
+- todo
+- [media/](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/media) contains images used throughout repository documentation.
+- [scripts/](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/scripts) contains several root-level utility scripts for data wrangling and for generating input/output examples for test-based problems. Note that experiment-specific scripts are located in their associated experiment directory.
+- [source/](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/source) contains the C++ implementations of our genetic programming experiments.
 
 <!-- **Repository guide:**
 
