@@ -4,7 +4,7 @@ Generate signal-response reprogramming input-output examples
 import argparse
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate examples input/output cases.")
+    parser = argparse.ArgumentParser(description="Generate input/output examples for the contextual-signal problem.")
     parser.add_argument("--signals", type=int, help="How many input signal types are there?")
 
     args = parser.parse_args()
