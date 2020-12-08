@@ -27,20 +27,20 @@ Also called 'alternating signal environment' in source code.
 
 Experiment-specific source files:
 
-- AltSignalConfig.h
-- AltSignalOrg.h
-- AltSignalWorld.h
-- native/alt-signal-exp.cc
+- [AltSignalConfig.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/AltSignalConfig.h)
+- [AltSignalOrg.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/AltSignalOrg.h)
+- [AltSignalWorld.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/AltSignalWorld.h)
+- [native/alt-signal-exp.cc](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/native/alt-signal-exp.cc)
 
 ## Contextual-signal problem
 
 The contextual-signal problem is (perhaps confusingly) carried out using the boolean logic calculator source code. Except, instead of providing input/output examples that describe calculator problems, we configure categorical output (`CATEGORICAL_OUTPUT`) and provide examples that look more like [this](../experiments/2020-11-27-context-sig/hpcc/examples_S4.csv).
 
-- BoolCalcConfig.h
-- BoolCalcOrg.h
-- BoolCalcTestCase.h
-- BoolCalcWorld.h
-- native/bool-calc-exp.cc
+- [BoolCalcConfig.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcConfig.h)
+- [BoolCalcOrg.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcOrg.h)
+- [BoolCalcTestCase.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcTestCase.h)
+- [BoolCalcWorld.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcWorld.h)
+- [native/bool-calc-exp.cc](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/native/bool-calc-exp.cc)
 
 ## Changing-signal problem
 
@@ -48,18 +48,18 @@ Also called 'changing environment problem' in source code.
 
 Experiment-specific source files:
 
-- ChgEnvOrg.h
-- ChgEnvWorld.h
-- ChgEnvConfig.h
-- native/chg-env-exp.cc
+- [ChgEnvOrg.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/ChgEnvOrg.h)
+- [ChgEnvWorld.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/ChgEnvWorld.h)
+- [ChgEnvConfig.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/ChgEnvConfig.h)
+- [native/chg-env-exp.cc](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/native/chg-env-exp.cc)
 
 ## Boolean logic calculator problem
 
-- [BoolCalcConfig.h](./BoolCalcConfig.h)
-- [BoolCalcOrg.h](./BoolCalcOrg.h)
-- [BoolCalcTestCase.h](./BoolCalcTestCase.h)
-- [BoolCalcWorld.h](./BoolCalcWorld.h)
-- [native/bool-calc-exp.cc](./native/bool-calc-exp.cc)
+- [BoolCalcConfig.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcConfig.h)
+- [BoolCalcOrg.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcOrg.h)
+- [BoolCalcTestCase.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcTestCase.h)
+- [BoolCalcWorld.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcWorld.h)
+- [native/bool-calc-exp.cc](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/native/bool-calc-exp.cc)
 
 ## Cross-task Utilities
 
