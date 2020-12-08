@@ -1,0 +1,15 @@
+---
+title: "Analyses for Tag-based Genetic Regulation for Genetic Programming"
+author: "Alexander Lalejini"
+date: "`r Sys.Date()`"
+# site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+# bibliography: packages.bib
+biblio-style: apalike
+link-citations: yes
+github-repo: amlalejini/Tag-based-Genetic-Regulation-for-LinearGP
+description: "This is a test."
+---
+
+# Test

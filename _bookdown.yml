@@ -1,0 +1,7 @@
+book_filename: "tag-based-genetic-regulation"
+language:
+  ui:
+    chapter_name: "Chapter "
+delete_merged_file: true
+rmd_files: ["index.Rmd", "documents/digital-organisms.md", "experiments/2020-11-11-chg-sig/analysis/2020-11-11-chg-sig.Rmd"]
+# new_session: yes
