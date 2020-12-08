@@ -192,13 +192,13 @@ int main() {
     std::function<emp::vector<TestCaseStr>()> {
       [&testing_set]() { return testing_set; }
     },
-    "testing_set.csv"
+    "testing_set_prefix.csv"
   );
   auto training_datafile = emp::MakeContainerDataFile(
     std::function<emp::vector<TestCaseStr>()> {
       [&training_set]() { return training_set; }
     },
-    "training_set.csv"
+    "training_set_prefix.csv"
   );
 
 
