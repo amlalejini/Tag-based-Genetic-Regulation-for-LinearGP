@@ -44,4 +44,6 @@ venv/
 
 _site/
 
+# Data
 data/
+*.tar.gz
