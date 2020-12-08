@@ -778,6 +778,11 @@ The raw data can be found on the OSF project associated with this work (link com
 \NormalTok{generations \textless{}{-}}\StringTok{ }\DecValTok{10000}
 \NormalTok{env\_complexities \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{)}
 
+\CommentTok{\# Settings for statistical analyses.}
+\NormalTok{alpha \textless{}{-}}\StringTok{ }\FloatTok{0.05}
+\NormalTok{correction\_method \textless{}{-}}\StringTok{ "bonferroni"}
+
+\CommentTok{\# Relative location of data.}
 \NormalTok{working\_directory \textless{}{-}}\StringTok{ "experiments/2020{-}11{-}11{-}chg{-}sig/analysis/"} \CommentTok{\# \textless{}\textless{} For bookdown}
 \CommentTok{\# working\_directory \textless{}{-} "./"                                     \# \textless{}\textless{} For local analysis}
 \end{Highlighting}
@@ -788,7 +793,7 @@ Because signals are distinct, programs do not need to alter their responses to p
 Instead, programs may `hardware' each of the \(K\) possible responses to the appropriate environmental signal.
 However, environmental signals are presented in a random order; thus, the correct \emph{order} of responses will vary and cannot be hardcoded.
 As in the repeated signal task, programs respond by executing one of \(K\) response instructions.
-Otherwise, evaluation (and fitness assignment) on the changing signal task mirrors that of the repeated signal task.
+Otherwise, evaluation (and fitness assignment) on the changing-signal task mirrors that of the repeated signal task.
 
 \includegraphics{experiments/2020-11-11-chg-sig/analysis/../../../media/changing-signal-task.png}
 
@@ -797,7 +802,7 @@ Requiring programs to express a distinct instruction in response to each environ
 We afforded programs 128 time steps to express the appropriate response after receiving an environmental signal.
 Once the allotted time to respond expires or the program expresses any response, the program's threads of execution are reset, resulting in a loss of all thread-local memory.
 \emph{Only} the contents of a program's global memory and each function's regulatory state persist.
-The environment then produces the next signal (distinct from all previous signals) to which the organism may respond.
+The environment then produces the next signal (distinct from all previous signals) to which the program may respond.
 A program's fitness is equal to the number of correct responses expressed during evaluation.
 
 We evolved populations of 1000 SignalGP programs to solve the changing-signal task at \(K=16\) (where \(K\) denotes the number of environmental signals).
@@ -809,9 +814,9 @@ We ran 200 replicate populations (each with a distinct random number seed) of ea
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  a regulation-enabled treatment where organisms have access to genetic regulation.
+  a regulation-enabled treatment where programs have access to genetic regulation.
 \item
-  a regulation-disabled treatment where organisms do not have access to genetic regulation.
+  a regulation-disabled treatment where programs do not have access to genetic regulation.
 \end{enumerate}
 
 Note this task does not require programs to shift their response to particular signals over time, and as such, genetic regulation is unnecessary.
@@ -826,10 +831,11 @@ Load all required R libraries.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(ggplot2)   }
-\KeywordTok{library}\NormalTok{(tidyverse) }
-\KeywordTok{library}\NormalTok{(cowplot)  }
-\KeywordTok{library}\NormalTok{(viridis)  }
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\KeywordTok{library}\NormalTok{(cowplot)}
+\KeywordTok{library}\NormalTok{(viridis)}
+\KeywordTok{source}\NormalTok{(}\StringTok{"https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom\_flat\_violin.R"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -866,22 +872,9 @@ Load data, initial data cleanup, configure some global settings.
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{\# Load data file}
 \NormalTok{data\_loc \textless{}{-}}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"data/max\_fit\_orgs.csv"}\NormalTok{)}
 \NormalTok{data \textless{}{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(data\_loc, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
-
-\CommentTok{\# Specify factors (not all of these matter for this set of runs).}
-\NormalTok{data}\OperatorTok{$}\NormalTok{matchbin\_thresh \textless{}{-}}
-\StringTok{  }\KeywordTok{factor}\NormalTok{(data}\OperatorTok{$}\NormalTok{matchbin\_thresh,}
-         \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{25}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{75}\NormalTok{))}
-\NormalTok{data}\OperatorTok{$}\NormalTok{NUM\_ENV\_STATES \textless{}{-}}
-\StringTok{  }\KeywordTok{factor}\NormalTok{(data}\OperatorTok{$}\NormalTok{NUM\_ENV\_STATES,}
-         \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{8}\NormalTok{, }\DecValTok{16}\NormalTok{, }\DecValTok{32}\NormalTok{))}
-\NormalTok{data}\OperatorTok{$}\NormalTok{NUM\_ENV\_UPDATES \textless{}{-}}
-\StringTok{  }\KeywordTok{factor}\NormalTok{(data}\OperatorTok{$}\NormalTok{NUM\_ENV\_UPDATES,}
-         \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{8}\NormalTok{, }\DecValTok{16}\NormalTok{, }\DecValTok{32}\NormalTok{))}
-\NormalTok{data}\OperatorTok{$}\NormalTok{TAG\_LEN \textless{}{-}}
-\StringTok{  }\KeywordTok{factor}\NormalTok{(data}\OperatorTok{$}\NormalTok{TAG\_LEN,}
-         \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\DecValTok{32}\NormalTok{, }\DecValTok{64}\NormalTok{, }\DecValTok{128}\NormalTok{, }\DecValTok{256}\NormalTok{))}
 
 \CommentTok{\# Define function to summarize regulation/memory configurations.}
 \NormalTok{get\_con \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(reg, mem) \{}
@@ -897,12 +890,18 @@ Load data, initial data cleanup, configure some global settings.
     \KeywordTok{return}\NormalTok{(}\StringTok{"UNKNOWN"}\NormalTok{)}
 \NormalTok{  \}}
 \NormalTok{\}}
+
 \CommentTok{\# Specify experimental condition for each datum.}
-\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(get\_con,}
-\NormalTok{                         data}\OperatorTok{$}\NormalTok{USE\_FUNC\_REGULATION,}
-\NormalTok{                         data}\OperatorTok{$}\NormalTok{USE\_GLOBAL\_MEMORY)}
-\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(data}\OperatorTok{$}\NormalTok{condition,}
-                         \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{"regulation"}\NormalTok{, }\StringTok{"memory"}\NormalTok{, }\StringTok{"none"}\NormalTok{, }\StringTok{"both"}\NormalTok{))}
+\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(}
+\NormalTok{  get\_con,}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{USE\_FUNC\_REGULATION,}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{USE\_GLOBAL\_MEMORY}
+\NormalTok{)}
+
+\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{condition,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{"regulation"}\NormalTok{, }\StringTok{"memory"}\NormalTok{, }\StringTok{"none"}\NormalTok{, }\StringTok{"both"}\NormalTok{)}
+\NormalTok{)}
 
 \CommentTok{\# For convenience, create a data set with only solutions}
 \CommentTok{\# Filter data to include only replicates labeled as solutions}
@@ -920,10 +919,6 @@ Load data, initial data cleanup, configure some global settings.
   \StringTok{"32"}\NormalTok{ =}\StringTok{"32{-}signal task"}
 \NormalTok{)}
 
-\CommentTok{\# Settings for statistical analyses.}
-\NormalTok{alpha \textless{}{-}}\StringTok{ }\FloatTok{0.05}
-\NormalTok{correction\_method \textless{}{-}}\StringTok{ "bonferroni"}
-
 \CommentTok{\# Configure our default graphing theme}
 \KeywordTok{theme\_set}\NormalTok{(}\KeywordTok{theme\_cowplot}\NormalTok{())}
 \end{Highlighting}
@@ -932,54 +927,69 @@ Load data, initial data cleanup, configure some global settings.
 \hypertarget{does-regulation-hinder-the-evolution-of-successful-genotypes}{%
 \section{Does regulation hinder the evolution of successful genotypes?}\label{does-regulation-hinder-the-evolution-of-successful-genotypes}}
 
-Here, we look at the number of solutions evolved with access and without access to genetic regulation.
-An organism is categorized as a `solution' if it can correctly respond in each of the \(K\) environmental signals \emph{during evaluation}.
+Here, we look at the number of solutions evolved under regulation-enabled and regulation-disabled conditions.
+A program is categorized as a `solution' if it can correctly respond to each of the \(K\) environmental signals \emph{during evaluation}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Graph the number of solutions evolved in each condition, faceted by environmental complexity}
-\KeywordTok{ggplot}\NormalTok{(sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{fill=}\NormalTok{condition)) }\OperatorTok{+}
+\KeywordTok{ggplot}\NormalTok{( sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_bar}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}\DataTypeTok{stat=}\StringTok{"count"}\NormalTok{,}
-            \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{..count..),}
-            \DataTypeTok{position=}\KeywordTok{position\_dodge}\NormalTok{(}\FloatTok{0.9}\NormalTok{), }\DataTypeTok{vjust=}\DecValTok{0}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
-                   \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
-                   \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Disabled"}\NormalTok{,}
-                            \StringTok{"Augmented"}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_fill\_discrete}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
-                      \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-                      \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}disabled"}\NormalTok{,}
-                               \StringTok{"Regulation{-}augmented"}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}
+    \DataTypeTok{stat=}\StringTok{"count"}\NormalTok{,}
+    \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{..count..),}
+    \DataTypeTok{position=}\KeywordTok{position\_dodge}\NormalTok{(}\FloatTok{0.9}\NormalTok{),}
+    \DataTypeTok{vjust=}\DecValTok{0}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# successful replciates (/200)"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"bottom"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Successful replicates"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \includegraphics{tag-based-genetic-regulation_files/figure-latex/unnamed-chunk-5-1.pdf}
 
-Programs capable of achieving a perfect score on the changing signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
+Programs capable of achieving a perfect score on the changing-signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
 These programs, however, do not necessarily generalize across all possible sequences of environmental signals.
 
 \hypertarget{does-access-to-regulation-slow-adaptation}{%
 \subsection{Does access to regulation slow adaptation?}\label{does-access-to-regulation-slow-adaptation}}
 
-I.e., did successful programs take longer (more generations) to evolve than those evolved in the regulation-disabled treatment?
+I.e., did successful regulation-enabled programs take longer (more generations) to evolve than those evolved in the regulation-disabled treatment?
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{(data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
-                 \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
-                 \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Disabled"}\NormalTok{,}
-                          \StringTok{"Augmented"}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_color\_discrete}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
-                       \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-                       \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}disabled"}\NormalTok{,}
-                                \StringTok{"Regulation{-}augmented"}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Generations to solution"}\NormalTok{)}
+\KeywordTok{ggplot}\NormalTok{( sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_flat\_violin}\NormalTok{(}
+    \DataTypeTok{position =} \KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
+    \DataTypeTok{alpha =} \FloatTok{.8}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ update, }\DataTypeTok{color =}\NormalTok{ condition),}
+    \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
+    \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.8}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{(}
+    \DataTypeTok{width =} \FloatTok{.1}\NormalTok{,}
+    \DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.5}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Generation first solution evolved }\CharTok{\textbackslash{}n}\StringTok{(log scale)"}\NormalTok{,}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1005,64 +1015,67 @@ I.e., did successful programs take longer (more generations) to evolve than thos
 ##               5.000013
 \end{verbatim}
 
-We find no evidence (Wilcoxon rank-sum test) that access to regulation resulted in slower adaptation.
+The difference in the number of generations before a solution arises is not significantly different.
 
 \hypertarget{do-they-generalize}{%
 \subsection{Do they generalize?}\label{do-they-generalize}}
 
 Note that solutions may or may not generalize beyond the sequence of environmental signals on which they achieved a perfect score (and were thus categorized as a `solution').
 We re-evaluated each `solution' on a random sample of 5000 sequences of environmental signals to test for generalization.
-We deem organisms as having successfully generalized only if they responded correctly in all 5000 tests.
-Additionally, we measured generalization in the regulation-augmented condition with regulation knocked out.
+We deem programs as having successfully generalized only if they responded correctly in all 5000 tests.
+
+To see if regulation is preventing some regulation-enabled solutions from generalizing, we test generalization for regulation-enabled solutions with their regulation faculties knocked out (i.e., regulation instructions replaced with no-operations).
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Grab count data to make bar plot life easier}
-\NormalTok{num\_solutions\_reg \textless{}{-}}
-\StringTok{  }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
-\NormalTok{num\_generalize\_reg \textless{}{-}}
-\StringTok{  }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
-\NormalTok{num\_generalize\_ko\_reg \textless{}{-}}
-\StringTok{  }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution\_ko\_reg}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
+\NormalTok{num\_solutions\_reg \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
+\NormalTok{num\_generalize\_reg \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
+\NormalTok{num\_generalize\_ko\_reg \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution\_ko\_reg}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
 
-\NormalTok{num\_generalize\_mem \textless{}{-}}
-\StringTok{  }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"memory"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
+\NormalTok{num\_generalize\_mem \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"memory"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
 
 \NormalTok{sol\_cnts \textless{}{-}}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x=}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{)}
 \NormalTok{sol\_cnts}\OperatorTok{$}\NormalTok{type \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"reg\_generalize"}\NormalTok{, }\StringTok{"reg\_generalize\_ko\_reg"}\NormalTok{, }\StringTok{"mem\_generalize"}\NormalTok{)}
 \NormalTok{sol\_cnts}\OperatorTok{$}\NormalTok{val \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(num\_generalize\_reg, num\_generalize\_ko\_reg, num\_generalize\_mem)}
 
-\KeywordTok{ggplot}\NormalTok{(sol\_cnts, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{type, }\DataTypeTok{y=}\NormalTok{val, }\DataTypeTok{fill=}\NormalTok{type)) }\OperatorTok{+}
+\KeywordTok{ggplot}\NormalTok{( sol\_cnts, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{type, }\DataTypeTok{y=}\NormalTok{val, }\DataTypeTok{fill=}\NormalTok{type) ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_bar}\NormalTok{(}\DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{val),}
-            \DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{,}
-            \DataTypeTok{position=}\KeywordTok{position\_dodge}\NormalTok{(}\FloatTok{0.75}\NormalTok{), }\DataTypeTok{vjust=}\OperatorTok{{-}}\FloatTok{0.01}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
-                   \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\StringTok{"mem\_generalize"}\NormalTok{,}
-                            \StringTok{"reg\_generalize"}\NormalTok{,}
-                            \StringTok{"reg\_generalize\_ko\_reg"}\NormalTok{),}
-                   \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}
-                            \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{,}
-                            \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled}\CharTok{\textbackslash{}n}\StringTok{(reg. KO)"}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\CommentTok{\# scale\_fill\_discrete(name="Condition",}
-\StringTok{  }\CommentTok{\#                     limits=c("mem\_generalize",}
-\StringTok{  }\CommentTok{\#                              "reg\_generalize",}
-\StringTok{  }\CommentTok{\#                              "reg\_generalize\_ko\_reg"),}
-\StringTok{  }\CommentTok{\#                     labels=c("Regulation{-}disabled",}
-\StringTok{  }\CommentTok{\#                              "Regulation{-}augmented",}
-\StringTok{  }\CommentTok{\#                              "Regulation{-}augmented\textbackslash{}n(reg. knockout)")) +}
-\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}\DataTypeTok{name=}\StringTok{"\# of solutions that generalize"}\NormalTok{,}
-                     \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{210}\NormalTok{),}
-                     \DataTypeTok{breaks=}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{200}\NormalTok{,}\DecValTok{50}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{,}
-        \DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{10}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{val),}
+    \DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{,}
+    \DataTypeTok{position=}\KeywordTok{position\_dodge}\NormalTok{(}\FloatTok{0.75}\NormalTok{),}
+    \DataTypeTok{vjust=}\OperatorTok{{-}}\FloatTok{0.01}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}
+      \StringTok{"mem\_generalize"}\NormalTok{,}
+      \StringTok{"reg\_generalize"}\NormalTok{,}
+      \StringTok{"reg\_generalize\_ko\_reg"}
+\NormalTok{      ),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}
+      \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}
+      \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{,}
+      \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled}\CharTok{\textbackslash{}n}\StringTok{(reg. KO)"}
+\NormalTok{    )}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"\# of solutions that generalize"}\NormalTok{,}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{210}\NormalTok{),}
+    \DataTypeTok{breaks=}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{200}\NormalTok{,}\DecValTok{50}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}
+    \DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{,}
+    \DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{10}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/chg{-}env{-}16{-}generalization.png"}\NormalTok{), }\DataTypeTok{width=}\DecValTok{4}\NormalTok{,}\DataTypeTok{height=}\DecValTok{4}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \includegraphics{tag-based-genetic-regulation_files/figure-latex/unnamed-chunk-7-1.pdf}
 
-All programs evolved without access to regulation successfully generalized. However, 18 out of 200 solutions evolved with access to regulation failed to generalize (statistically significant, Fisher's exact test).
+All regulation-disabled programs successfully generalized.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1090,6 +1103,8 @@ All programs evolved without access to regulation successfully generalized. Howe
 ## odds ratio 
 ##          0
 \end{verbatim}
+
+The difference in number of generalizing solutions between regulation-enabled and regulation-disabled conditions is statistically significant (Fisher's exact test).
 
 Moreover, 5 of the 18 non-generalizing programs generalize when we knockout genetic regulation.
 Upon close inspection, the other 13 non-general programs relied on genetic regulation to achieve initial success but failed to generalize to arbitrary environment signal sequences.
