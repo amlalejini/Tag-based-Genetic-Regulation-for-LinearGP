@@ -1,5 +1,8 @@
 '''
-Script: aggMaxFit.py
+This is a utility script for aggregating data (on MSU's HPCC) for this experiment.
+
+WARNING: this script might not age well (makes assumptions about file systems, etc)!
+
 For each run, grab the maximum fitness organism at end of run.
 '''
 
