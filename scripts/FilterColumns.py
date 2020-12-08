@@ -1,7 +1,7 @@
 """
 Script: FilterColumns.py
 
-Given a csv file, filter named columns from file.
+Use pandas to filter out specified columns from given csv file.
 """
 
 
@@ -10,7 +10,7 @@ import pandas as pd
 
 def main():
     # Setup the commandline argument parser
-    parser = argparse.ArgumentParser(description="Filter columns script.")
+    parser = argparse.ArgumentParser(description="Filter columns from a csv file.")
     parser.add_argument("-f", "--filter", type=str, nargs="+", help="What columns should we filter out of the file?")
     parser.add_argument("--file", type=str, help="What .csv file should we filter?")
     parser.add_argument("--out", type=str, help="Name of filtered file?", default="filtered.csv")
