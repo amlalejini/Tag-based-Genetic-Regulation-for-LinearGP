@@ -1,65 +1,72 @@
-# Source
+# source/
 
-[./native/](./native/) contains the .cc files for each of the four experiments:
+[./native/](./native/) contains the .cc files for our genetic programing problems:
 
-- Repeated signal task
-- Changing signal task
-- Directional signal task
-- Multicellular differentiation task
+- Repeated-signal problem (alt-signal-exp.cc)
+- Contextual-signal problem (bool-calc-exp.cc)
+- Changing-signal problem (chg-env-exp.cc)
+- Boolean logic calculator problem (bool-calc-exp.cc)
 
-Note that that the 'repeated signal task' is also referred to as the 'alternating signal environment',
-the 'changing signal task' is also referred to as the 'changing environment', and the 'multicellular
-differentiation task' is also referred to as the 'multicellular regulation task/environment'.
-
-When we down-scoped the paper, we excluded discussion (and further experimentation with) the multicellular
-differentiation task.
-
-The [./web/](./web/) is where we would house the .cc files for Emscripten web versions. As of me writing
-this readme, web versions of experiments do not exist, and as such, the web directory has only a stub
-.cc file.
+Below, we give the external dependencies for compiling our experiments, and we give which source files are associated with each of the problems.
 
 ## External Library Dependencies
 
 - Empirical
-  - repository: <https://github.com/devosoft/Empirical>
-  - commit: `d4306d33d5e68a3a52b304bd4b1ea394958dd8bd`
+  - We used a (minimally) modified version of the Empirical library that can be found on my fork of Empirical; here's the exact commit: <https://github.com/amlalejini/Empirical/tree/e72dae6490dee5caf8e5ec04a634b483d2ad4293>
+    - commit `e72dae6490dee5caf8e5ec04a634b483d2ad4293`
+  - Main Empirical repository: <https://github.com/devosoft/Empirical>
+    - If you're interested in using Empirical in your own projects, I recommend jumping over to the main Empirical repository!
 - SignalGP implementation
   - repository: <https://github.com/amlalejini/SignalGP>
-  - commit: `63d1966ca7fa98d3de634e5e8c316099ab9f68be`
+  - here's a link to the exact commit: <https://github.com/amlalejini/SignalGP/tree/83d879cfdb6540862315dc454c1525ccd8054e65>
+    - commit `83d879cfdb6540862315dc454c1525ccd8054e65`
 
-## Repeated Signal Task
+## Repeated-signal problem
 
-Also called 'alternating signal environment'.
+Also called 'alternating signal environment' in source code.
 
 Experiment-specific source files:
 
 - AltSignalConfig.h
 - AltSignalOrg.h
 - AltSignalWorld.h
+- native/alt-signal-exp.cc
 
-## Changing Signal Task
+## Contextual-signal problem
 
-Also called 'changing environment'.
+The contextual-signal problem is (perhaps confusingly) carried out using the boolean logic calculator source code. Except, instead of providing input/output examples that describe calculator problems, we configure categorical output (`CATEGORICAL_OUTPUT`) and provide examples that look more like [this](../experiments/2020-11-27-context-sig/hpcc/examples_S4.csv).
+
+- BoolCalcConfig.h
+- BoolCalcOrg.h
+- BoolCalcTestCase.h
+- BoolCalcWorld.h
+- native/bool-calc-exp.cc
+
+## Changing-signal problem
+
+Also called 'changing environment problem' in source code.
 
 Experiment-specific source files:
 
 - ChgEnvOrg.h
 - ChgEnvWorld.h
 - ChgEnvConfig.h
+- native/chg-env-exp.cc
 
+## Boolean logic calculator problem
 
-## Directional Signal Task
-
-Experiment-specific source files:
-
-- DirSignalWorld.h
-- DirSignalConfig.h
-- DirSignalOrg.h
+- [BoolCalcConfig.h](./BoolCalcConfig.h)
+- [BoolCalcOrg.h](./BoolCalcOrg.h)
+- [BoolCalcTestCase.h](./BoolCalcTestCase.h)
+- [BoolCalcWorld.h](./BoolCalcWorld.h)
+- [native/bool-calc-exp.cc](./native/bool-calc-exp.cc)
 
 ## Cross-task Utilities
 
 - Event.h
-  - Defines custom SignalGP message types used across different tasks.
+  - Defines custom SignalGP event types used across different tasks.
+- matchbin_regulators.h
+  - Defines the exponential tag-matching regulator used in this work.
 - mutation_utils.h
   - Defines mutator utility for SignalGP programs.
 - reg_ko_instr_impls.h
