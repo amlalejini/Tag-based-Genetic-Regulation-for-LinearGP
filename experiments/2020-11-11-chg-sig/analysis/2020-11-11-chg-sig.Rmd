@@ -189,7 +189,7 @@ ggplot( sol_data, aes(x=condition, y=update, fill=condition) ) +
   guides(fill = FALSE) +
   guides(color = FALSE)
 
-print(wilcox.test(formula=update~condition, data=data, exact=FALSE, conf.int=TRUE))
+print(wilcox.test(formula=update~condition, data=sol_data, exact=FALSE, conf.int=TRUE))
 ```
 
 The difference in the number of generations before a solution arises is not significantly different.
