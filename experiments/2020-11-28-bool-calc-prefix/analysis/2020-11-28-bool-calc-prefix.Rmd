@@ -19,8 +19,8 @@ generations <- 10000
 alpha <- 0.05
 
 # Relative location of data.
-# working_directory <- "experiments/2020-11-28-bool-calc-prefix/analysis/" # << For bookdown
-working_directory <- "./"                                              # << For local analysis
+working_directory <- "experiments/2020-11-28-bool-calc-prefix/analysis/" # << For bookdown
+# working_directory <- "./"                                              # << For local analysis
 ```
 
 The Boolean logic calculator problem requires programs to implement a calculator capable of performing each of the following 10 bitwise logic operations:

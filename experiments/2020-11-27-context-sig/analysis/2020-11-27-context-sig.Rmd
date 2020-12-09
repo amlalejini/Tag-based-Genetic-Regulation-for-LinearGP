@@ -79,7 +79,7 @@ data$task <- factor(
 )
 
 # Filter down to only data we use in paper.
-data <- filter(task=="S4")
+data <- filter(data, task=="S4")
 
 # Define function to summarize regulation/memory configurations.
 get_con <- function(reg, mem) {
@@ -203,7 +203,7 @@ ggplot(filter(sol_data, task=="S4"), aes(x=condition, fill=condition)) +
   ylab("# successful replciates") +
   theme(legend.position = "none") +
   ggsave(
-    paste0(working_directory, "context-signal-solution-counts.pdf"),
+    paste0(working_directory, "imgs/context-signal-solution-counts.pdf"),
     width=4,
     height=4
   )
