@@ -1,26 +1,24 @@
 # Target project
-# PROJECT options: alt-signal-exp, chg-env-exp, dir-signal-exp
-PROJECT := bool-calc-exp
+# PROJECT options: alt-signal-exp, chg-env-exp, bool-calc-exp
+PROJECT ?= bool-calc-exp
 # - Repeated signal task -
 # PROJECT := alt-signal-exp
 # - Changing signal task -
 # PROJECT := chg-env-exp
-# - Directional signal task -
-# PROJECT := dir-signal-exp
 
 # Dependency directories
-EMP_DIR := ../Empirical/include
-SGP_DIR := ../SignalGP/source
+EMP_DIR ?= ../Empirical/include
+SGP_DIR ?= ../SignalGP/source
 
 # Compile-time parameter configuration (tag metric, matching threshold, matching regulator, tag size)
 # MATCH_METRIC options: hamming, hash, integer, integer-symmetric, streak, streak-exact
-MATCH_METRIC := streak
+MATCH_METRIC ?= streak
 # MATCH_THRESH options: 0, 25, 50, 75
-MATCH_THRESH := 0
+MATCH_THRESH ?= 0
 # MATCH_REG options: add, mult, exp
-MATCH_REG := exp
+MATCH_REG ?= exp
 # TAG_NUM_BITS
-TAG_NUM_BITS := 256
+TAG_NUM_BITS ?= 256
 
 # Executable name
 # combine it all into the executable name
