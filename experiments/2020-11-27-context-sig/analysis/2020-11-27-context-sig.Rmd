@@ -6,7 +6,6 @@ The raw data can be found on the OSF project associated with this work (link com
 
 **Please [file an issue or make a pull request on github](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues) to report any mistakes, ask questions, request more explanation, et cetera.**
 
-
 ## Overview
 
 ```{r}
@@ -78,6 +77,9 @@ data$task <- factor(
   data$task,
   levels=c("S2", "S3", "S4")
 )
+
+# Filter down to only data we use in paper.
+data <- filter(task=="S4")
 
 # Define function to summarize regulation/memory configurations.
 get_con <- function(reg, mem) {
@@ -212,10 +214,10 @@ Test for significance using Fisher's exact test.
 ```{r}
 # Extract successes/fails for each condition.
 reg_disabled_success_cnt <- nrow(filter(sol_data, task=="S4" & solution=="1" & condition=="memory"))
-reg_disabled_fail_cnt <- nrow(filter(sol_data, task=="S4" & condition=="memory")) - reg_disabled_success_cnt
+reg_disabled_fail_cnt <- replicates - reg_disabled_success_cnt
 
 reg_enabled_success_cnt <- nrow(filter(sol_data, task=="S4" & solution=="1" & condition=="both"))
-reg_enabled_fail_cnt <- nrow(filter(sol_data, task=="S4" & condition=="both")) - reg_enabled_success_cnt
+reg_enabled_fail_cnt <- replicates - reg_enabled_success_cnt
 
 # Regulation-disabled vs regulation-enabled
 perf_table <- matrix(
@@ -272,7 +274,7 @@ ggplot( data = filter(sol_data, task=="S4"), aes(x=condition, y=update, fill=con
 Test for statistical difference between conditions using a Wilcoxon rank sum test.
 
 ```{r}
-print(wilcox.test(formula=update~condition, data=sol_data, exact=FALSE, conf.int=TRUE))
+print(wilcox.test(formula=update~condition, data=filter(sol_data, task=="S4"), exact=FALSE, conf.int=TRUE))
 ```
 
 ## Evolved strategies
@@ -408,7 +410,7 @@ print(wilcox.test(formula=reg_edges_cnt ~ reg_edge_type, data=filter(melted_netw
 
 #### Execution time
 
-How many time steps do evolved programs use to solve the repeated-signal task?
+How many time steps do evolved programs use to solve the contextual-signal task?
 
 ```{r}
 # only want solutions
@@ -502,7 +504,7 @@ ggplot( melted, aes(x=inst_type, y=inst_type_prop, color=condition) ) +
   theme(legend.position="bottom")
 ```
 
-## Case study: visualizing an evolved gene regulatory network
+## Visualizing an evolved gene regulatory network
 
 Let's take a closer look at a successful gene regulatory network.
 

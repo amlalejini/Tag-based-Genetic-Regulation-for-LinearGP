@@ -258,6 +258,7 @@ table <- matrix(c(num_generalize_reg,
                 nrow=2)
 rownames(table) <- c("reg-augmented", "reg-disabled")
 colnames(table) <- c("success", "fail")
+print(table)
 fisher.test(table)
 ```
 
