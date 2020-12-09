@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 6 Boolean calculator problem (prefix notation) | Analyses for Tag-based Genetic Regulation for Genetic Programming</title>
+  <meta name="description" content="This is a test." />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 6 Boolean calculator problem (prefix notation) | Analyses for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a test." />
+  <meta name="github-repo" content="amlalejini/Tag-based-Genetic-Regulation-for-LinearGP" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 6 Boolean calculator problem (prefix notation) | Analyses for Tag-based Genetic Regulation for Genetic Programming" />
+  
+  <meta name="twitter:description" content="This is a test." />
+  
+
+<meta name="author" content="Alexander Lalejini" />
+
+
+<meta name="date" content="2020-12-09" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="contextual-signal-problem-analysis.html"/>
+
+<script src="libs/header-attrs-2.5/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
+<link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Supplemental material</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Test</a></li>
+<li class="chapter" data-level="2" data-path="signalgp-digital-organisms.html"><a href="signalgp-digital-organisms.html"><i class="fa fa-check"></i><b>2</b> SignalGP Digital Organisms</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="signalgp-digital-organisms.html"><a href="signalgp-digital-organisms.html#memory-model"><i class="fa fa-check"></i><b>2.1</b> Memory model</a></li>
+<li class="chapter" data-level="2.2" data-path="signalgp-digital-organisms.html"><a href="signalgp-digital-organisms.html#mutation-operators"><i class="fa fa-check"></i><b>2.2</b> Mutation operators</a></li>
+<li class="chapter" data-level="2.3" data-path="signalgp-digital-organisms.html"><a href="signalgp-digital-organisms.html#instruction-set"><i class="fa fa-check"></i><b>2.3</b> Instruction Set</a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="signalgp-digital-organisms.html"><a href="signalgp-digital-organisms.html#default-instructions"><i class="fa fa-check"></i><b>2.3.1</b> Default Instructions</a></li>
+<li class="chapter" data-level="2.3.2" data-path="signalgp-digital-organisms.html"><a href="signalgp-digital-organisms.html#global-memory-access-instructions"><i class="fa fa-check"></i><b>2.3.2</b> Global memory access instructions</a></li>
+<li class="chapter" data-level="2.3.3" data-path="signalgp-digital-organisms.html"><a href="signalgp-digital-organisms.html#regulation-instructions"><i class="fa fa-check"></i><b>2.3.3</b> Regulation instructions</a></li>
+<li class="chapter" data-level="2.3.4" data-path="signalgp-digital-organisms.html"><a href="signalgp-digital-organisms.html#task-specific-instructions"><i class="fa fa-check"></i><b>2.3.4</b> Task-specific instructions</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="signalgp-digital-organisms.html"><a href="signalgp-digital-organisms.html#references"><i class="fa fa-check"></i><b>2.4</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html"><i class="fa fa-check"></i><b>3</b> Changing-signal problem analysis</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#overview"><i class="fa fa-check"></i><b>3.1</b> Overview</a></li>
+<li class="chapter" data-level="3.2" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#analysis-dependencies"><i class="fa fa-check"></i><b>3.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="3.3" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#setup"><i class="fa fa-check"></i><b>3.3</b> Setup</a></li>
+<li class="chapter" data-level="3.4" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#does-regulation-hinder-the-evolution-of-successful-genotypes"><i class="fa fa-check"></i><b>3.4</b> Does regulation hinder the evolution of successful genotypes?</a>
+<ul>
+<li class="chapter" data-level="3.4.1" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#does-access-to-regulation-slow-adaptation"><i class="fa fa-check"></i><b>3.4.1</b> Does access to regulation slow adaptation?</a></li>
+<li class="chapter" data-level="3.4.2" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#do-they-generalize"><i class="fa fa-check"></i><b>3.4.2</b> Do they generalize?</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html"><i class="fa fa-check"></i><b>4</b> Repeated-signal problem analysis</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#overview-1"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
+<li class="chapter" data-level="4.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#analysis-dependencies-1"><i class="fa fa-check"></i><b>4.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="4.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#setup-1"><i class="fa fa-check"></i><b>4.3</b> Setup</a></li>
+<li class="chapter" data-level="4.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#problem-solving-success"><i class="fa fa-check"></i><b>4.4</b> Problem-solving success</a>
+<ul>
+<li class="chapter" data-level="4.4.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#number-of-successful-replicates-by-condition"><i class="fa fa-check"></i><b>4.4.1</b> Number of successful replicates by condition</a></li>
+<li class="chapter" data-level="4.4.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#aggregate-fitness-scores-by-condition"><i class="fa fa-check"></i><b>4.4.2</b> Aggregate fitness scores by condition</a></li>
+</ul></li>
+<li class="chapter" data-level="4.5" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#how-many-generations-elapse-before-solutions-evolve"><i class="fa fa-check"></i><b>4.5</b> How many generations elapse before solutions evolve?</a>
+<ul>
+<li class="chapter" data-level="4.5.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#two-signal-task---statistical-analysis"><i class="fa fa-check"></i><b>4.5.1</b> Two-signal task - statistical analysis</a></li>
+<li class="chapter" data-level="4.5.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#four-signal-task---statistical-analysis"><i class="fa fa-check"></i><b>4.5.2</b> Four-signal task - statistical analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="4.6" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#teasing-apart-evolved-strategies"><i class="fa fa-check"></i><b>4.6</b> Teasing apart evolved strategies</a>
+<ul>
+<li class="chapter" data-level="4.6.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#do-solutions-rely-on-genetic-regulation-or-global-memory-access-to-dynamically-adjust-responses"><i class="fa fa-check"></i><b>4.6.1</b> Do solutions rely on genetic regulation or global memory access to dynamically adjust responses?</a></li>
+<li class="chapter" data-level="4.6.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#what-forms-of-genetic-regulation-do-evolved-programs-rely-on"><i class="fa fa-check"></i><b>4.6.2</b> What forms of genetic regulation do evolved programs rely on?</a></li>
+<li class="chapter" data-level="4.6.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#are-evolved-programs-relying-on-stochastic-strategies"><i class="fa fa-check"></i><b>4.6.3</b> Are evolved programs relying on stochastic strategies?</a></li>
+<li class="chapter" data-level="4.6.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#program-instruction-execution-traces"><i class="fa fa-check"></i><b>4.6.4</b> Program instruction execution traces</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#case-study-visualizing-regulation-in-an-evolved-program"><i class="fa fa-check"></i><b>4.7</b> Case study: visualizing regulation in an evolved program</a>
+<ul>
+<li class="chapter" data-level="4.7.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#data-wrangling"><i class="fa fa-check"></i><b>4.7.1</b> Data wrangling</a></li>
+<li class="chapter" data-level="4.7.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#function-regulation-over-time"><i class="fa fa-check"></i><b>4.7.2</b> Function regulation over time</a></li>
+<li class="chapter" data-level="4.7.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#environmental-signal-tag-match-score-over-time"><i class="fa fa-check"></i><b>4.7.3</b> Environmental signal tag-match score over time</a></li>
+<li class="chapter" data-level="4.7.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#evolved-regulatory-network"><i class="fa fa-check"></i><b>4.7.4</b> Evolved regulatory network</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html"><i class="fa fa-check"></i><b>5</b> Contextual-signal problem analysis</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#overview-2"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
+<li class="chapter" data-level="5.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#analysis-dependencies-2"><i class="fa fa-check"></i><b>5.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="5.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#setup-2"><i class="fa fa-check"></i><b>5.3</b> Setup</a></li>
+<li class="chapter" data-level="5.4" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#problem-solving-success-1"><i class="fa fa-check"></i><b>5.4</b> Problem-solving success</a></li>
+<li class="chapter" data-level="5.5" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#how-many-generations-elapse-before-solutions-evolve-1"><i class="fa fa-check"></i><b>5.5</b> How many generations elapse before solutions evolve?</a></li>
+<li class="chapter" data-level="5.6" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-strategies"><i class="fa fa-check"></i><b>5.6</b> Evolved strategies</a>
+<ul>
+<li class="chapter" data-level="5.6.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time"><i class="fa fa-check"></i><b>5.6.1</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
+<li class="chapter" data-level="5.6.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#gene-regulatory-networks"><i class="fa fa-check"></i><b>5.6.2</b> Gene regulatory networks</a></li>
+<li class="chapter" data-level="5.6.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#program-instruction-execution-traces-1"><i class="fa fa-check"></i><b>5.6.3</b> Program instruction execution traces</a></li>
+</ul></li>
+<li class="chapter" data-level="5.7" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#visualizing-an-evolved-gene-regulatory-network"><i class="fa fa-check"></i><b>5.7</b> Visualizing an evolved gene regulatory network</a>
+<ul>
+<li class="chapter" data-level="5.7.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-regulatory-network-1"><i class="fa fa-check"></i><b>5.7.1</b> Evolved regulatory network</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html"><i class="fa fa-check"></i><b>6</b> Boolean calculator problem (prefix notation)</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#overview-3"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
+<li class="chapter" data-level="6.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#analysis-dependencies-3"><i class="fa fa-check"></i><b>6.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="6.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#setup-3"><i class="fa fa-check"></i><b>6.3</b> Setup</a></li>
+<li class="chapter" data-level="6.4" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#problem-solving-success-2"><i class="fa fa-check"></i><b>6.4</b> Problem-solving success</a></li>
+<li class="chapter" data-level="6.5" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#how-many-generations-elapse-before-solutions-evolve-2"><i class="fa fa-check"></i><b>6.5</b> How many generations elapse before solutions evolve?</a></li>
+<li class="chapter" data-level="6.6" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-strategies-1"><i class="fa fa-check"></i><b>6.6</b> Evolved strategies</a>
+<ul>
+<li class="chapter" data-level="6.6.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-1"><i class="fa fa-check"></i><b>6.6.1</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
+<li class="chapter" data-level="6.6.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#gene-regulatory-networks-1"><i class="fa fa-check"></i><b>6.6.2</b> Gene regulatory networks</a></li>
+<li class="chapter" data-level="6.6.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#program-instruction-execution-traces-2"><i class="fa fa-check"></i><b>6.6.3</b> Program instruction execution traces</a></li>
+</ul></li>
+<li class="chapter" data-level="6.7" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#visualizaing-an-evolved-regulatory-network"><i class="fa fa-check"></i><b>6.7</b> Visualizaing an evolved regulatory network</a>
+<ul>
+<li class="chapter" data-level="6.7.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-regulatory-network-2"><i class="fa fa-check"></i><b>6.7.1</b> Evolved regulatory network</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Analyses for Tag-based Genetic Regulation for Genetic Programming</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="boolean-calculator-problem-prefix-notation" class="section level1" number="6">
+<h1><span class="header-section-number">Chapter 6</span> Boolean calculator problem (prefix notation)</h1>
+<p>Here, we give an overview of the boolean logic calculator problem, and we provide our data analyses for related experiments.
+All of our source code for statistical analyses and data visualizations is embedded in this document.
+The raw data can be found on the OSF project associated with this work (link coming).</p>
+<p><strong>Please <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues">file an issue or make a pull request on github</a> to report any mistakes, ask questions, request more explanation, et cetera.</strong></p>
+<div id="overview-3" class="section level2" number="6.1">
+<h2><span class="header-section-number">6.1</span> Overview</h2>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="boolean-calculator-problem-prefix-notation.html#cb104-1" aria-hidden="true"></a><span class="co"># Experimental parameters referenced in-text all in one convenient place.</span></span>
+<span id="cb104-2"><a href="boolean-calculator-problem-prefix-notation.html#cb104-2" aria-hidden="true"></a>time_steps &lt;-<span class="st"> </span><span class="dv">128</span></span>
+<span id="cb104-3"><a href="boolean-calculator-problem-prefix-notation.html#cb104-3" aria-hidden="true"></a>replicates &lt;-<span class="st"> </span><span class="dv">200</span></span>
+<span id="cb104-4"><a href="boolean-calculator-problem-prefix-notation.html#cb104-4" aria-hidden="true"></a>population_size &lt;-<span class="st"> </span><span class="dv">1000</span></span>
+<span id="cb104-5"><a href="boolean-calculator-problem-prefix-notation.html#cb104-5" aria-hidden="true"></a>generations &lt;-<span class="st"> </span><span class="dv">10000</span></span>
+<span id="cb104-6"><a href="boolean-calculator-problem-prefix-notation.html#cb104-6" aria-hidden="true"></a></span>
+<span id="cb104-7"><a href="boolean-calculator-problem-prefix-notation.html#cb104-7" aria-hidden="true"></a><span class="co"># Settings for statistical analyses.</span></span>
+<span id="cb104-8"><a href="boolean-calculator-problem-prefix-notation.html#cb104-8" aria-hidden="true"></a>alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></span>
+<span id="cb104-9"><a href="boolean-calculator-problem-prefix-notation.html#cb104-9" aria-hidden="true"></a></span>
+<span id="cb104-10"><a href="boolean-calculator-problem-prefix-notation.html#cb104-10" aria-hidden="true"></a><span class="co"># Relative location of data.</span></span>
+<span id="cb104-11"><a href="boolean-calculator-problem-prefix-notation.html#cb104-11" aria-hidden="true"></a>working_directory &lt;-<span class="st"> &quot;experiments/2020-11-28-bool-calc-prefix/analysis/&quot;</span> <span class="co"># &lt;&lt; For bookdown</span></span>
+<span id="cb104-12"><a href="boolean-calculator-problem-prefix-notation.html#cb104-12" aria-hidden="true"></a><span class="co"># working_directory &lt;- &quot;./&quot;                                              # &lt;&lt; For local analysis</span></span></code></pre></div>
+<p>The Boolean logic calculator problem requires programs to implement a calculator capable of performing each of the following 10 bitwise logic operations:
+ECHO, NOT, NAND, AND, OR-NOT, OR, AND-NOT, NOR, XOR, and EQUALS.
+In this problem, there are 11 distinct types of input signals: one for each of the 10 possible operators and one for numeric inputs.
+Each distinct signal type is associated with a unique tag and is meant to represent different types of buttons that could be pressed on a physical calculator.
+Programs receive a sequence of input signals in <em>prefix notation</em>, receiving an operator signal followed by the appropriate number of numeric input signals (that each contain an operand to use in the computation).
+After receiving the requisite input signals, programs must output the correct result of the requested computation.</p>
+</div>
+<div id="analysis-dependencies-3" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> Analysis Dependencies</h2>
+<p>Load all required R libraries.</p>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="boolean-calculator-problem-prefix-notation.html#cb105-1" aria-hidden="true"></a><span class="kw">library</span>(ggplot2)</span>
+<span id="cb105-2"><a href="boolean-calculator-problem-prefix-notation.html#cb105-2" aria-hidden="true"></a><span class="kw">library</span>(tidyverse)</span>
+<span id="cb105-3"><a href="boolean-calculator-problem-prefix-notation.html#cb105-3" aria-hidden="true"></a><span class="kw">library</span>(cowplot)</span>
+<span id="cb105-4"><a href="boolean-calculator-problem-prefix-notation.html#cb105-4" aria-hidden="true"></a><span class="kw">library</span>(viridis)</span>
+<span id="cb105-5"><a href="boolean-calculator-problem-prefix-notation.html#cb105-5" aria-hidden="true"></a><span class="kw">library</span>(reshape2)</span>
+<span id="cb105-6"><a href="boolean-calculator-problem-prefix-notation.html#cb105-6" aria-hidden="true"></a><span class="kw">library</span>(igraph)</span>
+<span id="cb105-7"><a href="boolean-calculator-problem-prefix-notation.html#cb105-7" aria-hidden="true"></a><span class="kw">source</span>(<span class="st">&quot;https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R&quot;</span>)</span></code></pre></div>
+<p>These analyses were conducted in the following computing environment:</p>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="boolean-calculator-problem-prefix-notation.html#cb106-1" aria-hidden="true"></a><span class="kw">print</span>(version)</span></code></pre></div>
+<pre><code>##                _                           
+## platform       x86_64-pc-linux-gnu         
+## arch           x86_64                      
+## os             linux-gnu                   
+## system         x86_64, linux-gnu           
+## status                                     
+## major          4                           
+## minor          0.2                         
+## year           2020                        
+## month          06                          
+## day            22                          
+## svn rev        78730                       
+## language       R                           
+## version.string R version 4.0.2 (2020-06-22)
+## nickname       Taking Off Again</code></pre>
+</div>
+<div id="setup-3" class="section level2" number="6.3">
+<h2><span class="header-section-number">6.3</span> Setup</h2>
+<p>Load data, initial data cleanup, configure some global settings.</p>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="boolean-calculator-problem-prefix-notation.html#cb108-1" aria-hidden="true"></a>data_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/max_fit_orgs.csv&quot;</span>)</span>
+<span id="cb108-2"><a href="boolean-calculator-problem-prefix-notation.html#cb108-2" aria-hidden="true"></a>data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(data_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb108-3"><a href="boolean-calculator-problem-prefix-notation.html#cb108-3" aria-hidden="true"></a></span>
+<span id="cb108-4"><a href="boolean-calculator-problem-prefix-notation.html#cb108-4" aria-hidden="true"></a><span class="co"># Specify factors (not all of these matter for this set of runs).</span></span>
+<span id="cb108-5"><a href="boolean-calculator-problem-prefix-notation.html#cb108-5" aria-hidden="true"></a>data<span class="op">$</span>matchbin_thresh &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb108-6"><a href="boolean-calculator-problem-prefix-notation.html#cb108-6" aria-hidden="true"></a>  data<span class="op">$</span>matchbin_thresh,</span>
+<span id="cb108-7"><a href="boolean-calculator-problem-prefix-notation.html#cb108-7" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">75</span>)</span>
+<span id="cb108-8"><a href="boolean-calculator-problem-prefix-notation.html#cb108-8" aria-hidden="true"></a>)</span>
+<span id="cb108-9"><a href="boolean-calculator-problem-prefix-notation.html#cb108-9" aria-hidden="true"></a></span>
+<span id="cb108-10"><a href="boolean-calculator-problem-prefix-notation.html#cb108-10" aria-hidden="true"></a>data<span class="op">$</span>TAG_LEN &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb108-11"><a href="boolean-calculator-problem-prefix-notation.html#cb108-11" aria-hidden="true"></a>  data<span class="op">$</span>TAG_LEN,</span>
+<span id="cb108-12"><a href="boolean-calculator-problem-prefix-notation.html#cb108-12" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="dv">32</span>, <span class="dv">64</span>, <span class="dv">128</span>, <span class="dv">256</span>)</span>
+<span id="cb108-13"><a href="boolean-calculator-problem-prefix-notation.html#cb108-13" aria-hidden="true"></a>)</span>
+<span id="cb108-14"><a href="boolean-calculator-problem-prefix-notation.html#cb108-14" aria-hidden="true"></a></span>
+<span id="cb108-15"><a href="boolean-calculator-problem-prefix-notation.html#cb108-15" aria-hidden="true"></a>data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb108-16"><a href="boolean-calculator-problem-prefix-notation.html#cb108-16" aria-hidden="true"></a>  data<span class="op">$</span>notation,</span>
+<span id="cb108-17"><a href="boolean-calculator-problem-prefix-notation.html#cb108-17" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;prefix&quot;</span>, <span class="st">&quot;postfix&quot;</span>)</span>
+<span id="cb108-18"><a href="boolean-calculator-problem-prefix-notation.html#cb108-18" aria-hidden="true"></a>)</span>
+<span id="cb108-19"><a href="boolean-calculator-problem-prefix-notation.html#cb108-19" aria-hidden="true"></a></span>
+<span id="cb108-20"><a href="boolean-calculator-problem-prefix-notation.html#cb108-20" aria-hidden="true"></a><span class="co"># Define function to summarize regulation/memory configurations.</span></span>
+<span id="cb108-21"><a href="boolean-calculator-problem-prefix-notation.html#cb108-21" aria-hidden="true"></a>get_con &lt;-<span class="st"> </span><span class="cf">function</span>(reg, mem) {</span>
+<span id="cb108-22"><a href="boolean-calculator-problem-prefix-notation.html#cb108-22" aria-hidden="true"></a>  <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem <span class="op">==</span><span class="st"> &quot;0&quot;</span>) {</span>
+<span id="cb108-23"><a href="boolean-calculator-problem-prefix-notation.html#cb108-23" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;none&quot;</span>)</span>
+<span id="cb108-24"><a href="boolean-calculator-problem-prefix-notation.html#cb108-24" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb108-25"><a href="boolean-calculator-problem-prefix-notation.html#cb108-25" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;memory&quot;</span>)</span>
+<span id="cb108-26"><a href="boolean-calculator-problem-prefix-notation.html#cb108-26" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
+<span id="cb108-27"><a href="boolean-calculator-problem-prefix-notation.html#cb108-27" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;regulation&quot;</span>)</span>
+<span id="cb108-28"><a href="boolean-calculator-problem-prefix-notation.html#cb108-28" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb108-29"><a href="boolean-calculator-problem-prefix-notation.html#cb108-29" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;both&quot;</span>)</span>
+<span id="cb108-30"><a href="boolean-calculator-problem-prefix-notation.html#cb108-30" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
+<span id="cb108-31"><a href="boolean-calculator-problem-prefix-notation.html#cb108-31" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
+<span id="cb108-32"><a href="boolean-calculator-problem-prefix-notation.html#cb108-32" aria-hidden="true"></a>  }</span>
+<span id="cb108-33"><a href="boolean-calculator-problem-prefix-notation.html#cb108-33" aria-hidden="true"></a>}</span>
+<span id="cb108-34"><a href="boolean-calculator-problem-prefix-notation.html#cb108-34" aria-hidden="true"></a></span>
+<span id="cb108-35"><a href="boolean-calculator-problem-prefix-notation.html#cb108-35" aria-hidden="true"></a><span class="co"># Specify experimental condition for each datum.</span></span>
+<span id="cb108-36"><a href="boolean-calculator-problem-prefix-notation.html#cb108-36" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb108-37"><a href="boolean-calculator-problem-prefix-notation.html#cb108-37" aria-hidden="true"></a>  get_con,</span>
+<span id="cb108-38"><a href="boolean-calculator-problem-prefix-notation.html#cb108-38" aria-hidden="true"></a>  data<span class="op">$</span>USE_FUNC_REGULATION,</span>
+<span id="cb108-39"><a href="boolean-calculator-problem-prefix-notation.html#cb108-39" aria-hidden="true"></a>  data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
+<span id="cb108-40"><a href="boolean-calculator-problem-prefix-notation.html#cb108-40" aria-hidden="true"></a>)</span>
+<span id="cb108-41"><a href="boolean-calculator-problem-prefix-notation.html#cb108-41" aria-hidden="true"></a></span>
+<span id="cb108-42"><a href="boolean-calculator-problem-prefix-notation.html#cb108-42" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb108-43"><a href="boolean-calculator-problem-prefix-notation.html#cb108-43" aria-hidden="true"></a>  data<span class="op">$</span>condition,</span>
+<span id="cb108-44"><a href="boolean-calculator-problem-prefix-notation.html#cb108-44" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb108-45"><a href="boolean-calculator-problem-prefix-notation.html#cb108-45" aria-hidden="true"></a>)</span>
+<span id="cb108-46"><a href="boolean-calculator-problem-prefix-notation.html#cb108-46" aria-hidden="true"></a></span>
+<span id="cb108-47"><a href="boolean-calculator-problem-prefix-notation.html#cb108-47" aria-hidden="true"></a><span class="co"># Given knockout info, what strategy does a program use?</span></span>
+<span id="cb108-48"><a href="boolean-calculator-problem-prefix-notation.html#cb108-48" aria-hidden="true"></a>get_strategy &lt;-<span class="st"> </span><span class="cf">function</span>(use_reg, use_mem) {</span>
+<span id="cb108-49"><a href="boolean-calculator-problem-prefix-notation.html#cb108-49" aria-hidden="true"></a>  <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
+<span id="cb108-50"><a href="boolean-calculator-problem-prefix-notation.html#cb108-50" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use neither&quot;</span>)</span>
+<span id="cb108-51"><a href="boolean-calculator-problem-prefix-notation.html#cb108-51" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb108-52"><a href="boolean-calculator-problem-prefix-notation.html#cb108-52" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use memory&quot;</span>)</span>
+<span id="cb108-53"><a href="boolean-calculator-problem-prefix-notation.html#cb108-53" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
+<span id="cb108-54"><a href="boolean-calculator-problem-prefix-notation.html#cb108-54" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use regulation&quot;</span>)</span>
+<span id="cb108-55"><a href="boolean-calculator-problem-prefix-notation.html#cb108-55" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb108-56"><a href="boolean-calculator-problem-prefix-notation.html#cb108-56" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use both&quot;</span>)</span>
+<span id="cb108-57"><a href="boolean-calculator-problem-prefix-notation.html#cb108-57" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
+<span id="cb108-58"><a href="boolean-calculator-problem-prefix-notation.html#cb108-58" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
+<span id="cb108-59"><a href="boolean-calculator-problem-prefix-notation.html#cb108-59" aria-hidden="true"></a>  }</span>
+<span id="cb108-60"><a href="boolean-calculator-problem-prefix-notation.html#cb108-60" aria-hidden="true"></a>}</span>
+<span id="cb108-61"><a href="boolean-calculator-problem-prefix-notation.html#cb108-61" aria-hidden="true"></a></span>
+<span id="cb108-62"><a href="boolean-calculator-problem-prefix-notation.html#cb108-62" aria-hidden="true"></a><span class="co"># Specify experimental conditions (to make labeling easier).</span></span>
+<span id="cb108-63"><a href="boolean-calculator-problem-prefix-notation.html#cb108-63" aria-hidden="true"></a>data<span class="op">$</span>strategy &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb108-64"><a href="boolean-calculator-problem-prefix-notation.html#cb108-64" aria-hidden="true"></a>  get_strategy,</span>
+<span id="cb108-65"><a href="boolean-calculator-problem-prefix-notation.html#cb108-65" aria-hidden="true"></a>  data<span class="op">$</span>relies_on_regulation,</span>
+<span id="cb108-66"><a href="boolean-calculator-problem-prefix-notation.html#cb108-66" aria-hidden="true"></a>  data<span class="op">$</span>relies_on_global_memory</span>
+<span id="cb108-67"><a href="boolean-calculator-problem-prefix-notation.html#cb108-67" aria-hidden="true"></a>)</span>
+<span id="cb108-68"><a href="boolean-calculator-problem-prefix-notation.html#cb108-68" aria-hidden="true"></a></span>
+<span id="cb108-69"><a href="boolean-calculator-problem-prefix-notation.html#cb108-69" aria-hidden="true"></a>data<span class="op">$</span>strategy &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb108-70"><a href="boolean-calculator-problem-prefix-notation.html#cb108-70" aria-hidden="true"></a>  data<span class="op">$</span>strategy,</span>
+<span id="cb108-71"><a href="boolean-calculator-problem-prefix-notation.html#cb108-71" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(</span>
+<span id="cb108-72"><a href="boolean-calculator-problem-prefix-notation.html#cb108-72" aria-hidden="true"></a>    <span class="st">&quot;use regulation&quot;</span>,</span>
+<span id="cb108-73"><a href="boolean-calculator-problem-prefix-notation.html#cb108-73" aria-hidden="true"></a>    <span class="st">&quot;use memory&quot;</span>,</span>
+<span id="cb108-74"><a href="boolean-calculator-problem-prefix-notation.html#cb108-74" aria-hidden="true"></a>    <span class="st">&quot;use neither&quot;</span>,</span>
+<span id="cb108-75"><a href="boolean-calculator-problem-prefix-notation.html#cb108-75" aria-hidden="true"></a>    <span class="st">&quot;use both&quot;</span></span>
+<span id="cb108-76"><a href="boolean-calculator-problem-prefix-notation.html#cb108-76" aria-hidden="true"></a>  )</span>
+<span id="cb108-77"><a href="boolean-calculator-problem-prefix-notation.html#cb108-77" aria-hidden="true"></a>)</span>
+<span id="cb108-78"><a href="boolean-calculator-problem-prefix-notation.html#cb108-78" aria-hidden="true"></a></span>
+<span id="cb108-79"><a href="boolean-calculator-problem-prefix-notation.html#cb108-79" aria-hidden="true"></a><span class="co"># Filter data to include only replicates labeled as solutions</span></span>
+<span id="cb108-80"><a href="boolean-calculator-problem-prefix-notation.html#cb108-80" aria-hidden="true"></a>sol_data &lt;-<span class="st"> </span><span class="kw">filter</span>(data, solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)</span>
+<span id="cb108-81"><a href="boolean-calculator-problem-prefix-notation.html#cb108-81" aria-hidden="true"></a></span>
+<span id="cb108-82"><a href="boolean-calculator-problem-prefix-notation.html#cb108-82" aria-hidden="true"></a><span class="co">####### Load instruction execution data #######</span></span>
+<span id="cb108-83"><a href="boolean-calculator-problem-prefix-notation.html#cb108-83" aria-hidden="true"></a>inst_exec_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/exec_trace_summary.csv&quot;</span>), <span class="dt">na.strings=</span><span class="st">&quot;NA&quot;</span>)</span>
+<span id="cb108-84"><a href="boolean-calculator-problem-prefix-notation.html#cb108-84" aria-hidden="true"></a></span>
+<span id="cb108-85"><a href="boolean-calculator-problem-prefix-notation.html#cb108-85" aria-hidden="true"></a>inst_exec_data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb108-86"><a href="boolean-calculator-problem-prefix-notation.html#cb108-86" aria-hidden="true"></a>  get_con,</span>
+<span id="cb108-87"><a href="boolean-calculator-problem-prefix-notation.html#cb108-87" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>USE_FUNC_REGULATION,</span>
+<span id="cb108-88"><a href="boolean-calculator-problem-prefix-notation.html#cb108-88" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
+<span id="cb108-89"><a href="boolean-calculator-problem-prefix-notation.html#cb108-89" aria-hidden="true"></a>)</span>
+<span id="cb108-90"><a href="boolean-calculator-problem-prefix-notation.html#cb108-90" aria-hidden="true"></a></span>
+<span id="cb108-91"><a href="boolean-calculator-problem-prefix-notation.html#cb108-91" aria-hidden="true"></a>inst_exec_data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb108-92"><a href="boolean-calculator-problem-prefix-notation.html#cb108-92" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>condition,</span>
+<span id="cb108-93"><a href="boolean-calculator-problem-prefix-notation.html#cb108-93" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb108-94"><a href="boolean-calculator-problem-prefix-notation.html#cb108-94" aria-hidden="true"></a>)</span>
+<span id="cb108-95"><a href="boolean-calculator-problem-prefix-notation.html#cb108-95" aria-hidden="true"></a></span>
+<span id="cb108-96"><a href="boolean-calculator-problem-prefix-notation.html#cb108-96" aria-hidden="true"></a>inst_exec_data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb108-97"><a href="boolean-calculator-problem-prefix-notation.html#cb108-97" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>notation,</span>
+<span id="cb108-98"><a href="boolean-calculator-problem-prefix-notation.html#cb108-98" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;prefix&quot;</span>, <span class="st">&quot;postfix&quot;</span>)</span>
+<span id="cb108-99"><a href="boolean-calculator-problem-prefix-notation.html#cb108-99" aria-hidden="true"></a>)</span>
+<span id="cb108-100"><a href="boolean-calculator-problem-prefix-notation.html#cb108-100" aria-hidden="true"></a></span>
+<span id="cb108-101"><a href="boolean-calculator-problem-prefix-notation.html#cb108-101" aria-hidden="true"></a><span class="co">####### Load network data #######</span></span>
+<span id="cb108-102"><a href="boolean-calculator-problem-prefix-notation.html#cb108-102" aria-hidden="true"></a>reg_network_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/reg_graphs_summary.csv&quot;</span>), <span class="dt">na.strings=</span><span class="st">&quot;NA&quot;</span>)</span>
+<span id="cb108-103"><a href="boolean-calculator-problem-prefix-notation.html#cb108-103" aria-hidden="true"></a>reg_network_data &lt;-<span class="st"> </span><span class="kw">filter</span>(reg_network_data, run_id <span class="op">%in%</span><span class="st"> </span>data<span class="op">$</span>SEED)</span>
+<span id="cb108-104"><a href="boolean-calculator-problem-prefix-notation.html#cb108-104" aria-hidden="true"></a></span>
+<span id="cb108-105"><a href="boolean-calculator-problem-prefix-notation.html#cb108-105" aria-hidden="true"></a>get_notation &lt;-<span class="st"> </span><span class="cf">function</span>(seed) {</span>
+<span id="cb108-106"><a href="boolean-calculator-problem-prefix-notation.html#cb108-106" aria-hidden="true"></a>  <span class="kw">return</span>(<span class="kw">filter</span>(data, SEED<span class="op">==</span>seed)<span class="op">$</span>notation)</span>
+<span id="cb108-107"><a href="boolean-calculator-problem-prefix-notation.html#cb108-107" aria-hidden="true"></a>}</span>
+<span id="cb108-108"><a href="boolean-calculator-problem-prefix-notation.html#cb108-108" aria-hidden="true"></a></span>
+<span id="cb108-109"><a href="boolean-calculator-problem-prefix-notation.html#cb108-109" aria-hidden="true"></a>reg_network_data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb108-110"><a href="boolean-calculator-problem-prefix-notation.html#cb108-110" aria-hidden="true"></a>  get_notation,</span>
+<span id="cb108-111"><a href="boolean-calculator-problem-prefix-notation.html#cb108-111" aria-hidden="true"></a>  reg_network_data<span class="op">$</span>run_id</span>
+<span id="cb108-112"><a href="boolean-calculator-problem-prefix-notation.html#cb108-112" aria-hidden="true"></a>)</span>
+<span id="cb108-113"><a href="boolean-calculator-problem-prefix-notation.html#cb108-113" aria-hidden="true"></a></span>
+<span id="cb108-114"><a href="boolean-calculator-problem-prefix-notation.html#cb108-114" aria-hidden="true"></a>reg_network_data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb108-115"><a href="boolean-calculator-problem-prefix-notation.html#cb108-115" aria-hidden="true"></a>  reg_network_data<span class="op">$</span>notation,</span>
+<span id="cb108-116"><a href="boolean-calculator-problem-prefix-notation.html#cb108-116" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;prefix&quot;</span>, <span class="st">&quot;postfix&quot;</span>)</span>
+<span id="cb108-117"><a href="boolean-calculator-problem-prefix-notation.html#cb108-117" aria-hidden="true"></a>)</span>
+<span id="cb108-118"><a href="boolean-calculator-problem-prefix-notation.html#cb108-118" aria-hidden="true"></a></span>
+<span id="cb108-119"><a href="boolean-calculator-problem-prefix-notation.html#cb108-119" aria-hidden="true"></a><span class="co">####### misc #######</span></span>
+<span id="cb108-120"><a href="boolean-calculator-problem-prefix-notation.html#cb108-120" aria-hidden="true"></a><span class="co"># Configure our default graphing theme</span></span>
+<span id="cb108-121"><a href="boolean-calculator-problem-prefix-notation.html#cb108-121" aria-hidden="true"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>())</span></code></pre></div>
+</div>
+<div id="problem-solving-success-2" class="section level2" number="6.4">
+<h2><span class="header-section-number">6.4</span> Problem-solving success</h2>
+<p>The number of successful replicates by condition:</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="boolean-calculator-problem-prefix-notation.html#cb109-1" aria-hidden="true"></a><span class="co"># Graph the number of solutions evolved in each condition, faceted by environmental complexity</span></span>
+<span id="cb109-2"><a href="boolean-calculator-problem-prefix-notation.html#cb109-2" aria-hidden="true"></a><span class="kw">ggplot</span>(sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>condition)) <span class="op">+</span></span>
+<span id="cb109-3"><a href="boolean-calculator-problem-prefix-notation.html#cb109-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>() <span class="op">+</span></span>
+<span id="cb109-4"><a href="boolean-calculator-problem-prefix-notation.html#cb109-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
+<span id="cb109-5"><a href="boolean-calculator-problem-prefix-notation.html#cb109-5" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span>,</span>
+<span id="cb109-6"><a href="boolean-calculator-problem-prefix-notation.html#cb109-6" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
+<span id="cb109-7"><a href="boolean-calculator-problem-prefix-notation.html#cb109-7" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.9</span>),</span>
+<span id="cb109-8"><a href="boolean-calculator-problem-prefix-notation.html#cb109-8" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="dv">0</span></span>
+<span id="cb109-9"><a href="boolean-calculator-problem-prefix-notation.html#cb109-9" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb109-10"><a href="boolean-calculator-problem-prefix-notation.html#cb109-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb109-11"><a href="boolean-calculator-problem-prefix-notation.html#cb109-11" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb109-12"><a href="boolean-calculator-problem-prefix-notation.html#cb109-12" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>,<span class="st">&quot;both&quot;</span>),</span>
+<span id="cb109-13"><a href="boolean-calculator-problem-prefix-notation.html#cb109-13" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb109-14"><a href="boolean-calculator-problem-prefix-notation.html#cb109-14" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb109-15"><a href="boolean-calculator-problem-prefix-notation.html#cb109-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# successful replciates&quot;</span>) <span class="op">+</span></span>
+<span id="cb109-16"><a href="boolean-calculator-problem-prefix-notation.html#cb109-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylim</span>(<span class="dv">0</span>, <span class="dv">200</span>) <span class="op">+</span></span>
+<span id="cb109-17"><a href="boolean-calculator-problem-prefix-notation.html#cb109-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="op">+</span></span>
+<span id="cb109-18"><a href="boolean-calculator-problem-prefix-notation.html#cb109-18" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
+<span id="cb109-19"><a href="boolean-calculator-problem-prefix-notation.html#cb109-19" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-prefix-solution-counts.pdf&quot;</span>),</span>
+<span id="cb109-20"><a href="boolean-calculator-problem-prefix-notation.html#cb109-20" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
+<span id="cb109-21"><a href="boolean-calculator-problem-prefix-notation.html#cb109-21" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">4</span></span>
+<span id="cb109-22"><a href="boolean-calculator-problem-prefix-notation.html#cb109-22" aria-hidden="true"></a>  )</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-65-1.png" width="672" /></p>
+<p>Test for significance using Fisher’s exact test.</p>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="boolean-calculator-problem-prefix-notation.html#cb110-1" aria-hidden="true"></a><span class="co"># Extract successes/fails for each condition.</span></span>
+<span id="cb110-2"><a href="boolean-calculator-problem-prefix-notation.html#cb110-2" aria-hidden="true"></a>reg_disabled_success_cnt &lt;-<span class="st"> </span><span class="kw">nrow</span>(<span class="kw">filter</span>(sol_data, solution<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;</span><span class="st"> </span>condition<span class="op">==</span><span class="st">&quot;memory&quot;</span>))</span>
+<span id="cb110-3"><a href="boolean-calculator-problem-prefix-notation.html#cb110-3" aria-hidden="true"></a>reg_disabled_fail_cnt &lt;-<span class="st"> </span>replicates <span class="op">-</span><span class="st"> </span>reg_disabled_success_cnt</span>
+<span id="cb110-4"><a href="boolean-calculator-problem-prefix-notation.html#cb110-4" aria-hidden="true"></a></span>
+<span id="cb110-5"><a href="boolean-calculator-problem-prefix-notation.html#cb110-5" aria-hidden="true"></a>reg_enabled_success_cnt &lt;-<span class="st"> </span><span class="kw">nrow</span>(<span class="kw">filter</span>(sol_data, solution<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;</span><span class="st"> </span>condition<span class="op">==</span><span class="st">&quot;both&quot;</span>))</span>
+<span id="cb110-6"><a href="boolean-calculator-problem-prefix-notation.html#cb110-6" aria-hidden="true"></a>reg_enabled_fail_cnt &lt;-<span class="st"> </span>replicates <span class="op">-</span><span class="st"> </span>reg_enabled_success_cnt</span>
+<span id="cb110-7"><a href="boolean-calculator-problem-prefix-notation.html#cb110-7" aria-hidden="true"></a></span>
+<span id="cb110-8"><a href="boolean-calculator-problem-prefix-notation.html#cb110-8" aria-hidden="true"></a><span class="co"># Regulation-disabled vs regulation-enabled</span></span>
+<span id="cb110-9"><a href="boolean-calculator-problem-prefix-notation.html#cb110-9" aria-hidden="true"></a>perf_table &lt;-<span class="st"> </span><span class="kw">matrix</span>(</span>
+<span id="cb110-10"><a href="boolean-calculator-problem-prefix-notation.html#cb110-10" aria-hidden="true"></a>  <span class="kw">c</span>(</span>
+<span id="cb110-11"><a href="boolean-calculator-problem-prefix-notation.html#cb110-11" aria-hidden="true"></a>    reg_enabled_success_cnt,</span>
+<span id="cb110-12"><a href="boolean-calculator-problem-prefix-notation.html#cb110-12" aria-hidden="true"></a>    reg_disabled_success_cnt,</span>
+<span id="cb110-13"><a href="boolean-calculator-problem-prefix-notation.html#cb110-13" aria-hidden="true"></a>    reg_enabled_fail_cnt,</span>
+<span id="cb110-14"><a href="boolean-calculator-problem-prefix-notation.html#cb110-14" aria-hidden="true"></a>    reg_disabled_fail_cnt</span>
+<span id="cb110-15"><a href="boolean-calculator-problem-prefix-notation.html#cb110-15" aria-hidden="true"></a>    ),</span>
+<span id="cb110-16"><a href="boolean-calculator-problem-prefix-notation.html#cb110-16" aria-hidden="true"></a>    <span class="dt">nrow=</span><span class="dv">2</span></span>
+<span id="cb110-17"><a href="boolean-calculator-problem-prefix-notation.html#cb110-17" aria-hidden="true"></a>)</span>
+<span id="cb110-18"><a href="boolean-calculator-problem-prefix-notation.html#cb110-18" aria-hidden="true"></a></span>
+<span id="cb110-19"><a href="boolean-calculator-problem-prefix-notation.html#cb110-19" aria-hidden="true"></a><span class="kw">rownames</span>(perf_table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg-enabled&quot;</span>, <span class="st">&quot;reg-disabled&quot;</span>)</span>
+<span id="cb110-20"><a href="boolean-calculator-problem-prefix-notation.html#cb110-20" aria-hidden="true"></a><span class="kw">colnames</span>(perf_table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;success&quot;</span>, <span class="st">&quot;fail&quot;</span>)</span>
+<span id="cb110-21"><a href="boolean-calculator-problem-prefix-notation.html#cb110-21" aria-hidden="true"></a></span>
+<span id="cb110-22"><a href="boolean-calculator-problem-prefix-notation.html#cb110-22" aria-hidden="true"></a><span class="kw">print</span>(perf_table)</span></code></pre></div>
+<pre><code>##              success fail
+## reg-enabled       66  134
+## reg-disabled      30  170</code></pre>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="boolean-calculator-problem-prefix-notation.html#cb112-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">fisher.test</span>(perf_table))</span></code></pre></div>
+<pre><code>## 
+##  Fisher&#39;s Exact Test for Count Data
+## 
+## data:  perf_table
+## p-value = 3.585e-05
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  1.673731 4.711896
+## sample estimates:
+## odds ratio 
+##   2.783852</code></pre>
+</div>
+<div id="how-many-generations-elapse-before-solutions-evolve-2" class="section level2" number="6.5">
+<h2><span class="header-section-number">6.5</span> How many generations elapse before solutions evolve?</h2>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="boolean-calculator-problem-prefix-notation.html#cb114-1" aria-hidden="true"></a><span class="kw">ggplot</span>( <span class="dt">data =</span> sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>update, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
+<span id="cb114-2"><a href="boolean-calculator-problem-prefix-notation.html#cb114-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_flat_violin</span>(</span>
+<span id="cb114-3"><a href="boolean-calculator-problem-prefix-notation.html#cb114-3" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="fl">.2</span>, <span class="dt">y =</span> <span class="dv">0</span>),</span>
+<span id="cb114-4"><a href="boolean-calculator-problem-prefix-notation.html#cb114-4" aria-hidden="true"></a>    <span class="dt">alpha=</span>.<span class="dv">8</span></span>
+<span id="cb114-5"><a href="boolean-calculator-problem-prefix-notation.html#cb114-5" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb114-6"><a href="boolean-calculator-problem-prefix-notation.html#cb114-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
+<span id="cb114-7"><a href="boolean-calculator-problem-prefix-notation.html#cb114-7" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">y=</span>update, <span class="dt">color=</span>condition),</span>
+<span id="cb114-8"><a href="boolean-calculator-problem-prefix-notation.html#cb114-8" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_jitter</span>(<span class="dt">width =</span> <span class="fl">.15</span>),</span>
+<span id="cb114-9"><a href="boolean-calculator-problem-prefix-notation.html#cb114-9" aria-hidden="true"></a>    <span class="dt">size =</span> <span class="fl">.5</span>,</span>
+<span id="cb114-10"><a href="boolean-calculator-problem-prefix-notation.html#cb114-10" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.8</span></span>
+<span id="cb114-11"><a href="boolean-calculator-problem-prefix-notation.html#cb114-11" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb114-12"><a href="boolean-calculator-problem-prefix-notation.html#cb114-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>(</span>
+<span id="cb114-13"><a href="boolean-calculator-problem-prefix-notation.html#cb114-13" aria-hidden="true"></a>    <span class="dt">width =</span> <span class="fl">.1</span>,</span>
+<span id="cb114-14"><a href="boolean-calculator-problem-prefix-notation.html#cb114-14" aria-hidden="true"></a>    <span class="dt">outlier.shape =</span> <span class="ot">NA</span>,</span>
+<span id="cb114-15"><a href="boolean-calculator-problem-prefix-notation.html#cb114-15" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb114-16"><a href="boolean-calculator-problem-prefix-notation.html#cb114-16" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb114-17"><a href="boolean-calculator-problem-prefix-notation.html#cb114-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb114-18"><a href="boolean-calculator-problem-prefix-notation.html#cb114-18" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb114-19"><a href="boolean-calculator-problem-prefix-notation.html#cb114-19" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb114-20"><a href="boolean-calculator-problem-prefix-notation.html#cb114-20" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb114-21"><a href="boolean-calculator-problem-prefix-notation.html#cb114-21" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb114-22"><a href="boolean-calculator-problem-prefix-notation.html#cb114-22" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name=</span><span class="st">&quot;Generation first solution evolved&quot;</span>) <span class="op">+</span></span>
+<span id="cb114-23"><a href="boolean-calculator-problem-prefix-notation.html#cb114-23" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
+<span id="cb114-24"><a href="boolean-calculator-problem-prefix-notation.html#cb114-24" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
+<span id="cb114-25"><a href="boolean-calculator-problem-prefix-notation.html#cb114-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
+<span id="cb114-26"><a href="boolean-calculator-problem-prefix-notation.html#cb114-26" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-prefix-solve-time-cloud.png&quot;</span>),</span>
+<span id="cb114-27"><a href="boolean-calculator-problem-prefix-notation.html#cb114-27" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
+<span id="cb114-28"><a href="boolean-calculator-problem-prefix-notation.html#cb114-28" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">4</span></span>
+<span id="cb114-29"><a href="boolean-calculator-problem-prefix-notation.html#cb114-29" aria-hidden="true"></a>  )</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-67-1.png" width="672" /></p>
+<p>Test for statistical difference between conditions using a Wilcoxon rank sum test.</p>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="boolean-calculator-problem-prefix-notation.html#cb115-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>update<span class="op">~</span>condition, <span class="dt">data=</span>sol_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
+<pre><code>## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  update by condition
+## W = 1249, p-value = 0.04102
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##    45.00003 2448.99997
+## sample estimates:
+## difference in location 
+##               1291.265</code></pre>
+</div>
+<div id="evolved-strategies-1" class="section level2" number="6.6">
+<h2><span class="header-section-number">6.6</span> Evolved strategies</h2>
+<div id="what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-1" class="section level3" number="6.6.1">
+<h3><span class="header-section-number">6.6.1</span> What mechanisms do programs rely on to adjust responses to signals over time?</h3>
+<p>We used indpendent knockouts of tag-based genetic regulation and global memory buffer access to investigate the mechanisms underpinning successful programs.</p>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="boolean-calculator-problem-prefix-notation.html#cb117-1" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>strategy) ) <span class="op">+</span></span>
+<span id="cb117-2"><a href="boolean-calculator-problem-prefix-notation.html#cb117-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>(</span>
+<span id="cb117-3"><a href="boolean-calculator-problem-prefix-notation.html#cb117-3" aria-hidden="true"></a>    <span class="dt">position=</span><span class="st">&quot;fill&quot;</span>,</span>
+<span id="cb117-4"><a href="boolean-calculator-problem-prefix-notation.html#cb117-4" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span></span>
+<span id="cb117-5"><a href="boolean-calculator-problem-prefix-notation.html#cb117-5" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb117-6"><a href="boolean-calculator-problem-prefix-notation.html#cb117-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
+<span id="cb117-7"><a href="boolean-calculator-problem-prefix-notation.html#cb117-7" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&#39;count&#39;</span>,</span>
+<span id="cb117-8"><a href="boolean-calculator-problem-prefix-notation.html#cb117-8" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
+<span id="cb117-9"><a href="boolean-calculator-problem-prefix-notation.html#cb117-9" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_fill</span>(<span class="dt">vjust=</span><span class="fl">0.05</span>)</span>
+<span id="cb117-10"><a href="boolean-calculator-problem-prefix-notation.html#cb117-10" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb117-11"><a href="boolean-calculator-problem-prefix-notation.html#cb117-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;% of Solutions&quot;</span>) <span class="op">+</span></span>
+<span id="cb117-12"><a href="boolean-calculator-problem-prefix-notation.html#cb117-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_fill_discrete</span>(</span>
+<span id="cb117-13"><a href="boolean-calculator-problem-prefix-notation.html#cb117-13" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Strategy:&quot;</span>,</span>
+<span id="cb117-14"><a href="boolean-calculator-problem-prefix-notation.html#cb117-14" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(</span>
+<span id="cb117-15"><a href="boolean-calculator-problem-prefix-notation.html#cb117-15" aria-hidden="true"></a>      <span class="st">&quot;use regulation&quot;</span>,</span>
+<span id="cb117-16"><a href="boolean-calculator-problem-prefix-notation.html#cb117-16" aria-hidden="true"></a>      <span class="st">&quot;use memory&quot;</span>,</span>
+<span id="cb117-17"><a href="boolean-calculator-problem-prefix-notation.html#cb117-17" aria-hidden="true"></a>      <span class="st">&quot;use neither&quot;</span>,</span>
+<span id="cb117-18"><a href="boolean-calculator-problem-prefix-notation.html#cb117-18" aria-hidden="true"></a>      <span class="st">&quot;use both&quot;</span></span>
+<span id="cb117-19"><a href="boolean-calculator-problem-prefix-notation.html#cb117-19" aria-hidden="true"></a>    ),</span>
+<span id="cb117-20"><a href="boolean-calculator-problem-prefix-notation.html#cb117-20" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(</span>
+<span id="cb117-21"><a href="boolean-calculator-problem-prefix-notation.html#cb117-21" aria-hidden="true"></a>      <span class="st">&quot;Use regulation (only)&quot;</span>,</span>
+<span id="cb117-22"><a href="boolean-calculator-problem-prefix-notation.html#cb117-22" aria-hidden="true"></a>      <span class="st">&quot;Use global memory (only)&quot;</span>,</span>
+<span id="cb117-23"><a href="boolean-calculator-problem-prefix-notation.html#cb117-23" aria-hidden="true"></a>      <span class="st">&quot;Use neither&quot;</span>,</span>
+<span id="cb117-24"><a href="boolean-calculator-problem-prefix-notation.html#cb117-24" aria-hidden="true"></a>      <span class="st">&quot;Use both&quot;</span></span>
+<span id="cb117-25"><a href="boolean-calculator-problem-prefix-notation.html#cb117-25" aria-hidden="true"></a>    )</span>
+<span id="cb117-26"><a href="boolean-calculator-problem-prefix-notation.html#cb117-26" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb117-27"><a href="boolean-calculator-problem-prefix-notation.html#cb117-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb117-28"><a href="boolean-calculator-problem-prefix-notation.html#cb117-28" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb117-29"><a href="boolean-calculator-problem-prefix-notation.html#cb117-29" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb117-30"><a href="boolean-calculator-problem-prefix-notation.html#cb117-30" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb117-31"><a href="boolean-calculator-problem-prefix-notation.html#cb117-31" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb117-32"><a href="boolean-calculator-problem-prefix-notation.html#cb117-32" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-69-1.png" width="672" /></p>
+</div>
+<div id="gene-regulatory-networks-1" class="section level3" number="6.6.2">
+<h3><span class="header-section-number">6.6.2</span> Gene regulatory networks</h3>
+<p>Looking only at successful programs that rely on regulation. At a glance, what do gene regulatory networks look like?</p>
+<p>First, the total edges found in networks:</p>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="boolean-calculator-problem-prefix-notation.html#cb118-1" aria-hidden="true"></a>relies_on_reg &lt;-<span class="st"> </span><span class="kw">filter</span>(</span>
+<span id="cb118-2"><a href="boolean-calculator-problem-prefix-notation.html#cb118-2" aria-hidden="true"></a>  sol_data,</span>
+<span id="cb118-3"><a href="boolean-calculator-problem-prefix-notation.html#cb118-3" aria-hidden="true"></a>  relies_on_regulation<span class="op">==</span><span class="st">&quot;1&quot;</span></span>
+<span id="cb118-4"><a href="boolean-calculator-problem-prefix-notation.html#cb118-4" aria-hidden="true"></a>)<span class="op">$</span>SEED</span>
+<span id="cb118-5"><a href="boolean-calculator-problem-prefix-notation.html#cb118-5" aria-hidden="true"></a></span>
+<span id="cb118-6"><a href="boolean-calculator-problem-prefix-notation.html#cb118-6" aria-hidden="true"></a><span class="kw">ggplot</span>( <span class="kw">filter</span>(reg_network_data, run_id <span class="op">%in%</span><span class="st"> </span>relies_on_reg), <span class="kw">aes</span>(<span class="dt">x=</span>notation, <span class="dt">y=</span>edge_cnt) ) <span class="op">+</span></span>
+<span id="cb118-7"><a href="boolean-calculator-problem-prefix-notation.html#cb118-7" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb118-8"><a href="boolean-calculator-problem-prefix-notation.html#cb118-8" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.1</span>) <span class="op">+</span></span>
+<span id="cb118-9"><a href="boolean-calculator-problem-prefix-notation.html#cb118-9" aria-hidden="true"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Notation&quot;</span>) <span class="op">+</span></span>
+<span id="cb118-10"><a href="boolean-calculator-problem-prefix-notation.html#cb118-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# Edges&quot;</span>) <span class="op">+</span></span>
+<span id="cb118-11"><a href="boolean-calculator-problem-prefix-notation.html#cb118-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb118-12"><a href="boolean-calculator-problem-prefix-notation.html#cb118-12" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb118-13"><a href="boolean-calculator-problem-prefix-notation.html#cb118-13" aria-hidden="true"></a>    <span class="dt">legend.text=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">9</span>),</span>
+<span id="cb118-14"><a href="boolean-calculator-problem-prefix-notation.html#cb118-14" aria-hidden="true"></a>    <span class="dt">legend.title=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
+<span id="cb118-15"><a href="boolean-calculator-problem-prefix-notation.html#cb118-15" aria-hidden="true"></a>    <span class="dt">axis.title.x=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">12</span>)</span>
+<span id="cb118-16"><a href="boolean-calculator-problem-prefix-notation.html#cb118-16" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb118-17"><a href="boolean-calculator-problem-prefix-notation.html#cb118-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
+<span id="cb118-18"><a href="boolean-calculator-problem-prefix-notation.html#cb118-18" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-prefix-regulation-edges.png&quot;</span>),</span>
+<span id="cb118-19"><a href="boolean-calculator-problem-prefix-notation.html#cb118-19" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
+<span id="cb118-20"><a href="boolean-calculator-problem-prefix-notation.html#cb118-20" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">3</span></span>
+<span id="cb118-21"><a href="boolean-calculator-problem-prefix-notation.html#cb118-21" aria-hidden="true"></a>  )</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-70-1.png" width="672" /></p>
+<p>Next, let’s look at edges by type.</p>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="boolean-calculator-problem-prefix-notation.html#cb119-1" aria-hidden="true"></a><span class="co"># Process/cleanup the network data</span></span>
+<span id="cb119-2"><a href="boolean-calculator-problem-prefix-notation.html#cb119-2" aria-hidden="true"></a>melted_network_data &lt;-<span class="st"> </span><span class="kw">melt</span>(</span>
+<span id="cb119-3"><a href="boolean-calculator-problem-prefix-notation.html#cb119-3" aria-hidden="true"></a>  <span class="kw">filter</span>(reg_network_data,</span>
+<span id="cb119-4"><a href="boolean-calculator-problem-prefix-notation.html#cb119-4" aria-hidden="true"></a>         run_id <span class="op">%in%</span><span class="st"> </span>relies_on_reg</span>
+<span id="cb119-5"><a href="boolean-calculator-problem-prefix-notation.html#cb119-5" aria-hidden="true"></a>        ),</span>
+<span id="cb119-6"><a href="boolean-calculator-problem-prefix-notation.html#cb119-6" aria-hidden="true"></a>  <span class="dt">variable.name =</span> <span class="st">&quot;reg_edge_type&quot;</span>,</span>
+<span id="cb119-7"><a href="boolean-calculator-problem-prefix-notation.html#cb119-7" aria-hidden="true"></a>  <span class="dt">value.name =</span> <span class="st">&quot;reg_edges_cnt&quot;</span>,</span>
+<span id="cb119-8"><a href="boolean-calculator-problem-prefix-notation.html#cb119-8" aria-hidden="true"></a>  <span class="dt">measure.vars=</span><span class="kw">c</span>(<span class="st">&quot;repressed_edges_cnt&quot;</span>, <span class="st">&quot;promoted_edges_cnt&quot;</span>)</span>
+<span id="cb119-9"><a href="boolean-calculator-problem-prefix-notation.html#cb119-9" aria-hidden="true"></a>)</span>
+<span id="cb119-10"><a href="boolean-calculator-problem-prefix-notation.html#cb119-10" aria-hidden="true"></a></span>
+<span id="cb119-11"><a href="boolean-calculator-problem-prefix-notation.html#cb119-11" aria-hidden="true"></a><span class="kw">ggplot</span>( melted_network_data, <span class="kw">aes</span>(<span class="dt">x=</span>reg_edge_type, <span class="dt">y=</span>reg_edges_cnt, <span class="dt">color=</span>reg_edge_type) ) <span class="op">+</span></span>
+<span id="cb119-12"><a href="boolean-calculator-problem-prefix-notation.html#cb119-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb119-13"><a href="boolean-calculator-problem-prefix-notation.html#cb119-13" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>) <span class="op">+</span></span>
+<span id="cb119-14"><a href="boolean-calculator-problem-prefix-notation.html#cb119-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Environmental Complexity&quot;</span>) <span class="op">+</span></span>
+<span id="cb119-15"><a href="boolean-calculator-problem-prefix-notation.html#cb119-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# Edges&quot;</span>) <span class="op">+</span></span>
+<span id="cb119-16"><a href="boolean-calculator-problem-prefix-notation.html#cb119-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb119-17"><a href="boolean-calculator-problem-prefix-notation.html#cb119-17" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Edge type&quot;</span>,</span>
+<span id="cb119-18"><a href="boolean-calculator-problem-prefix-notation.html#cb119-18" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(<span class="st">&quot;repressed_edges_cnt&quot;</span>, <span class="st">&quot;promoted_edges_cnt&quot;</span>),</span>
+<span id="cb119-19"><a href="boolean-calculator-problem-prefix-notation.html#cb119-19" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Repressing edges&quot;</span>, <span class="st">&quot;Promoting edges&quot;</span>)</span>
+<span id="cb119-20"><a href="boolean-calculator-problem-prefix-notation.html#cb119-20" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb119-21"><a href="boolean-calculator-problem-prefix-notation.html#cb119-21" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb119-22"><a href="boolean-calculator-problem-prefix-notation.html#cb119-22" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span>,</span>
+<span id="cb119-23"><a href="boolean-calculator-problem-prefix-notation.html#cb119-23" aria-hidden="true"></a>    <span class="dt">legend.text=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">9</span>),</span>
+<span id="cb119-24"><a href="boolean-calculator-problem-prefix-notation.html#cb119-24" aria-hidden="true"></a>    <span class="dt">legend.title=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
+<span id="cb119-25"><a href="boolean-calculator-problem-prefix-notation.html#cb119-25" aria-hidden="true"></a>    <span class="dt">axis.title.x=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">12</span>)</span>
+<span id="cb119-26"><a href="boolean-calculator-problem-prefix-notation.html#cb119-26" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb119-27"><a href="boolean-calculator-problem-prefix-notation.html#cb119-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
+<span id="cb119-28"><a href="boolean-calculator-problem-prefix-notation.html#cb119-28" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-prefix-regulation-edge-types.png&quot;</span>),</span>
+<span id="cb119-29"><a href="boolean-calculator-problem-prefix-notation.html#cb119-29" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
+<span id="cb119-30"><a href="boolean-calculator-problem-prefix-notation.html#cb119-30" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">3</span></span>
+<span id="cb119-31"><a href="boolean-calculator-problem-prefix-notation.html#cb119-31" aria-hidden="true"></a>  )</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-71-1.png" width="672" /></p>
+<p>Test for a statistical difference between edge types using a wilcoxon rank sum test:</p>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="boolean-calculator-problem-prefix-notation.html#cb120-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
+<span id="cb120-2"><a href="boolean-calculator-problem-prefix-notation.html#cb120-2" aria-hidden="true"></a>  <span class="kw">paste0</span>(</span>
+<span id="cb120-3"><a href="boolean-calculator-problem-prefix-notation.html#cb120-3" aria-hidden="true"></a>    <span class="st">&quot;Median # repressed edges: &quot;</span>,</span>
+<span id="cb120-4"><a href="boolean-calculator-problem-prefix-notation.html#cb120-4" aria-hidden="true"></a>    <span class="kw">median</span>(<span class="kw">filter</span>(melted_network_data, reg_edge_type<span class="op">==</span><span class="st">&quot;repressed_edges_cnt&quot;</span>)<span class="op">$</span>reg_edges_cnt)</span>
+<span id="cb120-5"><a href="boolean-calculator-problem-prefix-notation.html#cb120-5" aria-hidden="true"></a>  )</span>
+<span id="cb120-6"><a href="boolean-calculator-problem-prefix-notation.html#cb120-6" aria-hidden="true"></a>)</span></code></pre></div>
+<pre><code>## [1] &quot;Median # repressed edges: 34&quot;</code></pre>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="boolean-calculator-problem-prefix-notation.html#cb122-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
+<span id="cb122-2"><a href="boolean-calculator-problem-prefix-notation.html#cb122-2" aria-hidden="true"></a>  <span class="kw">paste0</span>(</span>
+<span id="cb122-3"><a href="boolean-calculator-problem-prefix-notation.html#cb122-3" aria-hidden="true"></a>    <span class="st">&quot;Median # promoting edges: &quot;</span>,</span>
+<span id="cb122-4"><a href="boolean-calculator-problem-prefix-notation.html#cb122-4" aria-hidden="true"></a>    <span class="kw">median</span>(<span class="kw">filter</span>(melted_network_data, reg_edge_type<span class="op">==</span><span class="st">&quot;promoted_edges_cnt&quot;</span>)<span class="op">$</span>reg_edges_cnt)</span>
+<span id="cb122-5"><a href="boolean-calculator-problem-prefix-notation.html#cb122-5" aria-hidden="true"></a>  )</span>
+<span id="cb122-6"><a href="boolean-calculator-problem-prefix-notation.html#cb122-6" aria-hidden="true"></a>)</span></code></pre></div>
+<pre><code>## [1] &quot;Median # promoting edges: 36&quot;</code></pre>
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="boolean-calculator-problem-prefix-notation.html#cb124-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>reg_edges_cnt <span class="op">~</span><span class="st"> </span>reg_edge_type, <span class="dt">data=</span>melted_network_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
+<pre><code>## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  reg_edges_cnt by reg_edge_type
+## W = 1961.5, p-value = 0.3254
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  -8.999963  2.999998
+## sample estimates:
+## difference in location 
+##              -2.999964</code></pre>
+</div>
+<div id="program-instruction-execution-traces-2" class="section level3" number="6.6.3">
+<h3><span class="header-section-number">6.6.3</span> Program instruction execution traces</h3>
+<div id="execution-time-2" class="section level4" number="6.6.3.1">
+<h4><span class="header-section-number">6.6.3.1</span> Execution time</h4>
+<p>How many time steps do successful programs take to solve the boolean calculator problem?</p>
+<div class="sourceCode" id="cb126"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb126-1"><a href="boolean-calculator-problem-prefix-notation.html#cb126-1" aria-hidden="true"></a><span class="co"># only want solutions</span></span>
+<span id="cb126-2"><a href="boolean-calculator-problem-prefix-notation.html#cb126-2" aria-hidden="true"></a>solutions_inst_exec_data &lt;-<span class="st"> </span><span class="kw">filter</span>(inst_exec_data, SEED <span class="op">%in%</span><span class="st"> </span>sol_data<span class="op">$</span>SEED)</span>
+<span id="cb126-3"><a href="boolean-calculator-problem-prefix-notation.html#cb126-3" aria-hidden="true"></a></span>
+<span id="cb126-4"><a href="boolean-calculator-problem-prefix-notation.html#cb126-4" aria-hidden="true"></a><span class="kw">ggplot</span>( solutions_inst_exec_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>total_execution_time, <span class="dt">color=</span>condition) ) <span class="op">+</span></span>
+<span id="cb126-5"><a href="boolean-calculator-problem-prefix-notation.html#cb126-5" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb126-6"><a href="boolean-calculator-problem-prefix-notation.html#cb126-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>) <span class="op">+</span></span>
+<span id="cb126-7"><a href="boolean-calculator-problem-prefix-notation.html#cb126-7" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb126-8"><a href="boolean-calculator-problem-prefix-notation.html#cb126-8" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb126-9"><a href="boolean-calculator-problem-prefix-notation.html#cb126-9" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb126-10"><a href="boolean-calculator-problem-prefix-notation.html#cb126-10" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb126-11"><a href="boolean-calculator-problem-prefix-notation.html#cb126-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb126-12"><a href="boolean-calculator-problem-prefix-notation.html#cb126-12" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span></span>
+<span id="cb126-13"><a href="boolean-calculator-problem-prefix-notation.html#cb126-13" aria-hidden="true"></a>  )</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-73-1.png" width="672" /></p>
+<p>Test for significant difference between conditions using Wilcoxon rank sum test:</p>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="boolean-calculator-problem-prefix-notation.html#cb127-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
+<span id="cb127-2"><a href="boolean-calculator-problem-prefix-notation.html#cb127-2" aria-hidden="true"></a>  <span class="kw">wilcox.test</span>(</span>
+<span id="cb127-3"><a href="boolean-calculator-problem-prefix-notation.html#cb127-3" aria-hidden="true"></a>    <span class="dt">formula=</span>total_execution_time<span class="op">~</span>condition,</span>
+<span id="cb127-4"><a href="boolean-calculator-problem-prefix-notation.html#cb127-4" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(solutions_inst_exec_data),</span>
+<span id="cb127-5"><a href="boolean-calculator-problem-prefix-notation.html#cb127-5" aria-hidden="true"></a>    <span class="dt">exact=</span><span class="ot">FALSE</span>,</span>
+<span id="cb127-6"><a href="boolean-calculator-problem-prefix-notation.html#cb127-6" aria-hidden="true"></a>    <span class="dt">conf.int=</span><span class="ot">TRUE</span>)</span>
+<span id="cb127-7"><a href="boolean-calculator-problem-prefix-notation.html#cb127-7" aria-hidden="true"></a>)</span></code></pre></div>
+<pre><code>## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  total_execution_time by condition
+## W = 1374, p-value = 0.002434
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  240 986
+## sample estimates:
+## difference in location 
+##               587.0774</code></pre>
+</div>
+<div id="what-types-of-instructions-to-successful-programs-execute-1" class="section level4" number="6.6.3.2">
+<h4><span class="header-section-number">6.6.3.2</span> What types of instructions to successful programs execute?</h4>
+<p>Here, we look at the distribution of instruction types executed by successful programs.
+We’re primarily interested in the proportion of control flow instructions, so let’s look at that first.</p>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="boolean-calculator-problem-prefix-notation.html#cb129-1" aria-hidden="true"></a><span class="kw">ggplot</span>( solutions_inst_exec_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>control_flow_inst_prop, <span class="dt">color=</span>condition) ) <span class="op">+</span></span>
+<span id="cb129-2"><a href="boolean-calculator-problem-prefix-notation.html#cb129-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb129-3"><a href="boolean-calculator-problem-prefix-notation.html#cb129-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>) <span class="op">+</span></span>
+<span id="cb129-4"><a href="boolean-calculator-problem-prefix-notation.html#cb129-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb129-5"><a href="boolean-calculator-problem-prefix-notation.html#cb129-5" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb129-6"><a href="boolean-calculator-problem-prefix-notation.html#cb129-6" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb129-7"><a href="boolean-calculator-problem-prefix-notation.html#cb129-7" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb129-8"><a href="boolean-calculator-problem-prefix-notation.html#cb129-8" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Proportion of executed flow control instructions&quot;</span>) <span class="op">+</span></span>
+<span id="cb129-9"><a href="boolean-calculator-problem-prefix-notation.html#cb129-9" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb129-10"><a href="boolean-calculator-problem-prefix-notation.html#cb129-10" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb129-11"><a href="boolean-calculator-problem-prefix-notation.html#cb129-11" aria-hidden="true"></a>    <span class="dt">axis.title.x=</span><span class="kw">element_blank</span>()</span>
+<span id="cb129-12"><a href="boolean-calculator-problem-prefix-notation.html#cb129-12" aria-hidden="true"></a>  )</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-75-1.png" width="672" /></p>
+<p>Test for significant difference between conditions using a Wilcoxon rank sum test:</p>
+<div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb130-1"><a href="boolean-calculator-problem-prefix-notation.html#cb130-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
+<span id="cb130-2"><a href="boolean-calculator-problem-prefix-notation.html#cb130-2" aria-hidden="true"></a>  <span class="kw">wilcox.test</span>(</span>
+<span id="cb130-3"><a href="boolean-calculator-problem-prefix-notation.html#cb130-3" aria-hidden="true"></a>    <span class="dt">formula=</span>control_flow_inst_prop<span class="op">~</span>condition,</span>
+<span id="cb130-4"><a href="boolean-calculator-problem-prefix-notation.html#cb130-4" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(solutions_inst_exec_data),</span>
+<span id="cb130-5"><a href="boolean-calculator-problem-prefix-notation.html#cb130-5" aria-hidden="true"></a>    <span class="dt">exact=</span><span class="ot">FALSE</span>,</span>
+<span id="cb130-6"><a href="boolean-calculator-problem-prefix-notation.html#cb130-6" aria-hidden="true"></a>    <span class="dt">conf.int=</span><span class="ot">TRUE</span>)</span>
+<span id="cb130-7"><a href="boolean-calculator-problem-prefix-notation.html#cb130-7" aria-hidden="true"></a>)</span></code></pre></div>
+<pre><code>## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  control_flow_inst_prop by condition
+## W = 1541.5, p-value = 1.328e-05
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  0.01486019 0.03910795
+## sample estimates:
+## difference in location 
+##             0.02639857</code></pre>
+<p>In case you’re curious, here’s all categories of instructions:</p>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="boolean-calculator-problem-prefix-notation.html#cb132-1" aria-hidden="true"></a>melted &lt;-<span class="st"> </span><span class="kw">melt</span>(</span>
+<span id="cb132-2"><a href="boolean-calculator-problem-prefix-notation.html#cb132-2" aria-hidden="true"></a>  solutions_inst_exec_data,</span>
+<span id="cb132-3"><a href="boolean-calculator-problem-prefix-notation.html#cb132-3" aria-hidden="true"></a>  <span class="dt">variable.name =</span> <span class="st">&quot;inst_type&quot;</span>,</span>
+<span id="cb132-4"><a href="boolean-calculator-problem-prefix-notation.html#cb132-4" aria-hidden="true"></a>  <span class="dt">value.name =</span> <span class="st">&quot;inst_type_prop&quot;</span>,</span>
+<span id="cb132-5"><a href="boolean-calculator-problem-prefix-notation.html#cb132-5" aria-hidden="true"></a>  <span class="dt">measure.vars=</span><span class="kw">c</span>(</span>
+<span id="cb132-6"><a href="boolean-calculator-problem-prefix-notation.html#cb132-6" aria-hidden="true"></a>    <span class="st">&quot;math_inst_prop&quot;</span>,</span>
+<span id="cb132-7"><a href="boolean-calculator-problem-prefix-notation.html#cb132-7" aria-hidden="true"></a>    <span class="st">&quot;module_inst_prop&quot;</span>,</span>
+<span id="cb132-8"><a href="boolean-calculator-problem-prefix-notation.html#cb132-8" aria-hidden="true"></a>    <span class="st">&quot;memory_inst_prop&quot;</span>,</span>
+<span id="cb132-9"><a href="boolean-calculator-problem-prefix-notation.html#cb132-9" aria-hidden="true"></a>    <span class="st">&quot;regulation_inst_prop&quot;</span>,</span>
+<span id="cb132-10"><a href="boolean-calculator-problem-prefix-notation.html#cb132-10" aria-hidden="true"></a>    <span class="st">&quot;control_flow_inst_prop&quot;</span>,</span>
+<span id="cb132-11"><a href="boolean-calculator-problem-prefix-notation.html#cb132-11" aria-hidden="true"></a>    <span class="st">&quot;thread_inst_prop&quot;</span>,</span>
+<span id="cb132-12"><a href="boolean-calculator-problem-prefix-notation.html#cb132-12" aria-hidden="true"></a>    <span class="st">&quot;task_inst_prop&quot;</span>,</span>
+<span id="cb132-13"><a href="boolean-calculator-problem-prefix-notation.html#cb132-13" aria-hidden="true"></a>    <span class="st">&quot;nop_inst_prop&quot;</span></span>
+<span id="cb132-14"><a href="boolean-calculator-problem-prefix-notation.html#cb132-14" aria-hidden="true"></a>  )</span>
+<span id="cb132-15"><a href="boolean-calculator-problem-prefix-notation.html#cb132-15" aria-hidden="true"></a>)</span>
+<span id="cb132-16"><a href="boolean-calculator-problem-prefix-notation.html#cb132-16" aria-hidden="true"></a></span>
+<span id="cb132-17"><a href="boolean-calculator-problem-prefix-notation.html#cb132-17" aria-hidden="true"></a><span class="kw">ggplot</span>( melted, <span class="kw">aes</span>(<span class="dt">x=</span>inst_type, <span class="dt">y=</span>inst_type_prop, <span class="dt">color=</span>condition) ) <span class="op">+</span></span>
+<span id="cb132-18"><a href="boolean-calculator-problem-prefix-notation.html#cb132-18" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb132-19"><a href="boolean-calculator-problem-prefix-notation.html#cb132-19" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_color_discrete</span>(</span>
+<span id="cb132-20"><a href="boolean-calculator-problem-prefix-notation.html#cb132-20" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition:&quot;</span>,</span>
+<span id="cb132-21"><a href="boolean-calculator-problem-prefix-notation.html#cb132-21" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb132-22"><a href="boolean-calculator-problem-prefix-notation.html#cb132-22" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-disabled&quot;</span>, <span class="st">&quot;Regulation-enabled&quot;</span>)</span>
+<span id="cb132-23"><a href="boolean-calculator-problem-prefix-notation.html#cb132-23" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb132-24"><a href="boolean-calculator-problem-prefix-notation.html#cb132-24" aria-hidden="true"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Instruction type&quot;</span>) <span class="op">+</span></span>
+<span id="cb132-25"><a href="boolean-calculator-problem-prefix-notation.html#cb132-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Proportion of instructions in execution trace&quot;</span>) <span class="op">+</span></span>
+<span id="cb132-26"><a href="boolean-calculator-problem-prefix-notation.html#cb132-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">coord_flip</span>() <span class="op">+</span></span>
+<span id="cb132-27"><a href="boolean-calculator-problem-prefix-notation.html#cb132-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position=</span><span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-77-1.png" width="672" /></p>
+</div>
+</div>
+</div>
+<div id="visualizaing-an-evolved-regulatory-network" class="section level2" number="6.7">
+<h2><span class="header-section-number">6.7</span> Visualizaing an evolved regulatory network</h2>
+<p>Let’s take a closer look at a successful gene regulatory network.</p>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="boolean-calculator-problem-prefix-notation.html#cb133-1" aria-hidden="true"></a>trace_id &lt;-<span class="st"> </span><span class="dv">24386</span></span></code></pre></div>
+<p>Specifically, we’ll be looking at the solution evolved in run id 2.4386^{4} (arbitrarily selected).</p>
+<div id="evolved-regulatory-network-2" class="section level3" number="6.7.1">
+<h3><span class="header-section-number">6.7.1</span> Evolved regulatory network</h3>
+<p>We use the igraph package to draw this program’s gene regulatory network.</p>
+<div class="sourceCode" id="cb134"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb134-1"><a href="boolean-calculator-problem-prefix-notation.html#cb134-1" aria-hidden="true"></a><span class="co"># Networks!</span></span>
+<span id="cb134-2"><a href="boolean-calculator-problem-prefix-notation.html#cb134-2" aria-hidden="true"></a>graph_nodes_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_nodes.csv&quot;</span>)</span>
+<span id="cb134-3"><a href="boolean-calculator-problem-prefix-notation.html#cb134-3" aria-hidden="true"></a>graph_edges_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_edges.csv&quot;</span>)</span>
+<span id="cb134-4"><a href="boolean-calculator-problem-prefix-notation.html#cb134-4" aria-hidden="true"></a>graph_nodes_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_nodes_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb134-5"><a href="boolean-calculator-problem-prefix-notation.html#cb134-5" aria-hidden="true"></a>graph_edges_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_edges_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb134-6"><a href="boolean-calculator-problem-prefix-notation.html#cb134-6" aria-hidden="true"></a></span>
+<span id="cb134-7"><a href="boolean-calculator-problem-prefix-notation.html#cb134-7" aria-hidden="true"></a>network &lt;-<span class="st"> </span><span class="kw">graph_from_data_frame</span>(</span>
+<span id="cb134-8"><a href="boolean-calculator-problem-prefix-notation.html#cb134-8" aria-hidden="true"></a>  <span class="dt">d=</span>graph_edges_data,</span>
+<span id="cb134-9"><a href="boolean-calculator-problem-prefix-notation.html#cb134-9" aria-hidden="true"></a>  <span class="dt">vertices=</span>graph_nodes_data,</span>
+<span id="cb134-10"><a href="boolean-calculator-problem-prefix-notation.html#cb134-10" aria-hidden="true"></a>  <span class="dt">directed=</span><span class="ot">TRUE</span></span>
+<span id="cb134-11"><a href="boolean-calculator-problem-prefix-notation.html#cb134-11" aria-hidden="true"></a>)</span>
+<span id="cb134-12"><a href="boolean-calculator-problem-prefix-notation.html#cb134-12" aria-hidden="true"></a></span>
+<span id="cb134-13"><a href="boolean-calculator-problem-prefix-notation.html#cb134-13" aria-hidden="true"></a><span class="co"># Setup edge styling</span></span>
+<span id="cb134-14"><a href="boolean-calculator-problem-prefix-notation.html#cb134-14" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> &quot;#FCE640&quot;</span></span>
+<span id="cb134-15"><a href="boolean-calculator-problem-prefix-notation.html#cb134-15" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb134-16"><a href="boolean-calculator-problem-prefix-notation.html#cb134-16" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> &quot;#441152&quot;</span></span>
+<span id="cb134-17"><a href="boolean-calculator-problem-prefix-notation.html#cb134-17" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb134-18"><a href="boolean-calculator-problem-prefix-notation.html#cb134-18" aria-hidden="true"></a></span>
+<span id="cb134-19"><a href="boolean-calculator-problem-prefix-notation.html#cb134-19" aria-hidden="true"></a>network_out_name &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/case-study-id-&quot;</span>, trace_id, <span class="st">&quot;-network.svg&quot;</span>)</span>
+<span id="cb134-20"><a href="boolean-calculator-problem-prefix-notation.html#cb134-20" aria-hidden="true"></a></span>
+<span id="cb134-21"><a href="boolean-calculator-problem-prefix-notation.html#cb134-21" aria-hidden="true"></a>draw_network &lt;-<span class="st"> </span><span class="cf">function</span>(net, write_out, out_name) {</span>
+<span id="cb134-22"><a href="boolean-calculator-problem-prefix-notation.html#cb134-22" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
+<span id="cb134-23"><a href="boolean-calculator-problem-prefix-notation.html#cb134-23" aria-hidden="true"></a>    <span class="kw">svg</span>(out_name, <span class="dt">width=</span><span class="dv">4</span>,<span class="dt">height=</span><span class="fl">1.5</span>)</span>
+<span id="cb134-24"><a href="boolean-calculator-problem-prefix-notation.html#cb134-24" aria-hidden="true"></a>    <span class="co"># bottom, left, top, right</span></span>
+<span id="cb134-25"><a href="boolean-calculator-problem-prefix-notation.html#cb134-25" aria-hidden="true"></a>    <span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="fl">0.2</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.5</span>))</span>
+<span id="cb134-26"><a href="boolean-calculator-problem-prefix-notation.html#cb134-26" aria-hidden="true"></a>  }</span>
+<span id="cb134-27"><a href="boolean-calculator-problem-prefix-notation.html#cb134-27" aria-hidden="true"></a>  <span class="kw">plot</span>(</span>
+<span id="cb134-28"><a href="boolean-calculator-problem-prefix-notation.html#cb134-28" aria-hidden="true"></a>    net,</span>
+<span id="cb134-29"><a href="boolean-calculator-problem-prefix-notation.html#cb134-29" aria-hidden="true"></a>    <span class="dt">edge.arrow.size=</span><span class="fl">0.4</span>,</span>
+<span id="cb134-30"><a href="boolean-calculator-problem-prefix-notation.html#cb134-30" aria-hidden="true"></a>    <span class="dt">edge.arrow.width=</span><span class="fl">0.75</span>,</span>
+<span id="cb134-31"><a href="boolean-calculator-problem-prefix-notation.html#cb134-31" aria-hidden="true"></a>    <span class="dt">edge.width=</span><span class="dv">2</span>,</span>
+<span id="cb134-32"><a href="boolean-calculator-problem-prefix-notation.html#cb134-32" aria-hidden="true"></a>    <span class="dt">vertex.size=</span><span class="dv">10</span>,</span>
+<span id="cb134-33"><a href="boolean-calculator-problem-prefix-notation.html#cb134-33" aria-hidden="true"></a>    <span class="dt">vertex.label.cex=</span><span class="fl">0.65</span>,</span>
+<span id="cb134-34"><a href="boolean-calculator-problem-prefix-notation.html#cb134-34" aria-hidden="true"></a>    <span class="dt">curved=</span><span class="ot">TRUE</span>,</span>
+<span id="cb134-35"><a href="boolean-calculator-problem-prefix-notation.html#cb134-35" aria-hidden="true"></a>    <span class="dt">vertex.color=</span><span class="st">&quot;grey99&quot;</span>,</span>
+<span id="cb134-36"><a href="boolean-calculator-problem-prefix-notation.html#cb134-36" aria-hidden="true"></a>    <span class="dt">vertex.label.color=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb134-37"><a href="boolean-calculator-problem-prefix-notation.html#cb134-37" aria-hidden="true"></a>    <span class="dt">vertex.label.family=</span><span class="st">&quot;sans&quot;</span>,</span>
+<span id="cb134-38"><a href="boolean-calculator-problem-prefix-notation.html#cb134-38" aria-hidden="true"></a>    <span class="dt">layout=</span><span class="kw">layout.circle</span>(net)</span>
+<span id="cb134-39"><a href="boolean-calculator-problem-prefix-notation.html#cb134-39" aria-hidden="true"></a>  )</span>
+<span id="cb134-40"><a href="boolean-calculator-problem-prefix-notation.html#cb134-40" aria-hidden="true"></a>  <span class="kw">legend</span>(</span>
+<span id="cb134-41"><a href="boolean-calculator-problem-prefix-notation.html#cb134-41" aria-hidden="true"></a>    <span class="dt">x =</span> <span class="st">&quot;bottomleft&quot;</span>,      <span class="co">## position, also takes x,y coordinates</span></span>
+<span id="cb134-42"><a href="boolean-calculator-problem-prefix-notation.html#cb134-42" aria-hidden="true"></a>    <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;Promoted&quot;</span>, <span class="st">&quot;Repressed&quot;</span>),</span>
+<span id="cb134-43"><a href="boolean-calculator-problem-prefix-notation.html#cb134-43" aria-hidden="true"></a>    <span class="dt">pch =</span> <span class="dv">19</span>,              <span class="co">## legend symbols see ?points</span></span>
+<span id="cb134-44"><a href="boolean-calculator-problem-prefix-notation.html#cb134-44" aria-hidden="true"></a>    <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#FCE640&quot;</span>, <span class="st">&quot;#441152&quot;</span>),</span>
+<span id="cb134-45"><a href="boolean-calculator-problem-prefix-notation.html#cb134-45" aria-hidden="true"></a>    <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb134-46"><a href="boolean-calculator-problem-prefix-notation.html#cb134-46" aria-hidden="true"></a>    <span class="dt">border=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb134-47"><a href="boolean-calculator-problem-prefix-notation.html#cb134-47" aria-hidden="true"></a>    <span class="dt">xpd=</span><span class="ot">TRUE</span>,</span>
+<span id="cb134-48"><a href="boolean-calculator-problem-prefix-notation.html#cb134-48" aria-hidden="true"></a>    <span class="dt">title =</span> <span class="st">&quot;Edges&quot;</span></span>
+<span id="cb134-49"><a href="boolean-calculator-problem-prefix-notation.html#cb134-49" aria-hidden="true"></a>  )</span>
+<span id="cb134-50"><a href="boolean-calculator-problem-prefix-notation.html#cb134-50" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
+<span id="cb134-51"><a href="boolean-calculator-problem-prefix-notation.html#cb134-51" aria-hidden="true"></a>    <span class="kw">dev.flush</span>()</span>
+<span id="cb134-52"><a href="boolean-calculator-problem-prefix-notation.html#cb134-52" aria-hidden="true"></a>    <span class="kw">dev.off</span>()</span>
+<span id="cb134-53"><a href="boolean-calculator-problem-prefix-notation.html#cb134-53" aria-hidden="true"></a>  }</span>
+<span id="cb134-54"><a href="boolean-calculator-problem-prefix-notation.html#cb134-54" aria-hidden="true"></a>}</span>
+<span id="cb134-55"><a href="boolean-calculator-problem-prefix-notation.html#cb134-55" aria-hidden="true"></a></span>
+<span id="cb134-56"><a href="boolean-calculator-problem-prefix-notation.html#cb134-56" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">TRUE</span>, network_out_name)</span></code></pre></div>
+<pre><code>## png 
+##   2</code></pre>
+<div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb136-1"><a href="boolean-calculator-problem-prefix-notation.html#cb136-1" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">FALSE</span>, <span class="st">&quot;&quot;</span>)</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-79-1.png" width="672" /></p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="contextual-signal-problem-analysis.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments/2020-11-28-bool-calc-prefix/analysis/2020-11-28-bool-calc-prefix.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["tag-based-regulation-supplemental.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
