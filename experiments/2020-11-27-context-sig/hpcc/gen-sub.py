@@ -18,8 +18,7 @@ config = {
     ],
     "TASK": [
         "-TESTING_SET_FILE <<CONFIG_DIR>>/examples_S3.csv -TRAINING_SET_FILE <<CONFIG_DIR>>/examples_S3.csv",
-        "-TESTING_SET_FILE <<CONFIG_DIR>>/examples_S4.csv -TRAINING_SET_FILE <<CONFIG_DIR>>/examples_S4.csv",
-        "-TESTING_SET_FILE <<CONFIG_DIR>>/examples_S5.csv -TRAINING_SET_FILE <<CONFIG_DIR>>/examples_S5.csv",
+        "-TESTING_SET_FILE <<CONFIG_DIR>>/examples_S4.csv -TRAINING_SET_FILE <<CONFIG_DIR>>/examples_S4.csv"
     ]
 }
 
