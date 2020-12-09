@@ -24,7 +24,7 @@
 <meta name="author" content="Alexander Lalejini" />
 
 
-<meta name="date" content="2020-12-08" />
+<meta name="date" content="2020-12-09" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -183,12 +183,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="4.6.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#are-evolved-programs-relying-on-stochastic-strategies"><i class="fa fa-check"></i><b>4.6.3</b> Are evolved programs relying on stochastic strategies?</a></li>
 <li class="chapter" data-level="4.6.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#program-instruction-execution-traces"><i class="fa fa-check"></i><b>4.6.4</b> Program instruction execution traces</a></li>
 </ul></li>
-<li class="chapter" data-level="4.7" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#case-study-visualizing-regulation-in-an-evolved-digital-organism"><i class="fa fa-check"></i><b>4.7</b> Case study: visualizing regulation in an evolved digital organism</a>
+<li class="chapter" data-level="4.7" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#case-study-visualizing-regulation-in-an-evolved-program"><i class="fa fa-check"></i><b>4.7</b> Case study: visualizing regulation in an evolved program</a>
 <ul>
 <li class="chapter" data-level="4.7.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#data-wrangling"><i class="fa fa-check"></i><b>4.7.1</b> Data wrangling</a></li>
 <li class="chapter" data-level="4.7.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#function-regulation-over-time"><i class="fa fa-check"></i><b>4.7.2</b> Function regulation over time</a></li>
 <li class="chapter" data-level="4.7.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#environmental-signal-tag-match-score-over-time"><i class="fa fa-check"></i><b>4.7.3</b> Environmental signal tag-match score over time</a></li>
 <li class="chapter" data-level="4.7.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#evolved-regulatory-network"><i class="fa fa-check"></i><b>4.7.4</b> Evolved regulatory network</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html"><i class="fa fa-check"></i><b>5</b> Contextual-signal problem analysis</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#overview-2"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
+<li class="chapter" data-level="5.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#analysis-dependencies-2"><i class="fa fa-check"></i><b>5.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="5.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#setup-2"><i class="fa fa-check"></i><b>5.3</b> Setup</a></li>
+<li class="chapter" data-level="5.4" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#problem-solving-success-1"><i class="fa fa-check"></i><b>5.4</b> Problem-solving success</a></li>
+<li class="chapter" data-level="5.5" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#how-many-generations-elapse-before-solutions-evolve-1"><i class="fa fa-check"></i><b>5.5</b> How many generations elapse before solutions evolve?</a></li>
+<li class="chapter" data-level="5.6" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-strategies"><i class="fa fa-check"></i><b>5.6</b> Evolved strategies</a>
+<ul>
+<li class="chapter" data-level="5.6.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time"><i class="fa fa-check"></i><b>5.6.1</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
+<li class="chapter" data-level="5.6.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#gene-regulatory-networks"><i class="fa fa-check"></i><b>5.6.2</b> Gene regulatory networks</a></li>
+<li class="chapter" data-level="5.6.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#program-instruction-execution-traces-1"><i class="fa fa-check"></i><b>5.6.3</b> Program instruction execution traces</a></li>
+</ul></li>
+<li class="chapter" data-level="5.7" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#case-study-visualizing-an-evolved-gene-regulatory-network"><i class="fa fa-check"></i><b>5.7</b> Case study: visualizing an evolved gene regulatory network</a>
+<ul>
+<li class="chapter" data-level="5.7.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-regulatory-network-1"><i class="fa fa-check"></i><b>5.7.1</b> Evolved regulatory network</a></li>
 </ul></li>
 </ul></li>
 <li class="divider"></li>
@@ -358,7 +376,7 @@ A program is categorized as a ‘solution’ if it can correctly respond to each
 <span id="cb6-15"><a href="changing-signal-problem-analysis.html#cb6-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# successful replciates (/200)&quot;</span>) <span class="op">+</span></span>
 <span id="cb6-16"><a href="changing-signal-problem-analysis.html#cb6-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="op">+</span></span>
 <span id="cb6-17"><a href="changing-signal-problem-analysis.html#cb6-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Successful replicates&quot;</span>)</span></code></pre></div>
-<p><img src="tag-based-genetic-regulation_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>Programs capable of achieving a perfect score on the changing-signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
 These programs, however, do not necessarily generalize across all possible sequences of environmental signals.</p>
 <div id="does-access-to-regulation-slow-adaptation" class="section level3" number="3.4.1">
@@ -390,7 +408,7 @@ These programs, however, do not necessarily generalize across all possible seque
 <span id="cb7-24"><a href="changing-signal-problem-analysis.html#cb7-24" aria-hidden="true"></a>  ) <span class="op">+</span></span>
 <span id="cb7-25"><a href="changing-signal-problem-analysis.html#cb7-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
 <span id="cb7-26"><a href="changing-signal-problem-analysis.html#cb7-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>)</span></code></pre></div>
-<p><img src="tag-based-genetic-regulation_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="changing-signal-problem-analysis.html#cb8-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>update<span class="op">~</span>condition, <span class="dt">data=</span>sol_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
 <pre><code>## 
 ##  Wilcoxon rank sum test with continuity correction
@@ -453,7 +471,7 @@ We deem programs as having successfully generalized only if they responded corre
 <span id="cb10-40"><a href="changing-signal-problem-analysis.html#cb10-40" aria-hidden="true"></a>    <span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>)</span>
 <span id="cb10-41"><a href="changing-signal-problem-analysis.html#cb10-41" aria-hidden="true"></a>  ) <span class="op">+</span></span>
 <span id="cb10-42"><a href="changing-signal-problem-analysis.html#cb10-42" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/chg-env-16-generalization.png&quot;</span>), <span class="dt">width=</span><span class="dv">4</span>,<span class="dt">height=</span><span class="dv">4</span>)</span></code></pre></div>
-<p><img src="tag-based-genetic-regulation_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>All regulation-disabled programs successfully generalized.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="changing-signal-problem-analysis.html#cb11-1" aria-hidden="true"></a>table &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(num_generalize_reg,</span>
 <span id="cb11-2"><a href="changing-signal-problem-analysis.html#cb11-2" aria-hidden="true"></a>                  num_generalize_mem,</span>
@@ -529,7 +547,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": ["tag-based-genetic-regulation.pdf"],
+"download": ["tag-based-regulation-supplemental.pdf"],
 "toc": {
 "collapse": "subsection"
 }
