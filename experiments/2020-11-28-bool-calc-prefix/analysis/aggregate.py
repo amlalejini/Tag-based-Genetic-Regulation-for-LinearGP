@@ -124,8 +124,6 @@ def main():
 
     analysis_header_set = set() # Use this to guarantee all organism file headers match.
 
-    # --bookmark--
-
     # For each run, aggregate max fitness organism information.
     analysis_org_infos = []
 
@@ -178,7 +176,7 @@ def main():
         # extract run settings
         run_settings = extract_settings(run_config_path)
         # extract notation from the training set file path
-        notation = run_settings["TRAINING_SET_FILE"].split(".")[0].split("_")[-1]
+        notation = run_settings["TRAINING_SET_FILE"].split(".")[-2].split("_")[-1]
 
         ################################################################################################
         # ================================= extract analysis file info =================================
