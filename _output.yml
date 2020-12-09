@@ -1,6 +1,7 @@
 bookdown::gitbook:
   css: style.css
   split_by: "chapter"
+  citation_package: natbib
   config:
     toc:
       before: |

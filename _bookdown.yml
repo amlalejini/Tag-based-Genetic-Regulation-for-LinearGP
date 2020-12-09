@@ -9,6 +9,7 @@ rmd_files: ["index.Rmd",
             "experiments/2020-11-25-rep-sig/analysis/2020-11-25-rep-sig.Rmd",
             "experiments/2020-11-27-context-sig/analysis/2020-11-27-context-sig.Rmd",
             "experiments/2020-11-28-bool-calc-prefix/analysis/2020-11-28-bool-calc-prefix.Rmd",
-            "experiments/2020-11-28-bool-calc-postfix/analysis/2020-11-28-bool-calc-postfix.Rmd"
+            "experiments/2020-11-28-bool-calc-postfix/analysis/2020-11-28-bool-calc-postfix.Rmd",
+            "tail.Rmd"
            ]
 # new_session: yes
