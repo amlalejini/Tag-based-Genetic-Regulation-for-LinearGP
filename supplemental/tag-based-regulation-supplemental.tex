@@ -1655,9 +1655,9 @@ Here, we compare the generation at which solutions arise (only at difficulty lev
 \end{Shaded}
 
 \begin{verbatim}
-## Warning: Removed 92 rows containing missing values (geom_point).
+## Warning: Removed 110 rows containing missing values (geom_point).
 
-## Warning: Removed 92 rows containing missing values (geom_point).
+## Warning: Removed 110 rows containing missing values (geom_point).
 \end{verbatim}
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-16-1.pdf}
@@ -3180,7 +3180,7 @@ The number of successful replicates by condition:
 \StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# successful replciates"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
-    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"context{-}signal{-}solution{-}counts.pdf"}\NormalTok{),}
+    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/context{-}signal{-}solution{-}counts.pdf"}\NormalTok{),}
     \DataTypeTok{width=}\DecValTok{4}\NormalTok{,}
     \DataTypeTok{height=}\DecValTok{4}
 \NormalTok{  )}
@@ -4486,5 +4486,780 @@ We use the igraph package to draw this program's gene regulatory network.
 \end{Shaded}
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-79-1.pdf}
+
+\hypertarget{boolean-calculator-problem-postfix-notation}{%
+\chapter{Boolean calculator problem (postfix notation)}\label{boolean-calculator-problem-postfix-notation}}
+
+Here, we give an overview of the boolean logic calculator problem, and we provide our data analyses for related experiments.
+All of our source code for statistical analyses and data visualizations is embedded in this document.
+The raw data can be found on the OSF project associated with this work (link coming).
+
+\textbf{Please \href{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues}{file an issue or make a pull request on github} to report any mistakes, ask questions, request more explanation, et cetera.}
+
+\hypertarget{overview-4}{%
+\section{Overview}\label{overview-4}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Experimental parameters referenced in{-}text all in one convenient place.}
+\NormalTok{time\_steps \textless{}{-}}\StringTok{ }\DecValTok{128}
+\NormalTok{replicates \textless{}{-}}\StringTok{ }\DecValTok{200}
+\NormalTok{population\_size \textless{}{-}}\StringTok{ }\DecValTok{1000}
+\NormalTok{generations \textless{}{-}}\StringTok{ }\DecValTok{10000}
+
+\CommentTok{\# Settings for statistical analyses.}
+\NormalTok{alpha \textless{}{-}}\StringTok{ }\FloatTok{0.05}
+
+\CommentTok{\# Relative location of data.}
+\NormalTok{working\_directory \textless{}{-}}\StringTok{ "experiments/2020{-}11{-}28{-}bool{-}calc{-}postfix/analysis/"} \CommentTok{\# \textless{}\textless{} For bookdown}
+\CommentTok{\# working\_directory \textless{}{-} "./"                                              \# \textless{}\textless{} For local analysis}
+\end{Highlighting}
+\end{Shaded}
+
+We use a modified version of the Boolean logic calculator problem to further investigate the potential for our implementation of tag-based regulation to impede adaptive evolution.
+Our previous experiments with the Boolean logic calculator problem provided inputs in prefix notation: the operator (e.g., AND, OR, XOR, etc.) is specified first, followed by the requisite number of numeric operands.
+As such, the final input signal does not differentiate which type of computation a program is expected to perform (e.g., AND, OR, XOR, etc.).
+This requires programs to adjust their response to the final input signal based on the context provided by the previous two signals, thereby increasing the value of regulation.
+
+We explore whether the calculator problem's context-dependence is driving the benefit of tag-based regulation that we identified in previous experiments.
+We can reduce context-dependence of the calculator problem by presenting input sequences in postfix notation.
+In postfix notation, programs receive the requisite numeric operand inputs first and the operator input last.
+As such, the final signal in an input sequence will always differentiate which bitwise operation should be performed.
+Successful programs must store the numeric inputs embedded in operand signals, and then, as in the changing-signal problem, a distinct signal will differentiate which of the response types a program should execute.
+
+\hypertarget{analysis-dependencies-4}{%
+\section{Analysis Dependencies}\label{analysis-dependencies-4}}
+
+Load all required R libraries.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\KeywordTok{library}\NormalTok{(cowplot)}
+\KeywordTok{library}\NormalTok{(viridis)}
+\KeywordTok{library}\NormalTok{(reshape2)}
+\KeywordTok{library}\NormalTok{(igraph)}
+\KeywordTok{source}\NormalTok{(}\StringTok{"https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom\_flat\_violin.R"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+These analyses were conducted in the following computing environment:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(version)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                _                           
+## platform       x86_64-pc-linux-gnu         
+## arch           x86_64                      
+## os             linux-gnu                   
+## system         x86_64, linux-gnu           
+## status                                     
+## major          4                           
+## minor          0.2                         
+## year           2020                        
+## month          06                          
+## day            22                          
+## svn rev        78730                       
+## language       R                           
+## version.string R version 4.0.2 (2020-06-22)
+## nickname       Taking Off Again
+\end{verbatim}
+
+\hypertarget{setup-4}{%
+\section{Setup}\label{setup-4}}
+
+Load data, initial data cleanup, configure some global settings.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data\_loc \textless{}{-}}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"data/max\_fit\_orgs.csv"}\NormalTok{)}
+\NormalTok{data \textless{}{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(data\_loc, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
+
+\CommentTok{\# Specify factors (not all of these matter for this set of runs).}
+\NormalTok{data}\OperatorTok{$}\NormalTok{matchbin\_thresh \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{matchbin\_thresh,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{25}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{75}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{data}\OperatorTok{$}\NormalTok{TAG\_LEN \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{TAG\_LEN,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\DecValTok{32}\NormalTok{, }\DecValTok{64}\NormalTok{, }\DecValTok{128}\NormalTok{, }\DecValTok{256}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{data}\OperatorTok{$}\NormalTok{notation \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{notation,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{"prefix"}\NormalTok{, }\StringTok{"postfix"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Define function to summarize regulation/memory configurations.}
+\NormalTok{get\_con \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(reg, mem) \{}
+  \ControlFlowTok{if}\NormalTok{ (reg }\OperatorTok{==}\StringTok{ "0"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem }\OperatorTok{==}\StringTok{ "0"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"none"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (reg }\OperatorTok{==}\StringTok{ "0"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem}\OperatorTok{==}\StringTok{"1"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"memory"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (reg}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem}\OperatorTok{==}\StringTok{"0"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"regulation"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (reg}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem}\OperatorTok{==}\StringTok{"1"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"both"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"UNKNOWN"}\NormalTok{)}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\CommentTok{\# Specify experimental condition for each datum.}
+\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(}
+\NormalTok{  get\_con,}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{USE\_FUNC\_REGULATION,}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{USE\_GLOBAL\_MEMORY}
+\NormalTok{)}
+
+\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{condition,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{"regulation"}\NormalTok{, }\StringTok{"memory"}\NormalTok{, }\StringTok{"none"}\NormalTok{, }\StringTok{"both"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Given knockout info, what strategy does a program use?}
+\NormalTok{get\_strategy \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(use\_reg, use\_mem) \{}
+  \ControlFlowTok{if}\NormalTok{ (use\_reg}\OperatorTok{==}\StringTok{"0"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{use\_mem}\OperatorTok{==}\StringTok{"0"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"use neither"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (use\_reg}\OperatorTok{==}\StringTok{"0"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{use\_mem}\OperatorTok{==}\StringTok{"1"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"use memory"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (use\_reg}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{use\_mem}\OperatorTok{==}\StringTok{"0"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"use regulation"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (use\_reg}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{use\_mem}\OperatorTok{==}\StringTok{"1"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"use both"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"UNKNOWN"}\NormalTok{)}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\CommentTok{\# Specify experimental conditions (to make labeling easier).}
+\NormalTok{data}\OperatorTok{$}\NormalTok{strategy \textless{}{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(}
+\NormalTok{  get\_strategy,}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{relies\_on\_regulation,}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{relies\_on\_global\_memory}
+\NormalTok{)}
+
+\NormalTok{data}\OperatorTok{$}\NormalTok{strategy \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{strategy,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}
+    \StringTok{"use regulation"}\NormalTok{,}
+    \StringTok{"use memory"}\NormalTok{,}
+    \StringTok{"use neither"}\NormalTok{,}
+    \StringTok{"use both"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\CommentTok{\# Filter data to include only replicates labeled as solutions}
+\NormalTok{sol\_data \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(data, solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}
+
+\CommentTok{\#\#\#\#\#\#\# Load instruction execution data \#\#\#\#\#\#\#}
+\NormalTok{inst\_exec\_data \textless{}{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"data/exec\_trace\_summary.csv"}\NormalTok{), }\DataTypeTok{na.strings=}\StringTok{"NA"}\NormalTok{)}
+
+\NormalTok{inst\_exec\_data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(}
+\NormalTok{  get\_con,}
+\NormalTok{  inst\_exec\_data}\OperatorTok{$}\NormalTok{USE\_FUNC\_REGULATION,}
+\NormalTok{  inst\_exec\_data}\OperatorTok{$}\NormalTok{USE\_GLOBAL\_MEMORY}
+\NormalTok{)}
+
+\NormalTok{inst\_exec\_data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  inst\_exec\_data}\OperatorTok{$}\NormalTok{condition,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{"regulation"}\NormalTok{, }\StringTok{"memory"}\NormalTok{, }\StringTok{"none"}\NormalTok{, }\StringTok{"both"}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{inst\_exec\_data}\OperatorTok{$}\NormalTok{notation \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  inst\_exec\_data}\OperatorTok{$}\NormalTok{notation,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{"prefix"}\NormalTok{, }\StringTok{"postfix"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\#\#\#\#\#\#\# Load network data \#\#\#\#\#\#\#}
+\NormalTok{reg\_network\_data \textless{}{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"data/reg\_graphs\_summary.csv"}\NormalTok{), }\DataTypeTok{na.strings=}\StringTok{"NA"}\NormalTok{)}
+\NormalTok{reg\_network\_data \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(reg\_network\_data, run\_id }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{data}\OperatorTok{$}\NormalTok{SEED)}
+
+\NormalTok{get\_notation \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(seed) \{}
+  \KeywordTok{return}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, SEED}\OperatorTok{==}\NormalTok{seed)}\OperatorTok{$}\NormalTok{notation)}
+\NormalTok{\}}
+
+\NormalTok{reg\_network\_data}\OperatorTok{$}\NormalTok{notation \textless{}{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(}
+\NormalTok{  get\_notation,}
+\NormalTok{  reg\_network\_data}\OperatorTok{$}\NormalTok{run\_id}
+\NormalTok{)}
+
+\NormalTok{reg\_network\_data}\OperatorTok{$}\NormalTok{notation \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  reg\_network\_data}\OperatorTok{$}\NormalTok{notation,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{"prefix"}\NormalTok{, }\StringTok{"postfix"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\#\#\#\#\#\#\# misc \#\#\#\#\#\#\#}
+\CommentTok{\# Configure our default graphing theme}
+\KeywordTok{theme\_set}\NormalTok{(}\KeywordTok{theme\_cowplot}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{problem-solving-success-3}{%
+\section{Problem-solving success}\label{problem-solving-success-3}}
+
+The number of successful replicates by condition:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Graph the number of solutions evolved in each condition, faceted by environmental complexity}
+\KeywordTok{ggplot}\NormalTok{(sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{fill=}\NormalTok{condition)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_bar}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}
+    \DataTypeTok{stat=}\StringTok{"count"}\NormalTok{,}
+    \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{..count..),}
+    \DataTypeTok{position=}\KeywordTok{position\_dodge}\NormalTok{(}\FloatTok{0.9}\NormalTok{),}
+    \DataTypeTok{vjust=}\DecValTok{0}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# successful replciates"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylim}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{200}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
+    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/boolean{-}calc{-}postfix{-}solution{-}counts.pdf"}\NormalTok{),}
+    \DataTypeTok{width=}\DecValTok{4}\NormalTok{,}
+    \DataTypeTok{height=}\DecValTok{4}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-84-1.pdf}
+
+Test for significance using Fisher's exact test.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Extract successes/fails for each condition.}
+\NormalTok{reg\_disabled\_success\_cnt \textless{}{-}}\StringTok{ }\KeywordTok{nrow}\NormalTok{(}\KeywordTok{filter}\NormalTok{(sol\_data, solution}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&}\StringTok{ }\NormalTok{condition}\OperatorTok{==}\StringTok{"memory"}\NormalTok{))}
+\NormalTok{reg\_disabled\_fail\_cnt \textless{}{-}}\StringTok{ }\NormalTok{replicates }\OperatorTok{{-}}\StringTok{ }\NormalTok{reg\_disabled\_success\_cnt}
+
+\NormalTok{reg\_enabled\_success\_cnt \textless{}{-}}\StringTok{ }\KeywordTok{nrow}\NormalTok{(}\KeywordTok{filter}\NormalTok{(sol\_data, solution}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&}\StringTok{ }\NormalTok{condition}\OperatorTok{==}\StringTok{"both"}\NormalTok{))}
+\NormalTok{reg\_enabled\_fail\_cnt \textless{}{-}}\StringTok{ }\NormalTok{replicates }\OperatorTok{{-}}\StringTok{ }\NormalTok{reg\_enabled\_success\_cnt}
+
+\CommentTok{\# Regulation{-}disabled vs regulation{-}enabled}
+\NormalTok{perf\_table \textless{}{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}
+  \KeywordTok{c}\NormalTok{(}
+\NormalTok{    reg\_enabled\_success\_cnt,}
+\NormalTok{    reg\_disabled\_success\_cnt,}
+\NormalTok{    reg\_enabled\_fail\_cnt,}
+\NormalTok{    reg\_disabled\_fail\_cnt}
+\NormalTok{    ),}
+    \DataTypeTok{nrow=}\DecValTok{2}
+\NormalTok{)}
+
+\KeywordTok{rownames}\NormalTok{(perf\_table) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"reg{-}enabled"}\NormalTok{, }\StringTok{"reg{-}disabled"}\NormalTok{)}
+\KeywordTok{colnames}\NormalTok{(perf\_table) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"success"}\NormalTok{, }\StringTok{"fail"}\NormalTok{)}
+
+\KeywordTok{print}\NormalTok{(perf\_table)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##              success fail
+## reg-enabled      120   80
+## reg-disabled     151   49
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}\KeywordTok{fisher.test}\NormalTok{(perf\_table))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Fisher's Exact Test for Count Data
+## 
+## data:  perf_table
+## p-value = 0.001286
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  0.3093253 0.7635173
+## sample estimates:
+## odds ratio 
+##  0.4876392
+\end{verbatim}
+
+\hypertarget{how-many-generations-elapse-before-solutions-evolve-3}{%
+\section{How many generations elapse before solutions evolve?}\label{how-many-generations-elapse-before-solutions-evolve-3}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{( }\DataTypeTok{data =}\NormalTok{ sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_flat\_violin}\NormalTok{(}
+    \DataTypeTok{position=}\KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
+    \DataTypeTok{alpha=}\NormalTok{.}\DecValTok{8}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition),}
+    \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
+    \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.8}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{(}
+    \DataTypeTok{width =} \FloatTok{.1}\NormalTok{,}
+    \DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.5}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Generation first solution evolved"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
+    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/boolean{-}calc{-}postfix{-}solve{-}time{-}cloud.png"}\NormalTok{),}
+    \DataTypeTok{width=}\DecValTok{4}\NormalTok{,}
+    \DataTypeTok{height=}\DecValTok{4}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-86-1.pdf}
+
+Test for statistical difference between conditions using a Wilcoxon rank sum test.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}\KeywordTok{wilcox.test}\NormalTok{(}\DataTypeTok{formula=}\NormalTok{update}\OperatorTok{\textasciitilde{}}\NormalTok{condition, }\DataTypeTok{data=}\NormalTok{sol\_data, }\DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  update by condition
+## W = 7175.5, p-value = 0.003285
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  -1422  -310
+## sample estimates:
+## difference in location 
+##                   -872
+\end{verbatim}
+
+\hypertarget{evolved-strategies-2}{%
+\section{Evolved strategies}\label{evolved-strategies-2}}
+
+\hypertarget{what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-2}{%
+\subsection{What mechanisms do programs rely on to adjust responses to signals over time?}\label{what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-2}}
+
+We used indpendent knockouts of tag-based genetic regulation and global memory buffer access to investigate the mechanisms underpinning successful programs.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{( sol\_data, }\DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{fill=}\NormalTok{strategy) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_bar}\NormalTok{(}
+    \DataTypeTok{position=}\StringTok{"fill"}\NormalTok{,}
+    \DataTypeTok{stat=}\StringTok{"count"}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}
+    \DataTypeTok{stat=}\StringTok{\textquotesingle{}count\textquotesingle{}}\NormalTok{,}
+    \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{..count..),}
+    \DataTypeTok{position=}\KeywordTok{position\_fill}\NormalTok{(}\DataTypeTok{vjust=}\FloatTok{0.05}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\% of Solutions"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_fill\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Strategy:"}\NormalTok{,}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}
+      \StringTok{"use regulation"}\NormalTok{,}
+      \StringTok{"use memory"}\NormalTok{,}
+      \StringTok{"use neither"}\NormalTok{,}
+      \StringTok{"use both"}
+\NormalTok{    ),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}
+      \StringTok{"Use regulation (only)"}\NormalTok{,}
+      \StringTok{"Use global memory (only)"}\NormalTok{,}
+      \StringTok{"Use neither"}\NormalTok{,}
+      \StringTok{"Use both"}
+\NormalTok{    )}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"bottom"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-88-1.pdf}
+
+\hypertarget{gene-regulatory-networks-2}{%
+\subsection{Gene regulatory networks}\label{gene-regulatory-networks-2}}
+
+Looking only at successful programs that rely on regulation. At a glance, what do gene regulatory networks look like?
+
+First, the total edges found in networks:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{relies\_on\_reg \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(}
+\NormalTok{  sol\_data,}
+\NormalTok{  relies\_on\_regulation}\OperatorTok{==}\StringTok{"1"}
+\NormalTok{)}\OperatorTok{$}\NormalTok{SEED}
+
+\KeywordTok{ggplot}\NormalTok{( }\KeywordTok{filter}\NormalTok{(reg\_network\_data, run\_id }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{relies\_on\_reg), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{notation, }\DataTypeTok{y=}\NormalTok{edge\_cnt) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_jitter}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.1}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Notation"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# Edges"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}
+    \DataTypeTok{legend.position=}\StringTok{"bottom"}\NormalTok{,}
+    \DataTypeTok{legend.text=}\KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{9}\NormalTok{),}
+    \DataTypeTok{legend.title=}\KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{10}\NormalTok{),}
+    \DataTypeTok{axis.title.x=}\KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{12}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
+    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/boolean{-}calc{-}postfix{-}regulation{-}edges.png"}\NormalTok{),}
+    \DataTypeTok{width=}\DecValTok{4}\NormalTok{,}
+    \DataTypeTok{height=}\DecValTok{3}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-89-1.pdf}
+
+Next, let's look at edges by type.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Process/cleanup the network data}
+\NormalTok{melted\_network\_data \textless{}{-}}\StringTok{ }\KeywordTok{melt}\NormalTok{(}
+  \KeywordTok{filter}\NormalTok{(reg\_network\_data,}
+\NormalTok{         run\_id }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{relies\_on\_reg}
+\NormalTok{        ),}
+  \DataTypeTok{variable.name =} \StringTok{"reg\_edge\_type"}\NormalTok{,}
+  \DataTypeTok{value.name =} \StringTok{"reg\_edges\_cnt"}\NormalTok{,}
+  \DataTypeTok{measure.vars=}\KeywordTok{c}\NormalTok{(}\StringTok{"repressed\_edges\_cnt"}\NormalTok{, }\StringTok{"promoted\_edges\_cnt"}\NormalTok{)}
+\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{( melted\_network\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{reg\_edge\_type, }\DataTypeTok{y=}\NormalTok{reg\_edges\_cnt, }\DataTypeTok{color=}\NormalTok{reg\_edge\_type) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_jitter}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Environmental Complexity"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# Edges"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Edge type"}\NormalTok{,}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\StringTok{"repressed\_edges\_cnt"}\NormalTok{, }\StringTok{"promoted\_edges\_cnt"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Repressing edges"}\NormalTok{, }\StringTok{"Promoting edges"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}
+    \DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{,}
+    \DataTypeTok{legend.text=}\KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{9}\NormalTok{),}
+    \DataTypeTok{legend.title=}\KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{10}\NormalTok{),}
+    \DataTypeTok{axis.title.x=}\KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{12}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
+    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/boolean{-}calc{-}postfix{-}regulation{-}edge{-}types.png"}\NormalTok{),}
+    \DataTypeTok{width=}\DecValTok{4}\NormalTok{,}
+    \DataTypeTok{height=}\DecValTok{3}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-90-1.pdf}
+
+Test for a statistical difference between edge types using a wilcoxon rank sum test:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}
+  \KeywordTok{paste0}\NormalTok{(}
+    \StringTok{"Median \# repressed edges: "}\NormalTok{,}
+    \KeywordTok{median}\NormalTok{(}\KeywordTok{filter}\NormalTok{(melted\_network\_data, reg\_edge\_type}\OperatorTok{==}\StringTok{"repressed\_edges\_cnt"}\NormalTok{)}\OperatorTok{$}\NormalTok{reg\_edges\_cnt)}
+\NormalTok{  )}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Median # repressed edges: 41"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}
+  \KeywordTok{paste0}\NormalTok{(}
+    \StringTok{"Median \# promoting edges: "}\NormalTok{,}
+    \KeywordTok{median}\NormalTok{(}\KeywordTok{filter}\NormalTok{(melted\_network\_data, reg\_edge\_type}\OperatorTok{==}\StringTok{"promoted\_edges\_cnt"}\NormalTok{)}\OperatorTok{$}\NormalTok{reg\_edges\_cnt)}
+\NormalTok{  )}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Median # promoting edges: 43"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}\KeywordTok{wilcox.test}\NormalTok{(}\DataTypeTok{formula=}\NormalTok{reg\_edges\_cnt }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{reg\_edge\_type, }\DataTypeTok{data=}\NormalTok{melted\_network\_data, }\DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  reg_edges_cnt by reg_edge_type
+## W = 4411, p-value = 0.4535
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  -7.999975  3.000061
+## sample estimates:
+## difference in location 
+##              -1.999985
+\end{verbatim}
+
+\hypertarget{program-instruction-execution-traces-3}{%
+\subsection{Program instruction execution traces}\label{program-instruction-execution-traces-3}}
+
+\hypertarget{execution-time-3}{%
+\subsubsection{Execution time}\label{execution-time-3}}
+
+How many time steps do successful programs take to solve the boolean calculator problem?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# only want solutions}
+\NormalTok{solutions\_inst\_exec\_data \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(inst\_exec\_data, SEED }\OperatorTok{\%in\%}\StringTok{ }\NormalTok{sol\_data}\OperatorTok{$}\NormalTok{SEED)}
+
+\KeywordTok{ggplot}\NormalTok{( solutions\_inst\_exec\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{total\_execution\_time, }\DataTypeTok{color=}\NormalTok{condition) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_jitter}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}
+    \DataTypeTok{legend.position=}\StringTok{"none"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-92-1.pdf}
+
+Test for significant difference between conditions using Wilcoxon rank sum test:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}
+  \KeywordTok{wilcox.test}\NormalTok{(}
+    \DataTypeTok{formula=}\NormalTok{total\_execution\_time}\OperatorTok{\textasciitilde{}}\NormalTok{condition,}
+    \DataTypeTok{data=}\KeywordTok{filter}\NormalTok{(solutions\_inst\_exec\_data),}
+    \DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{,}
+    \DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  total_execution_time by condition
+## W = 9737, p-value = 0.2912
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  -78.00002 274.00000
+## sample estimates:
+## difference in location 
+##               96.00004
+\end{verbatim}
+
+\hypertarget{what-types-of-instructions-to-successful-programs-execute-2}{%
+\subsubsection{What types of instructions to successful programs execute?}\label{what-types-of-instructions-to-successful-programs-execute-2}}
+
+Here, we look at the distribution of instruction types executed by successful programs.
+We're primarily interested in the proportion of control flow instructions, so let's look at that first.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{( solutions\_inst\_exec\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{control\_flow\_inst\_prop, }\DataTypeTok{color=}\NormalTok{condition) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_jitter}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Proportion of executed flow control instructions"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}
+    \DataTypeTok{legend.position=}\StringTok{"bottom"}\NormalTok{,}
+    \DataTypeTok{axis.title.x=}\KeywordTok{element\_blank}\NormalTok{()}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-94-1.pdf}
+
+Test for significant difference between conditions using a Wilcoxon rank sum test:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}
+  \KeywordTok{wilcox.test}\NormalTok{(}
+    \DataTypeTok{formula=}\NormalTok{control\_flow\_inst\_prop}\OperatorTok{\textasciitilde{}}\NormalTok{condition,}
+    \DataTypeTok{data=}\KeywordTok{filter}\NormalTok{(solutions\_inst\_exec\_data),}
+    \DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{,}
+    \DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  control_flow_inst_prop by condition
+## W = 8043, p-value = 0.1127
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  -0.011679066  0.001195076
+## sample estimates:
+## difference in location 
+##            -0.00543344
+\end{verbatim}
+
+In case you're curious, here's all categories of instructions:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{melted \textless{}{-}}\StringTok{ }\KeywordTok{melt}\NormalTok{(}
+\NormalTok{  solutions\_inst\_exec\_data,}
+  \DataTypeTok{variable.name =} \StringTok{"inst\_type"}\NormalTok{,}
+  \DataTypeTok{value.name =} \StringTok{"inst\_type\_prop"}\NormalTok{,}
+  \DataTypeTok{measure.vars=}\KeywordTok{c}\NormalTok{(}
+    \StringTok{"math\_inst\_prop"}\NormalTok{,}
+    \StringTok{"module\_inst\_prop"}\NormalTok{,}
+    \StringTok{"memory\_inst\_prop"}\NormalTok{,}
+    \StringTok{"regulation\_inst\_prop"}\NormalTok{,}
+    \StringTok{"control\_flow\_inst\_prop"}\NormalTok{,}
+    \StringTok{"thread\_inst\_prop"}\NormalTok{,}
+    \StringTok{"task\_inst\_prop"}\NormalTok{,}
+    \StringTok{"nop\_inst\_prop"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{( melted, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{inst\_type, }\DataTypeTok{y=}\NormalTok{inst\_type\_prop, }\DataTypeTok{color=}\NormalTok{condition) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_color\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition:"}\NormalTok{,}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}disabled"}\NormalTok{, }\StringTok{"Regulation{-}enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Instruction type"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Proportion of instructions in execution trace"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord\_flip}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"bottom"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-96-1.pdf}
+
+\hypertarget{visualizaing-an-evolved-regulatory-network-1}{%
+\section{Visualizaing an evolved regulatory network}\label{visualizaing-an-evolved-regulatory-network-1}}
+
+Let's take a closer look at a successful gene regulatory network.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{trace\_id \textless{}{-}}\StringTok{ }\DecValTok{25392}
+\end{Highlighting}
+\end{Shaded}
+
+Specifically, we'll be looking at the solution evolved in run id \ensuremath{2.5392\times 10^{4}} (arbitrarily selected).
+
+\hypertarget{evolved-regulatory-network-3}{%
+\subsection{Evolved regulatory network}\label{evolved-regulatory-network-3}}
+
+We use the igraph package to draw this program's gene regulatory network.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Networks!}
+\NormalTok{graph\_nodes\_loc \textless{}{-}}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"data/igraphs/reg\_graph\_id{-}"}\NormalTok{, trace\_id, }\StringTok{"\_nodes.csv"}\NormalTok{)}
+\NormalTok{graph\_edges\_loc \textless{}{-}}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"data/igraphs/reg\_graph\_id{-}"}\NormalTok{, trace\_id, }\StringTok{"\_edges.csv"}\NormalTok{)}
+\NormalTok{graph\_nodes\_data \textless{}{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(graph\_nodes\_loc, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
+\NormalTok{graph\_edges\_data \textless{}{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(graph\_edges\_loc, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
+
+\NormalTok{network \textless{}{-}}\StringTok{ }\KeywordTok{graph\_from\_data\_frame}\NormalTok{(}
+  \DataTypeTok{d=}\NormalTok{graph\_edges\_data,}
+  \DataTypeTok{vertices=}\NormalTok{graph\_nodes\_data,}
+  \DataTypeTok{directed=}\OtherTok{TRUE}
+\NormalTok{)}
+
+\CommentTok{\# Setup edge styling}
+\KeywordTok{E}\NormalTok{(network)}\OperatorTok{$}\NormalTok{color[}\KeywordTok{E}\NormalTok{(network)}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "promote"}\NormalTok{] \textless{}{-}}\StringTok{ "\#FCE640"}
+\KeywordTok{E}\NormalTok{(network)}\OperatorTok{$}\NormalTok{lty[}\KeywordTok{E}\NormalTok{(network)}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "promote"}\NormalTok{] \textless{}{-}}\StringTok{ }\DecValTok{1}
+\KeywordTok{E}\NormalTok{(network)}\OperatorTok{$}\NormalTok{color[}\KeywordTok{E}\NormalTok{(network)}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "repress"}\NormalTok{] \textless{}{-}}\StringTok{ "\#441152"}
+\KeywordTok{E}\NormalTok{(network)}\OperatorTok{$}\NormalTok{lty[}\KeywordTok{E}\NormalTok{(network)}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "repress"}\NormalTok{] \textless{}{-}}\StringTok{ }\DecValTok{1}
+
+\NormalTok{network\_out\_name \textless{}{-}}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/case{-}study{-}id{-}"}\NormalTok{, trace\_id, }\StringTok{"{-}network.svg"}\NormalTok{)}
+
+\NormalTok{draw\_network \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(net, write\_out, out\_name) \{}
+  \ControlFlowTok{if}\NormalTok{ (write\_out) \{}
+    \KeywordTok{svg}\NormalTok{(out\_name, }\DataTypeTok{width=}\DecValTok{4}\NormalTok{,}\DataTypeTok{height=}\FloatTok{1.5}\NormalTok{)}
+    \CommentTok{\# bottom, left, top, right}
+    \KeywordTok{par}\NormalTok{(}\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{0.2}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\FloatTok{0.5}\NormalTok{))}
+\NormalTok{  \}}
+  \KeywordTok{plot}\NormalTok{(}
+\NormalTok{    net,}
+    \DataTypeTok{edge.arrow.size=}\FloatTok{0.4}\NormalTok{,}
+    \DataTypeTok{edge.arrow.width=}\FloatTok{0.75}\NormalTok{,}
+    \DataTypeTok{edge.width=}\DecValTok{2}\NormalTok{,}
+    \DataTypeTok{vertex.size=}\DecValTok{10}\NormalTok{,}
+    \DataTypeTok{vertex.label.cex=}\FloatTok{0.65}\NormalTok{,}
+    \DataTypeTok{curved=}\OtherTok{TRUE}\NormalTok{,}
+    \DataTypeTok{vertex.color=}\StringTok{"grey99"}\NormalTok{,}
+    \DataTypeTok{vertex.label.color=}\StringTok{"black"}\NormalTok{,}
+    \DataTypeTok{vertex.label.family=}\StringTok{"sans"}\NormalTok{,}
+    \DataTypeTok{layout=}\KeywordTok{layout.circle}\NormalTok{(net)}
+\NormalTok{  )}
+  \KeywordTok{legend}\NormalTok{(}
+    \DataTypeTok{x =} \StringTok{"bottomleft"}\NormalTok{,      }\CommentTok{\#\# position, also takes x,y coordinates}
+    \DataTypeTok{legend =} \KeywordTok{c}\NormalTok{(}\StringTok{"Promoted"}\NormalTok{, }\StringTok{"Repressed"}\NormalTok{),}
+    \DataTypeTok{pch =} \DecValTok{19}\NormalTok{,              }\CommentTok{\#\# legend symbols see ?points}
+    \DataTypeTok{col =} \KeywordTok{c}\NormalTok{(}\StringTok{"\#FCE640"}\NormalTok{, }\StringTok{"\#441152"}\NormalTok{),}
+    \DataTypeTok{bty =} \StringTok{"n"}\NormalTok{,}
+    \DataTypeTok{border=}\StringTok{"black"}\NormalTok{,}
+    \DataTypeTok{xpd=}\OtherTok{TRUE}\NormalTok{,}
+    \DataTypeTok{title =} \StringTok{"Edges"}
+\NormalTok{  )}
+  \ControlFlowTok{if}\NormalTok{ (write\_out) \{}
+    \KeywordTok{dev.flush}\NormalTok{()}
+    \KeywordTok{dev.off}\NormalTok{()}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\KeywordTok{draw\_network}\NormalTok{(network, }\OtherTok{TRUE}\NormalTok{, network\_out\_name)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## pdf 
+##   2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{draw\_network}\NormalTok{(network, }\OtherTok{FALSE}\NormalTok{, }\StringTok{""}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-98-1.pdf}
 
 \end{document}
