@@ -1,0 +1,580 @@
+# Contextual-signal problem analysis
+
+Here, we give an overview of the contextual-signal diagnostic problem, and we provide our data analyses for related experiments.
+All of our source code for statistical analyses and data visualizations is embedded in this document.
+The raw data can be found on the OSF project associated with this work (link coming).
+
+**Please [file an issue or make a pull request on github](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues) to report any mistakes, ask questions, request more explanation, et cetera.**
+
+
+## Overview
+
+```{r}
+# Experimental parameters referenced in-text all in one convenient place.
+time_steps <- 128
+replicates <- 200
+population_size <- 1000
+generations <- 10000
+
+# Settings for statistical analyses.
+alpha <- 0.05
+
+# Relative location of data.
+working_directory <- "experiments/2020-11-27-context-sig/analysis/" # << For bookdown
+# working_directory <- "./"                                         # << For local analysis
+```
+
+In the contextual-signal problem, programs must respond appropriately to a sequence of two input signals where the first, ''contextual'', signal dictates how a program should respond to each possible second, ''response'', signal.
+In this work, there are a total of four possible input signals and four possible output responses.
+Programs output these responses by executing one of four response instructions.
+
+The dataframe below gives the correct output for each combination of input signals.
+```{r}
+testcases <- read.csv(paste0(working_directory, "../hpcc/examples_S4.csv"))
+print(testcases)
+```
+
+## Analysis Dependencies
+
+Load all required R libraries.
+
+```{r, message=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(cowplot)
+library(viridis)
+library(reshape2)
+library(igraph)
+source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
+```
+
+These analyses were conducted in the following computing environment:
+
+```{r}
+print(version)
+```
+
+## Setup
+
+Load data, initial data cleanup, configure some global settings.
+
+```{r}
+####### Load max fit program data #######
+data_loc <- paste0(working_directory, "data/max_fit_orgs.csv")
+data <- read.csv(data_loc, na.strings="NONE")
+
+# Specify factors (not all of these matter for this set of runs).
+data$matchbin_thresh <- factor(
+  data$matchbin_thresh,
+  levels=c(0, 25, 50, 75)
+)
+
+data$TAG_LEN <- factor(
+  data$TAG_LEN,
+  levels=c(32, 64, 128, 256)
+)
+
+data$task <- factor(
+  data$task,
+  levels=c("S2", "S3", "S4")
+)
+
+# Define function to summarize regulation/memory configurations.
+get_con <- function(reg, mem) {
+  if (reg == "0" && mem == "0") {
+    return("none")
+  } else if (reg == "0" && mem=="1") {
+    return("memory")
+  } else if (reg=="1" && mem=="0") {
+    return("regulation")
+  } else if (reg=="1" && mem=="1") {
+    return("both")
+  } else {
+    return("UNKNOWN")
+  }
+}
+# Specify experimental condition for each datum.
+data$condition <- mapply(
+  get_con,
+  data$USE_FUNC_REGULATION,
+  data$USE_GLOBAL_MEMORY
+)
+
+data$condition <- factor(
+  data$condition,
+  levels=c("regulation", "memory", "none", "both")
+)
+
+# Given knockout info, what strategy does a program use?
+get_strategy <- function(use_reg, use_mem) {
+  if (use_reg=="0" && use_mem=="0") {
+    return("use neither")
+  } else if (use_reg=="0" && use_mem=="1") {
+    return("use memory")
+  } else if (use_reg=="1" && use_mem=="0") {
+    return("use regulation")
+  } else if (use_reg=="1" && use_mem=="1") {
+    return("use both")
+  } else {
+    return("UNKNOWN")
+  }
+}
+
+# Specify experimental conditions (to make labeling easier).
+data$strategy <- mapply(
+  get_strategy,
+  data$relies_on_regulation,
+  data$relies_on_global_memory
+)
+
+data$strategy <- factor(
+  data$strategy,
+  levels=c(
+    "use regulation",
+    "use memory",
+    "use neither",
+    "use both"
+  )
+)
+
+# Filter data to include only replicates labeled as solutions
+sol_data <- filter(data, solution=="1")
+
+####### Load instruction execution data #######
+inst_exec_data <- read.csv(paste0(working_directory, "data/exec_trace_summary.csv"), na.strings="NA")
+
+inst_exec_data$condition <- mapply(
+  get_con,
+  inst_exec_data$USE_FUNC_REGULATION,
+  inst_exec_data$USE_GLOBAL_MEMORY
+)
+
+inst_exec_data$condition <- factor(
+  inst_exec_data$condition,
+  levels=c("regulation", "memory", "none", "both")
+)
+
+inst_exec_data$task <- factor(
+  inst_exec_data$task,
+  levels=c("S2", "S3", "S4")
+)
+
+####### Load network data #######
+reg_network_data <- read.csv(paste0(working_directory, "data/reg_graphs_summary.csv"), na.strings="NA")
+reg_network_data <- filter(reg_network_data, run_id %in% data$SEED)
+
+get_task <- function(seed) {
+  return(filter(data, SEED==seed)$task)
+}
+
+reg_network_data$task <- mapply(
+  get_task,
+  reg_network_data$run_id
+)
+
+reg_network_data$task <- factor(reg_network_data$task)
+
+####### misc #######
+# Configure our default graphing theme
+theme_set(theme_cowplot())
+```
+
+## Problem-solving success
+
+The number of successful replicates by condition:
+
+```{r, echo=TRUE}
+# Graph the number of solutions evolved in each condition, faceted by environmental complexity
+ggplot(filter(sol_data, task=="S4"), aes(x=condition, fill=condition)) +
+  geom_bar() +
+  geom_text(
+    stat="count",
+    mapping=aes(label=..count..),
+    position=position_dodge(0.9),
+    vjust=0
+  ) +
+  scale_x_discrete(
+    name="Condition",
+    breaks=c("memory","both"),
+    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+  ) +
+  ylab("# successful replciates") +
+  theme(legend.position = "none") +
+  ggsave(
+    paste0(working_directory, "context-signal-solution-counts.pdf"),
+    width=4,
+    height=4
+  )
+```
+
+Test for significance using Fisher's exact test.
+
+```{r}
+# Extract successes/fails for each condition.
+reg_disabled_success_cnt <- nrow(filter(sol_data, task=="S4" & solution=="1" & condition=="memory"))
+reg_disabled_fail_cnt <- nrow(filter(sol_data, task=="S4" & condition=="memory")) - reg_disabled_success_cnt
+
+reg_enabled_success_cnt <- nrow(filter(sol_data, task=="S4" & solution=="1" & condition=="both"))
+reg_enabled_fail_cnt <- nrow(filter(sol_data, task=="S4" & condition=="both")) - reg_enabled_success_cnt
+
+# Regulation-disabled vs regulation-enabled
+perf_table <- matrix(
+  c(
+    reg_enabled_success_cnt,
+    reg_disabled_success_cnt,
+    reg_enabled_fail_cnt,
+    reg_disabled_fail_cnt
+    ),
+    nrow=2
+)
+
+rownames(perf_table) <- c("reg-enabled", "reg-disabled")
+colnames(perf_table) <- c("success", "fail")
+
+print(perf_table)
+print(fisher.test(perf_table))
+```
+
+## How many generations elapse before solutions evolve?
+
+```{r}
+ggplot( data = filter(sol_data, task=="S4"), aes(x=condition, y=update, fill=condition) ) +
+  geom_flat_violin(
+    position=position_nudge(x = .2, y = 0),
+    alpha=.8
+  ) +
+  geom_point(
+    aes(y=update, color=condition),
+    position = position_jitter(width = .15),
+    size = .5,
+    alpha = 0.8
+  ) +
+  geom_boxplot(
+    width = .1,
+    outlier.shape = NA,
+    alpha = 0.5
+  ) +
+  scale_x_discrete(
+    name="Condition",
+    breaks=c("memory", "both"),
+    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+  ) +
+  scale_y_continuous(name="Generation first solution evolved") +
+  guides(fill = FALSE) +
+  guides(color = FALSE) +
+  ggsave(
+    paste0(working_directory, "imgs/context-signal-solve-time-cloud.png"),
+    width=4,
+    height=4
+  )
+```
+
+Test for statistical difference between conditions using a Wilcoxon rank sum test.
+
+```{r}
+print(wilcox.test(formula=update~condition, data=sol_data, exact=FALSE, conf.int=TRUE))
+```
+
+## Evolved strategies
+
+### What mechanisms do programs rely on to adjust responses to signals over time?
+
+We used indpendent knockouts of tag-based genetic regulation and global memory buffer access to investigate the mechanisms underpinning successful programs.
+
+```{r}
+ggplot( filter(sol_data, task=="S4"), mapping=aes(x=condition, fill=strategy) ) +
+  geom_bar(
+    position="fill",
+    stat="count"
+  ) +
+  geom_text(
+    stat='count',
+    mapping=aes(label=..count..),
+    position=position_fill(vjust=0.05)
+  ) +
+  ylab("% of Solutions") +
+  scale_fill_discrete(
+    name="Strategy:",
+    breaks=c(
+      "use regulation",
+      "use memory",
+      "use neither",
+      "use both"
+    ),
+    labels=c(
+      "Use regulation (only)",
+      "Use global memory (only)",
+      "Use neither",
+      "Use both"
+    )
+  ) +
+  scale_x_discrete(
+    name="Condition",
+    breaks=c("memory", "both"),
+    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+  ) +
+  theme(legend.position = "bottom")
+```
+
+### Gene regulatory networks
+
+Looking only at successful programs that rely on regulation. At a glance, what do gene regulatory networks look like?
+
+First, the total edges found in networks:
+
+```{r}
+relies_on_reg <- filter(
+  sol_data,
+  relies_on_regulation=="1"
+)$SEED
+
+ggplot( filter(reg_network_data, run_id %in% relies_on_reg & task=="S4"), aes(x=task, y=edge_cnt) ) +
+  geom_boxplot() +
+  geom_jitter(alpha=0.1) +
+  xlab("Task") +
+  ylab("# Edges") +
+  theme(
+    legend.position="bottom",
+    legend.text=element_text(size=9),
+    legend.title=element_text(size=10),
+    axis.title.x=element_text(size=12)
+  ) +
+  ggsave(
+    paste0(working_directory, "imgs/contextual-signal-regulation-edges.png"),
+    width=4,
+    height=3
+  )
+```
+
+Next, let's look at edges by type.
+
+```{r}
+
+# Process/cleanup the network data
+melted_network_data <- melt(
+  filter(reg_network_data,
+         run_id %in% relies_on_reg
+        ),
+  variable.name = "reg_edge_type",
+  value.name = "reg_edges_cnt",
+  measure.vars=c("repressed_edges_cnt", "promoted_edges_cnt")
+)
+
+ggplot(filter(melted_network_data, task=="S4"), aes(x=reg_edge_type, y=reg_edges_cnt, color=reg_edge_type)) +
+  geom_boxplot() +
+  geom_jitter(alpha=0.2) +
+  xlab("Environmental Complexity") +
+  ylab("# Edges") +
+  scale_x_discrete(
+    name="Edge type",
+    limits=c("repressed_edges_cnt", "promoted_edges_cnt"),
+    labels=c("Repressing edges", "Promoting edges")
+  ) +
+  theme(
+    legend.position="none",
+    legend.text=element_text(size=9),
+    legend.title=element_text(size=10),
+    axis.title.x=element_text(size=12)
+  ) +
+  ggsave(
+    paste0(working_directory, "imgs/context-signal-regulation-edge-types.png"),
+    width=4,
+    height=3
+  )
+```
+
+Test for a statistical difference between edge types using a wilcoxon rank sum test:
+
+```{r}
+print(
+  paste0(
+    "Median # repressed edges: ",
+    median(filter(melted_network_data, task=="S4" & reg_edge_type=="repressed_edges_cnt")$reg_edges_cnt)
+  )
+)
+
+print(
+  paste0(
+    "Median # promoting edges: ",
+    median(filter(melted_network_data, task=="S4" & reg_edge_type=="promoted_edges_cnt")$reg_edges_cnt)
+  )
+)
+
+print(wilcox.test(formula=reg_edges_cnt ~ reg_edge_type, data=filter(melted_network_data, task=="S4"), exact=FALSE, conf.int=TRUE))
+
+```
+
+### Program instruction execution traces
+
+#### Execution time
+
+How many time steps do evolved programs use to solve the repeated-signal task?
+
+```{r}
+# only want solutions
+solutions_inst_exec_data <- filter(inst_exec_data, SEED %in% sol_data$SEED & task=="S4")
+
+ggplot( solutions_inst_exec_data, aes(x=condition, y=total_execution_time, color=condition) ) +
+  geom_boxplot() +
+  geom_jitter(alpha=0.2) +
+  scale_x_discrete(
+    breaks=c("memory", "both"),
+    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+  ) +
+  theme(
+    legend.position="none"
+  )
+```
+
+Test for significant difference between conditions using Wilcoxon rank sum test:
+
+```{r}
+print(
+  wilcox.test(
+    formula=total_execution_time~condition,
+    data=filter(solutions_inst_exec_data),
+    exact=FALSE,
+    conf.int=TRUE)
+)
+```
+
+#### What types of instructions to successful programs execute?
+
+Here, we look at the distribution of instruction types executed by successful programs.
+We're primarily interested in the proportion of control flow instructions, so let's look at that first.
+
+```{r}
+ggplot( solutions_inst_exec_data, aes(x=condition, y=control_flow_inst_prop, color=condition) ) +
+  geom_boxplot() +
+  geom_jitter(alpha=0.2) +
+  scale_x_discrete(
+    breaks=c("memory", "both"),
+    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+  ) +
+  ylab("Proportion of executed flow control instructions") +
+  theme(
+    legend.position="bottom",
+    axis.title.x=element_blank()
+  )
+```
+
+Test for significant difference between conditions using a Wilcoxon rank sum test:
+
+```{r}
+print(
+  wilcox.test(
+    formula=control_flow_inst_prop~condition,
+    data=filter(solutions_inst_exec_data),
+    exact=FALSE,
+    conf.int=TRUE)
+)
+```
+
+In case you're curious, here's all categories of instructions:
+
+```{r}
+melted <- melt(
+  solutions_inst_exec_data,
+  variable.name = "inst_type",
+  value.name = "inst_type_prop",
+  measure.vars=c(
+    "math_inst_prop",
+    "module_inst_prop",
+    "memory_inst_prop",
+    "regulation_inst_prop",
+    "control_flow_inst_prop",
+    "thread_inst_prop",
+    "task_inst_prop",
+    "nop_inst_prop"
+  )
+)
+
+ggplot( melted, aes(x=inst_type, y=inst_type_prop, color=condition) ) +
+  geom_boxplot() +
+  scale_color_discrete(
+    name="Condition:",
+    breaks=c("memory", "both"),
+    labels=c("Regulation-disabled", "Regulation-enabled")
+  ) +
+  xlab("Instruction type") +
+  ylab("Proportion of instructions in execution trace") +
+  coord_flip() +
+  theme(legend.position="bottom")
+```
+
+## Case study: visualizing an evolved gene regulatory network
+
+Let's take a closer look at a successful gene regulatory network.
+
+```{r}
+trace_id <- 23997
+```
+
+Specifically, we'll be looking at the solution evolved in run id `r trace_id` (arbitrarily selected).
+
+
+### Evolved regulatory network
+
+We use the igraph package to draw this program's gene regulatory network.
+
+```{r, message=FALSE}
+# Networks!
+graph_nodes_loc <- paste0(working_directory, "data/igraphs/reg_graph_id-", trace_id, "_nodes.csv")
+graph_edges_loc <- paste0(working_directory, "data/igraphs/reg_graph_id-", trace_id, "_edges.csv")
+graph_nodes_data <- read.csv(graph_nodes_loc, na.strings="NONE")
+graph_edges_data <- read.csv(graph_edges_loc, na.strings="NONE")
+
+network <- graph_from_data_frame(
+  d=graph_edges_data,
+  vertices=graph_nodes_data,
+  directed=TRUE
+)
+
+# Setup edge styling
+E(network)$color[E(network)$type == "promote"] <- "#FCE640"
+E(network)$lty[E(network)$type == "promote"] <- 1
+E(network)$color[E(network)$type == "repress"] <- "#441152"
+E(network)$lty[E(network)$type == "repress"] <- 1
+
+network_out_name <- paste0(working_directory, "imgs/case-study-id-", trace_id, "-network.svg")
+
+draw_network <- function(net, write_out, out_name) {
+  if (write_out) {
+    svg(out_name, width=4,height=1.5)
+    # bottom, left, top, right
+    par(mar=c(0.2,0,1,0.5))
+  }
+  plot(
+    net,
+    edge.arrow.size=0.4,
+    edge.arrow.width=0.75,
+    edge.width=2,
+    vertex.size=10,
+    vertex.label.cex=0.65,
+    curved=TRUE,
+    vertex.color="grey99",
+    vertex.label.color="black",
+    vertex.label.family="sans",
+    layout=layout.circle(net)
+  )
+  legend(
+    x = "bottomleft",      ## position, also takes x,y coordinates
+    legend = c("Promoted", "Repressed"),
+    pch = 19,              ## legend symbols see ?points
+    col = c("#FCE640", "#441152"),
+    bty = "n",
+    border="black",
+    xpd=TRUE,
+    title = "Edges"
+  )
+  if (write_out) {
+    dev.flush()
+    dev.off()
+  }
+}
+
+draw_network(network, TRUE, network_out_name)
+draw_network(network, FALSE, "")
+```
+
+
