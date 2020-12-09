@@ -530,7 +530,7 @@ We used two approaches to tease apart forms of genetic regulation that evolved S
 2. We independently knockout up-regulation and down-regulation and record the fitness of knockout-variants.
    If fitness decreases when a target functionality is knocked out, we categorize the program as relying on that functionality.
 
-Note that the knockout data more directly indicates which forms of regulation a digital organism relies on,
+Note that the knockout data more directly indicates which forms of regulation a program relies on,
 as the gene regulation networks may include neutral and non-adaptive regulatory interactions.
 
 #### Gene regulatory network edges
@@ -564,7 +564,7 @@ ggplot( filter(reg_network_data, run_id %in% relies_on_reg ), aes(x=NUM_SIGNAL_R
   )
 ```
 
-Next, lets look at edges by type.
+Next, let's look at edges by type.
 
 ```{r}
 # Get seeds (run ids) of replicates that rely on regulation and are a solution.
@@ -628,7 +628,7 @@ relies_on_reg_orgs <- filter(
 )
 ```
 
-Note that there are `r nrow(relies_on_reg_orgs)` total organisms represented in the graphs below.
+Note that there are `r nrow(relies_on_reg_orgs)` total programs represented in the graphs below.
 
 ```{r}
 # Data processing/clean up
@@ -745,7 +745,7 @@ ggplot(relies_on_reg_orgs, aes(x=regulation_type_usage, fill=regulation_type_usa
 
 ### Are evolved programs relying on stochastic strategies?
 
-To confirm that evolved organisms are not relying on stochastic approaches to solve the repeated signal task,
+To confirm that evolved programs are not relying on stochastic approaches to solve the repeated signal task,
 we tested the most fit individual from each replicate at the end of each run three times.
 If program's behavior was not identical across each of the three trials, we labeled is as using a stochastic strategy.
 
@@ -792,7 +792,8 @@ ggplot( solutions_inst_exec_data, aes(x=condition, y=total_execution_time, color
   scale_color_discrete(
     name="Condition: ",
     breaks=c("memory", "both"),
-    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")) +
+    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+  ) +
   scale_x_discrete(
     breaks=c("memory", "both"),
     labels=c("D", "E")
@@ -925,9 +926,9 @@ ggplot( melted, aes(x=inst_type, y=inst_type_prop, color=condition) ) +
   )
 ```
 
-## Case study: visualizing regulation in an evolved digital organism
+## Case study: visualizing regulation in an evolved program
 
-Let's take a closer look at the behavioral/regulatory profile of a representative digital organism that solves the four-signal version of the repeated signal task.
+Let's take a closer look at the behavioral/regulatory profile of a representative program that solves the four-signal version of the repeated signal task.
 
 ```{r}
 trace_id <- 20203
@@ -1286,7 +1287,7 @@ ggplot(active_data, aes(x=mod_id_x_pos, y=time_step, fill=similarity_score)) +
 
 ### Evolved regulatory network
 
-We use the igraph package to draw this organism's gene regulatory network.
+We use the igraph package to draw this program's gene regulatory network.
 
 ```{r, message=FALSE}
 # Networks!
