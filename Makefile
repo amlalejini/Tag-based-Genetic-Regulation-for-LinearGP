@@ -9,8 +9,8 @@ PROJECT := bool-calc-exp
 # PROJECT := dir-signal-exp
 
 # Dependency directories
-EMP_DIR := ../Empirical/include		# Path to Empirical include directory.
-SGP_DIR := ../SignalGP/source			# Path to SignalGP source directory.
+EMP_DIR := ../Empirical/include
+SGP_DIR := ../SignalGP/source
 
 # Compile-time parameter configuration (tag metric, matching threshold, matching regulator, tag size)
 # MATCH_METRIC options: hamming, hash, integer, integer-symmetric, streak, streak-exact
