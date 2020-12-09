@@ -47,3 +47,4 @@ _site/
 # Data
 data/
 *.tar.gz
+traces/
