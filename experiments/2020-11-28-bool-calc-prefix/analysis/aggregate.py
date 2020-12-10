@@ -330,7 +330,7 @@ def main():
                     if len(call_stack):
                         if len(call_stack[0]["flow_stack"]):
                             triggered_module = call_stack[0]["flow_stack"][0]["mp"]
-                    else:
+                    if triggered_module == None:
                         # if not call stack, the program immediately responded.
                         triggered_module = step_info["cur_responding_function"]
 
