@@ -330,8 +330,11 @@ def main():
                     if len(call_stack):
                         if len(call_stack[0]["flow_stack"]):
                             triggered_module = call_stack[0]["flow_stack"][0]["mp"]
-                    if triggered_module != None:
-                        modules_triggered_by_input[testcase_id][testcase_input_id].add(triggered_module)
+                    else:
+                        # if not call stack, the program immediately responded.
+                        triggered_module = step_info["cur_responding_function"]
+
+                    modules_triggered_by_input[testcase_id][testcase_input_id].add(triggered_module)
 
 
             # Add present modules for this test case
