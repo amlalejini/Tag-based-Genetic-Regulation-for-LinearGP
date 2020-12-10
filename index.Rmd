@@ -15,6 +15,7 @@ description: "Supplemental material"
 # Introduction
 
 This is the supplemental material for our work, 'Tag-based Genetic Regulation for Genetic Programming'.
+This is not intended as a stand-alone document, but as a companion to our paper.
 <!-- todo - link to paper -->
 
 ## About our supplemental material
