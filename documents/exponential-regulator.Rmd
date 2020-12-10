@@ -1,0 +1,92 @@
+# Exponential regulator
+
+For this work we used a simple exponential function to apply regulatory modifiers to tag-match scores (see details in paper).
+
+## Analysis Dependencies
+
+Load all required R libraries.
+
+```{r, message=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(cowplot)
+library(viridis)
+library(RColorBrewer)
+```
+
+These analyses were conducted in the following computing environment:
+
+```{r}
+print(version)
+```
+
+Configuration:
+
+```{r}
+theme_set(theme_cowplot())
+output_directory <- "media/"
+```
+
+## Regulator modifier equation
+
+Below is the function we use to apply regulation to module match scores.
+
+```{r}
+exp_base <- 1.1
+# Exponential regulator
+exp_regulator <- function(raw_match, modifier, base=1.1) {
+  return(raw_match * (base**modifier));
+}
+```
+
+## Regulator behavior
+
+Generate data to graph. We want to visualize regulated match scores as a function of raw tag match scores and module regulatory modifiers.
+
+```{r}
+# generate data to visualize
+data <- expand_grid(
+  raw_match=seq(0, 1.0, 0.01),
+  reg_modifier=seq(-10, 10, 0.1)
+)
+
+data <- as.data.frame(data)
+data$regulated_match <- mapply(
+  exp_regulator,
+  data$raw_match,
+  data$reg_modifier,
+  exp_base
+)
+data$above_perfect <- data$regulated_match > 1.0
+```
+
+```{r}
+ggplot(data, aes(y=reg_modifier, x=raw_match, fill=regulated_match)) +
+  geom_raster() +
+  geom_hline(yintercept=0, size=1.2, color="white") +
+  geom_hline(yintercept=0, size=1, color="black") +
+  scale_x_continuous(name="Raw tag-match score") +
+  scale_y_continuous(name="Module regulation modifier") +
+  scale_fill_distiller(palette = "Spectral") +
+  theme(
+    legend.position = "top",
+    legend.key.width=unit(2, 'cm')
+  ) +
+  ggsave(
+    paste0(output_directory, "exp-reg-match.png"),
+    width=10,
+    height=10
+  )
+```
+
+Does a given raw match + regulatory modifier beat a perfect match (with no regulation)?
+
+```{r}
+ggplot(data, aes(y=reg_modifier, x=raw_match, fill=above_perfect)) +
+  geom_tile() +
+  ggsave(
+    paste0(output_directory, "exp-reg-match.png"),
+    width=10,
+    height=10
+  )
+```
