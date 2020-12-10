@@ -11,6 +11,7 @@ import hjson
 csv.field_size_limit(sys.maxsize)
 
 run_dir_identifier = "RUN_" # all legit run directories will have this substring in their name
+operators = ["ECHO", "NOT","NAND","ORNOT","AND","OR","ANDNOT","NOR","XOR","EQU"]
 
 config_exclude = {
     "STOP_ON_SOLUTION",
@@ -165,7 +166,7 @@ def main():
             exit(-1)
 
         # Extract organism update from analysis file.
-        org_update = org_analysis_path.split(".")[0].split("_")[-1]
+        org_update = org_analysis_path.split("/")[-1].split("_update_")[-1].split(".")[0]
 
         org_trace_path = find_trace_path(run, update if update >= 0 else None)
         trace_update = org_trace_path.split("/")[-1].split("_update_")[-1].split(".")[0]
@@ -259,17 +260,30 @@ def main():
 
         # How many test cases do we have in the trace?
         testcase_ids = {step["cur_test_id"] for step in trace_steps}
+        testcase_ids_by_step = [step["cur_test_id"] for step in trace_steps]
+        cur_input_by_step = [step["cur_test_input"] for step in trace_steps]
         # num_testcases = len(testcase_ids)
         # How many modules in the program?
         num_modules = int(org["num_modules"])
 
-        modules_active_ever = set()
+        modules_active_ever = {int(testcase):set() for testcase in testcase_ids}
         modules_run_by_test = {int(testcase):set() for testcase in testcase_ids}
 
         modules_present_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(time_steps))]
         modules_active_by_step = [[0 for m in range(0, num_modules)] for i in range(0, len(time_steps))]
-        # modules_triggered_by_step = [None for i in range(0, len(time_steps))]
+        modules_triggered_by_step = [set() for i in range(0, len(time_steps))]
         modules_responded_by_step = [None for i in range(0, len(time_steps))]
+        modules_triggered_by_input = {int(testcase_id):{} for testcase_id in testcase_ids}
+
+        testcase_id_to_operator = {}
+        for i in range(0, len(time_steps)):
+            step = trace_steps[i]
+            testcase_id = testcase_ids_by_step[i]
+            if "signal-type:OPERATOR" in step["cur_test_signal"]:
+                for op in operators:
+                    if f"operator:{op}" in step["cur_test_signal"]:
+                        testcase_id_to_operator[testcase_id] = op
+                        break
 
         # Extract which module responded to each input signal.
         for i in range(0, len(time_steps)):
@@ -284,6 +298,7 @@ def main():
             step_info = trace_steps[i]
             threads = thread_states[i]
             testcase_id = int(step_info["cur_test_id"])
+            testcase_input_id = int(step_info["cur_test_input"])
             # Extract what modules are running
             active_modules = []
             present_modules = []
@@ -292,6 +307,7 @@ def main():
             if modules_responded_by_step[i] != None:
                 active_modules.append(int(modules_responded_by_step[i]))
                 present_modules.append(int(modules_responded_by_step[i]))
+
             for thread in threads:
                 call_stack = thread["call_stack"]
                 # active modules are at the top of the flow stack on the top of the call stack
@@ -301,17 +317,99 @@ def main():
                         active_module = call_stack[-1]["flow_stack"][-1]["mp"]
                 if active_module != None:
                     active_modules.append(int(active_module))
-                    modules_active_ever.add(int(active_module))
+                    modules_active_ever[testcase_id].add(int(active_module))
                 # add ALL modules to present modules
                 present_modules += list({flow["mp"] for call in call_stack for flow in call["flow_stack"]})
+
+                # check for triggered module?
+                if step_info["cpu_step"] == "1":
+                    # on the second cpu step, we have the first thread state report
+                    # - look at the bottom of the flow stack on the bottom-most call
+                    triggered_module = None
+                    modules_triggered_by_input[testcase_id][testcase_input_id] = set()
+                    if len(call_stack):
+                        if len(call_stack[0]["flow_stack"]):
+                            triggered_module = call_stack[0]["flow_stack"][0]["mp"]
+                    if triggered_module != None:
+                        modules_triggered_by_input[testcase_id][testcase_input_id].add(triggered_module)
+
+
             # Add present modules for this test case
             for module_id in present_modules: modules_run_by_test[testcase_id].add(int(module_id))
             # Add active modules for this step
             for module_id in active_modules: modules_active_by_step[i][module_id] += 1
             # Add present modules for this step
             for module_id in present_modules: modules_present_by_step[i][module_id] += 1
+
+        # store which module is triggered by step
+        for i in range(0, len(trace_steps)):
+            step_info = trace_steps[i]
+            if step_info["cpu_step"] == "0":
+                testcase_id = int(step_info["cur_test_id"])
+                testcase_input_id = int(step_info["cur_test_input"])
+                modules_triggered_by_step[i] = modules_triggered_by_input[testcase_id][testcase_input_id]
+                for module_id in modules_triggered_by_step[i]:
+                    modules_active_ever[testcase_id].add(module_id)
+                    if modules_active_by_step[i][module_id] == 0:
+                        modules_active_by_step[i][module_id] += 1
+                    if modules_present_by_step[i][module_id] == 0:
+                        modules_present_by_step[i][module_id] += 1
+
         ################################################################################################
 
+        ################################################################################################
+        # ============================= build regulation execution trace =============================
+        ################################################################################################
+        reg_trace_out_name = f"trace-reg_update-{update}_run-id-" + run_settings["SEED"] + ".csv"
+        reg_trace_orig_fields = [
+            "cur_test_id",
+            "cur_test_input",
+            "cpu_step",
+            "cur_response_type",
+            "cur_response_value",
+            "has_correct_response",
+            "num_modules",
+            "num_active_threads"
+        ]
+        reg_trace_derived_fields = [
+            "module_id",
+            "time_step",
+            "cur_test_operator",
+            "is_in_call_stack",
+            "is_triggered",
+            "is_running",
+            "is_cur_responding_function",
+            "is_ever_active",
+            "regulator_state"
+        ]
+        reg_trace_fields = reg_trace_orig_fields + reg_trace_derived_fields
+        reg_trace_out_lines = [",".join(reg_trace_fields)]
+
+        for step_i in range(0, len(trace_steps)):
+            step_info = trace_steps[step_i]
+            testcase_id = testcase_ids_by_step[step_i]
+            # print(testcase_id, testcase_id_to_operator[testcase_id])
+            cur_reg_states = list(map(float, step_info["module_regulator_states"].strip("[]").split(",")))
+            cur_responding_function = int(step_info["cur_responding_function"])
+            modules_present = modules_present_by_step[step_i]
+            modules_active = modules_active_by_step[step_i]
+            for module_id in range(0, num_modules):
+                line_info = {field:step_info[field] for field in reg_trace_orig_fields}
+                line_info["module_id"] = module_id
+                line_info["time_step"] = step_i
+                line_info["cur_test_operator"] = testcase_id_to_operator[testcase_id]
+                line_info["is_in_call_stack"] = int(modules_present[module_id] > 0)
+                line_info["is_triggered"] = int(module_id in modules_triggered_by_step[step_i])
+                line_info["is_running"] = int(modules_active[module_id] > 0)
+                line_info["is_cur_responding_function"] = int(cur_responding_function == module_id)
+                line_info["is_ever_active"] = int(module_id in modules_active_ever[int(testcase_id)])
+                line_info["regulator_state"] = cur_reg_states[module_id]
+                reg_trace_out_lines.append(",".join([str(line_info[field]) for field in reg_trace_fields]))
+
+        with open(os.path.join(dump_dir, reg_trace_out_name), "w") as fp:
+            fp.write("\n".join(reg_trace_out_lines))
+        reg_trace_out_lines = None
+        ################################################################################################
 
         ################################################################################################
         # ============================= build instruction execution trace =============================
