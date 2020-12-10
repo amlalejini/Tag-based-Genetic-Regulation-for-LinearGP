@@ -125,6 +125,7 @@
 \chapter{Introduction}\label{introduction}}
 
 This is the supplemental material for our work, `Tag-based Genetic Regulation for Genetic Programming'.
+This is not intended as a stand-alone document, but as a companion to our paper.
 
 \hypertarget{about-our-supplemental-material}{%
 \section{About our supplemental material}\label{about-our-supplemental-material}}
@@ -476,6 +477,654 @@ This should create three executables (with absurdly long names):
 \end{itemize}
 
 Find the exact configurations we used for our experiments here: \url{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments}
+
+\hypertarget{signalgp-representation}{%
+\chapter{SignalGP representation}\label{signalgp-representation}}
+
+Here, we give more details on how we configured SignalGP for this work, including the particular instruction sets used in each experiment.
+For a broad overview of SignalGP, see \citep{lalejini_evolving_2018}.
+For exact configurations used in each experiment, see respective \href{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments}{experiment directories}.
+
+\hypertarget{memory-model}{%
+\section{Memory model}\label{memory-model}}
+
+SignalGP programs have four types of memory buffers with which to carry out computations:
+
+\begin{itemize}
+\tightlist
+\item
+  Working (register) memory
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Call-local (* thread-local) memory.
+  \item
+    Memory used by the majority of computation instructions.
+  \end{itemize}
+\item
+  Input memory
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Call-local (\& thread-local) memory.
+  \item
+    Read-only.
+  \item
+    This memory is used to specify function call arguments. When a function is called on a thread (i.e.,
+    a call instruction is executed), the caller's working memory is copied into the input memory of
+    the new call-state, which is created on top of the thread's call stack.
+  \item
+    Programs must execute explicit instructions to read from the input memory buffer (into the working
+    memory buffer).
+  \end{itemize}
+\item
+  Output memory
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Call-local (\& thread-local) memory.
+  \item
+    Write-only.
+  \item
+    This memory is used to specify the return values of a function call.
+  \item
+    When a function returns to the previous call-state (i.e., the one just below it on the thread's
+    call stack), positions that were set in the output buffer are returned to the caller's working memory
+    buffer.
+  \item
+    Programs must execute explicit instructions to write to the output memory buffer (from the working
+    memory buffer).
+  \end{itemize}
+\item
+  Global memory
+
+  \begin{itemize}
+  \tightlist
+  \item
+    This memory buffer is shared by all executing threads. Threads must use explicit instructions to access it.
+  \end{itemize}
+\end{itemize}
+
+Memory buffers are implemented as integer to double maps. Instruction use their integer arguments to specify locations in memory.
+In this work, evolving programs do not have de-referencing functionality (i.e., memory pointers).
+
+\hypertarget{mutation-operators}{%
+\section{Mutation operators}\label{mutation-operators}}
+
+\begin{itemize}
+\tightlist
+\item
+  Single-instruction insertions
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Applied per instruction
+  \end{itemize}
+\item
+  Single-instruction deletions
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Applied per instruction
+  \end{itemize}
+\item
+  Single-instruction substitutions
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Applied per instruction
+  \end{itemize}
+\item
+  Single-argument substitutions
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Applied per argument
+  \end{itemize}
+\item
+  Slip mutations \citep{lalejini_gene_2017}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Applied at a per-function rate.
+  \item
+    Pick two random positions in function's instructions sequence: A and B
+  \item
+    If A \textless{} B: duplicate sequence from A to B
+  \item
+    If A \textgreater{} B: delete sequence from A to B
+  \end{itemize}
+\item
+  Single-function duplications
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Applied per-function
+  \end{itemize}
+\item
+  Single-function deletions
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Applied per-function
+  \end{itemize}
+\item
+  Tag bit flips
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Applied at a per-bit rate
+  \item
+    (applies to both instruction- and function-tags)
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{instruction-set}{%
+\section{Instruction set}\label{instruction-set}}
+
+Abbreviations:
+
+\begin{itemize}
+\tightlist
+\item
+  EOP: End of program
+\item
+  Reg: local register
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Reg{[}0{]} indicates the value at the register specified by an instruction's first \emph{argument} (either tag-based or numeric), Reg{[}1{]} indicates the value at the register specified by an instruction's second argument, and Reg{[}2{]} indicates the value at the register specified by the instruction's third argument.
+  \item
+    Reg{[}0{]}, Reg{[}1{]}, \emph{etc}: Register 0, Register 1, \emph{etc.}
+  \end{itemize}
+\item
+  Input: input buffer
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Follows same scheme as Reg
+  \end{itemize}
+\item
+  Output: output buffer
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Follows same scheme as Reg
+  \end{itemize}
+\item
+  Global: global memory buffer
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Follows same scheme as Reg
+  \end{itemize}
+\item
+  Arg: Instruction argument
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Arg{[}i{]} indicates the i'th instruction argument (an integer encoded in the genome)
+  \item
+    E.g., Arg{[}0{]} is an instruction's first argument
+  \end{itemize}
+\end{itemize}
+
+Instructions that would produce undefined behavior (e.g., division by zero) are treated as no operations.
+
+\hypertarget{default-instructions}{%
+\subsection{Default Instructions}\label{default-instructions}}
+
+I.e., instructions used across all diagnostic tasks.
+
+\begin{longtable}[]{@{}lcl@{}}
+\toprule
+\begin{minipage}[b]{0.28\columnwidth}\raggedright
+Instruction\strut
+\end{minipage} & \begin{minipage}[b]{0.35\columnwidth}\centering
+Arguments Used\strut
+\end{minipage} & \begin{minipage}[b]{0.28\columnwidth}\raggedright
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Nop}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+No operation\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Not}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}0{]} = !Reg{[}0{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Inc}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}0{]} = Reg{[}0{]} + 1\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Dec}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}0{]} = Reg{[}0{]} - 1\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Add}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} + Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Sub}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} - Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Mult}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} * Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Div}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} / Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Mod}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} \% Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Nand}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = !(Reg{[}0{]} \& Reg{[}1{]})\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{TestEqu}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} == Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{TestNEqu}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} != Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{TestLess}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} \textless{} Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{TestLessEqu}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} \textless= Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{TestGreater}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} \textgreater{} Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{TestGreaterEqu}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}2{]} = Reg{[}0{]} \textgreater= Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{SetMem}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}0{]} = Arg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Terminal}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}0{]} = double value encoded by instruction tag\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{CopyMem}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}0{]} = Reg{[}1{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{SwapMem}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Swap(Reg{[}0{]}, Reg{[}1{]})\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{InputToWorking}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}1{]} = Input{[}0{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{WorkingToOutput}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Output{[}1{]} = Reg{[}0{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{If}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+If Reg{[}0{]} != 0, proceed. Otherwise skip to the next \texttt{Close} or EOP.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{While}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+While Reg{[}0{]} != 0, loop. Otherwise skip to next \texttt{Close} or EOP.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Close}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Indicate the end of a control block of code (e.g., loop, if).\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Break}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Break out of current control flow (e.g., loop).\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Terminate}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Kill thread that this instruction is executing on.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Fork}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Generate an internal signal (using this instruction's tag) that can trigger a function to run in parallel.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Call}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Call a function, using this instruction's tag to determine which function is called.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Routine}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Same as call, but local memory is shared. Sort of like a jump that will jump back when the routine ends.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{Return}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Return from the current function call.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Note that \texttt{Nand} performs a bitwise operation.
+
+\hypertarget{global-memory-access-instructions}{%
+\subsection{Global memory access instructions}\label{global-memory-access-instructions}}
+
+For experimental conditions without global memory access, these instructions are replaced with no-operation
+such that the instruction set remains a constant size regardless of experimental condition.
+
+\begin{longtable}[]{@{}lcl@{}}
+\toprule
+\begin{minipage}[b]{0.28\columnwidth}\raggedright
+Instruction\strut
+\end{minipage} & \begin{minipage}[b]{0.35\columnwidth}\centering
+Arguments Used\strut
+\end{minipage} & \begin{minipage}[b]{0.28\columnwidth}\raggedright
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{WorkingToGlobal}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Global{[}1{]} = Reg{[}0{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{GlobalToWorking}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}1{]} = Global{[}0{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{FullGlobalToWorking}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Copy entire global memory buffer into working memory buffer\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{FullWorkingToGlobal}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Copy entire working memory buffer into global memory buffer\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Note that full buffer copies only copy registers that have been set (they do not necessarily stomp all over the entire destination buffer).
+
+\hypertarget{regulation-instructions}{%
+\subsection{Regulation instructions}\label{regulation-instructions}}
+
+For experimental conditions without regulation, these instructions are replaced with no-operation
+such that the instruction set remains a constant size regardless of experimental condition.
+
+Note that several regulation instructions have a baseline and (-) version.
+The (-) versions are identical to the baseline version, except that they multiply the value they are
+regulating with by -1. This eliminates any bias toward either up-/down-regulation.
+
+Also note that the emp::MatchBin (in the Empirical library) data structure that manages function regulation
+is defined in terms of tag DISTANCE, not similarity. So, decreasing function regulation values decreases
+the distance between potential referring tags, and thus, unintuitively, \emph{up-regulates} the function.
+
+All tag-based referencing used by regulation instructions use unregulated, raw match scores. Thus, programs
+can still up-regulate a function that was previously `turned off' with down-regulation.
+
+\begin{longtable}[]{@{}lcl@{}}
+\toprule
+\begin{minipage}[b]{0.28\columnwidth}\raggedright
+Instruction\strut
+\end{minipage} & \begin{minipage}[b]{0.35\columnwidth}\centering
+Arguments Used\strut
+\end{minipage} & \begin{minipage}[b]{0.28\columnwidth}\raggedright
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{SetRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Set regulation value of function (targeted with instruction tag) to Reg{[}0{]}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{SetRegulator-}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Set regulation value of function (targeted with instruction tag) to -1 * Reg{[}0{]}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{SetOwnRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Set regulation value of function (currently executing) to Reg{[}0{]}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{SetOwnRegulator-}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Set regulation value of function (currently executing) to -1 * Reg{[}0{]}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{AdjRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Regulation value of function (targeted with instruction tag) += Reg{[}0{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{AdjRegulator-}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Regulation value of function (targeted with instruction tag) -= Reg{[}0{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{AdjOwnRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Regulation value of function (currently executing) += Reg{[}0{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{AdjOwnRegulator-}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Regulation value of function (currently executing) -= Reg{[}0{]}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{ClearRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Clear function regulation (reset to neutral) of function targeted by instruction's tag.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{ClearOwnRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Clear function regulation (reset to neutral) of currently executing function\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{SenseRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}0{]} = regulator state of function targeted by instruction tag\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{SenseOwnRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Reg{[}0{]} = regulator state of current function\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{IncRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Increment regulator state of function targeted with this instruction's tag\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{IncOwnRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Increment regulator state of currently executing function\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{DecRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Decrement regulator state of function targeted with this instruction's tag\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\raggedright
+\texttt{DecOwnRegulator}\strut
+\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Decrement regulator state of the currently executing function\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\hypertarget{task-specific-instructions}{%
+\subsection{Task-specific instructions}\label{task-specific-instructions}}
+
+Each task as a number of response instructions added to the instruction set equal to the possible set
+of responses that can be expressed by a program. Each of these response instructions set a
+flag on the virtual hardware indicating which response the program expressed and reset all executing
+threads such that only function regulation and global memory contents persist.
 
 \hypertarget{exponential-regulator}{%
 \chapter{Exponential regulator}\label{exponential-regulator}}
@@ -1508,9 +2157,9 @@ Here, we compare the generation at which solutions arise (only at difficulty lev
 \end{Shaded}
 
 \begin{verbatim}
-## Warning: Removed 117 rows containing missing values (geom_point).
+## Warning: Removed 96 rows containing missing values (geom_point).
 
-## Warning: Removed 117 rows containing missing values (geom_point).
+## Warning: Removed 96 rows containing missing values (geom_point).
 \end{verbatim}
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-23-1.pdf}

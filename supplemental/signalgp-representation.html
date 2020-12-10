@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 3 Compile and run experiments locally | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
+  <title>Chapter 4 SignalGP representation | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
   <meta name="description" content="Supplemental material" />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 3 Compile and run experiments locally | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta property="og:title" content="Chapter 4 SignalGP representation | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="amlalejini/Tag-based-Genetic-Regulation-for-LinearGP" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 3 Compile and run experiments locally | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta name="twitter:title" content="Chapter 4 SignalGP representation | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   
   <meta name="twitter:description" content="Supplemental material" />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="data-availability.html"/>
-<link rel="next" href="signalgp-representation.html"/>
+<link rel="prev" href="compile-and-run-experiments-locally.html"/>
+<link rel="next" href="exponential-regulator.html"/>
 <script src="libs/header-attrs-2.5/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -293,108 +293,463 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="compile-and-run-experiments-locally" class="section level1" number="3">
-<h1><span class="header-section-number">Chapter 3</span> Compile and run experiments locally</h1>
-<p>Here, we provide a brief guide to compiling and running our experiments.</p>
-<p>Please file an <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues">issue</a> if something is unclear or does not work.</p>
-<div id="docker" class="section level2" number="3.1">
-<h2><span class="header-section-number">3.1</span> Docker</h2>
-<p>On docker hub: <a href="https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp" class="uri">https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp</a></p>
-<pre><code>docker pull amlalejini/tag-based-genetic-regulation-for-gp</code></pre>
-<p>This will create an image with all the requisite dependencies installed/downloaded and with our experiments compiled.</p>
-<p>To run the container interactively:</p>
-<pre><code>docker run -it --entrypoint bash amlalejini/tag-based-genetic-regulation-for-gp</code></pre>
-<p>You can exit the container at any point with <code>ctrl-d</code>.</p>
-<p>Inside the container, you should be at <code>/opt/Tag-based-Genetic-Regulation-for-LinearGP/</code>.
-If you <code>ls</code> you should see something like this (maybe not exactly):</p>
-<pre><code>Dockerfile                                                       documents
-Gemfile                                                          experiments
-LICENSE                                                          index.Rmd
-Makefile                                                         media
-README.md                                                        requirements.txt
-_bookdown.yml                                                    scripts
-_config.yml                                                      source
-_output.yml                                                      style.css
-alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp  supplemental
-bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp   supplemental.bib
-build_book.sh                                                    supplemental_files
-build_exps.sh                                                    tail.Rmd
-chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp     tests</code></pre>
-<p>The important thing is that there should be three executables (with absurdly long names):</p>
+<div id="signalgp-representation" class="section level1" number="4">
+<h1><span class="header-section-number">Chapter 4</span> SignalGP representation</h1>
+<p>Here, we give more details on how we configured SignalGP for this work, including the particular instruction sets used in each experiment.
+For a broad overview of SignalGP, see <span class="citation">(Lalejini and Ofria <a href="#ref-lalejini_evolving_2018" role="doc-biblioref">2018</a>)</span>.
+For exact configurations used in each experiment, see respective <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments">experiment directories</a>.</p>
+<div id="memory-model" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Memory model</h2>
+<p>SignalGP programs have four types of memory buffers with which to carry out computations:</p>
 <ul>
-<li><code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
+<li>Working (register) memory
 <ul>
-<li>Use this to run the changing-signal problem.</li>
-<li>To generate a default configuration file, <code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
+<li>Call-local (* thread-local) memory.</li>
+<li>Memory used by the majority of computation instructions.</li>
 </ul></li>
-<li><code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
+<li>Input memory
 <ul>
-<li>Use this to run the repeated-signal problem.</li>
-<li>To generate a default configuration file, <code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
+<li>Call-local (&amp; thread-local) memory.</li>
+<li>Read-only.</li>
+<li>This memory is used to specify function call arguments. When a function is called on a thread (i.e.,
+a call instruction is executed), the caller’s working memory is copied into the input memory of
+the new call-state, which is created on top of the thread’s call stack.</li>
+<li>Programs must execute explicit instructions to read from the input memory buffer (into the working
+memory buffer).</li>
 </ul></li>
-<li><code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
+<li>Output memory
 <ul>
-<li>Use this to run any of the boolean logic calculator problems and the contextual-signal problem.</li>
-<li>To generate a default configuration file, <code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
+<li>Call-local (&amp; thread-local) memory.</li>
+<li>Write-only.</li>
+<li>This memory is used to specify the return values of a function call.</li>
+<li>When a function returns to the previous call-state (i.e., the one just below it on the thread’s
+call stack), positions that were set in the output buffer are returned to the caller’s working memory
+buffer.</li>
+<li>Programs must execute explicit instructions to write to the output memory buffer (from the working
+memory buffer).</li>
+</ul></li>
+<li>Global memory
+<ul>
+<li>This memory buffer is shared by all executing threads. Threads must use explicit instructions to access it.</li>
 </ul></li>
 </ul>
-<p>Find the exact configurations we used for our experiments here: <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments" class="uri">https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments</a></p>
+<p>Memory buffers are implemented as integer to double maps. Instruction use their integer arguments to specify locations in memory.
+In this work, evolving programs do not have de-referencing functionality (i.e., memory pointers).</p>
 </div>
-<div id="manually" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> Manually</h2>
-<p>This guide assumes an Ubuntu-flavored Linux operating system. These instructions <em>should</em> mostly work for MacOS; otherwise, we recommend using our Docker image or a virtual machine.</p>
-<p>Our experiments are implemented in C++, so you’ll need a modern C++ compiler capable of compiling C++17 code.</p>
-<p>E.g., I’m using:</p>
-<pre><code>g++ (Ubuntu 10.2.0-13ubuntu1) 10.2.0</code></pre>
-<div id="get-dependencies" class="section level3" number="3.2.1">
-<h3><span class="header-section-number">3.2.1</span> Get dependencies</h3>
-<p>First, make a directory were we can put this project and all of its dependencies.</p>
-<pre><code>mkdir workspace
-cd workspace</code></pre>
-<p>Next, clone this repository into your new directory.</p>
-<pre><code>git clone https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP.git</code></pre>
-<p>Our experiments depend on the Empirical and SignalGP libraries on GitHub.
-Inside the <code>workspace</code> directory, we’ll clone SignalGP and checkout the appropriate commit.</p>
-<pre><code>git clone https://github.com/amlalejini/SignalGP.git
-cd SignalGP
-git checkout 83d879cfdb6540862315dc454c1525ccd8054e65
-cd ..</code></pre>
-<p>Next, let’s get Empirical (also stick this in the <code>workspace</code> directory).</p>
-<pre><code>git clone https://github.com/amlalejini/Empirical.git
-cd Empirical
-git checkout e72dae6490dee5caf8e5ec04a634b483d2ad4293</code></pre>
-<p>We’re not quite done with Empirical. We need to grab all of Empirical’s dependencies. This will install <em>all</em> of Empirical’s dependencies, including those needed to build its documentation/tests.</p>
-<pre><code>make install-dependencies</code></pre>
-<p>OR, if you don’t want <em>all</em> of that, instead you could do:</p>
-<pre><code>git submodule init
-git submodule update</code></pre>
-<p>If you don’t have libssl-dev, you’ll also want to install that (some of the tag-matching metrics use cryptographic hash). E.g.,</p>
-<pre><code>sudo apt-get install libssl-dev</code></pre>
-<p>Now we should be good to compile the three executables that we used for our experiments. Inside <code>workspace/Tag-based-Genetic-Regulation-for-LinearGP/</code>:</p>
-<pre><code>./build_exps</code></pre>
-<p>This script just sets some environment variables (e.g., to define which experiment to compile, the tag-matching metric, etc.) and runs <code>make native</code>.</p>
-<p>To use a different compiler (than g++), you’ll need to change <code>CXX_nat</code> in the makefile.</p>
-<p>This should create three executables (with absurdly long names):</p>
+<div id="mutation-operators" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Mutation operators</h2>
 <ul>
-<li><code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
+<li>Single-instruction insertions
 <ul>
-<li>Use this to run the changing-signal problem.</li>
-<li>To generate a default configuration file, <code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
+<li>Applied per instruction</li>
 </ul></li>
-<li><code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
+<li>Single-instruction deletions
 <ul>
-<li>Use this to run the repeated-signal problem.</li>
-<li>To generate a default configuration file, <code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
+<li>Applied per instruction</li>
 </ul></li>
-<li><code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
+<li>Single-instruction substitutions
 <ul>
-<li>Use this to run any of the boolean logic calculator problems and the contextual-signal problem.</li>
-<li>To generate a default configuration file, <code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
+<li>Applied per instruction</li>
+</ul></li>
+<li>Single-argument substitutions
+<ul>
+<li>Applied per argument</li>
+</ul></li>
+<li>Slip mutations <span class="citation">(Lalejini, Wiser, and Ofria <a href="#ref-lalejini_gene_2017" role="doc-biblioref">2017</a>)</span>
+<ul>
+<li>Applied at a per-function rate.</li>
+<li>Pick two random positions in function’s instructions sequence: A and B</li>
+<li>If A &lt; B: duplicate sequence from A to B</li>
+<li>If A &gt; B: delete sequence from A to B</li>
+</ul></li>
+<li>Single-function duplications
+<ul>
+<li>Applied per-function</li>
+</ul></li>
+<li>Single-function deletions
+<ul>
+<li>Applied per-function</li>
+</ul></li>
+<li>Tag bit flips
+<ul>
+<li>Applied at a per-bit rate</li>
+<li>(applies to both instruction- and function-tags)</li>
 </ul></li>
 </ul>
-<p>Find the exact configurations we used for our experiments here: <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments" class="uri">https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments</a></p>
+</div>
+<div id="instruction-set" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> Instruction set</h2>
+<p>Abbreviations:</p>
+<ul>
+<li>EOP: End of program</li>
+<li>Reg: local register
+<ul>
+<li>Reg[0] indicates the value at the register specified by an instruction’s first <em>argument</em> (either tag-based or numeric), Reg[1] indicates the value at the register specified by an instruction’s second argument, and Reg[2] indicates the value at the register specified by the instruction’s third argument.</li>
+<li>Reg[0], Reg[1], <em>etc</em>: Register 0, Register 1, <em>etc.</em></li>
+</ul></li>
+<li>Input: input buffer
+<ul>
+<li>Follows same scheme as Reg</li>
+</ul></li>
+<li>Output: output buffer
+<ul>
+<li>Follows same scheme as Reg</li>
+</ul></li>
+<li>Global: global memory buffer
+<ul>
+<li>Follows same scheme as Reg</li>
+</ul></li>
+<li>Arg: Instruction argument
+<ul>
+<li>Arg[i] indicates the i’th instruction argument (an integer encoded in the genome)</li>
+<li>E.g., Arg[0] is an instruction’s first argument</li>
+</ul></li>
+</ul>
+<p>Instructions that would produce undefined behavior (e.g., division by zero) are treated as no operations.</p>
+<div id="default-instructions" class="section level3" number="4.3.1">
+<h3><span class="header-section-number">4.3.1</span> Default Instructions</h3>
+<p>I.e., instructions used across all diagnostic tasks.</p>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="38%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Instruction</th>
+<th align="center">Arguments Used</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>Nop</code></td>
+<td align="center">0</td>
+<td align="left">No operation</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Not</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = !Reg[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Inc</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = Reg[0] + 1</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Dec</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = Reg[0] - 1</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Add</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] + Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Sub</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] - Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Mult</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] * Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Div</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] / Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Mod</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] % Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Nand</code></td>
+<td align="center">2</td>
+<td align="left">Reg[2] = !(Reg[0] &amp; Reg[1])</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>TestEqu</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] == Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>TestNEqu</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] != Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>TestLess</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] &lt; Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>TestLessEqu</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] &lt;= Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>TestGreater</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] &gt; Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>TestGreaterEqu</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] &gt;= Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>SetMem</code></td>
+<td align="center">2</td>
+<td align="left">Reg[0] = Arg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Terminal</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = double value encoded by instruction tag</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>CopyMem</code></td>
+<td align="center">2</td>
+<td align="left">Reg[0] = Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>SwapMem</code></td>
+<td align="center">2</td>
+<td align="left">Swap(Reg[0], Reg[1])</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>InputToWorking</code></td>
+<td align="center">2</td>
+<td align="left">Reg[1] = Input[0]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>WorkingToOutput</code></td>
+<td align="center">2</td>
+<td align="left">Output[1] = Reg[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>If</code></td>
+<td align="center">1</td>
+<td align="left">If Reg[0] != 0, proceed. Otherwise skip to the next <code>Close</code> or EOP.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>While</code></td>
+<td align="center">1</td>
+<td align="left">While Reg[0] != 0, loop. Otherwise skip to next <code>Close</code> or EOP.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Close</code></td>
+<td align="center">0</td>
+<td align="left">Indicate the end of a control block of code (e.g., loop, if).</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Break</code></td>
+<td align="center">0</td>
+<td align="left">Break out of current control flow (e.g., loop).</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Terminate</code></td>
+<td align="center">0</td>
+<td align="left">Kill thread that this instruction is executing on.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Fork</code></td>
+<td align="center">0</td>
+<td align="left">Generate an internal signal (using this instruction’s tag) that can trigger a function to run in parallel.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Call</code></td>
+<td align="center">0</td>
+<td align="left">Call a function, using this instruction’s tag to determine which function is called.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Routine</code></td>
+<td align="center">0</td>
+<td align="left">Same as call, but local memory is shared. Sort of like a jump that will jump back when the routine ends.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Return</code></td>
+<td align="center">0</td>
+<td align="left">Return from the current function call.</td>
+</tr>
+</tbody>
+</table>
+<p>Note that <code>Nand</code> performs a bitwise operation.</p>
+</div>
+<div id="global-memory-access-instructions" class="section level3" number="4.3.2">
+<h3><span class="header-section-number">4.3.2</span> Global memory access instructions</h3>
+<p>For experimental conditions without global memory access, these instructions are replaced with no-operation
+such that the instruction set remains a constant size regardless of experimental condition.</p>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="38%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Instruction</th>
+<th align="center">Arguments Used</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>WorkingToGlobal</code></td>
+<td align="center">2</td>
+<td align="left">Global[1] = Reg[0]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>GlobalToWorking</code></td>
+<td align="center">2</td>
+<td align="left">Reg[1] = Global[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>FullGlobalToWorking</code></td>
+<td align="center">0</td>
+<td align="left">Copy entire global memory buffer into working memory buffer</td>
+</tr>
+<tr class="even">
+<td align="left"><code>FullWorkingToGlobal</code></td>
+<td align="center">0</td>
+<td align="left">Copy entire working memory buffer into global memory buffer</td>
+</tr>
+</tbody>
+</table>
+<p>Note that full buffer copies only copy registers that have been set (they do not necessarily stomp all over the entire destination buffer).</p>
+</div>
+<div id="regulation-instructions" class="section level3" number="4.3.3">
+<h3><span class="header-section-number">4.3.3</span> Regulation instructions</h3>
+<p>For experimental conditions without regulation, these instructions are replaced with no-operation
+such that the instruction set remains a constant size regardless of experimental condition.</p>
+<p>Note that several regulation instructions have a baseline and (-) version.
+The (-) versions are identical to the baseline version, except that they multiply the value they are
+regulating with by -1. This eliminates any bias toward either up-/down-regulation.</p>
+<p>Also note that the emp::MatchBin (in the Empirical library) data structure that manages function regulation
+is defined in terms of tag DISTANCE, not similarity. So, decreasing function regulation values decreases
+the distance between potential referring tags, and thus, unintuitively, <em>up-regulates</em> the function.</p>
+<p>All tag-based referencing used by regulation instructions use unregulated, raw match scores. Thus, programs
+can still up-regulate a function that was previously ‘turned off’ with down-regulation.</p>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="38%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Instruction</th>
+<th align="center">Arguments Used</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>SetRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Set regulation value of function (targeted with instruction tag) to Reg[0].</td>
+</tr>
+<tr class="even">
+<td align="left"><code>SetRegulator-</code></td>
+<td align="center">1</td>
+<td align="left">Set regulation value of function (targeted with instruction tag) to -1 * Reg[0].</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>SetOwnRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Set regulation value of function (currently executing) to Reg[0].</td>
+</tr>
+<tr class="even">
+<td align="left"><code>SetOwnRegulator-</code></td>
+<td align="center">1</td>
+<td align="left">Set regulation value of function (currently executing) to -1 * Reg[0].</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>AdjRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Regulation value of function (targeted with instruction tag) += Reg[0]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>AdjRegulator-</code></td>
+<td align="center">1</td>
+<td align="left">Regulation value of function (targeted with instruction tag) -= Reg[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>AdjOwnRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Regulation value of function (currently executing) += Reg[0]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>AdjOwnRegulator-</code></td>
+<td align="center">1</td>
+<td align="left">Regulation value of function (currently executing) -= Reg[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>ClearRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Clear function regulation (reset to neutral) of function targeted by instruction’s tag.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>ClearOwnRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Clear function regulation (reset to neutral) of currently executing function</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>SenseRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = regulator state of function targeted by instruction tag</td>
+</tr>
+<tr class="even">
+<td align="left"><code>SenseOwnRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = regulator state of current function</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>IncRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Increment regulator state of function targeted with this instruction’s tag</td>
+</tr>
+<tr class="even">
+<td align="left"><code>IncOwnRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Increment regulator state of currently executing function</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>DecRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Decrement regulator state of function targeted with this instruction’s tag</td>
+</tr>
+<tr class="even">
+<td align="left"><code>DecOwnRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Decrement regulator state of the currently executing function</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="task-specific-instructions" class="section level3" number="4.3.4">
+<h3><span class="header-section-number">4.3.4</span> Task-specific instructions</h3>
+<p>Each task as a number of response instructions added to the instruction set equal to the possible set
+of responses that can be expressed by a program. Each of these response instructions set a
+flag on the virtual hardware indicating which response the program expressed and reset all executing
+threads such that only function regulation and global memory contents persist.</p>
 
 </div>
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-lalejini_evolving_2018">
+<p>Lalejini, Alexander, and Charles Ofria. 2018. “Evolving Event-Driven Programs with SignalGP.” In <em>Proceedings of the Genetic and Evolutionary Computation Conference on - GECCO ’18</em>, 1135–42. Kyoto, Japan: ACM Press. <a href="https://doi.org/10.1145/3205455.3205523">https://doi.org/10.1145/3205455.3205523</a>.</p>
+</div>
+<div id="ref-lalejini_gene_2017">
+<p>Lalejini, Alexander, Michael J. Wiser, and Charles Ofria. 2017. “Gene Duplications Drive the Evolution of Complex Traits and Regulation.” In <em>Proceedings of the 14th European Conference on Artificial Life ECAL 2017</em>, 257–64. Lyon, France: MIT Press. <a href="https://doi.org/10.7551/ecal_a_045">https://doi.org/10.7551/ecal_a_045</a>.</p>
 </div>
 </div>
             </section>
@@ -402,8 +757,8 @@ git submodule update</code></pre>
           </div>
         </div>
       </div>
-<a href="data-availability.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="signalgp-representation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="compile-and-run-experiments-locally.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="exponential-regulator.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -434,7 +789,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/documents/running-experiments.md",
+"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/documents/signalgp.md",
 "text": "Edit"
 },
 "history": {
