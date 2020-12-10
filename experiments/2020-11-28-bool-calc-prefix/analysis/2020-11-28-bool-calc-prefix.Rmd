@@ -2,7 +2,7 @@
 
 Here, we give an overview of the boolean logic calculator problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
-The raw data can be found on the OSF project associated with this work (link coming).
+The raw data can be found on the OSF project associated with this work [@Lalejini_Moreno_Ofria_Data_2020].
 
 **Please [file an issue or make a pull request on github](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues) to report any mistakes, ask questions, request more explanation, et cetera.**
 
