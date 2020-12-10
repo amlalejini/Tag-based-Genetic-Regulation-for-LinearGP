@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
+  <title>References | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
   <meta name="description" content="Supplemental material" />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta property="og:title" content="References | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="amlalejini/Tag-based-Genetic-Regulation-for-LinearGP" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta name="twitter:title" content="References | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   
   <meta name="twitter:description" content="Supplemental material" />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
+<link rel="prev" href="boolean-calculator-problem-postfix-notation.html"/>
 
-<link rel="next" href="data-availability.html"/>
 <script src="libs/header-attrs-2.5/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -275,131 +275,82 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</h1>
-<p class="author"><em>Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria</em></p>
-<p class="date"><em>2020-12-09</em></p>
-</div>
-<div id="introduction" class="section level1" number="1">
-<h1><span class="header-section-number">Chapter 1</span> Introduction</h1>
-<p>This is the supplemental material for our work, ‘Tag-based Genetic Regulation for Genetic Programming’.
-<!-- todo - link to paper --></p>
-<div id="about-our-supplemental-material" class="section level2" number="1.1">
-<h2><span class="header-section-number">1.1</span> About our supplemental material</h2>
-<p>As you may have noticed (unless you’re reading a pdf version of this), our supplemental material is hosted using <a href="https://pages.github.com/">GitHub pages</a>.
-We compiled our data analyses and supplemental documentation into this nifty web-accessible book using <a href="https://bookdown.org">bookdown</a>.</p>
-<p>Our supplemental material includes the following:</p>
-<ul>
-<li>TODO</li>
-</ul>
-</div>
-<div id="contributing-authors" class="section level2" number="1.2">
-<h2><span class="header-section-number">1.2</span> Contributing authors</h2>
-<ul>
-<li><a href="https://lalejini.com/">Alexander Lalejini</a></li>
-<li><a href="http://mmore500.com/">Matthew Andrew Moreno</a></li>
-<li><a href="https://ofria.com/">Charles Ofria</a></li>
-</ul>
-</div>
-<div id="research-overview" class="section level2" number="1.3">
-<h2><span class="header-section-number">1.3</span> Research overview</h2>
-<div id="abstract" class="section level3" number="1.3.1">
-<h3><span class="header-section-number">1.3.1</span> Abstract</h3>
-<blockquote>
-<p><strong>We introduce and experimentally demonstrate tag-based genetic regulation, a new genetic programming (GP) technique that allows evolving programs to regulate code modules.</strong>
-Tags are evolvable labels that provide a flexible mechanism for labeling and referring to code modules.
-Tag-based genetic regulation extends existing tag-based naming schemes to allow programs to ‘’promote’’ and ‘’repress’’ code modules.
-This extension allows evolution to form arbitrary gene regulatory networks in a program where genes are program modules and program instructions mediate regulation.
-We demonstrate the functionality of tag-based genetic regulation on several diagnostic tasks as well as a more challenging program synthesis problem.
-We find that tag-based regulation improves problem-solving performance on problems responses to particular inputs must change over time (e.g., based on local context).
-We also observe that our implementation of tag-based genetic regulation can impede adaptive evolution when expected outputs are not context-dependent (i.e., the correct response to a particular input remains static over time).
-Tag-based genetic regulation is immediately applicable to existing tag-enabled GP systems, and broadens our repertoire of techniques for evolving more dynamic programs.</p>
-</blockquote>
-</div>
-<div id="tag-based-referencing" class="section level3" number="1.3.2">
-<h3><span class="header-section-number">1.3.2</span> Tag-based Referencing</h3>
-<p>Tags are evolvable labels that can be mutated, and the similarity (or dissimilarity) between any two tags can be quantified <span class="citation">(Spector et al. <a href="#ref-spector_tag-based_2011" role="doc-biblioref">2011</a>)</span>.
-Tags allow for <em>inexact</em> addressing.
-A referring tag targets the tagged entity (<em>e.g.</em>, a module) with the <em>closest matching</em> tag;
-this ensures that all possible tags are potentially valid references.
-Further, mutations to tags do not necessarily damage existing references.
-For example, mutating a referring tag will have no phenotypic effect if those mutations do not change which target tag is matched.
-As such, this technique allows the naming and use of modularized code fragments to incrementally co-evolve.</p>
-<div class="figure">
-<img src="media/tag-based-referencing.png" alt="" />
-<p class="caption">Example of tag-based referencing.</p>
-</div>
-<p>In the tag-based referencing example above, the call instruction uses tag 1001 to reference the closest-matching module (in this case, the yellow module tagged 0001).</p>
-</div>
-<div id="tag-based-regulation" class="section level3" number="1.3.3">
-<h3><span class="header-section-number">1.3.3</span> Tag-based Regulation</h3>
-<p>Tag-based regulation allows evolving programs to instantiate gene regulatory networks using tag-based referencing.
-This functionality allows programs to dynamically adjust which module is triggered by a particular call based on prior inputs.
-Specifically, we implemented tag-based genetic regulation in the context of a linear GP system (SignalGP); however, our approach is applicable to any tag-enabled GP system.</p>
-<p>To implement tag-based genetic regulation, we supplement the instruction set with promoter and repressor instructions that, when executed, adjust how well subsequent tag-based references match with a target module.
-Intuitively, promoters increase a target module’s tag-match score with subsequent references, thereby increasing its chances of being triggered; repressors have the opposite effect.
-When determining which module to reference in response to a call instruction, each module’s tag-match score is a function of how well the module’s tag matches the call instruction’s tag as well as the module’s regulatory value.</p>
-</div>
-<div id="signalgp" class="section level3" number="1.3.4">
-<h3><span class="header-section-number">1.3.4</span> SignalGP</h3>
-<div class="figure">
-<img src="media/sgp-cartoon.png" alt="" />
-<p class="caption">Cartoon overview of SignalGP.</p>
-</div>
-<p>SignalGP defines a way of organizing and interpreting genetic programs to afford computational evolution access to the <a href="https://en.wikipedia.org/wiki/Event-driven_programming">event-driven programming paradigm</a>.
-In SignalGP, program execution is signal-driven.
-Programs are segmented into genetic modules (or functions), and each module can be independently triggered in response to a signal.
-Each module associates a tag with a linear sequence of instructions.
-In this work, tags are represented as fixed-length bit strings.</p>
-<p>SignalGP makes the concept of events or signals explicit: all signals contain a tag and any associated
-data.
-Signals can originate exogenously (e.g, from the environment or other agents) or endogenously (e.g., self-signaling).
-We use tag-based referencing to determine the most appropriate function to automatically trigger in
-response to a signal.
-Signals trigger the function with the closest matching tag.</p>
-<p>For a more detailed description of the SignalGP representation, see <span class="citation">(Lalejini and Ofria <a href="#ref-lalejini_evolving_2018" role="doc-biblioref">2018</a>)</span>.</p>
-<div id="genetic-regulation-in-signalgp" class="section level4" number="1.3.4.1">
-<h4><span class="header-section-number">1.3.4.1</span> Genetic Regulation in SignalGP</h4>
-<p>In this work, we augment the SignalGP representation with genetic regulation, allowing programs to alter their responses to signals during their lifetime.
-We supplement the SignalGP instruction set with promotor and repressor instructions, which, when executed, adjust how well subsequent signals or internal call instructions match with a target function (instruction-level tags and tag-based referencing are used for function targeting).</p>
-<p>A simple example of how genetic regulation works (in an event-handling context) is given in the figure below. First (1), an event triggers the yellow function that, when executed, (2) promotes the red function and represses itself. Finally (3), when a subsequent signal (identical to the previous) is received, it triggers the up-regulated red function instead of the yellow function.</p>
-<div class="figure">
-<img src="media/regulation-example-cartoon.png" alt="" />
-<p class="caption">Example of tag-based genetic regulation in SignalGP.</p>
-</div>
-</div>
-</div>
-<div id="experiments" class="section level3" number="1.3.5">
-<h3><span class="header-section-number">1.3.5</span> Experiments</h3>
-<p>We compared the performance of regulation-enabled and regulation-disabled SignalGP on five problems:</p>
-<ul>
-<li>Repeated-signal Problem</li>
-<li>Contextual-signal Problem</li>
-<li>Changing-signal Problem</li>
-<li>Boolean Logic Calculator Problem (prefix notation)</li>
-<li>Boolean Logic Calculator Problem (postfix notation)</li>
-</ul>
-<p>The repeated-signal, contextual-signal, and prefix notation calculator problems each required programs to dynamically adjust their responses to particular inputs over time.
-The changing-signal and postfix notation calculator problems did not require programs to adjust responses to inputs over time.</p>
-</div>
-<div id="results" class="section level3" number="1.3.6">
-<h3><span class="header-section-number">1.3.6</span> Results</h3>
-<ul>
-<li>Proof of method: we observed the evolution of programs capable of leveraging tag-based regulation to dynamically adjust module associations over time.</li>
-<li>We found that tag-based regulation improved problem-solving performance on context-dependent problems (i.e., problems in which the appropriate response to a particular input changes over time).</li>
-<li>We found that our implementation of tag-based regulation can impede adaptive evolution on problems that do not require programs to adjust responses to particular inputs over time.</li>
-</ul>
+<div id="references" class="section level1 unnumbered" number="">
+<h1>References</h1>
 
+<div id="refs" class="references hanging-indent">
+<div>
+<p>Csardi, Gabor, and Tamas Nepusz. 2006. “The Igraph Software Package for Complex Network Research.” <em>InterJournal</em> Complex Systems: 1695. <a href="https://igraph.org">https://igraph.org</a>.</p>
 </div>
+<div>
+<p>file., See AUTHORS. 2020. <em>Igraph: Network Analysis and Visualization</em>. <a href="https://igraph.org">https://igraph.org</a>.</p>
 </div>
+<div>
+<p>Garnier, Simon. 2018a. <em>Viridis: Default Color Maps from Matplotlib</em>. <a href="https://github.com/sjmgarnier/viridis">https://github.com/sjmgarnier/viridis</a>.</p>
 </div>
-<h3>References</h3>
-<div id="refs" class="references">
-<div id="ref-lalejini_evolving_2018">
+<div>
+<p>———. 2018b. <em>ViridisLite: Default Color Maps from Matplotlib (Lite Version)</em>. <a href="https://github.com/sjmgarnier/viridisLite">https://github.com/sjmgarnier/viridisLite</a>.</p>
+</div>
+<div>
+<p>Henry, Lionel, and Hadley Wickham. 2020. <em>Purrr: Functional Programming Tools</em>. <a href="https://CRAN.R-project.org/package=purrr">https://CRAN.R-project.org/package=purrr</a>.</p>
+</div>
+<div>
+<p>Lalejini, Alexander M, Matthew A Moreno, and Charles Ofria. 2020. “Tag-Based Genetic Regulation for Genetic Programming.” OSF. <a href="https://doi.org/10.17605/OSF.IO/928FX">https://doi.org/10.17605/OSF.IO/928FX</a>.</p>
+</div>
+<div>
 <p>Lalejini, Alexander, and Charles Ofria. 2018. “Evolving Event-Driven Programs with SignalGP.” In <em>Proceedings of the Genetic and Evolutionary Computation Conference on - GECCO ’18</em>, 1135–42. Kyoto, Japan: ACM Press. <a href="https://doi.org/10.1145/3205455.3205523">https://doi.org/10.1145/3205455.3205523</a>.</p>
 </div>
-<div id="ref-spector_tag-based_2011">
+<div>
+<p>Müller, Kirill, and Hadley Wickham. 2020. <em>Tibble: Simple Data Frames</em>. <a href="https://CRAN.R-project.org/package=tibble">https://CRAN.R-project.org/package=tibble</a>.</p>
+</div>
+<div>
+<p>R Core Team. 2020. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.</p>
+</div>
+<div>
 <p>Spector, Lee, Brian Martin, Kyle Harrington, and Thomas Helmuth. 2011. “Tag-Based Modules in Genetic Programming.” In <em>Proceedings of the 13th Annual Conference on Genetic and Evolutionary Computation - GECCO ’11</em>, 1419. Dublin, Ireland: ACM Press. <a href="https://doi.org/10.1145/2001576.2001767">https://doi.org/10.1145/2001576.2001767</a>.</p>
+</div>
+<div>
+<p>Wickham, Hadley. 2007. “Reshaping Data with the reshape Package.” <em>Journal of Statistical Software</em> 21 (12): 1–20. <a href="http://www.jstatsoft.org/v21/i12/">http://www.jstatsoft.org/v21/i12/</a>.</p>
+</div>
+<div>
+<p>———. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>.</p>
+</div>
+<div>
+<p>———. 2019a. <em>Stringr: Simple, Consistent Wrappers for Common String Operations</em>. <a href="https://CRAN.R-project.org/package=stringr">https://CRAN.R-project.org/package=stringr</a>.</p>
+</div>
+<div>
+<p>———. 2019b. <em>Tidyverse: Easily Install and Load the Tidyverse</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.</p>
+</div>
+<div>
+<p>———. 2020a. <em>Forcats: Tools for Working with Categorical Variables (Factors)</em>. <a href="https://CRAN.R-project.org/package=forcats">https://CRAN.R-project.org/package=forcats</a>.</p>
+</div>
+<div>
+<p>———. 2020b. <em>Reshape2: Flexibly Reshape Data: A Reboot of the Reshape Package</em>. <a href="https://github.com/hadley/reshape">https://github.com/hadley/reshape</a>.</p>
+</div>
+<div>
+<p>———. 2020c. <em>Tidyr: Tidy Messy Data</em>. <a href="https://CRAN.R-project.org/package=tidyr">https://CRAN.R-project.org/package=tidyr</a>.</p>
+</div>
+<div>
+<p>Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino McGowan, Romain François, Garrett Grolemund, et al. 2019. “Welcome to the tidyverse.” <em>Journal of Open Source Software</em> 4 (43): 1686. <a href="https://doi.org/10.21105/joss.01686">https://doi.org/10.21105/joss.01686</a>.</p>
+</div>
+<div>
+<p>Wickham, Hadley, Winston Chang, Lionel Henry, Thomas Lin Pedersen, Kohske Takahashi, Claus Wilke, Kara Woo, Hiroaki Yutani, and Dewey Dunnington. 2020. <em>Ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics</em>. <a href="https://CRAN.R-project.org/package=ggplot2">https://CRAN.R-project.org/package=ggplot2</a>.</p>
+</div>
+<div>
+<p>Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2020. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.</p>
+</div>
+<div>
+<p>Wickham, Hadley, and Jim Hester. 2020. <em>Readr: Read Rectangular Text Data</em>. <a href="https://CRAN.R-project.org/package=readr">https://CRAN.R-project.org/package=readr</a>.</p>
+</div>
+<div>
+<p>Wilke, Claus O. 2020. <em>Cowplot: Streamlined Plot Theme and Plot Annotations for Ggplot2</em>. <a href="https://wilkelab.org/cowplot/">https://wilkelab.org/cowplot/</a>.</p>
+</div>
+<div>
+<p>Xie, Yihui. 2016. <em>Bookdown: Authoring Books and Technical Documents with R Markdown</em>. Boca Raton, Florida: Chapman; Hall/CRC. <a href="https://github.com/rstudio/bookdown">https://github.com/rstudio/bookdown</a>.</p>
+</div>
+<div>
+<p>———. 2020. <em>Bookdown: Authoring Books and Technical Documents with R Markdown</em>. <a href="https://github.com/rstudio/bookdown">https://github.com/rstudio/bookdown</a>.</p>
+</div>
 </div>
 </div>
             </section>
@@ -407,8 +358,8 @@ The changing-signal and postfix notation calculator problems did not require pro
           </div>
         </div>
       </div>
+<a href="boolean-calculator-problem-postfix-notation.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 
-<a href="data-availability.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -439,7 +390,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/index.Rmd",
+"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/tail.Rmd",
 "text": "Edit"
 },
 "history": {

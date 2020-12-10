@@ -36,8 +36,8 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
-  pdftitle={Analyses for Tag-based Genetic Regulation for Genetic Programming},
-  pdfauthor={Alexander Lalejini},
+  pdftitle={Supplemental Material for Tag-based Genetic Regulation for Genetic Programming},
+  pdfauthor={Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
@@ -110,8 +110,8 @@
 \usepackage[]{natbib}
 \bibliographystyle{apalike}
 
-\title{Analyses for Tag-based Genetic Regulation for Genetic Programming}
-\author{Alexander Lalejini}
+\title{Supplemental Material for Tag-based Genetic Regulation for Genetic Programming}
+\author{Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria}
 \date{2020-12-09}
 
 \begin{document}
@@ -121,641 +121,361 @@
 \setcounter{tocdepth}{1}
 \tableofcontents
 }
-\hypertarget{test}{%
-\chapter{Test}\label{test}}
+\hypertarget{introduction}{%
+\chapter{Introduction}\label{introduction}}
 
-\hypertarget{signalgp-digital-organisms}{%
-\chapter{SignalGP Digital Organisms}\label{signalgp-digital-organisms}}
+This is the supplemental material for our work, `Tag-based Genetic Regulation for Genetic Programming'.
 
-Here, we give more details on the setup of the SignalGP digital organisms used in the diagnostic
-experiments. For a broad overview of SignalGP, see \href{https://doi.org/10.1145/3205455.3205523}{(Lalejini and Ofria, 2018)}. For specific parameter choices, see experiment-specific configuration descriptions (TODO - link here).
+\hypertarget{about-our-supplemental-material}{%
+\section{About our supplemental material}\label{about-our-supplemental-material}}
 
-For DISHTINY SignalGP details, see DISHTINY docs.
+As you may have noticed (unless you're reading a pdf version of this), our supplemental material is hosted using \href{https://pages.github.com/}{GitHub pages}.
+We compiled our data analyses and supplemental documentation into this nifty web-accessible book using \href{https://bookdown.org}{bookdown}.
 
-\textbf{Navigation}
-
-\begin{itemize}
-\tightlist
-\item
-  \protect\hyperlink{memory-model}{Memory model}
-\item
-  \protect\hyperlink{mutation-operators}{Mutation operators}
-\item
-  \protect\hyperlink{instruction-set}{Instruction Set}
-
-  \begin{itemize}
-  \tightlist
-  \item
-    \protect\hyperlink{default-instructions}{Default Instructions}
-  \item
-    \protect\hyperlink{global-memory-access-instructions}{Global memory access instructions}
-  \item
-    \protect\hyperlink{regulation-instructions}{Regulation instructions}
-  \item
-    \protect\hyperlink{task-specific-instructions}{Task-specific instructions}
-  \end{itemize}
-\item
-  \protect\hyperlink{references}{References}
-\end{itemize}
-
-\hypertarget{memory-model}{%
-\section{Memory model}\label{memory-model}}
-
-SignalGP digital organisms have four types of memory buffers with which to carry out computations:
+Our supplemental material includes the following:
 
 \begin{itemize}
 \tightlist
 \item
-  Working (register) memory
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Call-local (* thread-local) memory.
-  \item
-    Memory used by the majority of computation instructions.
-  \end{itemize}
-\item
-  Input memory
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Call-local (\& thread-local) memory.
-  \item
-    Read-only.
-  \item
-    This memory is used to specify function call arguments. When a function is called on a thread (i.e.,
-    a call instruction is executed), the caller's working memory is copied into the input memory of
-    the new call-state, which is created on top of the thread's call stack.
-  \item
-    Programs must execute explicit instructions to read from the input memory buffer (into the working
-    memory buffer).
-  \end{itemize}
-\item
-  Output memory
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Call-local (\& thread-local) memory.
-  \item
-    Write-only.
-  \item
-    This memory is used to specify the return values of a function call.
-  \item
-    When a function returns to the previous call-state (i.e., the one just below it on the thread's
-    call stack), positions that were set in the output buffer are returned to the caller's working memory
-    buffer.
-  \item
-    Programs must execute explicit instructions to write to the output memory buffer (from the working
-    memory buffer).
-  \end{itemize}
-\item
-  Global memory
-
-  \begin{itemize}
-  \tightlist
-  \item
-    This memory buffer is shared by all executing threads. Threads must use explicit instructions
-    (\texttt{GlobalToWorking} or \texttt{WorkingToGlobal}) to access it.
-  \end{itemize}
+  TODO
 \end{itemize}
 
-These are described in more detail in \href{https://doi.org/10.1145/3205455.3205523}{(Lalejini and Ofria, 2018)}.
-
-Memory buffers are implemented as integer =\textgreater{} double maps.
-
-\hypertarget{mutation-operators}{%
-\section{Mutation operators}\label{mutation-operators}}
+\hypertarget{contributing-authors}{%
+\section{Contributing authors}\label{contributing-authors}}
 
 \begin{itemize}
 \tightlist
 \item
-  Single-instruction insertions
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Applied per instruction
-  \end{itemize}
+  \href{https://lalejini.com/}{Alexander Lalejini}
 \item
-  Single-instruction deletions
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Applied per instruction
-  \end{itemize}
+  \href{http://mmore500.com/}{Matthew Andrew Moreno}
 \item
-  Single-instruction substitutions
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Applied per instruction
-  \end{itemize}
-\item
-  Single-argument substitutions
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Applied per argument
-  \end{itemize}
-\item
-  Slip mutations \href{https://doi.org/10.7551/ecal_a_045}{(Lalejini et al., 2017)}
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Applied at a per-function rate.
-  \item
-    Pick two random positions in function's instructions sequence: A and B
-  \item
-    If A \textless{} B: duplicate sequence from A to B
-  \item
-    If A \textgreater{} B: delete sequence from A to B
-  \end{itemize}
-\item
-  Single-function duplications
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Applied per-function
-  \end{itemize}
-\item
-  Single-function deletions
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Applied per-function
-  \end{itemize}
-\item
-  Tag bit flips
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Applied at a per-bit rate
-  \item
-    (applies to both instruction- and function-tags)
-  \end{itemize}
+  \href{https://ofria.com/}{Charles Ofria}
 \end{itemize}
 
-\hypertarget{instruction-set}{%
-\section{Instruction Set}\label{instruction-set}}
+\hypertarget{research-overview}{%
+\section{Research overview}\label{research-overview}}
 
-Abbreviations:
+\hypertarget{abstract}{%
+\subsection{Abstract}\label{abstract}}
+
+\begin{quote}
+\textbf{We introduce and experimentally demonstrate tag-based genetic regulation, a new genetic programming (GP) technique that allows evolving programs to regulate code modules.}
+Tags are evolvable labels that provide a flexible mechanism for labeling and referring to code modules.
+Tag-based genetic regulation extends existing tag-based naming schemes to allow programs to `'promote'' and `'repress'' code modules.
+This extension allows evolution to form arbitrary gene regulatory networks in a program where genes are program modules and program instructions mediate regulation.
+We demonstrate the functionality of tag-based genetic regulation on several diagnostic tasks as well as a more challenging program synthesis problem.
+We find that tag-based regulation improves problem-solving performance on problems responses to particular inputs must change over time (e.g., based on local context).
+We also observe that our implementation of tag-based genetic regulation can impede adaptive evolution when expected outputs are not context-dependent (i.e., the correct response to a particular input remains static over time).
+Tag-based genetic regulation is immediately applicable to existing tag-enabled GP systems, and broadens our repertoire of techniques for evolving more dynamic programs.
+\end{quote}
+
+\hypertarget{tag-based-referencing}{%
+\subsection{Tag-based Referencing}\label{tag-based-referencing}}
+
+Tags are evolvable labels that can be mutated, and the similarity (or dissimilarity) between any two tags can be quantified \citep{spector_tag-based_2011}.
+Tags allow for \emph{inexact} addressing.
+A referring tag targets the tagged entity (\emph{e.g.}, a module) with the \emph{closest matching} tag;
+this ensures that all possible tags are potentially valid references.
+Further, mutations to tags do not necessarily damage existing references.
+For example, mutating a referring tag will have no phenotypic effect if those mutations do not change which target tag is matched.
+As such, this technique allows the naming and use of modularized code fragments to incrementally co-evolve.
+
+\begin{figure}
+\centering
+\includegraphics{./media/tag-based-referencing.png}
+\caption{Example of tag-based referencing.}
+\end{figure}
+
+In the tag-based referencing example above, the call instruction uses tag 1001 to reference the closest-matching module (in this case, the yellow module tagged 0001).
+
+\hypertarget{tag-based-regulation}{%
+\subsection{Tag-based Regulation}\label{tag-based-regulation}}
+
+Tag-based regulation allows evolving programs to instantiate gene regulatory networks using tag-based referencing.
+This functionality allows programs to dynamically adjust which module is triggered by a particular call based on prior inputs.
+Specifically, we implemented tag-based genetic regulation in the context of a linear GP system (SignalGP); however, our approach is applicable to any tag-enabled GP system.
+
+To implement tag-based genetic regulation, we supplement the instruction set with promoter and repressor instructions that, when executed, adjust how well subsequent tag-based references match with a target module.
+Intuitively, promoters increase a target module's tag-match score with subsequent references, thereby increasing its chances of being triggered; repressors have the opposite effect.
+When determining which module to reference in response to a call instruction, each module's tag-match score is a function of how well the module's tag matches the call instruction's tag as well as the module's regulatory value.
+
+\hypertarget{signalgp}{%
+\subsection{SignalGP}\label{signalgp}}
+
+\begin{figure}
+\centering
+\includegraphics{./media/sgp-cartoon.png}
+\caption{Cartoon overview of SignalGP.}
+\end{figure}
+
+SignalGP defines a way of organizing and interpreting genetic programs to afford computational evolution access to the \href{https://en.wikipedia.org/wiki/Event-driven_programming}{event-driven programming paradigm}.
+In SignalGP, program execution is signal-driven.
+Programs are segmented into genetic modules (or functions), and each module can be independently triggered in response to a signal.
+Each module associates a tag with a linear sequence of instructions.
+In this work, tags are represented as fixed-length bit strings.
+
+SignalGP makes the concept of events or signals explicit: all signals contain a tag and any associated
+data.
+Signals can originate exogenously (e.g, from the environment or other agents) or endogenously (e.g., self-signaling).
+We use tag-based referencing to determine the most appropriate function to automatically trigger in
+response to a signal.
+Signals trigger the function with the closest matching tag.
+
+For a more detailed description of the SignalGP representation, see \citep{lalejini_evolving_2018}.
+
+\hypertarget{genetic-regulation-in-signalgp}{%
+\subsubsection{Genetic Regulation in SignalGP}\label{genetic-regulation-in-signalgp}}
+
+In this work, we augment the SignalGP representation with genetic regulation, allowing programs to alter their responses to signals during their lifetime.
+We supplement the SignalGP instruction set with promotor and repressor instructions, which, when executed, adjust how well subsequent signals or internal call instructions match with a target function (instruction-level tags and tag-based referencing are used for function targeting).
+
+A simple example of how genetic regulation works (in an event-handling context) is given in the figure below. First (1), an event triggers the yellow function that, when executed, (2) promotes the red function and represses itself. Finally (3), when a subsequent signal (identical to the previous) is received, it triggers the up-regulated red function instead of the yellow function.
+
+\begin{figure}
+\centering
+\includegraphics{./media/regulation-example-cartoon.png}
+\caption{Example of tag-based genetic regulation in SignalGP.}
+\end{figure}
+
+\hypertarget{experiments}{%
+\subsection{Experiments}\label{experiments}}
+
+We compared the performance of regulation-enabled and regulation-disabled SignalGP on five problems:
 
 \begin{itemize}
 \tightlist
 \item
-  EOP: End of program
+  Repeated-signal Problem
 \item
-  Reg: local register
+  Contextual-signal Problem
+\item
+  Changing-signal Problem
+\item
+  Boolean Logic Calculator Problem (prefix notation)
+\item
+  Boolean Logic Calculator Problem (postfix notation)
+\end{itemize}
+
+The repeated-signal, contextual-signal, and prefix notation calculator problems each required programs to dynamically adjust their responses to particular inputs over time.
+The changing-signal and postfix notation calculator problems did not require programs to adjust responses to inputs over time.
+
+\hypertarget{results}{%
+\subsection{Results}\label{results}}
+
+\begin{itemize}
+\tightlist
+\item
+  Proof of method: we observed the evolution of programs capable of leveraging tag-based regulation to dynamically adjust module associations over time.
+\item
+  We found that tag-based regulation improved problem-solving performance on context-dependent problems (i.e., problems in which the appropriate response to a particular input changes over time).
+\item
+  We found that our implementation of tag-based regulation can impede adaptive evolution on problems that do not require programs to adjust responses to particular inputs over time.
+\end{itemize}
+
+\hypertarget{data-availability}{%
+\chapter{Data Availability}\label{data-availability}}
+
+All of our experimental data is available online at \citep{Lalejini_Moreno_Ofria_Data_2020}.
+
+All project source code and any training/testing sets used in our experiments can be found in this project's GitHub repository: \url{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP}.
+
+\hypertarget{compile-and-run-experiments-locally}{%
+\chapter{Compile and run experiments locally}\label{compile-and-run-experiments-locally}}
+
+Here, we provide a brief guide to compiling and running our experiments.
+
+Please file an \href{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues}{issue} if something is unclear or does not work.
+
+\hypertarget{docker}{%
+\section{Docker}\label{docker}}
+
+On docker hub: \url{https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp}
+
+\begin{verbatim}
+docker pull amlalejini/tag-based-genetic-regulation-for-gp
+\end{verbatim}
+
+This will create an image with all the requisite dependencies installed/downloaded and with our experiments compiled.
+
+To run the container interactively:
+
+\begin{verbatim}
+docker run -it --entrypoint bash amlalejini/tag-based-genetic-regulation-for-gp
+\end{verbatim}
+
+You can exit the container at any point with \texttt{ctrl-d}.
+
+Inside the container, you should be at \texttt{/opt/Tag-based-Genetic-Regulation-for-LinearGP/}.
+If you \texttt{ls} you should see something like this (maybe not exactly):
+
+\begin{verbatim}
+Dockerfile                                                       documents
+Gemfile                                                          experiments
+LICENSE                                                          index.Rmd
+Makefile                                                         media
+README.md                                                        requirements.txt
+_bookdown.yml                                                    scripts
+_config.yml                                                      source
+_output.yml                                                      style.css
+alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp  supplemental
+bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp   supplemental.bib
+build_book.sh                                                    supplemental_files
+build_exps.sh                                                    tail.Rmd
+chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp     tests
+\end{verbatim}
+
+The important thing is that there should be three executables (with absurdly long names):
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{chg-env-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp}
 
   \begin{itemize}
   \tightlist
   \item
-    Reg{[}0{]} indicates the value at the register specified by an instruction's first \emph{argument} (either tag-based or numeric), Reg{[}1{]} indicates the value at the register specified by an instruction's second argument, and Reg{[}2{]} indicates the value at the register specified by the instruction's third argument.
+    Use this to run the changing-signal problem.
   \item
-    Reg{[}0{]}, Reg{[}1{]}, \emph{etc}: Register 0, Register 1, \emph{etc.}
+    To generate a default configuration file, \texttt{chg-env-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp\ -\/-gen}
   \end{itemize}
 \item
-  Input: input buffer
+  \texttt{alt-signal-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp}
 
   \begin{itemize}
   \tightlist
   \item
-    Follows same scheme as Reg
+    Use this to run the repeated-signal problem.
+  \item
+    To generate a default configuration file, \texttt{alt-signal-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp\ -\/-gen}
   \end{itemize}
 \item
-  Output: output buffer
+  \texttt{bool-calc-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp}
 
   \begin{itemize}
   \tightlist
   \item
-    Follows same scheme as Reg
-  \end{itemize}
-\item
-  Arg: Instruction argument
-
-  \begin{itemize}
-  \tightlist
+    Use this to run any of the boolean logic calculator problems and the contextual-signal problem.
   \item
-    Arg{[}i{]} indicates the i'th instruction argument (an integer encoded in the genome)
-  \item
-    E.g., Arg{[}0{]} is an instruction's first argument
+    To generate a default configuration file, \texttt{bool-calc-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp\ -\/-gen}
   \end{itemize}
 \end{itemize}
 
-Instructions that would produce undefined behavior (e.g., division by zero) are treated as no operations.
+Find the exact configurations we used for our experiments here: \url{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments}
 
-\hypertarget{default-instructions}{%
-\subsection{Default Instructions}\label{default-instructions}}
+\hypertarget{manually}{%
+\section{Manually}\label{manually}}
 
-I.e., instructions used across all diagnostic tasks.
+This guide assumes an Ubuntu-flavored Linux operating system. These instructions \emph{should} mostly work for MacOS; otherwise, we recommend using our Docker image or a virtual machine.
 
-\begin{longtable}[]{@{}lcl@{}}
-\toprule
-\begin{minipage}[b]{0.28\columnwidth}\raggedright
-Instruction\strut
-\end{minipage} & \begin{minipage}[b]{0.35\columnwidth}\centering
-Arguments Used\strut
-\end{minipage} & \begin{minipage}[b]{0.28\columnwidth}\raggedright
-Description\strut
-\end{minipage}\tabularnewline
-\midrule
-\endhead
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Nop}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-No operation\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Not}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}0{]} = !Reg{[}0{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Inc}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}0{]} = Reg{[}0{]} + 1\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Dec}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}0{]} = Reg{[}0{]} - 1\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Add}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} + Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Sub}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} - Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Mult}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} * Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Div}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} / Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Mod}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} \% Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{TestEqu}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} == Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{TestNEqu}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} != Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{TestLess}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} \textless{} Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{TestLessEqu}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} \textless= Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{TestGreater}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} \textgreater{} Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{TestGreaterEqu}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}2{]} = Reg{[}0{]} \textgreater= Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{SetMem}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}0{]} = Arg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Terminal}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}0{]} = double value encoded by instruction tag\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{CopyMem}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}0{]} = Reg{[}1{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{SwapMem}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Swap(Reg{[}0{]}, Reg{[}1{]})\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{InputToWorking}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}1{]} = Input{[}0{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{WorkingToOutput}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Output{[}1{]} = Reg{[}0{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{If}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-If Reg{[}0{]} != 0, proceed. Otherwise skip to the next \texttt{Close} or EOP.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{While}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-While Reg{[}0{]} != 0, loop. Otherwise skip to next \texttt{Close} or EOP.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Close}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Indicate the end of a control block of code (e.g., loop, if).\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Break}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Break out of current control flow (e.g., loop).\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Terminate}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Kill thread that this instruction is executing on.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Fork}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Generate an internal signal (using this instruction's tag) that can trigger a function to run in parallel.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Call}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Call a function, using this instruction's tag to determine which function is called.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Routine}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Same as call, but local memory is shared. Sort of like a jump that will jump back when the routine ends.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{Return}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Return from the current function call.\strut
-\end{minipage}\tabularnewline
-\bottomrule
-\end{longtable}
+Our experiments are implemented in C++, so you'll need a modern C++ compiler capable of compiling C++17 code.
 
-\hypertarget{global-memory-access-instructions}{%
-\subsection{Global memory access instructions}\label{global-memory-access-instructions}}
+E.g., I'm using:
 
-For experimental conditions without global memory access, these instructions are replaced with no-operation
-such that the instruction set remains a constant size regardless of experimental condition.
+\begin{verbatim}
+g++ (Ubuntu 10.2.0-13ubuntu1) 10.2.0
+\end{verbatim}
 
-\begin{longtable}[]{@{}lcl@{}}
-\toprule
-Instruction & Arguments Used & Description\tabularnewline
-\midrule
-\endhead
-\texttt{WorkingToGlobal} & 2 & Global{[}1{]} = Reg{[}0{]}\tabularnewline
-\texttt{GlobalToWorking} & 2 & Reg{[}1{]} = Global{[}0{]}\tabularnewline
-\bottomrule
-\end{longtable}
+\hypertarget{get-dependencies}{%
+\subsection{Get dependencies}\label{get-dependencies}}
 
-\hypertarget{regulation-instructions}{%
-\subsection{Regulation instructions}\label{regulation-instructions}}
+First, make a directory were we can put this project and all of its dependencies.
 
-For experimental conditions without regulation, these instructions are replaced with no-operation
-such that the instruction set remains a constant size regardless of experimental condition.
+\begin{verbatim}
+mkdir workspace
+cd workspace
+\end{verbatim}
 
-Note that several regulation instructions have a baseline and (-) version.
-The (-) versions are identical to the baseline version, except that they multiply the value they are
-regulating with by -1. This eliminates any bias toward either up-/down-regulation.
+Next, clone this repository into your new directory.
 
-Also note that the emp::MatchBin (in the Empirical library) data structure that manages function regulation
-is defined in terms of tag DISTANCE, not similarity. So, decreasing function regulation values decreases
-the distance between potential referring tags, and thus, unintuitively, \emph{up-regulates} the function.
+\begin{verbatim}
+git clone https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP.git
+\end{verbatim}
 
-All tag-based referencing used by regulation instructions use unregulated, raw match scores. Thus, programs
-can still up-regulate a function that was previously `turned off' with down-regulation.
+Our experiments depend on the Empirical and SignalGP libraries on GitHub.
+Inside the \texttt{workspace} directory, we'll clone SignalGP and checkout the appropriate commit.
 
-\begin{longtable}[]{@{}lcl@{}}
-\toprule
-\begin{minipage}[b]{0.28\columnwidth}\raggedright
-Instruction\strut
-\end{minipage} & \begin{minipage}[b]{0.35\columnwidth}\centering
-Arguments Used\strut
-\end{minipage} & \begin{minipage}[b]{0.28\columnwidth}\raggedright
-Description\strut
-\end{minipage}\tabularnewline
-\midrule
-\endhead
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{SetRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Set regulation value of function (targeted with instruction tag) to Reg{[}0{]}.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{SetRegulator-}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Set regulation value of function (targeted with instruction tag) to -1 * Reg{[}0{]}.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{SetOwnRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Set regulation value of function (currently executing) to Reg{[}0{]}.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{SetOwnRegulator-}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Set regulation value of function (currently executing) to -1 * Reg{[}0{]}.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{AdjRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Regulation value of function (targeted with instruction tag) += Reg{[}0{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{AdjRegulator-}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Regulation value of function (targeted with instruction tag) -= Reg{[}0{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{AdjOwnRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Regulation value of function (currently executing) += Reg{[}0{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{AdjOwnRegulator-}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Regulation value of function (currently executing) -= Reg{[}0{]}\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{ClearRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Clear function regulation (reset to neutral) of function targeted by instruction's tag.\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{ClearOwnRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Clear function regulation (reset to neutral) of currently executing function\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{SenseRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}0{]} = regulator state of function targeted by instruction tag\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{SenseOwnRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Reg{[}0{]} = regulator state of current function\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{IncRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Increment regulator state of function targeted with this instruction's tag\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{IncOwnRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Increment regulator state of currently executing function\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{DecRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Decrement regulator state of function targeted with this instruction's tag\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\raggedright
-\texttt{DecOwnRegulator}\strut
-\end{minipage} & \begin{minipage}[t]{0.35\columnwidth}\centering
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
-Decrement regulator state of the currently executing function\strut
-\end{minipage}\tabularnewline
-\bottomrule
-\end{longtable}
+\begin{verbatim}
+git clone https://github.com/amlalejini/SignalGP.git
+cd SignalGP
+git checkout 83d879cfdb6540862315dc454c1525ccd8054e65
+cd ..
+\end{verbatim}
 
-\hypertarget{task-specific-instructions}{%
-\subsection{Task-specific instructions}\label{task-specific-instructions}}
+Next, let's get Empirical (also stick this in the \texttt{workspace} directory).
 
-Each task as a number of response instructions added to the instruction set equal to the possible set
-of responses that can be expressed by a digital organism. Each of these response instructions set a
-flag on the virtual hardware indicating which response the organism expressed and reset all executing
-threads such that only function regulation and global memory contents persist.
+\begin{verbatim}
+git clone https://github.com/amlalejini/Empirical.git
+cd Empirical
+git checkout e72dae6490dee5caf8e5ec04a634b483d2ad4293
+\end{verbatim}
 
-\hypertarget{references}{%
-\section{References}\label{references}}
+We're not quite done with Empirical. We need to grab all of Empirical's dependencies. This will install \emph{all} of Empirical's dependencies, including those needed to build its documentation/tests.
 
-Lalejini, A., \& Ofria, C. (2018). Evolving event-driven programs with SignalGP. Proceedings of the Genetic and Evolutionary Computation Conference on - GECCO '18, 1135--1142. \url{https://doi.org/10.1145/3205455.3205523}
+\begin{verbatim}
+make install-dependencies
+\end{verbatim}
 
-Lalejini, A., Wiser, M. J., \& Ofria, C. (2017). Gene duplications drive the evolution of complex traits and regulation. Proceedings of the 14th European Conference on Artificial Life ECAL 2017, 257--264. \url{https://doi.org/10.7551/ecal_a_045}
+OR, if you don't want \emph{all} of that, instead you could do:
+
+\begin{verbatim}
+git submodule init
+git submodule update
+\end{verbatim}
+
+If you don't have libssl-dev, you'll also want to install that (some of the tag-matching metrics use cryptographic hash). E.g.,
+
+\begin{verbatim}
+sudo apt-get install libssl-dev
+\end{verbatim}
+
+Now we should be good to compile the three executables that we used for our experiments. Inside \texttt{workspace/Tag-based-Genetic-Regulation-for-LinearGP/}:
+
+\begin{verbatim}
+./build_exps
+\end{verbatim}
+
+This script just sets some environment variables (e.g., to define which experiment to compile, the tag-matching metric, etc.) and runs \texttt{make\ native}.
+
+To use a different compiler (than g++), you'll need to change \texttt{CXX\_nat} in the makefile.
+
+This should create three executables (with absurdly long names):
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{chg-env-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Use this to run the changing-signal problem.
+  \item
+    To generate a default configuration file, \texttt{chg-env-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp\ -\/-gen}
+  \end{itemize}
+\item
+  \texttt{alt-signal-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Use this to run the repeated-signal problem.
+  \item
+    To generate a default configuration file, \texttt{alt-signal-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp\ -\/-gen}
+  \end{itemize}
+\item
+  \texttt{bool-calc-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Use this to run any of the boolean logic calculator problems and the contextual-signal problem.
+  \item
+    To generate a default configuration file, \texttt{bool-calc-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp\ -\/-gen}
+  \end{itemize}
+\end{itemize}
+
+Find the exact configurations we used for our experiments here: \url{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments}
 
 \hypertarget{changing-signal-problem-analysis}{%
 \chapter{Changing-signal problem analysis}\label{changing-signal-problem-analysis}}
@@ -1655,9 +1375,9 @@ Here, we compare the generation at which solutions arise (only at difficulty lev
 \end{Shaded}
 
 \begin{verbatim}
-## Warning: Removed 102 rows containing missing values (geom_point).
+## Warning: Removed 97 rows containing missing values (geom_point).
 
-## Warning: Removed 102 rows containing missing values (geom_point).
+## Warning: Removed 97 rows containing missing values (geom_point).
 \end{verbatim}
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-16-1.pdf}
@@ -5262,6 +4982,6 @@ We use the igraph package to draw this program's gene regulatory network.
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-98-1.pdf}
 
-  \bibliography{packages.bib}
+  \bibliography{packages.bib,supplemental.bib}
 
 \end{document}

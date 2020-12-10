@@ -4,7 +4,9 @@ language:
     chapter_name: "Chapter "
 delete_merged_file: true
 rmd_files: ["index.Rmd",
-            "documents/digital-organisms.md",
+            "documents/data-availability.md",
+            "documents/running-experiments.md",
+            # "documents/digital-organisms.md",
             "experiments/2020-11-11-chg-sig/analysis/2020-11-11-chg-sig.Rmd",
             "experiments/2020-11-25-rep-sig/analysis/2020-11-25-rep-sig.Rmd",
             "experiments/2020-11-27-context-sig/analysis/2020-11-27-context-sig.Rmd",

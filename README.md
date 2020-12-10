@@ -123,24 +123,13 @@ We provide a step-by-step guide for compiling and running the software we used t
 
 We conducted our data analyses using a combination of Python (version 3.8.6) and R (version 4.0.2).
 Python is used primarily for data wrangling, and R is used for stats and graphs/visualizations.
-We compiled our data analyses into nifty HTML web pages (using R markdown and knitr), which are one-stop-shops for all of our R source code, statistical results, and data visualizations; these pages are linked below in [Supplemental Material](#supplemental-material)
+See our [supplemental material](https://lalejini.com/Tag-based-Genetic-Regulation-for-LinearGP/supplemental/) for fully-detailed data analyses/visualizations (including source code)!
 
 ## Supplemental Material
 
-In addition to our source code (found in this repository), we compiled our data analyses and supplemental documentation into a nifty web-hosted book using [bookdown](https://bookdown.org) and [GitHub pages](https://pages.github.com/).
+In addition to our source code (found in this repository), we compiled our data analyses and supplemental documentation (including guides for replication and data availability) into a nifty web-hosted book using [bookdown](https://bookdown.org) and [GitHub pages](https://pages.github.com/).
 
 :arrow_right: **[Find our supplemental material here](https://lalejini.com/Tag-based-Genetic-Regulation-for-LinearGP/supplemental/)** :arrow_left:
-
-
-<!-- - Guide to running our software locally: [./documents/running-experiments.md](./documents/running-experiments.md)
-- Diagnostic task descriptions and experiment configurations: [./documents/task-descriptions.md](./documents/task-descriptions.md)
-- Digital organism representation details (instruction set, etc): [./documents/digital-organisms.md](./documents/digital-organisms.md)
-- Handcoded memory-based solutions to the repeated signal task: [./documents/handcoded-examples.md](./documents/handcoded-examples.md)
-- Fully-detailed data analyses, including source code for statistical analyses and visualizations, from the paper:
-  - [Repeated signal task](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/repeated-signal-task-analysis.html)
-  - [Directional signal task](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/directional-signal-task-analysis.html)
-  - [Comparing evolved repeated-signal and directional-signal regulatory networks](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/regulatory-network-comparison.html)
-  - [Changing signal task](https://lalejini.com/ALife-2020--SignalGP-Genetic-Regulation/experiments/alife-2020/analysis/changing-signal-task-analysis.html) -->
 
 ### Repository guide
 
