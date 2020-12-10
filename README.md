@@ -2,6 +2,8 @@
 
 <!-- TODO: This repository is the supplemental material associated with the following research article: ... -->
 
+[![DockerHub link](https://img.shields.io/badge/DockerHub-Hosted-blue)](https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp)
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/amlalejini/tag-based-genetic-regulation-for-gp)
 
 **Navigation**
 
