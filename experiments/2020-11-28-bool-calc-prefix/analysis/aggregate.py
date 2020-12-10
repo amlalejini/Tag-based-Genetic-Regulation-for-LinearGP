@@ -308,6 +308,7 @@ def main():
                 active_modules.append(int(modules_responded_by_step[i]))
                 present_modules.append(int(modules_responded_by_step[i]))
 
+            triggered_module = None
             for thread in threads:
                 call_stack = thread["call_stack"]
                 # active modules are at the top of the flow stack on the top of the call stack
@@ -325,7 +326,6 @@ def main():
                 if step_info["cpu_step"] == "1":
                     # on the second cpu step, we have the first thread state report
                     # - look at the bottom of the flow stack on the bottom-most call
-                    triggered_module = None
                     modules_triggered_by_input[testcase_id][testcase_input_id] = set()
                     if len(call_stack):
                         if len(call_stack[0]["flow_stack"]):
@@ -333,9 +333,13 @@ def main():
                     if triggered_module == None:
                         # if not call stack, the program immediately responded.
                         triggered_module = step_info["cur_responding_function"]
-
                     modules_triggered_by_input[testcase_id][testcase_input_id].add(triggered_module)
 
+            if step_info["cpu_step"] == "1" and triggered_module == None:
+                triggered_module = step_info["cur_responding_function"]
+                if testcase_input_id not in modules_triggered_by_input[testcase_id]:
+                    modules_triggered_by_input[testcase_id][testcase_input_id] = set()
+                modules_triggered_by_input[testcase_id][testcase_input_id].add(triggered_module)
 
             # Add present modules for this test case
             for module_id in present_modules: modules_run_by_test[testcase_id].add(int(module_id))
@@ -350,13 +354,13 @@ def main():
             if step_info["cpu_step"] == "0":
                 testcase_id = int(step_info["cur_test_id"])
                 testcase_input_id = int(step_info["cur_test_input"])
-                modules_triggered_by_step[i] = modules_triggered_by_input[testcase_id][testcase_input_id]
+                modules_triggered_by_step[i] = {int(module_id) for module_id in modules_triggered_by_input[testcase_id][testcase_input_id]}
                 for module_id in modules_triggered_by_step[i]:
-                    modules_active_ever[testcase_id].add(module_id)
-                    if modules_active_by_step[i][module_id] == 0:
-                        modules_active_by_step[i][module_id] += 1
-                    if modules_present_by_step[i][module_id] == 0:
-                        modules_present_by_step[i][module_id] += 1
+                    modules_active_ever[testcase_id].add(int(module_id))
+                    if modules_active_by_step[i][int(module_id)] == 0:
+                        modules_active_by_step[i][int(module_id)] += 1
+                    if modules_present_by_step[i][int(module_id)] == 0:
+                        modules_present_by_step[i][int(module_id)] += 1
 
         ################################################################################################
 
