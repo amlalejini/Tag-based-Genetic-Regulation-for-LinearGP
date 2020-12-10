@@ -25,7 +25,16 @@ We compiled our data analyses and supplemental documentation into this nifty web
 
 Our supplemental material includes the following:
 
-- TODO
+- Data availability (Section \@ref(data-availability))
+- Step-by-step guide to compiling and running our experiments (Section \@ref(compile-and-run-experiments-locally))
+- More details on the SignalGP representation used in this work (Section \@ref(signalgp-representation))
+- Visualizations of the exponential regulator used in this work (Section \@ref(exponential-regulator))
+- Fully-detailed analysis scripts for each experiment (including source code)
+  - Changing-signal problem analysis (Section \@ref(changing-signal-problem-analysis))
+  - Repeated-signal problem analysis (Section \@ref(repeated-signal-problem-analysis))
+  - Contextual-signal problem analysis (Section \@ref(contextual-signal-problem-analysis))
+  - Boolean calculator problem (prefix notation) analysis (Section \@ref(boolean-calculator-problem-prefix-notation))
+  - Boolean calculator problem (postfix notation) analysis (Section \@ref(boolean-calculator-problem-postfix-notation))
 
 ## Contributing authors
 

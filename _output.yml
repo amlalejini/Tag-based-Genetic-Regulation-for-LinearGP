@@ -7,7 +7,7 @@ bookdown::gitbook:
       before: |
         <li><a href="./">Supplemental material</a></li>
       after: |
-        <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+        <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with ❤ and bookdown</a></li>
     edit: https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/%s
     download: ["pdf"]
 bookdown::pdf_book:
