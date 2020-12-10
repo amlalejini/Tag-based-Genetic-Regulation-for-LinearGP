@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 Changing-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
+  <title>Chapter 5 Changing-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
   <meta name="description" content="Supplemental material" />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 Changing-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta property="og:title" content="Chapter 5 Changing-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="amlalejini/Tag-based-Genetic-Regulation-for-LinearGP" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Changing-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta name="twitter:title" content="Chapter 5 Changing-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   
   <meta name="twitter:description" content="Supplemental material" />
   
@@ -31,7 +31,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="compile-and-run-experiments-locally.html"/>
+<link rel="prev" href="exponential-regulator.html"/>
 <link rel="next" href="repeated-signal-problem-analysis.html"/>
 <script src="libs/header-attrs-2.5/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
@@ -159,99 +159,105 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3.2.1" data-path="compile-and-run-experiments-locally.html"><a href="compile-and-run-experiments-locally.html#get-dependencies"><i class="fa fa-check"></i><b>3.2.1</b> Get dependencies</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html"><i class="fa fa-check"></i><b>4</b> Changing-signal problem analysis</a>
+<li class="chapter" data-level="4" data-path="exponential-regulator.html"><a href="exponential-regulator.html"><i class="fa fa-check"></i><b>4</b> Exponential regulator</a>
 <ul>
-<li class="chapter" data-level="4.1" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#overview"><i class="fa fa-check"></i><b>4.1</b> Overview</a></li>
-<li class="chapter" data-level="4.2" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#analysis-dependencies"><i class="fa fa-check"></i><b>4.2</b> Analysis Dependencies</a></li>
-<li class="chapter" data-level="4.3" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#setup"><i class="fa fa-check"></i><b>4.3</b> Setup</a></li>
-<li class="chapter" data-level="4.4" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#does-regulation-hinder-the-evolution-of-successful-genotypes"><i class="fa fa-check"></i><b>4.4</b> Does regulation hinder the evolution of successful genotypes?</a>
+<li class="chapter" data-level="4.1" data-path="exponential-regulator.html"><a href="exponential-regulator.html#analysis-dependencies"><i class="fa fa-check"></i><b>4.1</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="4.2" data-path="exponential-regulator.html"><a href="exponential-regulator.html#regulator-modifier-equation"><i class="fa fa-check"></i><b>4.2</b> Regulator modifier equation</a></li>
+<li class="chapter" data-level="4.3" data-path="exponential-regulator.html"><a href="exponential-regulator.html#regulator-behavior"><i class="fa fa-check"></i><b>4.3</b> Regulator behavior</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html"><i class="fa fa-check"></i><b>5</b> Changing-signal problem analysis</a>
 <ul>
-<li class="chapter" data-level="4.4.1" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#does-access-to-regulation-slow-adaptation"><i class="fa fa-check"></i><b>4.4.1</b> Does access to regulation slow adaptation?</a></li>
-<li class="chapter" data-level="4.4.2" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#do-they-generalize"><i class="fa fa-check"></i><b>4.4.2</b> Do they generalize?</a></li>
+<li class="chapter" data-level="5.1" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#overview"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
+<li class="chapter" data-level="5.2" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#analysis-dependencies-1"><i class="fa fa-check"></i><b>5.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="5.3" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#setup"><i class="fa fa-check"></i><b>5.3</b> Setup</a></li>
+<li class="chapter" data-level="5.4" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#does-regulation-hinder-the-evolution-of-successful-genotypes"><i class="fa fa-check"></i><b>5.4</b> Does regulation hinder the evolution of successful genotypes?</a>
+<ul>
+<li class="chapter" data-level="5.4.1" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#does-access-to-regulation-slow-adaptation"><i class="fa fa-check"></i><b>5.4.1</b> Does access to regulation slow adaptation?</a></li>
+<li class="chapter" data-level="5.4.2" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#do-they-generalize"><i class="fa fa-check"></i><b>5.4.2</b> Do they generalize?</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html"><i class="fa fa-check"></i><b>5</b> Repeated-signal problem analysis</a>
+<li class="chapter" data-level="6" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html"><i class="fa fa-check"></i><b>6</b> Repeated-signal problem analysis</a>
 <ul>
-<li class="chapter" data-level="5.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#overview-1"><i class="fa fa-check"></i><b>5.1</b> Overview</a></li>
-<li class="chapter" data-level="5.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#analysis-dependencies-1"><i class="fa fa-check"></i><b>5.2</b> Analysis Dependencies</a></li>
-<li class="chapter" data-level="5.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#setup-1"><i class="fa fa-check"></i><b>5.3</b> Setup</a></li>
-<li class="chapter" data-level="5.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#problem-solving-success"><i class="fa fa-check"></i><b>5.4</b> Problem-solving success</a>
+<li class="chapter" data-level="6.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#overview-1"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
+<li class="chapter" data-level="6.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#analysis-dependencies-2"><i class="fa fa-check"></i><b>6.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="6.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#setup-1"><i class="fa fa-check"></i><b>6.3</b> Setup</a></li>
+<li class="chapter" data-level="6.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#problem-solving-success"><i class="fa fa-check"></i><b>6.4</b> Problem-solving success</a>
 <ul>
-<li class="chapter" data-level="5.4.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#number-of-successful-replicates-by-condition"><i class="fa fa-check"></i><b>5.4.1</b> Number of successful replicates by condition</a></li>
-<li class="chapter" data-level="5.4.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#aggregate-fitness-scores-by-condition"><i class="fa fa-check"></i><b>5.4.2</b> Aggregate fitness scores by condition</a></li>
+<li class="chapter" data-level="6.4.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#number-of-successful-replicates-by-condition"><i class="fa fa-check"></i><b>6.4.1</b> Number of successful replicates by condition</a></li>
+<li class="chapter" data-level="6.4.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#aggregate-fitness-scores-by-condition"><i class="fa fa-check"></i><b>6.4.2</b> Aggregate fitness scores by condition</a></li>
 </ul></li>
-<li class="chapter" data-level="5.5" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#how-many-generations-elapse-before-solutions-evolve"><i class="fa fa-check"></i><b>5.5</b> How many generations elapse before solutions evolve?</a>
+<li class="chapter" data-level="6.5" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#how-many-generations-elapse-before-solutions-evolve"><i class="fa fa-check"></i><b>6.5</b> How many generations elapse before solutions evolve?</a>
 <ul>
-<li class="chapter" data-level="5.5.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#two-signal-task---statistical-analysis"><i class="fa fa-check"></i><b>5.5.1</b> Two-signal task - statistical analysis</a></li>
-<li class="chapter" data-level="5.5.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#four-signal-task---statistical-analysis"><i class="fa fa-check"></i><b>5.5.2</b> Four-signal task - statistical analysis</a></li>
+<li class="chapter" data-level="6.5.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#two-signal-task---statistical-analysis"><i class="fa fa-check"></i><b>6.5.1</b> Two-signal task - statistical analysis</a></li>
+<li class="chapter" data-level="6.5.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#four-signal-task---statistical-analysis"><i class="fa fa-check"></i><b>6.5.2</b> Four-signal task - statistical analysis</a></li>
 </ul></li>
-<li class="chapter" data-level="5.6" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#teasing-apart-evolved-strategies"><i class="fa fa-check"></i><b>5.6</b> Teasing apart evolved strategies</a>
+<li class="chapter" data-level="6.6" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#teasing-apart-evolved-strategies"><i class="fa fa-check"></i><b>6.6</b> Teasing apart evolved strategies</a>
 <ul>
-<li class="chapter" data-level="5.6.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#do-solutions-rely-on-genetic-regulation-or-global-memory-access-to-dynamically-adjust-responses"><i class="fa fa-check"></i><b>5.6.1</b> Do solutions rely on genetic regulation or global memory access to dynamically adjust responses?</a></li>
-<li class="chapter" data-level="5.6.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#what-forms-of-genetic-regulation-do-evolved-programs-rely-on"><i class="fa fa-check"></i><b>5.6.2</b> What forms of genetic regulation do evolved programs rely on?</a></li>
-<li class="chapter" data-level="5.6.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#are-evolved-programs-relying-on-stochastic-strategies"><i class="fa fa-check"></i><b>5.6.3</b> Are evolved programs relying on stochastic strategies?</a></li>
-<li class="chapter" data-level="5.6.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#program-instruction-execution-traces"><i class="fa fa-check"></i><b>5.6.4</b> Program instruction execution traces</a></li>
+<li class="chapter" data-level="6.6.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#do-solutions-rely-on-genetic-regulation-or-global-memory-access-to-dynamically-adjust-responses"><i class="fa fa-check"></i><b>6.6.1</b> Do solutions rely on genetic regulation or global memory access to dynamically adjust responses?</a></li>
+<li class="chapter" data-level="6.6.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#what-forms-of-genetic-regulation-do-evolved-programs-rely-on"><i class="fa fa-check"></i><b>6.6.2</b> What forms of genetic regulation do evolved programs rely on?</a></li>
+<li class="chapter" data-level="6.6.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#are-evolved-programs-relying-on-stochastic-strategies"><i class="fa fa-check"></i><b>6.6.3</b> Are evolved programs relying on stochastic strategies?</a></li>
+<li class="chapter" data-level="6.6.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#program-instruction-execution-traces"><i class="fa fa-check"></i><b>6.6.4</b> Program instruction execution traces</a></li>
 </ul></li>
-<li class="chapter" data-level="5.7" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#case-study-visualizing-regulation-in-an-evolved-program"><i class="fa fa-check"></i><b>5.7</b> Case study: visualizing regulation in an evolved program</a>
+<li class="chapter" data-level="6.7" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#case-study-visualizing-regulation-in-an-evolved-program"><i class="fa fa-check"></i><b>6.7</b> Case study: visualizing regulation in an evolved program</a>
 <ul>
-<li class="chapter" data-level="5.7.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#data-wrangling"><i class="fa fa-check"></i><b>5.7.1</b> Data wrangling</a></li>
-<li class="chapter" data-level="5.7.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#function-regulation-over-time"><i class="fa fa-check"></i><b>5.7.2</b> Function regulation over time</a></li>
-<li class="chapter" data-level="5.7.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#environmental-signal-tag-match-score-over-time"><i class="fa fa-check"></i><b>5.7.3</b> Environmental signal tag-match score over time</a></li>
-<li class="chapter" data-level="5.7.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#evolved-regulatory-network"><i class="fa fa-check"></i><b>5.7.4</b> Evolved regulatory network</a></li>
-</ul></li>
-</ul></li>
-<li class="chapter" data-level="6" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html"><i class="fa fa-check"></i><b>6</b> Contextual-signal problem analysis</a>
-<ul>
-<li class="chapter" data-level="6.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#overview-2"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
-<li class="chapter" data-level="6.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#analysis-dependencies-2"><i class="fa fa-check"></i><b>6.2</b> Analysis Dependencies</a></li>
-<li class="chapter" data-level="6.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#setup-2"><i class="fa fa-check"></i><b>6.3</b> Setup</a></li>
-<li class="chapter" data-level="6.4" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#problem-solving-success-1"><i class="fa fa-check"></i><b>6.4</b> Problem-solving success</a></li>
-<li class="chapter" data-level="6.5" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#how-many-generations-elapse-before-solutions-evolve-1"><i class="fa fa-check"></i><b>6.5</b> How many generations elapse before solutions evolve?</a></li>
-<li class="chapter" data-level="6.6" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-strategies"><i class="fa fa-check"></i><b>6.6</b> Evolved strategies</a>
-<ul>
-<li class="chapter" data-level="6.6.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time"><i class="fa fa-check"></i><b>6.6.1</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
-<li class="chapter" data-level="6.6.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#gene-regulatory-networks"><i class="fa fa-check"></i><b>6.6.2</b> Gene regulatory networks</a></li>
-<li class="chapter" data-level="6.6.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#program-instruction-execution-traces-1"><i class="fa fa-check"></i><b>6.6.3</b> Program instruction execution traces</a></li>
-</ul></li>
-<li class="chapter" data-level="6.7" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#visualizing-an-evolved-gene-regulatory-network"><i class="fa fa-check"></i><b>6.7</b> Visualizing an evolved gene regulatory network</a>
-<ul>
-<li class="chapter" data-level="6.7.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-regulatory-network-1"><i class="fa fa-check"></i><b>6.7.1</b> Evolved regulatory network</a></li>
+<li class="chapter" data-level="6.7.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#data-wrangling"><i class="fa fa-check"></i><b>6.7.1</b> Data wrangling</a></li>
+<li class="chapter" data-level="6.7.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#function-regulation-over-time"><i class="fa fa-check"></i><b>6.7.2</b> Function regulation over time</a></li>
+<li class="chapter" data-level="6.7.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#environmental-signal-tag-match-score-over-time"><i class="fa fa-check"></i><b>6.7.3</b> Environmental signal tag-match score over time</a></li>
+<li class="chapter" data-level="6.7.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#evolved-regulatory-network"><i class="fa fa-check"></i><b>6.7.4</b> Evolved regulatory network</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html"><i class="fa fa-check"></i><b>7</b> Boolean calculator problem (prefix notation)</a>
+<li class="chapter" data-level="7" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html"><i class="fa fa-check"></i><b>7</b> Contextual-signal problem analysis</a>
 <ul>
-<li class="chapter" data-level="7.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#overview-3"><i class="fa fa-check"></i><b>7.1</b> Overview</a></li>
-<li class="chapter" data-level="7.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#analysis-dependencies-3"><i class="fa fa-check"></i><b>7.2</b> Analysis Dependencies</a></li>
-<li class="chapter" data-level="7.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#setup-3"><i class="fa fa-check"></i><b>7.3</b> Setup</a></li>
-<li class="chapter" data-level="7.4" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#problem-solving-success-2"><i class="fa fa-check"></i><b>7.4</b> Problem-solving success</a></li>
-<li class="chapter" data-level="7.5" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#how-many-generations-elapse-before-solutions-evolve-2"><i class="fa fa-check"></i><b>7.5</b> How many generations elapse before solutions evolve?</a></li>
-<li class="chapter" data-level="7.6" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-strategies-1"><i class="fa fa-check"></i><b>7.6</b> Evolved strategies</a>
+<li class="chapter" data-level="7.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#overview-2"><i class="fa fa-check"></i><b>7.1</b> Overview</a></li>
+<li class="chapter" data-level="7.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#analysis-dependencies-3"><i class="fa fa-check"></i><b>7.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="7.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#setup-2"><i class="fa fa-check"></i><b>7.3</b> Setup</a></li>
+<li class="chapter" data-level="7.4" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#problem-solving-success-1"><i class="fa fa-check"></i><b>7.4</b> Problem-solving success</a></li>
+<li class="chapter" data-level="7.5" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#how-many-generations-elapse-before-solutions-evolve-1"><i class="fa fa-check"></i><b>7.5</b> How many generations elapse before solutions evolve?</a></li>
+<li class="chapter" data-level="7.6" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-strategies"><i class="fa fa-check"></i><b>7.6</b> Evolved strategies</a>
 <ul>
-<li class="chapter" data-level="7.6.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-1"><i class="fa fa-check"></i><b>7.6.1</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
-<li class="chapter" data-level="7.6.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#gene-regulatory-networks-1"><i class="fa fa-check"></i><b>7.6.2</b> Gene regulatory networks</a></li>
-<li class="chapter" data-level="7.6.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#program-instruction-execution-traces-2"><i class="fa fa-check"></i><b>7.6.3</b> Program instruction execution traces</a></li>
+<li class="chapter" data-level="7.6.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time"><i class="fa fa-check"></i><b>7.6.1</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
+<li class="chapter" data-level="7.6.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#gene-regulatory-networks"><i class="fa fa-check"></i><b>7.6.2</b> Gene regulatory networks</a></li>
+<li class="chapter" data-level="7.6.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#program-instruction-execution-traces-1"><i class="fa fa-check"></i><b>7.6.3</b> Program instruction execution traces</a></li>
 </ul></li>
-<li class="chapter" data-level="7.7" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#visualizaing-an-evolved-regulatory-network"><i class="fa fa-check"></i><b>7.7</b> Visualizaing an evolved regulatory network</a>
+<li class="chapter" data-level="7.7" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#visualizing-an-evolved-gene-regulatory-network"><i class="fa fa-check"></i><b>7.7</b> Visualizing an evolved gene regulatory network</a>
 <ul>
-<li class="chapter" data-level="7.7.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-regulatory-network-2"><i class="fa fa-check"></i><b>7.7.1</b> Evolved regulatory network</a></li>
+<li class="chapter" data-level="7.7.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-regulatory-network-1"><i class="fa fa-check"></i><b>7.7.1</b> Evolved regulatory network</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="8" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html"><i class="fa fa-check"></i><b>8</b> Boolean calculator problem (postfix notation)</a>
+<li class="chapter" data-level="8" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html"><i class="fa fa-check"></i><b>8</b> Boolean calculator problem (prefix notation)</a>
 <ul>
-<li class="chapter" data-level="8.1" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#overview-4"><i class="fa fa-check"></i><b>8.1</b> Overview</a></li>
-<li class="chapter" data-level="8.2" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#analysis-dependencies-4"><i class="fa fa-check"></i><b>8.2</b> Analysis Dependencies</a></li>
-<li class="chapter" data-level="8.3" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#setup-4"><i class="fa fa-check"></i><b>8.3</b> Setup</a></li>
-<li class="chapter" data-level="8.4" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#problem-solving-success-3"><i class="fa fa-check"></i><b>8.4</b> Problem-solving success</a></li>
-<li class="chapter" data-level="8.5" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#how-many-generations-elapse-before-solutions-evolve-3"><i class="fa fa-check"></i><b>8.5</b> How many generations elapse before solutions evolve?</a></li>
-<li class="chapter" data-level="8.6" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#evolved-strategies-2"><i class="fa fa-check"></i><b>8.6</b> Evolved strategies</a>
+<li class="chapter" data-level="8.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#overview-3"><i class="fa fa-check"></i><b>8.1</b> Overview</a></li>
+<li class="chapter" data-level="8.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#analysis-dependencies-4"><i class="fa fa-check"></i><b>8.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="8.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#setup-3"><i class="fa fa-check"></i><b>8.3</b> Setup</a></li>
+<li class="chapter" data-level="8.4" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#problem-solving-success-2"><i class="fa fa-check"></i><b>8.4</b> Problem-solving success</a></li>
+<li class="chapter" data-level="8.5" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#how-many-generations-elapse-before-solutions-evolve-2"><i class="fa fa-check"></i><b>8.5</b> How many generations elapse before solutions evolve?</a></li>
+<li class="chapter" data-level="8.6" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-strategies-1"><i class="fa fa-check"></i><b>8.6</b> Evolved strategies</a>
 <ul>
-<li class="chapter" data-level="8.6.1" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-2"><i class="fa fa-check"></i><b>8.6.1</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
-<li class="chapter" data-level="8.6.2" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#gene-regulatory-networks-2"><i class="fa fa-check"></i><b>8.6.2</b> Gene regulatory networks</a></li>
-<li class="chapter" data-level="8.6.3" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#program-instruction-execution-traces-3"><i class="fa fa-check"></i><b>8.6.3</b> Program instruction execution traces</a></li>
+<li class="chapter" data-level="8.6.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-1"><i class="fa fa-check"></i><b>8.6.1</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
+<li class="chapter" data-level="8.6.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#gene-regulatory-networks-1"><i class="fa fa-check"></i><b>8.6.2</b> Gene regulatory networks</a></li>
+<li class="chapter" data-level="8.6.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#program-instruction-execution-traces-2"><i class="fa fa-check"></i><b>8.6.3</b> Program instruction execution traces</a></li>
 </ul></li>
-<li class="chapter" data-level="8.7" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#visualizaing-an-evolved-regulatory-network-1"><i class="fa fa-check"></i><b>8.7</b> Visualizaing an evolved regulatory network</a>
+<li class="chapter" data-level="8.7" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#visualizaing-an-evolved-regulatory-network"><i class="fa fa-check"></i><b>8.7</b> Visualizaing an evolved regulatory network</a>
 <ul>
-<li class="chapter" data-level="8.7.1" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#evolved-regulatory-network-3"><i class="fa fa-check"></i><b>8.7.1</b> Evolved regulatory network</a></li>
+<li class="chapter" data-level="8.7.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-regulatory-network-2"><i class="fa fa-check"></i><b>8.7.1</b> Evolved regulatory network</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html"><i class="fa fa-check"></i><b>9</b> Boolean calculator problem (postfix notation)</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#overview-4"><i class="fa fa-check"></i><b>9.1</b> Overview</a></li>
+<li class="chapter" data-level="9.2" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#analysis-dependencies-5"><i class="fa fa-check"></i><b>9.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="9.3" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#setup-4"><i class="fa fa-check"></i><b>9.3</b> Setup</a></li>
+<li class="chapter" data-level="9.4" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#problem-solving-success-3"><i class="fa fa-check"></i><b>9.4</b> Problem-solving success</a></li>
+<li class="chapter" data-level="9.5" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#how-many-generations-elapse-before-solutions-evolve-3"><i class="fa fa-check"></i><b>9.5</b> How many generations elapse before solutions evolve?</a></li>
+<li class="chapter" data-level="9.6" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#evolved-strategies-2"><i class="fa fa-check"></i><b>9.6</b> Evolved strategies</a>
+<ul>
+<li class="chapter" data-level="9.6.1" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-2"><i class="fa fa-check"></i><b>9.6.1</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
+<li class="chapter" data-level="9.6.2" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#gene-regulatory-networks-2"><i class="fa fa-check"></i><b>9.6.2</b> Gene regulatory networks</a></li>
+<li class="chapter" data-level="9.6.3" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#program-instruction-execution-traces-3"><i class="fa fa-check"></i><b>9.6.3</b> Program instruction execution traces</a></li>
+</ul></li>
+<li class="chapter" data-level="9.7" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#visualizaing-an-evolved-regulatory-network-1"><i class="fa fa-check"></i><b>9.7</b> Visualizaing an evolved regulatory network</a>
+<ul>
+<li class="chapter" data-level="9.7.1" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#evolved-regulatory-network-3"><i class="fa fa-check"></i><b>9.7.1</b> Evolved regulatory network</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
@@ -275,28 +281,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="changing-signal-problem-analysis" class="section level1" number="4">
-<h1><span class="header-section-number">Chapter 4</span> Changing-signal problem analysis</h1>
+<div id="changing-signal-problem-analysis" class="section level1" number="5">
+<h1><span class="header-section-number">Chapter 5</span> Changing-signal problem analysis</h1>
 <p>Here, we give an overview of the changing-signal diagnostic problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
 The raw data can be found on the OSF project associated with this work (link coming).</p>
 <p><strong>Please <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues">file an issue or make a pull request on github</a> to report any mistakes, ask questions, request more explanation, et cetera.</strong></p>
-<div id="overview" class="section level2" number="4.1">
-<h2><span class="header-section-number">4.1</span> Overview</h2>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="changing-signal-problem-analysis.html#cb13-1" aria-hidden="true"></a><span class="co"># Experimental parameters referenced in-text all in one convenient place.</span></span>
-<span id="cb13-2"><a href="changing-signal-problem-analysis.html#cb13-2" aria-hidden="true"></a>time_steps &lt;-<span class="st"> </span><span class="dv">128</span></span>
-<span id="cb13-3"><a href="changing-signal-problem-analysis.html#cb13-3" aria-hidden="true"></a>replicates &lt;-<span class="st"> </span><span class="dv">200</span></span>
-<span id="cb13-4"><a href="changing-signal-problem-analysis.html#cb13-4" aria-hidden="true"></a>population_size &lt;-<span class="st"> </span><span class="dv">1000</span></span>
-<span id="cb13-5"><a href="changing-signal-problem-analysis.html#cb13-5" aria-hidden="true"></a>generations &lt;-<span class="st"> </span><span class="dv">10000</span></span>
-<span id="cb13-6"><a href="changing-signal-problem-analysis.html#cb13-6" aria-hidden="true"></a>env_complexities &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">16</span>)</span>
-<span id="cb13-7"><a href="changing-signal-problem-analysis.html#cb13-7" aria-hidden="true"></a></span>
-<span id="cb13-8"><a href="changing-signal-problem-analysis.html#cb13-8" aria-hidden="true"></a><span class="co"># Settings for statistical analyses.</span></span>
-<span id="cb13-9"><a href="changing-signal-problem-analysis.html#cb13-9" aria-hidden="true"></a>alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></span>
-<span id="cb13-10"><a href="changing-signal-problem-analysis.html#cb13-10" aria-hidden="true"></a>correction_method &lt;-<span class="st"> &quot;bonferroni&quot;</span></span>
-<span id="cb13-11"><a href="changing-signal-problem-analysis.html#cb13-11" aria-hidden="true"></a></span>
-<span id="cb13-12"><a href="changing-signal-problem-analysis.html#cb13-12" aria-hidden="true"></a><span class="co"># Relative location of data.</span></span>
-<span id="cb13-13"><a href="changing-signal-problem-analysis.html#cb13-13" aria-hidden="true"></a>working_directory &lt;-<span class="st"> &quot;experiments/2020-11-11-chg-sig/analysis/&quot;</span> <span class="co"># &lt;&lt; For bookdown</span></span>
-<span id="cb13-14"><a href="changing-signal-problem-analysis.html#cb13-14" aria-hidden="true"></a><span class="co"># working_directory &lt;- &quot;./&quot;                                     # &lt;&lt; For local analysis</span></span></code></pre></div>
+<div id="overview" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> Overview</h2>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="changing-signal-problem-analysis.html#cb21-1" aria-hidden="true"></a><span class="co"># Experimental parameters referenced in-text all in one convenient place.</span></span>
+<span id="cb21-2"><a href="changing-signal-problem-analysis.html#cb21-2" aria-hidden="true"></a>time_steps &lt;-<span class="st"> </span><span class="dv">128</span></span>
+<span id="cb21-3"><a href="changing-signal-problem-analysis.html#cb21-3" aria-hidden="true"></a>replicates &lt;-<span class="st"> </span><span class="dv">200</span></span>
+<span id="cb21-4"><a href="changing-signal-problem-analysis.html#cb21-4" aria-hidden="true"></a>population_size &lt;-<span class="st"> </span><span class="dv">1000</span></span>
+<span id="cb21-5"><a href="changing-signal-problem-analysis.html#cb21-5" aria-hidden="true"></a>generations &lt;-<span class="st"> </span><span class="dv">10000</span></span>
+<span id="cb21-6"><a href="changing-signal-problem-analysis.html#cb21-6" aria-hidden="true"></a>env_complexities &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">16</span>)</span>
+<span id="cb21-7"><a href="changing-signal-problem-analysis.html#cb21-7" aria-hidden="true"></a></span>
+<span id="cb21-8"><a href="changing-signal-problem-analysis.html#cb21-8" aria-hidden="true"></a><span class="co"># Settings for statistical analyses.</span></span>
+<span id="cb21-9"><a href="changing-signal-problem-analysis.html#cb21-9" aria-hidden="true"></a>alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></span>
+<span id="cb21-10"><a href="changing-signal-problem-analysis.html#cb21-10" aria-hidden="true"></a>correction_method &lt;-<span class="st"> &quot;bonferroni&quot;</span></span>
+<span id="cb21-11"><a href="changing-signal-problem-analysis.html#cb21-11" aria-hidden="true"></a></span>
+<span id="cb21-12"><a href="changing-signal-problem-analysis.html#cb21-12" aria-hidden="true"></a><span class="co"># Relative location of data.</span></span>
+<span id="cb21-13"><a href="changing-signal-problem-analysis.html#cb21-13" aria-hidden="true"></a>working_directory &lt;-<span class="st"> &quot;experiments/2020-11-11-chg-sig/analysis/&quot;</span> <span class="co"># &lt;&lt; For bookdown</span></span>
+<span id="cb21-14"><a href="changing-signal-problem-analysis.html#cb21-14" aria-hidden="true"></a><span class="co"># working_directory &lt;- &quot;./&quot;                                     # &lt;&lt; For local analysis</span></span></code></pre></div>
 <p>The changing-signal task requires programs to express a unique response for each of <span class="math inline">\(K\)</span> distinct environmental signals (i.e., each signal has a distinct tag); the figure below is given as an example.
 Because signals are distinct, programs do not need to alter their responses to particular signals over time.
 Instead, programs may ‘hardware’ each of the <span class="math inline">\(K\)</span> possible responses to the appropriate environmental signal.
@@ -322,16 +328,16 @@ Further, because programs experience environmental inputs in a random order, err
 For example, non-adaptive down-regulation of a particular response function may be neutral given one sequence of environmental signals, but may be deleterious in another.
 <strong>We expected regulation-enabled SignalGP to exhibit non-adaptive plasticity, potentially resulting in slower adaptation and non-general solutions.</strong></p>
 </div>
-<div id="analysis-dependencies" class="section level2" number="4.2">
-<h2><span class="header-section-number">4.2</span> Analysis Dependencies</h2>
+<div id="analysis-dependencies-1" class="section level2" number="5.2">
+<h2><span class="header-section-number">5.2</span> Analysis Dependencies</h2>
 <p>Load all required R libraries.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="changing-signal-problem-analysis.html#cb14-1" aria-hidden="true"></a><span class="kw">library</span>(ggplot2)</span>
-<span id="cb14-2"><a href="changing-signal-problem-analysis.html#cb14-2" aria-hidden="true"></a><span class="kw">library</span>(tidyverse)</span>
-<span id="cb14-3"><a href="changing-signal-problem-analysis.html#cb14-3" aria-hidden="true"></a><span class="kw">library</span>(cowplot)</span>
-<span id="cb14-4"><a href="changing-signal-problem-analysis.html#cb14-4" aria-hidden="true"></a><span class="kw">library</span>(viridis)</span>
-<span id="cb14-5"><a href="changing-signal-problem-analysis.html#cb14-5" aria-hidden="true"></a><span class="kw">source</span>(<span class="st">&quot;https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="changing-signal-problem-analysis.html#cb22-1" aria-hidden="true"></a><span class="kw">library</span>(ggplot2)</span>
+<span id="cb22-2"><a href="changing-signal-problem-analysis.html#cb22-2" aria-hidden="true"></a><span class="kw">library</span>(tidyverse)</span>
+<span id="cb22-3"><a href="changing-signal-problem-analysis.html#cb22-3" aria-hidden="true"></a><span class="kw">library</span>(cowplot)</span>
+<span id="cb22-4"><a href="changing-signal-problem-analysis.html#cb22-4" aria-hidden="true"></a><span class="kw">library</span>(viridis)</span>
+<span id="cb22-5"><a href="changing-signal-problem-analysis.html#cb22-5" aria-hidden="true"></a><span class="kw">source</span>(<span class="st">&quot;https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R&quot;</span>)</span></code></pre></div>
 <p>These analyses were conducted in the following computing environment:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="changing-signal-problem-analysis.html#cb15-1" aria-hidden="true"></a><span class="kw">print</span>(version)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="changing-signal-problem-analysis.html#cb23-1" aria-hidden="true"></a><span class="kw">print</span>(version)</span></code></pre></div>
 <pre><code>##                _                           
 ## platform       x86_64-pc-linux-gnu         
 ## arch           x86_64                      
@@ -348,114 +354,114 @@ For example, non-adaptive down-regulation of a particular response function may 
 ## version.string R version 4.0.2 (2020-06-22)
 ## nickname       Taking Off Again</code></pre>
 </div>
-<div id="setup" class="section level2" number="4.3">
-<h2><span class="header-section-number">4.3</span> Setup</h2>
+<div id="setup" class="section level2" number="5.3">
+<h2><span class="header-section-number">5.3</span> Setup</h2>
 <p>Load data, initial data cleanup, configure some global settings.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="changing-signal-problem-analysis.html#cb17-1" aria-hidden="true"></a><span class="co"># Load data file</span></span>
-<span id="cb17-2"><a href="changing-signal-problem-analysis.html#cb17-2" aria-hidden="true"></a>data_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/max_fit_orgs.csv&quot;</span>)</span>
-<span id="cb17-3"><a href="changing-signal-problem-analysis.html#cb17-3" aria-hidden="true"></a>data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(data_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
-<span id="cb17-4"><a href="changing-signal-problem-analysis.html#cb17-4" aria-hidden="true"></a></span>
-<span id="cb17-5"><a href="changing-signal-problem-analysis.html#cb17-5" aria-hidden="true"></a><span class="co"># Define function to summarize regulation/memory configurations.</span></span>
-<span id="cb17-6"><a href="changing-signal-problem-analysis.html#cb17-6" aria-hidden="true"></a>get_con &lt;-<span class="st"> </span><span class="cf">function</span>(reg, mem) {</span>
-<span id="cb17-7"><a href="changing-signal-problem-analysis.html#cb17-7" aria-hidden="true"></a>  <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem <span class="op">==</span><span class="st"> &quot;0&quot;</span>) {</span>
-<span id="cb17-8"><a href="changing-signal-problem-analysis.html#cb17-8" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;none&quot;</span>)</span>
-<span id="cb17-9"><a href="changing-signal-problem-analysis.html#cb17-9" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
-<span id="cb17-10"><a href="changing-signal-problem-analysis.html#cb17-10" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;memory&quot;</span>)</span>
-<span id="cb17-11"><a href="changing-signal-problem-analysis.html#cb17-11" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
-<span id="cb17-12"><a href="changing-signal-problem-analysis.html#cb17-12" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;regulation&quot;</span>)</span>
-<span id="cb17-13"><a href="changing-signal-problem-analysis.html#cb17-13" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
-<span id="cb17-14"><a href="changing-signal-problem-analysis.html#cb17-14" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;both&quot;</span>)</span>
-<span id="cb17-15"><a href="changing-signal-problem-analysis.html#cb17-15" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
-<span id="cb17-16"><a href="changing-signal-problem-analysis.html#cb17-16" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
-<span id="cb17-17"><a href="changing-signal-problem-analysis.html#cb17-17" aria-hidden="true"></a>  }</span>
-<span id="cb17-18"><a href="changing-signal-problem-analysis.html#cb17-18" aria-hidden="true"></a>}</span>
-<span id="cb17-19"><a href="changing-signal-problem-analysis.html#cb17-19" aria-hidden="true"></a></span>
-<span id="cb17-20"><a href="changing-signal-problem-analysis.html#cb17-20" aria-hidden="true"></a><span class="co"># Specify experimental condition for each datum.</span></span>
-<span id="cb17-21"><a href="changing-signal-problem-analysis.html#cb17-21" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
-<span id="cb17-22"><a href="changing-signal-problem-analysis.html#cb17-22" aria-hidden="true"></a>  get_con,</span>
-<span id="cb17-23"><a href="changing-signal-problem-analysis.html#cb17-23" aria-hidden="true"></a>  data<span class="op">$</span>USE_FUNC_REGULATION,</span>
-<span id="cb17-24"><a href="changing-signal-problem-analysis.html#cb17-24" aria-hidden="true"></a>  data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
-<span id="cb17-25"><a href="changing-signal-problem-analysis.html#cb17-25" aria-hidden="true"></a>)</span>
-<span id="cb17-26"><a href="changing-signal-problem-analysis.html#cb17-26" aria-hidden="true"></a></span>
-<span id="cb17-27"><a href="changing-signal-problem-analysis.html#cb17-27" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb17-28"><a href="changing-signal-problem-analysis.html#cb17-28" aria-hidden="true"></a>  data<span class="op">$</span>condition,</span>
-<span id="cb17-29"><a href="changing-signal-problem-analysis.html#cb17-29" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
-<span id="cb17-30"><a href="changing-signal-problem-analysis.html#cb17-30" aria-hidden="true"></a>)</span>
-<span id="cb17-31"><a href="changing-signal-problem-analysis.html#cb17-31" aria-hidden="true"></a></span>
-<span id="cb17-32"><a href="changing-signal-problem-analysis.html#cb17-32" aria-hidden="true"></a><span class="co"># For convenience, create a data set with only solutions</span></span>
-<span id="cb17-33"><a href="changing-signal-problem-analysis.html#cb17-33" aria-hidden="true"></a><span class="co"># Filter data to include only replicates labeled as solutions</span></span>
-<span id="cb17-34"><a href="changing-signal-problem-analysis.html#cb17-34" aria-hidden="true"></a>sol_data &lt;-<span class="st"> </span><span class="kw">filter</span>(</span>
-<span id="cb17-35"><a href="changing-signal-problem-analysis.html#cb17-35" aria-hidden="true"></a>  data,</span>
-<span id="cb17-36"><a href="changing-signal-problem-analysis.html#cb17-36" aria-hidden="true"></a>  solution<span class="op">==</span><span class="st">&quot;1&quot;</span></span>
-<span id="cb17-37"><a href="changing-signal-problem-analysis.html#cb17-37" aria-hidden="true"></a>)</span>
-<span id="cb17-38"><a href="changing-signal-problem-analysis.html#cb17-38" aria-hidden="true"></a></span>
-<span id="cb17-39"><a href="changing-signal-problem-analysis.html#cb17-39" aria-hidden="true"></a><span class="co"># A lookup table for task complexities</span></span>
-<span id="cb17-40"><a href="changing-signal-problem-analysis.html#cb17-40" aria-hidden="true"></a>task_label_lu &lt;-<span class="st"> </span><span class="kw">c</span>(</span>
-<span id="cb17-41"><a href="changing-signal-problem-analysis.html#cb17-41" aria-hidden="true"></a>  <span class="st">&quot;2&quot;</span> =<span class="st"> &quot;2-signal task&quot;</span>,</span>
-<span id="cb17-42"><a href="changing-signal-problem-analysis.html#cb17-42" aria-hidden="true"></a>  <span class="st">&quot;4&quot;</span> =<span class="st"> &quot;4-signal task&quot;</span>,</span>
-<span id="cb17-43"><a href="changing-signal-problem-analysis.html#cb17-43" aria-hidden="true"></a>  <span class="st">&quot;8&quot;</span> =<span class="st"> &quot;8-signal task&quot;</span>,</span>
-<span id="cb17-44"><a href="changing-signal-problem-analysis.html#cb17-44" aria-hidden="true"></a>  <span class="st">&quot;16&quot;</span> =<span class="st"> &quot;16-signal task&quot;</span>,</span>
-<span id="cb17-45"><a href="changing-signal-problem-analysis.html#cb17-45" aria-hidden="true"></a>  <span class="st">&quot;32&quot;</span> =<span class="st">&quot;32-signal task&quot;</span></span>
-<span id="cb17-46"><a href="changing-signal-problem-analysis.html#cb17-46" aria-hidden="true"></a>)</span>
-<span id="cb17-47"><a href="changing-signal-problem-analysis.html#cb17-47" aria-hidden="true"></a></span>
-<span id="cb17-48"><a href="changing-signal-problem-analysis.html#cb17-48" aria-hidden="true"></a><span class="co"># Configure our default graphing theme</span></span>
-<span id="cb17-49"><a href="changing-signal-problem-analysis.html#cb17-49" aria-hidden="true"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>())</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="changing-signal-problem-analysis.html#cb25-1" aria-hidden="true"></a><span class="co"># Load data file</span></span>
+<span id="cb25-2"><a href="changing-signal-problem-analysis.html#cb25-2" aria-hidden="true"></a>data_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/max_fit_orgs.csv&quot;</span>)</span>
+<span id="cb25-3"><a href="changing-signal-problem-analysis.html#cb25-3" aria-hidden="true"></a>data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(data_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb25-4"><a href="changing-signal-problem-analysis.html#cb25-4" aria-hidden="true"></a></span>
+<span id="cb25-5"><a href="changing-signal-problem-analysis.html#cb25-5" aria-hidden="true"></a><span class="co"># Define function to summarize regulation/memory configurations.</span></span>
+<span id="cb25-6"><a href="changing-signal-problem-analysis.html#cb25-6" aria-hidden="true"></a>get_con &lt;-<span class="st"> </span><span class="cf">function</span>(reg, mem) {</span>
+<span id="cb25-7"><a href="changing-signal-problem-analysis.html#cb25-7" aria-hidden="true"></a>  <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem <span class="op">==</span><span class="st"> &quot;0&quot;</span>) {</span>
+<span id="cb25-8"><a href="changing-signal-problem-analysis.html#cb25-8" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;none&quot;</span>)</span>
+<span id="cb25-9"><a href="changing-signal-problem-analysis.html#cb25-9" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb25-10"><a href="changing-signal-problem-analysis.html#cb25-10" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;memory&quot;</span>)</span>
+<span id="cb25-11"><a href="changing-signal-problem-analysis.html#cb25-11" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
+<span id="cb25-12"><a href="changing-signal-problem-analysis.html#cb25-12" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;regulation&quot;</span>)</span>
+<span id="cb25-13"><a href="changing-signal-problem-analysis.html#cb25-13" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb25-14"><a href="changing-signal-problem-analysis.html#cb25-14" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;both&quot;</span>)</span>
+<span id="cb25-15"><a href="changing-signal-problem-analysis.html#cb25-15" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
+<span id="cb25-16"><a href="changing-signal-problem-analysis.html#cb25-16" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
+<span id="cb25-17"><a href="changing-signal-problem-analysis.html#cb25-17" aria-hidden="true"></a>  }</span>
+<span id="cb25-18"><a href="changing-signal-problem-analysis.html#cb25-18" aria-hidden="true"></a>}</span>
+<span id="cb25-19"><a href="changing-signal-problem-analysis.html#cb25-19" aria-hidden="true"></a></span>
+<span id="cb25-20"><a href="changing-signal-problem-analysis.html#cb25-20" aria-hidden="true"></a><span class="co"># Specify experimental condition for each datum.</span></span>
+<span id="cb25-21"><a href="changing-signal-problem-analysis.html#cb25-21" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb25-22"><a href="changing-signal-problem-analysis.html#cb25-22" aria-hidden="true"></a>  get_con,</span>
+<span id="cb25-23"><a href="changing-signal-problem-analysis.html#cb25-23" aria-hidden="true"></a>  data<span class="op">$</span>USE_FUNC_REGULATION,</span>
+<span id="cb25-24"><a href="changing-signal-problem-analysis.html#cb25-24" aria-hidden="true"></a>  data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
+<span id="cb25-25"><a href="changing-signal-problem-analysis.html#cb25-25" aria-hidden="true"></a>)</span>
+<span id="cb25-26"><a href="changing-signal-problem-analysis.html#cb25-26" aria-hidden="true"></a></span>
+<span id="cb25-27"><a href="changing-signal-problem-analysis.html#cb25-27" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb25-28"><a href="changing-signal-problem-analysis.html#cb25-28" aria-hidden="true"></a>  data<span class="op">$</span>condition,</span>
+<span id="cb25-29"><a href="changing-signal-problem-analysis.html#cb25-29" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb25-30"><a href="changing-signal-problem-analysis.html#cb25-30" aria-hidden="true"></a>)</span>
+<span id="cb25-31"><a href="changing-signal-problem-analysis.html#cb25-31" aria-hidden="true"></a></span>
+<span id="cb25-32"><a href="changing-signal-problem-analysis.html#cb25-32" aria-hidden="true"></a><span class="co"># For convenience, create a data set with only solutions</span></span>
+<span id="cb25-33"><a href="changing-signal-problem-analysis.html#cb25-33" aria-hidden="true"></a><span class="co"># Filter data to include only replicates labeled as solutions</span></span>
+<span id="cb25-34"><a href="changing-signal-problem-analysis.html#cb25-34" aria-hidden="true"></a>sol_data &lt;-<span class="st"> </span><span class="kw">filter</span>(</span>
+<span id="cb25-35"><a href="changing-signal-problem-analysis.html#cb25-35" aria-hidden="true"></a>  data,</span>
+<span id="cb25-36"><a href="changing-signal-problem-analysis.html#cb25-36" aria-hidden="true"></a>  solution<span class="op">==</span><span class="st">&quot;1&quot;</span></span>
+<span id="cb25-37"><a href="changing-signal-problem-analysis.html#cb25-37" aria-hidden="true"></a>)</span>
+<span id="cb25-38"><a href="changing-signal-problem-analysis.html#cb25-38" aria-hidden="true"></a></span>
+<span id="cb25-39"><a href="changing-signal-problem-analysis.html#cb25-39" aria-hidden="true"></a><span class="co"># A lookup table for task complexities</span></span>
+<span id="cb25-40"><a href="changing-signal-problem-analysis.html#cb25-40" aria-hidden="true"></a>task_label_lu &lt;-<span class="st"> </span><span class="kw">c</span>(</span>
+<span id="cb25-41"><a href="changing-signal-problem-analysis.html#cb25-41" aria-hidden="true"></a>  <span class="st">&quot;2&quot;</span> =<span class="st"> &quot;2-signal task&quot;</span>,</span>
+<span id="cb25-42"><a href="changing-signal-problem-analysis.html#cb25-42" aria-hidden="true"></a>  <span class="st">&quot;4&quot;</span> =<span class="st"> &quot;4-signal task&quot;</span>,</span>
+<span id="cb25-43"><a href="changing-signal-problem-analysis.html#cb25-43" aria-hidden="true"></a>  <span class="st">&quot;8&quot;</span> =<span class="st"> &quot;8-signal task&quot;</span>,</span>
+<span id="cb25-44"><a href="changing-signal-problem-analysis.html#cb25-44" aria-hidden="true"></a>  <span class="st">&quot;16&quot;</span> =<span class="st"> &quot;16-signal task&quot;</span>,</span>
+<span id="cb25-45"><a href="changing-signal-problem-analysis.html#cb25-45" aria-hidden="true"></a>  <span class="st">&quot;32&quot;</span> =<span class="st">&quot;32-signal task&quot;</span></span>
+<span id="cb25-46"><a href="changing-signal-problem-analysis.html#cb25-46" aria-hidden="true"></a>)</span>
+<span id="cb25-47"><a href="changing-signal-problem-analysis.html#cb25-47" aria-hidden="true"></a></span>
+<span id="cb25-48"><a href="changing-signal-problem-analysis.html#cb25-48" aria-hidden="true"></a><span class="co"># Configure our default graphing theme</span></span>
+<span id="cb25-49"><a href="changing-signal-problem-analysis.html#cb25-49" aria-hidden="true"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>())</span></code></pre></div>
 </div>
-<div id="does-regulation-hinder-the-evolution-of-successful-genotypes" class="section level2" number="4.4">
-<h2><span class="header-section-number">4.4</span> Does regulation hinder the evolution of successful genotypes?</h2>
+<div id="does-regulation-hinder-the-evolution-of-successful-genotypes" class="section level2" number="5.4">
+<h2><span class="header-section-number">5.4</span> Does regulation hinder the evolution of successful genotypes?</h2>
 <p>Here, we look at the number of solutions evolved under regulation-enabled and regulation-disabled conditions.
 A program is categorized as a ‘solution’ if it can correctly respond to each of the <span class="math inline">\(K\)</span> environmental signals <em>during evaluation</em>.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="changing-signal-problem-analysis.html#cb18-1" aria-hidden="true"></a><span class="co"># Graph the number of solutions evolved in each condition, faceted by environmental complexity</span></span>
-<span id="cb18-2"><a href="changing-signal-problem-analysis.html#cb18-2" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
-<span id="cb18-3"><a href="changing-signal-problem-analysis.html#cb18-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>() <span class="op">+</span></span>
-<span id="cb18-4"><a href="changing-signal-problem-analysis.html#cb18-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
-<span id="cb18-5"><a href="changing-signal-problem-analysis.html#cb18-5" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span>,</span>
-<span id="cb18-6"><a href="changing-signal-problem-analysis.html#cb18-6" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
-<span id="cb18-7"><a href="changing-signal-problem-analysis.html#cb18-7" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.9</span>),</span>
-<span id="cb18-8"><a href="changing-signal-problem-analysis.html#cb18-8" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="dv">0</span></span>
-<span id="cb18-9"><a href="changing-signal-problem-analysis.html#cb18-9" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb18-10"><a href="changing-signal-problem-analysis.html#cb18-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb18-11"><a href="changing-signal-problem-analysis.html#cb18-11" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb18-12"><a href="changing-signal-problem-analysis.html#cb18-12" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>,<span class="st">&quot;both&quot;</span>),</span>
-<span id="cb18-13"><a href="changing-signal-problem-analysis.html#cb18-13" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
-<span id="cb18-14"><a href="changing-signal-problem-analysis.html#cb18-14" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb18-15"><a href="changing-signal-problem-analysis.html#cb18-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# successful replciates (/200)&quot;</span>) <span class="op">+</span></span>
-<span id="cb18-16"><a href="changing-signal-problem-analysis.html#cb18-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="op">+</span></span>
-<span id="cb18-17"><a href="changing-signal-problem-analysis.html#cb18-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Successful replicates&quot;</span>)</span></code></pre></div>
-<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="changing-signal-problem-analysis.html#cb26-1" aria-hidden="true"></a><span class="co"># Graph the number of solutions evolved in each condition, faceted by environmental complexity</span></span>
+<span id="cb26-2"><a href="changing-signal-problem-analysis.html#cb26-2" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
+<span id="cb26-3"><a href="changing-signal-problem-analysis.html#cb26-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>() <span class="op">+</span></span>
+<span id="cb26-4"><a href="changing-signal-problem-analysis.html#cb26-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
+<span id="cb26-5"><a href="changing-signal-problem-analysis.html#cb26-5" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span>,</span>
+<span id="cb26-6"><a href="changing-signal-problem-analysis.html#cb26-6" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
+<span id="cb26-7"><a href="changing-signal-problem-analysis.html#cb26-7" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.9</span>),</span>
+<span id="cb26-8"><a href="changing-signal-problem-analysis.html#cb26-8" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="dv">0</span></span>
+<span id="cb26-9"><a href="changing-signal-problem-analysis.html#cb26-9" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb26-10"><a href="changing-signal-problem-analysis.html#cb26-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb26-11"><a href="changing-signal-problem-analysis.html#cb26-11" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb26-12"><a href="changing-signal-problem-analysis.html#cb26-12" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>,<span class="st">&quot;both&quot;</span>),</span>
+<span id="cb26-13"><a href="changing-signal-problem-analysis.html#cb26-13" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb26-14"><a href="changing-signal-problem-analysis.html#cb26-14" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb26-15"><a href="changing-signal-problem-analysis.html#cb26-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# successful replciates (/200)&quot;</span>) <span class="op">+</span></span>
+<span id="cb26-16"><a href="changing-signal-problem-analysis.html#cb26-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="op">+</span></span>
+<span id="cb26-17"><a href="changing-signal-problem-analysis.html#cb26-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Successful replicates&quot;</span>)</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <p>Programs capable of achieving a perfect score on the changing-signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
 These programs, however, do not necessarily generalize across all possible sequences of environmental signals.</p>
-<div id="does-access-to-regulation-slow-adaptation" class="section level3" number="4.4.1">
-<h3><span class="header-section-number">4.4.1</span> Does access to regulation slow adaptation?</h3>
+<div id="does-access-to-regulation-slow-adaptation" class="section level3" number="5.4.1">
+<h3><span class="header-section-number">5.4.1</span> Does access to regulation slow adaptation?</h3>
 <p>I.e., did successful regulation-enabled programs take longer (more generations) to evolve than those evolved in the regulation-disabled treatment?</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="changing-signal-problem-analysis.html#cb19-1" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>update, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
-<span id="cb19-2"><a href="changing-signal-problem-analysis.html#cb19-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_flat_violin</span>(</span>
-<span id="cb19-3"><a href="changing-signal-problem-analysis.html#cb19-3" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="fl">.2</span>, <span class="dt">y =</span> <span class="dv">0</span>),</span>
-<span id="cb19-4"><a href="changing-signal-problem-analysis.html#cb19-4" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">.8</span></span>
-<span id="cb19-5"><a href="changing-signal-problem-analysis.html#cb19-5" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb19-6"><a href="changing-signal-problem-analysis.html#cb19-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
-<span id="cb19-7"><a href="changing-signal-problem-analysis.html#cb19-7" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">y =</span> update, <span class="dt">color =</span> condition),</span>
-<span id="cb19-8"><a href="changing-signal-problem-analysis.html#cb19-8" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_jitter</span>(<span class="dt">width =</span> <span class="fl">.15</span>),</span>
-<span id="cb19-9"><a href="changing-signal-problem-analysis.html#cb19-9" aria-hidden="true"></a>    <span class="dt">size =</span> <span class="fl">.5</span>,</span>
-<span id="cb19-10"><a href="changing-signal-problem-analysis.html#cb19-10" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.8</span></span>
-<span id="cb19-11"><a href="changing-signal-problem-analysis.html#cb19-11" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb19-12"><a href="changing-signal-problem-analysis.html#cb19-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>(</span>
-<span id="cb19-13"><a href="changing-signal-problem-analysis.html#cb19-13" aria-hidden="true"></a>    <span class="dt">width =</span> <span class="fl">.1</span>,</span>
-<span id="cb19-14"><a href="changing-signal-problem-analysis.html#cb19-14" aria-hidden="true"></a>    <span class="dt">outlier.shape =</span> <span class="ot">NA</span>,</span>
-<span id="cb19-15"><a href="changing-signal-problem-analysis.html#cb19-15" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.5</span></span>
-<span id="cb19-16"><a href="changing-signal-problem-analysis.html#cb19-16" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb19-17"><a href="changing-signal-problem-analysis.html#cb19-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb19-18"><a href="changing-signal-problem-analysis.html#cb19-18" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb19-19"><a href="changing-signal-problem-analysis.html#cb19-19" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
-<span id="cb19-20"><a href="changing-signal-problem-analysis.html#cb19-20" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
-<span id="cb19-21"><a href="changing-signal-problem-analysis.html#cb19-21" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb19-22"><a href="changing-signal-problem-analysis.html#cb19-22" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(</span>
-<span id="cb19-23"><a href="changing-signal-problem-analysis.html#cb19-23" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Generation first solution evolved </span><span class="ch">\n</span><span class="st">(log scale)&quot;</span>,</span>
-<span id="cb19-24"><a href="changing-signal-problem-analysis.html#cb19-24" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb19-25"><a href="changing-signal-problem-analysis.html#cb19-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
-<span id="cb19-26"><a href="changing-signal-problem-analysis.html#cb19-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>)</span></code></pre></div>
-<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="changing-signal-problem-analysis.html#cb20-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>update<span class="op">~</span>condition, <span class="dt">data=</span>sol_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="changing-signal-problem-analysis.html#cb27-1" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>update, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
+<span id="cb27-2"><a href="changing-signal-problem-analysis.html#cb27-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_flat_violin</span>(</span>
+<span id="cb27-3"><a href="changing-signal-problem-analysis.html#cb27-3" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="fl">.2</span>, <span class="dt">y =</span> <span class="dv">0</span>),</span>
+<span id="cb27-4"><a href="changing-signal-problem-analysis.html#cb27-4" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">.8</span></span>
+<span id="cb27-5"><a href="changing-signal-problem-analysis.html#cb27-5" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb27-6"><a href="changing-signal-problem-analysis.html#cb27-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
+<span id="cb27-7"><a href="changing-signal-problem-analysis.html#cb27-7" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">y =</span> update, <span class="dt">color =</span> condition),</span>
+<span id="cb27-8"><a href="changing-signal-problem-analysis.html#cb27-8" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_jitter</span>(<span class="dt">width =</span> <span class="fl">.15</span>),</span>
+<span id="cb27-9"><a href="changing-signal-problem-analysis.html#cb27-9" aria-hidden="true"></a>    <span class="dt">size =</span> <span class="fl">.5</span>,</span>
+<span id="cb27-10"><a href="changing-signal-problem-analysis.html#cb27-10" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.8</span></span>
+<span id="cb27-11"><a href="changing-signal-problem-analysis.html#cb27-11" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb27-12"><a href="changing-signal-problem-analysis.html#cb27-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>(</span>
+<span id="cb27-13"><a href="changing-signal-problem-analysis.html#cb27-13" aria-hidden="true"></a>    <span class="dt">width =</span> <span class="fl">.1</span>,</span>
+<span id="cb27-14"><a href="changing-signal-problem-analysis.html#cb27-14" aria-hidden="true"></a>    <span class="dt">outlier.shape =</span> <span class="ot">NA</span>,</span>
+<span id="cb27-15"><a href="changing-signal-problem-analysis.html#cb27-15" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb27-16"><a href="changing-signal-problem-analysis.html#cb27-16" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb27-17"><a href="changing-signal-problem-analysis.html#cb27-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb27-18"><a href="changing-signal-problem-analysis.html#cb27-18" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb27-19"><a href="changing-signal-problem-analysis.html#cb27-19" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb27-20"><a href="changing-signal-problem-analysis.html#cb27-20" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb27-21"><a href="changing-signal-problem-analysis.html#cb27-21" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb27-22"><a href="changing-signal-problem-analysis.html#cb27-22" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(</span>
+<span id="cb27-23"><a href="changing-signal-problem-analysis.html#cb27-23" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Generation first solution evolved </span><span class="ch">\n</span><span class="st">(log scale)&quot;</span>,</span>
+<span id="cb27-24"><a href="changing-signal-problem-analysis.html#cb27-24" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb27-25"><a href="changing-signal-problem-analysis.html#cb27-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
+<span id="cb27-26"><a href="changing-signal-problem-analysis.html#cb27-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>)</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="changing-signal-problem-analysis.html#cb28-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>update<span class="op">~</span>condition, <span class="dt">data=</span>sol_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
 <pre><code>## 
 ##  Wilcoxon rank sum test with continuity correction
 ## 
@@ -469,68 +475,68 @@ These programs, however, do not necessarily generalize across all possible seque
 ##               5.000013</code></pre>
 <p>The difference in the number of generations before a solution arises is not significantly different.</p>
 </div>
-<div id="do-they-generalize" class="section level3" number="4.4.2">
-<h3><span class="header-section-number">4.4.2</span> Do they generalize?</h3>
+<div id="do-they-generalize" class="section level3" number="5.4.2">
+<h3><span class="header-section-number">5.4.2</span> Do they generalize?</h3>
 <p>Note that solutions may or may not generalize beyond the sequence of environmental signals on which they achieved a perfect score (and were thus categorized as a ‘solution’).
 We re-evaluated each ‘solution’ on a random sample of 5000 sequences of environmental signals to test for generalization.
 We deem programs as having successfully generalized only if they responded correctly in all 5000 tests.</p>
 <p>To see if regulation is preventing some regulation-enabled solutions from generalizing, we test generalization for regulation-enabled solutions with their regulation faculties knocked out (i.e., regulation instructions replaced with no-operations).</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="changing-signal-problem-analysis.html#cb22-1" aria-hidden="true"></a><span class="co"># Grab count data to make bar plot life easier</span></span>
-<span id="cb22-2"><a href="changing-signal-problem-analysis.html#cb22-2" aria-hidden="true"></a>num_solutions_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
-<span id="cb22-3"><a href="changing-signal-problem-analysis.html#cb22-3" aria-hidden="true"></a>num_generalize_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
-<span id="cb22-4"><a href="changing-signal-problem-analysis.html#cb22-4" aria-hidden="true"></a>num_generalize_ko_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution_ko_reg<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
-<span id="cb22-5"><a href="changing-signal-problem-analysis.html#cb22-5" aria-hidden="true"></a></span>
-<span id="cb22-6"><a href="changing-signal-problem-analysis.html#cb22-6" aria-hidden="true"></a>num_generalize_mem &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;memory&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
-<span id="cb22-7"><a href="changing-signal-problem-analysis.html#cb22-7" aria-hidden="true"></a></span>
-<span id="cb22-8"><a href="changing-signal-problem-analysis.html#cb22-8" aria-hidden="true"></a>sol_cnts &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x=</span><span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)</span>
-<span id="cb22-9"><a href="changing-signal-problem-analysis.html#cb22-9" aria-hidden="true"></a>sol_cnts<span class="op">$</span>type &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg_generalize&quot;</span>, <span class="st">&quot;reg_generalize_ko_reg&quot;</span>, <span class="st">&quot;mem_generalize&quot;</span>)</span>
-<span id="cb22-10"><a href="changing-signal-problem-analysis.html#cb22-10" aria-hidden="true"></a>sol_cnts<span class="op">$</span>val &lt;-<span class="st"> </span><span class="kw">c</span>(num_generalize_reg, num_generalize_ko_reg, num_generalize_mem)</span>
-<span id="cb22-11"><a href="changing-signal-problem-analysis.html#cb22-11" aria-hidden="true"></a></span>
-<span id="cb22-12"><a href="changing-signal-problem-analysis.html#cb22-12" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_cnts, <span class="kw">aes</span>(<span class="dt">x=</span>type, <span class="dt">y=</span>val, <span class="dt">fill=</span>type) ) <span class="op">+</span></span>
-<span id="cb22-13"><a href="changing-signal-problem-analysis.html#cb22-13" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>) <span class="op">+</span></span>
-<span id="cb22-14"><a href="changing-signal-problem-analysis.html#cb22-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
-<span id="cb22-15"><a href="changing-signal-problem-analysis.html#cb22-15" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">label=</span>val),</span>
-<span id="cb22-16"><a href="changing-signal-problem-analysis.html#cb22-16" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>,</span>
-<span id="cb22-17"><a href="changing-signal-problem-analysis.html#cb22-17" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.75</span>),</span>
-<span id="cb22-18"><a href="changing-signal-problem-analysis.html#cb22-18" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.01</span></span>
-<span id="cb22-19"><a href="changing-signal-problem-analysis.html#cb22-19" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb22-20"><a href="changing-signal-problem-analysis.html#cb22-20" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb22-21"><a href="changing-signal-problem-analysis.html#cb22-21" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb22-22"><a href="changing-signal-problem-analysis.html#cb22-22" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(</span>
-<span id="cb22-23"><a href="changing-signal-problem-analysis.html#cb22-23" aria-hidden="true"></a>      <span class="st">&quot;mem_generalize&quot;</span>,</span>
-<span id="cb22-24"><a href="changing-signal-problem-analysis.html#cb22-24" aria-hidden="true"></a>      <span class="st">&quot;reg_generalize&quot;</span>,</span>
-<span id="cb22-25"><a href="changing-signal-problem-analysis.html#cb22-25" aria-hidden="true"></a>      <span class="st">&quot;reg_generalize_ko_reg&quot;</span></span>
-<span id="cb22-26"><a href="changing-signal-problem-analysis.html#cb22-26" aria-hidden="true"></a>      ),</span>
-<span id="cb22-27"><a href="changing-signal-problem-analysis.html#cb22-27" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(</span>
-<span id="cb22-28"><a href="changing-signal-problem-analysis.html#cb22-28" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,</span>
-<span id="cb22-29"><a href="changing-signal-problem-analysis.html#cb22-29" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>,</span>
-<span id="cb22-30"><a href="changing-signal-problem-analysis.html#cb22-30" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled</span><span class="ch">\n</span><span class="st">(reg. KO)&quot;</span></span>
-<span id="cb22-31"><a href="changing-signal-problem-analysis.html#cb22-31" aria-hidden="true"></a>    )</span>
-<span id="cb22-32"><a href="changing-signal-problem-analysis.html#cb22-32" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb22-33"><a href="changing-signal-problem-analysis.html#cb22-33" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(</span>
-<span id="cb22-34"><a href="changing-signal-problem-analysis.html#cb22-34" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;# of solutions that generalize&quot;</span>,</span>
-<span id="cb22-35"><a href="changing-signal-problem-analysis.html#cb22-35" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">210</span>),</span>
-<span id="cb22-36"><a href="changing-signal-problem-analysis.html#cb22-36" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">seq</span>(<span class="dv">0</span>,<span class="dv">200</span>,<span class="dv">50</span>)</span>
-<span id="cb22-37"><a href="changing-signal-problem-analysis.html#cb22-37" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb22-38"><a href="changing-signal-problem-analysis.html#cb22-38" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
-<span id="cb22-39"><a href="changing-signal-problem-analysis.html#cb22-39" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span>,</span>
-<span id="cb22-40"><a href="changing-signal-problem-analysis.html#cb22-40" aria-hidden="true"></a>    <span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>)</span>
-<span id="cb22-41"><a href="changing-signal-problem-analysis.html#cb22-41" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb22-42"><a href="changing-signal-problem-analysis.html#cb22-42" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/chg-env-16-generalization.png&quot;</span>), <span class="dt">width=</span><span class="dv">4</span>,<span class="dt">height=</span><span class="dv">4</span>)</span></code></pre></div>
-<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="changing-signal-problem-analysis.html#cb30-1" aria-hidden="true"></a><span class="co"># Grab count data to make bar plot life easier</span></span>
+<span id="cb30-2"><a href="changing-signal-problem-analysis.html#cb30-2" aria-hidden="true"></a>num_solutions_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
+<span id="cb30-3"><a href="changing-signal-problem-analysis.html#cb30-3" aria-hidden="true"></a>num_generalize_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
+<span id="cb30-4"><a href="changing-signal-problem-analysis.html#cb30-4" aria-hidden="true"></a>num_generalize_ko_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution_ko_reg<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
+<span id="cb30-5"><a href="changing-signal-problem-analysis.html#cb30-5" aria-hidden="true"></a></span>
+<span id="cb30-6"><a href="changing-signal-problem-analysis.html#cb30-6" aria-hidden="true"></a>num_generalize_mem &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;memory&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
+<span id="cb30-7"><a href="changing-signal-problem-analysis.html#cb30-7" aria-hidden="true"></a></span>
+<span id="cb30-8"><a href="changing-signal-problem-analysis.html#cb30-8" aria-hidden="true"></a>sol_cnts &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x=</span><span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)</span>
+<span id="cb30-9"><a href="changing-signal-problem-analysis.html#cb30-9" aria-hidden="true"></a>sol_cnts<span class="op">$</span>type &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg_generalize&quot;</span>, <span class="st">&quot;reg_generalize_ko_reg&quot;</span>, <span class="st">&quot;mem_generalize&quot;</span>)</span>
+<span id="cb30-10"><a href="changing-signal-problem-analysis.html#cb30-10" aria-hidden="true"></a>sol_cnts<span class="op">$</span>val &lt;-<span class="st"> </span><span class="kw">c</span>(num_generalize_reg, num_generalize_ko_reg, num_generalize_mem)</span>
+<span id="cb30-11"><a href="changing-signal-problem-analysis.html#cb30-11" aria-hidden="true"></a></span>
+<span id="cb30-12"><a href="changing-signal-problem-analysis.html#cb30-12" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_cnts, <span class="kw">aes</span>(<span class="dt">x=</span>type, <span class="dt">y=</span>val, <span class="dt">fill=</span>type) ) <span class="op">+</span></span>
+<span id="cb30-13"><a href="changing-signal-problem-analysis.html#cb30-13" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>) <span class="op">+</span></span>
+<span id="cb30-14"><a href="changing-signal-problem-analysis.html#cb30-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
+<span id="cb30-15"><a href="changing-signal-problem-analysis.html#cb30-15" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">label=</span>val),</span>
+<span id="cb30-16"><a href="changing-signal-problem-analysis.html#cb30-16" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>,</span>
+<span id="cb30-17"><a href="changing-signal-problem-analysis.html#cb30-17" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.75</span>),</span>
+<span id="cb30-18"><a href="changing-signal-problem-analysis.html#cb30-18" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.01</span></span>
+<span id="cb30-19"><a href="changing-signal-problem-analysis.html#cb30-19" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb30-20"><a href="changing-signal-problem-analysis.html#cb30-20" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb30-21"><a href="changing-signal-problem-analysis.html#cb30-21" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb30-22"><a href="changing-signal-problem-analysis.html#cb30-22" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(</span>
+<span id="cb30-23"><a href="changing-signal-problem-analysis.html#cb30-23" aria-hidden="true"></a>      <span class="st">&quot;mem_generalize&quot;</span>,</span>
+<span id="cb30-24"><a href="changing-signal-problem-analysis.html#cb30-24" aria-hidden="true"></a>      <span class="st">&quot;reg_generalize&quot;</span>,</span>
+<span id="cb30-25"><a href="changing-signal-problem-analysis.html#cb30-25" aria-hidden="true"></a>      <span class="st">&quot;reg_generalize_ko_reg&quot;</span></span>
+<span id="cb30-26"><a href="changing-signal-problem-analysis.html#cb30-26" aria-hidden="true"></a>      ),</span>
+<span id="cb30-27"><a href="changing-signal-problem-analysis.html#cb30-27" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(</span>
+<span id="cb30-28"><a href="changing-signal-problem-analysis.html#cb30-28" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,</span>
+<span id="cb30-29"><a href="changing-signal-problem-analysis.html#cb30-29" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>,</span>
+<span id="cb30-30"><a href="changing-signal-problem-analysis.html#cb30-30" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled</span><span class="ch">\n</span><span class="st">(reg. KO)&quot;</span></span>
+<span id="cb30-31"><a href="changing-signal-problem-analysis.html#cb30-31" aria-hidden="true"></a>    )</span>
+<span id="cb30-32"><a href="changing-signal-problem-analysis.html#cb30-32" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb30-33"><a href="changing-signal-problem-analysis.html#cb30-33" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(</span>
+<span id="cb30-34"><a href="changing-signal-problem-analysis.html#cb30-34" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;# of solutions that generalize&quot;</span>,</span>
+<span id="cb30-35"><a href="changing-signal-problem-analysis.html#cb30-35" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">210</span>),</span>
+<span id="cb30-36"><a href="changing-signal-problem-analysis.html#cb30-36" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">seq</span>(<span class="dv">0</span>,<span class="dv">200</span>,<span class="dv">50</span>)</span>
+<span id="cb30-37"><a href="changing-signal-problem-analysis.html#cb30-37" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb30-38"><a href="changing-signal-problem-analysis.html#cb30-38" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb30-39"><a href="changing-signal-problem-analysis.html#cb30-39" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span>,</span>
+<span id="cb30-40"><a href="changing-signal-problem-analysis.html#cb30-40" aria-hidden="true"></a>    <span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>)</span>
+<span id="cb30-41"><a href="changing-signal-problem-analysis.html#cb30-41" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb30-42"><a href="changing-signal-problem-analysis.html#cb30-42" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/chg-env-16-generalization.png&quot;</span>), <span class="dt">width=</span><span class="dv">4</span>,<span class="dt">height=</span><span class="dv">4</span>)</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 <p>All regulation-disabled programs successfully generalized.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="changing-signal-problem-analysis.html#cb23-1" aria-hidden="true"></a>table &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(num_generalize_reg,</span>
-<span id="cb23-2"><a href="changing-signal-problem-analysis.html#cb23-2" aria-hidden="true"></a>                  num_generalize_mem,</span>
-<span id="cb23-3"><a href="changing-signal-problem-analysis.html#cb23-3" aria-hidden="true"></a>                  <span class="dv">200</span> <span class="op">-</span><span class="st"> </span>num_generalize_reg,</span>
-<span id="cb23-4"><a href="changing-signal-problem-analysis.html#cb23-4" aria-hidden="true"></a>                  <span class="dv">200</span> <span class="op">-</span><span class="st"> </span>num_generalize_mem),</span>
-<span id="cb23-5"><a href="changing-signal-problem-analysis.html#cb23-5" aria-hidden="true"></a>                <span class="dt">nrow=</span><span class="dv">2</span>)</span>
-<span id="cb23-6"><a href="changing-signal-problem-analysis.html#cb23-6" aria-hidden="true"></a><span class="kw">rownames</span>(table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg-augmented&quot;</span>, <span class="st">&quot;reg-disabled&quot;</span>)</span>
-<span id="cb23-7"><a href="changing-signal-problem-analysis.html#cb23-7" aria-hidden="true"></a><span class="kw">colnames</span>(table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;success&quot;</span>, <span class="st">&quot;fail&quot;</span>)</span>
-<span id="cb23-8"><a href="changing-signal-problem-analysis.html#cb23-8" aria-hidden="true"></a><span class="kw">print</span>(table)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="changing-signal-problem-analysis.html#cb31-1" aria-hidden="true"></a>table &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(num_generalize_reg,</span>
+<span id="cb31-2"><a href="changing-signal-problem-analysis.html#cb31-2" aria-hidden="true"></a>                  num_generalize_mem,</span>
+<span id="cb31-3"><a href="changing-signal-problem-analysis.html#cb31-3" aria-hidden="true"></a>                  <span class="dv">200</span> <span class="op">-</span><span class="st"> </span>num_generalize_reg,</span>
+<span id="cb31-4"><a href="changing-signal-problem-analysis.html#cb31-4" aria-hidden="true"></a>                  <span class="dv">200</span> <span class="op">-</span><span class="st"> </span>num_generalize_mem),</span>
+<span id="cb31-5"><a href="changing-signal-problem-analysis.html#cb31-5" aria-hidden="true"></a>                <span class="dt">nrow=</span><span class="dv">2</span>)</span>
+<span id="cb31-6"><a href="changing-signal-problem-analysis.html#cb31-6" aria-hidden="true"></a><span class="kw">rownames</span>(table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg-augmented&quot;</span>, <span class="st">&quot;reg-disabled&quot;</span>)</span>
+<span id="cb31-7"><a href="changing-signal-problem-analysis.html#cb31-7" aria-hidden="true"></a><span class="kw">colnames</span>(table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;success&quot;</span>, <span class="st">&quot;fail&quot;</span>)</span>
+<span id="cb31-8"><a href="changing-signal-problem-analysis.html#cb31-8" aria-hidden="true"></a><span class="kw">print</span>(table)</span></code></pre></div>
 <pre><code>##               success fail
 ## reg-augmented     182   18
 ## reg-disabled      200    0</code></pre>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="changing-signal-problem-analysis.html#cb25-1" aria-hidden="true"></a><span class="kw">fisher.test</span>(table)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="changing-signal-problem-analysis.html#cb33-1" aria-hidden="true"></a><span class="kw">fisher.test</span>(table)</span></code></pre></div>
 <pre><code>## 
 ##  Fisher&#39;s Exact Test for Count Data
 ## 
@@ -554,7 +560,7 @@ Upon close inspection, the other 13 non-general programs relied on genetic regul
           </div>
         </div>
       </div>
-<a href="compile-and-run-experiments-locally.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="exponential-regulator.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 <a href="repeated-signal-problem-analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>

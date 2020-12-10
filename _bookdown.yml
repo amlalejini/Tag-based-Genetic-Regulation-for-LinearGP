@@ -6,6 +6,7 @@ delete_merged_file: true
 rmd_files: ["index.Rmd",
             "documents/data-availability.md",
             "documents/running-experiments.md",
+            "documents/exponential-regulator.Rmd",
             # "documents/digital-organisms.md",
             "experiments/2020-11-11-chg-sig/analysis/2020-11-11-chg-sig.Rmd",
             "experiments/2020-11-25-rep-sig/analysis/2020-11-25-rep-sig.Rmd",
