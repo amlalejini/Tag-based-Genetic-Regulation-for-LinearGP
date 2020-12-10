@@ -85,7 +85,7 @@ Does a given raw match + regulatory modifier beat a perfect match (with no regul
 ggplot(data, aes(y=reg_modifier, x=raw_match, fill=above_perfect)) +
   geom_tile() +
   ggsave(
-    paste0(output_directory, "exp-reg-match.png"),
+    paste0(output_directory, "exp-reg-match-above-perfect.png"),
     width=10,
     height=10
   )
