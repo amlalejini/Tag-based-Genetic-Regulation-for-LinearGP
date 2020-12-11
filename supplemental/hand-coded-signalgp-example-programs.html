@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 3 Compile and run experiments locally | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
+  <title>Chapter 11 Hand-coded SignalGP example programs | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
   <meta name="description" content="Supplemental material" />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 3 Compile and run experiments locally | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta property="og:title" content="Chapter 11 Hand-coded SignalGP example programs | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="amlalejini/Tag-based-Genetic-Regulation-for-LinearGP" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 3 Compile and run experiments locally | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta name="twitter:title" content="Chapter 11 Hand-coded SignalGP example programs | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   
   <meta name="twitter:description" content="Supplemental material" />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="data-availability.html"/>
-<link rel="next" href="signalgp-representation.html"/>
+<link rel="prev" href="boolean-calculator-problem-postfix-notation.html"/>
+<link rel="next" href="references.html"/>
 <script src="libs/header-attrs-2.5/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -306,106 +306,437 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="compile-and-run-experiments-locally" class="section level1" number="3">
-<h1><span class="header-section-number">Chapter 3</span> Compile and run experiments locally</h1>
-<p>Here, we provide a brief guide to compiling and running our experiments.</p>
-<p>Please file an <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues">issue</a> if something is unclear or does not work.</p>
-<div id="docker" class="section level2" number="3.1">
-<h2><span class="header-section-number">3.1</span> Docker</h2>
-<p>On docker hub: <a href="https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp" class="uri">https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp</a></p>
-<pre><code>docker pull amlalejini/tag-based-genetic-regulation-for-gp</code></pre>
-<p>This will create an image with all the requisite dependencies installed/downloaded and with our experiments compiled.</p>
-<p>To run the container interactively:</p>
-<pre><code>docker run -it --entrypoint bash amlalejini/tag-based-genetic-regulation-for-gp</code></pre>
-<p>You can exit the container at any point with <code>ctrl-d</code>.</p>
-<p>Inside the container, you should be at <code>/opt/Tag-based-Genetic-Regulation-for-LinearGP/</code>.
-If you <code>ls</code> you should see something like this (maybe not exactly):</p>
-<pre><code>Dockerfile                                                       documents
-Gemfile                                                          experiments
-LICENSE                                                          index.Rmd
-Makefile                                                         media
-README.md                                                        requirements.txt
-_bookdown.yml                                                    scripts
-_config.yml                                                      source
-_output.yml                                                      style.css
-alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp  supplemental
-bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp   supplemental.bib
-build_book.sh                                                    supplemental_files
-build_exps.sh                                                    tail.Rmd
-chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp     tests</code></pre>
-<p>The important thing is that there should be three executables (with absurdly long names):</p>
+<div id="hand-coded-signalgp-example-programs" class="section level1" number="11">
+<h1><span class="header-section-number">Chapter 11</span> Hand-coded SignalGP example programs</h1>
+<!-- TOC -->
 <ul>
-<li><code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
+<li><a href="hand-coded-signalgp-example-programs.html#repeated-signal-task">Repeated Signal Task</a>
 <ul>
-<li>Use this to run the changing-signal problem.</li>
-<li>To generate a default configuration file, <code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-<li><code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run the repeated-signal problem.</li>
-<li>To generate a default configuration file, <code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-<li><code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run any of the boolean logic calculator problems and the contextual-signal problem.</li>
-<li>To generate a default configuration file, <code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
+<li><a href="hand-coded-signalgp-example-programs.html#two-signal-task---memory-based-solution">Two-signal Task - memory-based solution</a></li>
+<li><a href="hand-coded-signalgp-example-programs.html#four-signal-task---memory-based-solution">Four-signal Task - memory-based solution</a></li>
+<li><a href="hand-coded-signalgp-example-programs.html#eight-signal-task---memory-based-solution">Eight-signal Task - memory-based solution</a></li>
+<li><a href="hand-coded-signalgp-example-programs.html#sixteen-signal-task---memory-based-solution">Sixteen-signal Task - memory-based solution</a></li>
 </ul></li>
 </ul>
-<p>Find the exact configurations we used for our experiments here: <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments" class="uri">https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments</a></p>
+<!-- /TOC -->
+<p>Hand-coded SignalGP programs, useful for task/intuition validation.</p>
+<div id="repeated-signal-task" class="section level2" number="11.1">
+<h2><span class="header-section-number">11.1</span> Repeated Signal Task</h2>
+<p>To validate that memory-based solutions are possible in our SignalGP representation, we handcoded memory-based
+solutions for each of two-signal, four-signal, eight-signal, and sixteen-signal repeated signal environments.</p>
+<p>These solutions are most not the most efficient implementations.</p>
+<div id="two-signal-task---memory-based-solution" class="section level3" number="11.1.1">
+<h3><span class="header-section-number">11.1.1</span> Two-signal Task - memory-based solution</h3>
+<p>Pseudocode:</p>
+<pre><code>If(Global[0]%2 == 0) {
+  Response-0
+} else {
+  Response-1
+}
+Global[0]+=1</code></pre>
+<p>SignalGP instructions:</p>
+<pre><code>SetMem(2,2,0)
+GlobalToWorking(0,0,0)
+Mod(0,2,1)
+Inc(0,0,0)
+WorkingToGlobal(0,0,0)
+If(1,0,0)
+  Response-1
+Close
+Response-0</code></pre>
+<p>As C++ (can be used in AltSigWorld::InitPop_Hardcoded):</p>
+<pre><code>program.PushInst(*inst_lib, &quot;SetMem&quot;, {2, 2, 0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;GlobalToWorking&quot;, {0, 0, 0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Mod&quot;, {0, 2, 1}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Inc&quot;, {0, 0, 0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;WorkingToGlobal&quot;, {0, 0, 0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;, {1, 0, 0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-1&quot;, {0, 0, 0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;, {0, 0, 0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-0&quot;, {0, 0, 0}, {tag_t()});</code></pre>
 </div>
-<div id="manually" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> Manually</h2>
-<p>This guide assumes an Ubuntu-flavored Linux operating system. These instructions <em>should</em> mostly work for MacOS; otherwise, we recommend using our Docker image or a virtual machine.</p>
-<p>Our experiments are implemented in C++, so you’ll need a modern C++ compiler capable of compiling C++17 code.</p>
-<p>E.g., I’m using:</p>
-<pre><code>g++ (Ubuntu 10.2.0-13ubuntu1) 10.2.0</code></pre>
-<div id="get-dependencies" class="section level3" number="3.2.1">
-<h3><span class="header-section-number">3.2.1</span> Get dependencies</h3>
-<p>First, make a directory were we can put this project and all of its dependencies.</p>
-<pre><code>mkdir workspace
-cd workspace</code></pre>
-<p>Next, clone this repository into your new directory.</p>
-<pre><code>git clone https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP.git</code></pre>
-<p>Our experiments depend on the Empirical and SignalGP libraries on GitHub.
-Inside the <code>workspace</code> directory, we’ll clone SignalGP and checkout the appropriate commit.</p>
-<pre><code>git clone https://github.com/amlalejini/SignalGP.git
-cd SignalGP
-git checkout 83d879cfdb6540862315dc454c1525ccd8054e65
-cd ..</code></pre>
-<p>Next, let’s get Empirical (also stick this in the <code>workspace</code> directory).</p>
-<pre><code>git clone https://github.com/amlalejini/Empirical.git
-cd Empirical
-git checkout e72dae6490dee5caf8e5ec04a634b483d2ad4293</code></pre>
-<p>We’re not quite done with Empirical. We need to grab all of Empirical’s dependencies. This will install <em>all</em> of Empirical’s dependencies, including those needed to build its documentation/tests.</p>
-<pre><code>make install-dependencies</code></pre>
-<p>OR, if you don’t want <em>all</em> of that, instead you could do:</p>
-<pre><code>git submodule init
-git submodule update</code></pre>
-<p>If you don’t have libssl-dev, you’ll also want to install that (some of the tag-matching metrics use cryptographic hash). E.g.,</p>
-<pre><code>sudo apt-get install libssl-dev</code></pre>
-<p>Now we should be good to compile the three executables that we used for our experiments. Inside <code>workspace/Tag-based-Genetic-Regulation-for-LinearGP/</code>:</p>
-<pre><code>./build_exps</code></pre>
-<p>This script just sets some environment variables (e.g., to define which experiment to compile, the tag-matching metric, etc.) and runs <code>make native</code>.</p>
-<p>To use a different compiler (than g++), you’ll need to change <code>CXX_nat</code> in the makefile.</p>
-<p>This should create three executables (with absurdly long names):</p>
-<ul>
-<li><code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run the changing-signal problem.</li>
-<li>To generate a default configuration file, <code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-<li><code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run the repeated-signal problem.</li>
-<li>To generate a default configuration file, <code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-<li><code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run any of the boolean logic calculator problems and the contextual-signal problem.</li>
-<li>To generate a default configuration file, <code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-</ul>
-<p>Find the exact configurations we used for our experiments here: <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments" class="uri">https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments</a></p>
+<div id="four-signal-task---memory-based-solution" class="section level3" number="11.1.2">
+<h3><span class="header-section-number">11.1.2</span> Four-signal Task - memory-based solution</h3>
+<p>SignalGP instructions:</p>
+<pre><code>// Register[0]: current environment id; Register[1]: environment id constant; Register[2]: Register[0] == Register[1]
+
+// Get global memory value, increment environment tracker, push to global memory
+GlobalToWorking(0,0) // (global memory is initialized to 0 if never set)
+CopyMem(0, 3)
+Inc(3)
+WorkingToGlobal(3,0)
+
+// test for response 0
+SetMem(1,0)
+TestEqu(0,1,2)
+If(2)
+  Response-0
+Close
+
+// test for response 1
+SetMem(1,1)
+TestEqu(0,1,2)
+If(2)
+  Response-1
+Close
+
+// test for response 2
+SetMem(1,2)
+TestEqu(0,1,2)
+If(2)
+  Response-2
+Close
+
+// test for response 3
+SetMem(1,3)
+TestEqu(0,1,2)
+If(2)
+  Response-3
+Close</code></pre>
+<p>As C++ (can be used in AltSigWorld::InitPop_Hardcoded):</p>
+<pre><code>program.PushInst(*inst_lib, &quot;GlobalToWorking&quot;, {0,0,0}, {tag_t()} );
+program.PushInst(*inst_lib, &quot;CopyMem&quot;,         {0,3,0}, {tag_t()} );
+program.PushInst(*inst_lib, &quot;Inc&quot;,             {3,0,0}, {tag_t()} );
+program.PushInst(*inst_lib, &quot;WorkingToGlobal&quot;, {3,0,0}, {tag_t()} );
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,          {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-0&quot;,      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,          {1,1,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-1&quot;,      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,2,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-2&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,3,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-3&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});</code></pre>
+</div>
+<div id="eight-signal-task---memory-based-solution" class="section level3" number="11.1.3">
+<h3><span class="header-section-number">11.1.3</span> Eight-signal Task - memory-based solution</h3>
+<p>SignalGP instructions:</p>
+<pre><code>GlobalToWorking(0,0,0)
+CopyMem(0,3,0)
+Inc(3,0,0)
+WorkingToGlobal(3,0,0)
+
+SetMem(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-0(0,0,0)
+Close(0,0,0)
+
+SetMem(1,1,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-1(0,0,0)
+Close(0,0,0)
+
+SetMem(1,2,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-2(0,0,0)
+Close(0,0,0)
+
+SetMem(1,3,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-3(0,0,0)
+Close(0,0,0)
+
+SetMem(1,4,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-4(0,0,0)
+Close(0,0,0)
+
+SetMem(1,5,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-5(0,0,0)
+Close(0,0,0)
+
+SetMem(1,6,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-6(0,0,0)
+Close(0,0,0)
+
+SetMem(1,7,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-7(0,0,0)
+Close(0,0,0)</code></pre>
+<p>As C++ (can be used in AltSigWorld::InitPop_Hardcoded):</p>
+<pre><code>program.PushInst(*inst_lib, &quot;GlobalToWorking&quot;, {0,0,0}, {tag_t()} );
+program.PushInst(*inst_lib, &quot;CopyMem&quot;,         {0,3,0}, {tag_t()} );
+program.PushInst(*inst_lib, &quot;Inc&quot;,             {3,0,0}, {tag_t()} );
+program.PushInst(*inst_lib, &quot;WorkingToGlobal&quot;, {3,0,0}, {tag_t()} );
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,          {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-0&quot;,      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,          {1,1,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-1&quot;,      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,2,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-2&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,3,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-3&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,4,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-4&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,5,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-5&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,6,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-6&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,7,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-7&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});</code></pre>
+</div>
+<div id="sixteen-signal-task---memory-based-solution" class="section level3" number="11.1.4">
+<h3><span class="header-section-number">11.1.4</span> Sixteen-signal Task - memory-based solution</h3>
+<p>SignalGP instructions:</p>
+<pre><code>GlobalToWorking(0,0,0)
+CopyMem(0,3,0)
+Inc(3,0,0)
+WorkingToGlobal(3,0,0)
+
+SetMem(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-0(0,0,0)
+Close(0,0,0)
+
+SetMem(1,1,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-1(0,0,0)
+Close(0,0,0)
+
+SetMem(1,2,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-2(0,0,0)
+Close(0,0,0)
+
+SetMem(1,3,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-3(0,0,0)
+Close(0,0,0)
+
+SetMem(1,4,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-4(0,0,0)
+Close(0,0,0)
+
+SetMem(1,5,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-5(0,0,0)
+Close(0,0,0)
+
+SetMem(1,6,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-6(0,0,0)
+Close(0,0,0)
+
+SetMem(1,7,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-7(0,0,0)
+Close(0,0,0)
+
+Inc(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-8(0,0,0)
+Close(0,0,0)
+
+Inc(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-9(0,0,0)
+Close(0,0,0)
+
+Inc(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-10(0,0,0)
+Close(0,0,0)
+
+Inc(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-11(0,0,0)
+Close(0,0,0)
+
+Inc(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-12(0,0,0)
+Close(0,0,0)
+
+Inc(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-13(0,0,0)
+Close(0,0,0)
+
+Inc(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-14(0,0,0)
+Close(0,0,0)
+
+Inc(1,0,0)
+TestEqu(0,1,2)
+If(2,0,0)
+  Response-15(0,0,0)
+Close(0,0,0)</code></pre>
+<p>As C++ (can be used in AltSigWorld::InitPop_Hardcoded):</p>
+<pre><code>program.PushInst(*inst_lib, &quot;GlobalToWorking&quot;, {0,0,0}, {tag_t()} );
+program.PushInst(*inst_lib, &quot;CopyMem&quot;,         {0,3,0}, {tag_t()} );
+program.PushInst(*inst_lib, &quot;Inc&quot;,             {3,0,0}, {tag_t()} );
+program.PushInst(*inst_lib, &quot;WorkingToGlobal&quot;, {3,0,0}, {tag_t()} );
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,          {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-0&quot;,      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,          {1,1,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-1&quot;,      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,2,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-2&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,3,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-3&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,4,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-4&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,5,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-5&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,6,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-6&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,            {1,7,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-7&quot;,        {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,          {1,8,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-8&quot;,      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;SetMem&quot;,          {1,8,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Inc&quot;,             {1,0,0}, {tag_t()}); // Make a 9 to compare to
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,         {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,              {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-9&quot;,      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,           {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;Inc&quot;,              {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,          {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,               {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-10&quot;,      {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,            {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;Inc&quot;,               {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-11&quot;,       {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;Inc&quot;,               {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-12&quot;,       {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;Inc&quot;,               {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-13&quot;,       {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;Inc&quot;,               {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-14&quot;,       {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});
+
+program.PushInst(*inst_lib, &quot;Inc&quot;,               {1,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;TestEqu&quot;,           {0,1,2}, {tag_t()});
+program.PushInst(*inst_lib, &quot;If&quot;,                {2,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Response-15&quot;,       {0,0,0}, {tag_t()});
+program.PushInst(*inst_lib, &quot;Close&quot;,             {0,0,0}, {tag_t()});</code></pre>
 
 </div>
 </div>
@@ -415,8 +746,8 @@ git submodule update</code></pre>
           </div>
         </div>
       </div>
-<a href="data-availability.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="signalgp-representation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="boolean-calculator-problem-postfix-notation.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -447,7 +778,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/documents/running-experiments.md",
+"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/documents/handcoded-examples.md",
 "text": "Edit"
 },
 "history": {
