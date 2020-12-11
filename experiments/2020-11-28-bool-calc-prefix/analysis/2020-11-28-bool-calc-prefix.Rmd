@@ -507,11 +507,281 @@ ggplot( melted, aes(x=inst_type, y=inst_type_prop, color=condition) ) +
 Let's take a closer look at a successful gene regulatory network.
 
 ```{r}
-trace_id <- 24386
+# 24386-393 24391-394 24392-394 24393 24398 24400
+trace_id <- 24400
+test_id <- 420
 ```
 
 Specifically, we'll be looking at the solution evolved in run id `r trace_id` (arbitrarily selected).
 
+
+### Data wrangling
+
+```{r}
+case_study_info <- read.csv(
+  paste0(working_directory, "data/max_fit_orgs.csv"),
+  na.strings="NONE"
+)
+
+case_study_info <- filter(
+  case_study_info,
+  SEED==trace_id
+)
+
+# Extract relevant information about solution of interest.
+is_sol <- case_study_info$solution
+num_modules <- case_study_info$num_modules
+
+# Load trace file associated with this solution.
+trace_file <- paste0(working_directory, "data/reg-traces/trace-reg_update-10000_run-id-", trace_id, ".csv")
+trace_data <- read.csv(trace_file, na.strings="NONE")
+trace_data <- filter(trace_data, cur_test_id == test_id)
+
+# Data cleanup/summarizing
+trace_data$is_running <- trace_data$is_running == "1" | trace_data$is_triggered == "1" | trace_data$is_cur_responding_function == "1"
+
+# Build a list of modules that were triggered & those that responded to a signal
+triggered_ids <- levels(factor(filter(trace_data, is_triggered=="1")$module_id))
+response_ids <- levels(factor(filter(trace_data, is_cur_responding_function=="1")$module_id))
+regulated_ids <- levels(factor(filter(trace_data, regulator_state != 0)$module_id))
+final_response_ids <- levels(factor(filter(trace_data, is_cur_responding_function=="1" & cur_response_type == "NUMERIC")$module_id))
+
+trace_data$is_ever_active <-
+  trace_data$is_ever_active=="1" |
+  trace_data$is_running |
+  trace_data$module_id %in% triggered_ids |
+  trace_data$module_id %in% response_ids |
+  trace_data$module_id %in% regulated_ids
+
+# function to categorize each regulatory state as promoted, neutral, or repressed
+# remember, the regulatory states in our data file operate with tag DISTANCE in mind
+# as opposed to tag similarity, so: promotion => reg < 0, repression => reg > 0
+categorize_reg_state <- function(reg_state) {
+  if (reg_state == 0) {
+    return("neutral")
+  } else if (reg_state < 0) {
+    return("promoted")
+  } else if (reg_state > 0) {
+    return("repressed")
+  } else {
+    return("unknown")
+  }
+}
+
+trace_data$regulator_state_simplified <- mapply(
+  categorize_reg_state,
+  trace_data$regulator_state
+)
+
+# Omit all in-active rows
+# Extract only rows that correspond with modules that were active during evaluation.
+active_data <- filter(trace_data, is_ever_active==TRUE)
+
+# Do some work to have module ids appear in a nice order along axis.
+active_module_ids <- levels(factor(active_data$module_id))
+active_module_ids <- as.integer(active_module_ids)
+module_id_map <- as.data.frame(active_module_ids)
+module_id_map$order <- order(module_id_map$active_module_ids) - 1
+
+get_module_x_pos <- function(module_id) {
+  return(filter(module_id_map, active_module_ids==module_id)$order)
+}
+
+active_data$mod_id_x_pos <- mapply(get_module_x_pos, active_data$module_id)
+```
+
+### Function regulation over time
+
+First, let's omit all non-active funcitons.
+
+Horizontal orientation:
+
+```{r}
+out_name <- paste0(
+  working_directory,
+  "imgs/case-study-trace-id-",
+   trace_id,
+   "-test_id-",
+   test_id,
+   "-regulator-state-horizontal.pdf"
+)
+
+active_data$module_id <- factor(active_data$module_id)
+active_data$graph_time_step <- active_data$time_step - min(active_data$time_step)
+
+ggplot(active_data, aes(x=mod_id_x_pos, y=graph_time_step, fill=regulator_state_simplified)) +
+  scale_fill_viridis(
+    name="Regulation:",
+    limits=c(
+      "promoted",
+      "neutral",
+      "repressed"
+    ),
+    labels=c(
+      "+",
+      "\u00F8",
+      "-"
+    ),
+    discrete=TRUE,
+    direction=-1
+  ) +
+  scale_x_discrete(
+    name="Function ID",
+    limits=seq(0, length(active_module_ids)-1, 1),
+    labels=active_module_ids
+  ) +
+  ylab("Time Step") +
+  # Background tile color
+  geom_tile(
+    color="white",
+    size=0.2,
+    width=1,
+    height=1,
+    alpha=0.75
+  ) +
+  # Highlight actively running functions
+  geom_tile(
+    data=filter(active_data, is_running==TRUE | is_triggered=="1"),
+    color="black",
+    size=0.8,
+    width=1,
+    height=1
+  ) +
+  # Environment delimiters
+  geom_hline(
+    yintercept=filter(active_data, cpu_step==0)$graph_time_step - 0.5,
+    size=1.25,
+    color="black"
+  ) +
+  # Draw points on triggered modules
+  geom_point(
+    data=filter(active_data, is_triggered=="1"),
+    shape=23,
+    colour="black",
+    fill="white",
+    stroke=0.5,
+    size=1.75,
+    position=position_nudge(x = 0, y = 0.01)
+  ) +
+  geom_point(
+    data=filter(active_data, is_cur_responding_function=="1"),
+    shape=21,
+    colour="black",
+    fill="white",
+    stroke=0.5,
+    size=1.5,
+    position=position_nudge(x = 0, y = 0.01)
+  ) +
+  theme(
+    legend.position = "top",
+    legend.text = element_text(size=10),
+    legend.title=element_text(size=10),
+    axis.text.y = element_text(size=10),
+    axis.title.y = element_text(size=10),
+    axis.text.x = element_text(size=9),
+    axis.title.x = element_text(size=10),
+    plot.title = element_text(hjust = 0.5)
+  ) +
+  coord_flip() +
+  ggsave(out_name, height=4, width=8)
+```
+
+Vertical orientation:
+
+```{r}
+out_name <- paste0(
+  working_directory,
+  "imgs/case-study-trace-id-",
+   trace_id,
+   "-test_id-",
+   test_id,
+   "-regulator-state-vertical.pdf"
+)
+
+ggplot(
+    active_data,
+    aes(x=mod_id_x_pos, y=time_step, fill=regulator_state_simplified)
+  ) +
+  scale_fill_viridis(
+    name="Regulation:",
+    limits=c(
+      "promoted",
+      "neutral",
+      "repressed"
+    ),
+    labels=c(
+      "+",
+      "\u00F8",
+      "-"
+    ),
+    discrete=TRUE,
+    direction=-1
+  ) +
+  scale_x_discrete(
+    name="Function ID",
+    limits=seq(0, length(active_module_ids)-1, 1),
+    labels=active_module_ids
+  ) +
+  # scale_y_discrete(
+  #   name="Time Step"
+  # ) +
+  # Background tile color
+  geom_tile(
+    color="white",
+    size=0.2,
+    width=1,
+    height=1,
+    alpha=0.75
+  ) +
+  # Highlight actively running functions
+  geom_tile(
+    data=filter(active_data, is_running==TRUE | is_triggered=="1"),
+    color="black",
+    size=0.8,
+    width=1,
+    height=1
+  ) +
+  # Environment delimiters
+  geom_hline(
+    yintercept=filter(active_data, cpu_step==0)$time_step - 0.5,
+    size=1.25,
+    color="black"
+  ) +
+  # Draw points on triggered modules
+  geom_point(
+    data=filter(active_data, is_triggered=="1"),
+    shape=23,
+    colour="black",
+    fill="white",
+    stroke=0.5,
+    size=1.5,
+    position=position_nudge(x = 0, y = 0.01)
+  ) +
+  geom_point(
+    data=filter(active_data, is_cur_responding_function=="1"),
+    shape=21,
+    colour="black",
+    fill="white",
+    stroke=0.5,
+    size=1.5,
+    position=position_nudge(x = 0, y = 0.01)
+  ) +
+  theme(
+    legend.position = "top",
+    legend.text = element_text(size=9),
+    legend.title=element_text(size=8),
+    axis.text.y = element_text(size=8),
+    axis.title.y = element_text(size=8),
+    axis.text.x = element_text(size=8),
+    axis.title.x = element_text(size=8),
+    plot.title = element_text(hjust = 0.5)
+  ) +
+  ggsave(
+    out_name,
+    height=3.5,
+    width=2.25
+  )
+```
 
 ### Evolved regulatory network
 
@@ -519,8 +789,8 @@ We use the igraph package to draw this program's gene regulatory network.
 
 ```{r, message=FALSE}
 # Networks!
-graph_nodes_loc <- paste0(working_directory, "data/igraphs/reg_graph_id-", trace_id, "_nodes.csv")
-graph_edges_loc <- paste0(working_directory, "data/igraphs/reg_graph_id-", trace_id, "_edges.csv")
+graph_nodes_loc <- paste0(working_directory, "data/igraphs/reg_graph_id-", trace_id, "_test-", test_id , "_nodes.csv")
+graph_edges_loc <- paste0(working_directory, "data/igraphs/reg_graph_id-", trace_id, "_test-", test_id , "_edges.csv")
 graph_nodes_data <- read.csv(graph_nodes_loc, na.strings="NONE")
 graph_edges_data <- read.csv(graph_edges_loc, na.strings="NONE")
 
@@ -536,11 +806,11 @@ E(network)$lty[E(network)$type == "promote"] <- 1
 E(network)$color[E(network)$type == "repress"] <- "#441152"
 E(network)$lty[E(network)$type == "repress"] <- 1
 
-network_out_name <- paste0(working_directory, "imgs/case-study-id-", trace_id, "-network.svg")
+network_out_name <- paste0(working_directory, "imgs/case-study-id-", trace_id, "-test-", test_id, "-network.svg")
 
 draw_network <- function(net, write_out, out_name) {
   if (write_out) {
-    svg(out_name, width=4,height=1.5)
+    svg(out_name, width=6,height=3)
     # bottom, left, top, right
     par(mar=c(0.2,0,1,0.5))
   }
@@ -549,7 +819,7 @@ draw_network <- function(net, write_out, out_name) {
     edge.arrow.size=0.4,
     edge.arrow.width=0.75,
     edge.width=2,
-    vertex.size=10,
+    vertex.size=20,
     vertex.label.cex=0.65,
     curved=TRUE,
     vertex.color="grey99",

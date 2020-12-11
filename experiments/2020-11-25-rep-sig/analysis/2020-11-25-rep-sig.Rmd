@@ -1095,7 +1095,7 @@ ggplot(
   # Draw points on triggered modules
   geom_point(
     data=filter(active_data, triggered==TRUE),
-    shape=8,
+    shape=23,
     colour="black",
     fill="white",
     stroke=0.5,
@@ -1183,7 +1183,7 @@ ggplot(active_data, aes(x=mod_id_x_pos, y=time_step, fill=regulator_state_simpli
   # Draw points on triggered modules
   geom_point(
     data=filter(active_data, triggered==TRUE),
-    shape=8,
+    shape=23,
     colour="black",
     fill="white",
     stroke=0.5,
@@ -1258,7 +1258,7 @@ ggplot(active_data, aes(x=mod_id_x_pos, y=time_step, fill=similarity_score)) +
   # Draw points on triggered modules
   geom_point(
     data=filter(active_data, triggered==TRUE),
-    shape=8,
+    shape=23,
     colour="black",
     fill="white",
     stroke=0.5,
