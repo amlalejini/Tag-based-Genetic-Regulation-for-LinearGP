@@ -1,4 +1,4 @@
-# Handcoded SignalGP example programs
+# Hand-coded SignalGP example programs
 
 <!-- TOC -->
 
@@ -10,7 +10,7 @@
 
 <!-- /TOC -->
 
-Handcoded SignalGP programs, useful for task/intuition validation.
+Hand-coded SignalGP programs, useful for task/intuition validation.
 
 ## Repeated Signal Task
 
@@ -252,12 +252,6 @@ program.PushInst(*inst_lib, "Close",             {0,0,0}, {tag_t()});
 
 
 ### Sixteen-signal Task - memory-based solution
-
-Note that we limited functions to a maximum of 64 instructions for our final set of runs. The solution
-below is greater than 64 instructions. It, however, can easily be split into two functions, requiring
-the first to call the second. I'm not writing it split between two functions because the environment
-signal tag is generated randomly during setup, so I would not be able to guarantee that the correction
-function would be triggered by the environment.
 
 SignalGP instructions:
 
