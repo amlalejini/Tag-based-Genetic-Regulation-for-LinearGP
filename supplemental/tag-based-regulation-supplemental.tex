@@ -1246,19 +1246,23 @@ Generate data to graph. We want to visualize regulated match scores as a functio
 \begin{Highlighting}[]
 \KeywordTok{ggplot}\NormalTok{(data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{reg\_modifier, }\DataTypeTok{x=}\NormalTok{raw\_match, }\DataTypeTok{fill=}\NormalTok{regulated\_match)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_raster}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_hline}\NormalTok{(}\DataTypeTok{yintercept=}\DecValTok{0}\NormalTok{, }\DataTypeTok{size=}\FloatTok{1.2}\NormalTok{, }\DataTypeTok{color=}\StringTok{"white"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_hline}\NormalTok{(}\DataTypeTok{yintercept=}\DecValTok{0}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_vline}\NormalTok{(}\DataTypeTok{xintercept=}\FloatTok{0.33}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_vline}\NormalTok{(}\DataTypeTok{xintercept=}\FloatTok{0.66}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale\_x\_continuous}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Raw tag{-}match score"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Module regulation modifier"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_fill\_distiller}\NormalTok{(}\DataTypeTok{palette =} \StringTok{"Spectral"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_fill\_distiller}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Regulated match:  "}\NormalTok{,}
+    \DataTypeTok{palette =} \StringTok{"Spectral"}
+\NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}
     \DataTypeTok{legend.position =} \StringTok{"top"}\NormalTok{,}
-    \DataTypeTok{legend.key.width=}\KeywordTok{unit}\NormalTok{(}\DecValTok{2}\NormalTok{, }\StringTok{\textquotesingle{}cm\textquotesingle{}}\NormalTok{)}
+    \DataTypeTok{legend.key.width=}\KeywordTok{unit}\NormalTok{(}\FloatTok{1.5}\NormalTok{, }\StringTok{\textquotesingle{}cm\textquotesingle{}}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
-    \KeywordTok{paste0}\NormalTok{(output\_directory, }\StringTok{"exp{-}reg{-}match.png"}\NormalTok{),}
-    \DataTypeTok{width=}\DecValTok{10}\NormalTok{,}
-    \DataTypeTok{height=}\DecValTok{10}
+    \KeywordTok{paste0}\NormalTok{(output\_directory, }\StringTok{"exp{-}reg{-}match.svg"}\NormalTok{),}
+    \DataTypeTok{width=}\DecValTok{6}\NormalTok{,}
+    \DataTypeTok{height=}\DecValTok{6}
 \NormalTok{  )}
 \end{Highlighting}
 \end{Shaded}
@@ -1585,7 +1589,7 @@ To see if regulation is preventing some regulation-enabled solutions from genera
 \NormalTok{    )}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"\# of solutions that generalize"}\NormalTok{,}
+    \DataTypeTok{name=}\StringTok{"Solutions that generalize"}\NormalTok{,}
     \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{210}\NormalTok{),}
     \DataTypeTok{breaks=}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{200}\NormalTok{,}\DecValTok{50}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
@@ -2179,9 +2183,9 @@ Here, we compare the generation at which solutions arise (only at difficulty lev
 \end{Shaded}
 
 \begin{verbatim}
-## Warning: Removed 104 rows containing missing values (geom_point).
+## Warning: Removed 103 rows containing missing values (geom_point).
 
-## Warning: Removed 104 rows containing missing values (geom_point).
+## Warning: Removed 103 rows containing missing values (geom_point).
 \end{verbatim}
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-23-1.pdf}
@@ -3129,7 +3133,7 @@ Vertical orientation:
 \StringTok{  }\CommentTok{\# Draw points on triggered modules}
 \StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
     \DataTypeTok{data=}\KeywordTok{filter}\NormalTok{(active\_data, triggered}\OperatorTok{==}\OtherTok{TRUE}\NormalTok{),}
-    \DataTypeTok{shape=}\DecValTok{8}\NormalTok{,}
+    \DataTypeTok{shape=}\DecValTok{23}\NormalTok{,}
     \DataTypeTok{colour=}\StringTok{"black"}\NormalTok{,}
     \DataTypeTok{fill=}\StringTok{"white"}\NormalTok{,}
     \DataTypeTok{stroke=}\FloatTok{0.5}\NormalTok{,}
@@ -3316,7 +3320,7 @@ Again, we'll omit unexecuted functions.
 \StringTok{  }\CommentTok{\# Draw points on triggered modules}
 \StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
     \DataTypeTok{data=}\KeywordTok{filter}\NormalTok{(active\_data, triggered}\OperatorTok{==}\OtherTok{TRUE}\NormalTok{),}
-    \DataTypeTok{shape=}\DecValTok{8}\NormalTok{,}
+    \DataTypeTok{shape=}\DecValTok{23}\NormalTok{,}
     \DataTypeTok{colour=}\StringTok{"black"}\NormalTok{,}
     \DataTypeTok{fill=}\StringTok{"white"}\NormalTok{,}
     \DataTypeTok{stroke=}\FloatTok{0.5}\NormalTok{,}
@@ -3706,7 +3710,7 @@ The number of successful replicates by condition:
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# successful replciates"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Successful replciates"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
     \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/context{-}signal{-}solution{-}counts.pdf"}\NormalTok{),}
@@ -4476,7 +4480,7 @@ The number of successful replicates by condition:
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# successful replciates"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Successful replciates"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ylim}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{200}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
@@ -5188,7 +5192,7 @@ Vertical orientation:
 \StringTok{  }\CommentTok{\# Draw points on triggered modules}
 \StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
     \DataTypeTok{data=}\KeywordTok{filter}\NormalTok{(active\_data, is\_triggered}\OperatorTok{==}\StringTok{"1"}\NormalTok{),}
-    \DataTypeTok{shape=}\DecValTok{8}\NormalTok{,}
+    \DataTypeTok{shape=}\DecValTok{23}\NormalTok{,}
     \DataTypeTok{colour=}\StringTok{"black"}\NormalTok{,}
     \DataTypeTok{fill=}\StringTok{"white"}\NormalTok{,}
     \DataTypeTok{stroke=}\FloatTok{0.5}\NormalTok{,}
@@ -5543,7 +5547,7 @@ The number of successful replicates by condition:
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# successful replciates"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Successful replciates"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ylim}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{200}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
