@@ -237,7 +237,7 @@ ggplot( sol_cnts, aes(x=type, y=val, fill=type) ) +
     )
   ) +
   scale_y_continuous(
-    name="# of solutions that generalize",
+    name="Solutions that generalize",
     limits=c(0, 210),
     breaks=seq(0,200,50)
   ) +

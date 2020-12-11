@@ -197,7 +197,7 @@ ggplot(sol_data, aes(x=condition, fill=condition)) +
     breaks=c("memory","both"),
     labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
   ) +
-  ylab("# successful replciates") +
+  ylab("Successful replciates") +
   ylim(0, 200) +
   theme(legend.position = "none") +
   ggsave(
