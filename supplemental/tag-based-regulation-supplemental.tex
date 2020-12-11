@@ -151,13 +151,13 @@ Our supplemental material includes the following:
   \begin{itemize}
   \tightlist
   \item
-    Changing-signal problem analysis (Section \ref{changing-signal-problem-analysis})
-  \item
     Repeated-signal problem analysis (Section \ref{repeated-signal-problem-analysis})
   \item
     Contextual-signal problem analysis (Section \ref{contextual-signal-problem-analysis})
   \item
     Boolean calculator problem (prefix notation) analysis (Section \ref{boolean-calculator-problem-prefix-notation})
+  \item
+    Changing-signal problem analysis (Section \ref{changing-signal-problem-analysis})
   \item
     Boolean calculator problem (postfix notation) analysis (Section \ref{boolean-calculator-problem-postfix-notation})
   \end{itemize}
@@ -1285,370 +1285,6 @@ Does a given raw match + regulatory modifier beat a perfect match (with no regul
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-7-1.pdf}
 
-\hypertarget{changing-signal-problem-analysis}{%
-\chapter{Changing-signal problem analysis}\label{changing-signal-problem-analysis}}
-
-Here, we give an overview of the changing-signal diagnostic problem, and we provide our data analyses for related experiments.
-All of our source code for statistical analyses and data visualizations is embedded in this document.
-The raw data can be found on the OSF project associated with this work \citep{Lalejini_Moreno_Ofria_Data_2020}.
-
-\textbf{Please \href{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues}{file an issue or make a pull request on github} to report any mistakes, ask questions, request more explanation, et cetera.}
-
-\hypertarget{overview}{%
-\section{Overview}\label{overview}}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Experimental parameters referenced in{-}text all in one convenient place.}
-\NormalTok{time\_steps \textless{}{-}}\StringTok{ }\DecValTok{128}
-\NormalTok{replicates \textless{}{-}}\StringTok{ }\DecValTok{200}
-\NormalTok{population\_size \textless{}{-}}\StringTok{ }\DecValTok{1000}
-\NormalTok{generations \textless{}{-}}\StringTok{ }\DecValTok{10000}
-\NormalTok{env\_complexities \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{)}
-
-\CommentTok{\# Settings for statistical analyses.}
-\NormalTok{alpha \textless{}{-}}\StringTok{ }\FloatTok{0.05}
-\NormalTok{correction\_method \textless{}{-}}\StringTok{ "bonferroni"}
-
-\CommentTok{\# Relative location of data.}
-\NormalTok{working\_directory \textless{}{-}}\StringTok{ "experiments/2020{-}11{-}11{-}chg{-}sig/analysis/"} \CommentTok{\# \textless{}\textless{} For bookdown}
-\CommentTok{\# working\_directory \textless{}{-} "./"                                     \# \textless{}\textless{} For local analysis}
-\end{Highlighting}
-\end{Shaded}
-
-The changing-signal task requires programs to express a unique response for each of \(K\) distinct environmental signals (i.e., each signal has a distinct tag); the figure below is given as an example.
-Because signals are distinct, programs do not need to alter their responses to particular signals over time.
-Instead, programs may `hardware' each of the \(K\) possible responses to the appropriate environmental signal.
-However, environmental signals are presented in a random order; thus, the correct \emph{order} of responses will vary and cannot be hardcoded.
-As in the repeated signal task, programs respond by executing one of \(K\) response instructions.
-Otherwise, evaluation (and fitness assignment) on the changing-signal task mirrors that of the repeated signal task.
-
-\includegraphics{experiments/2020-11-11-chg-sig/analysis/../../../media/changing-signal-task.png}
-
-Requiring programs to express a distinct instruction in response to each environmental signal represents programs having to perform distinct behaviors.
-
-We afforded programs 128 time steps to express the appropriate response after receiving an environmental signal.
-Once the allotted time to respond expires or the program expresses any response, the program's threads of execution are reset, resulting in a loss of all thread-local memory.
-\emph{Only} the contents of a program's global memory and each function's regulatory state persist.
-The environment then produces the next signal (distinct from all previous signals) to which the program may respond.
-A program's fitness is equal to the number of correct responses expressed during evaluation.
-
-We evolved populations of 1000 SignalGP programs to solve the changing-signal task at \(K=16\) (where \(K\) denotes the number of environmental signals).
-We evolved populations for \ensuremath{10^{4}} generations or until an program capable of achieving a perfect score during task evaluation (i.e., able to express the appropriate response to each of the \(K\) signals) evolved.
-
-We ran 200 replicate populations (each with a distinct random number seed) of each of the following experimental conditions:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  a regulation-enabled treatment where programs have access to genetic regulation.
-\item
-  a regulation-disabled treatment where programs do not have access to genetic regulation.
-\end{enumerate}
-
-Note this task does not require programs to shift their response to particular signals over time, and as such, genetic regulation is unnecessary.
-Further, because programs experience environmental inputs in a random order, erroneous genetic regulation can manifest as cryptic variation.
-For example, non-adaptive down-regulation of a particular response function may be neutral given one sequence of environmental signals, but may be deleterious in another.
-\textbf{We expected regulation-enabled SignalGP to exhibit non-adaptive plasticity, potentially resulting in slower adaptation and non-general solutions.}
-
-\hypertarget{analysis-dependencies-1}{%
-\section{Analysis Dependencies}\label{analysis-dependencies-1}}
-
-Load all required R libraries.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(ggplot2)}
-\KeywordTok{library}\NormalTok{(tidyverse)}
-\KeywordTok{library}\NormalTok{(cowplot)}
-\KeywordTok{library}\NormalTok{(viridis)}
-\KeywordTok{source}\NormalTok{(}\StringTok{"https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom\_flat\_violin.R"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-These analyses were conducted in the following computing environment:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{print}\NormalTok{(version)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##                _                           
-## platform       x86_64-pc-linux-gnu         
-## arch           x86_64                      
-## os             linux-gnu                   
-## system         x86_64, linux-gnu           
-## status                                     
-## major          4                           
-## minor          0.2                         
-## year           2020                        
-## month          06                          
-## day            22                          
-## svn rev        78730                       
-## language       R                           
-## version.string R version 4.0.2 (2020-06-22)
-## nickname       Taking Off Again
-\end{verbatim}
-
-\hypertarget{setup}{%
-\section{Setup}\label{setup}}
-
-Load data, initial data cleanup, configure some global settings.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Load data file}
-\NormalTok{data\_loc \textless{}{-}}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"data/max\_fit\_orgs.csv"}\NormalTok{)}
-\NormalTok{data \textless{}{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(data\_loc, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
-
-\CommentTok{\# Define function to summarize regulation/memory configurations.}
-\NormalTok{get\_con \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(reg, mem) \{}
-  \ControlFlowTok{if}\NormalTok{ (reg }\OperatorTok{==}\StringTok{ "0"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem }\OperatorTok{==}\StringTok{ "0"}\NormalTok{) \{}
-    \KeywordTok{return}\NormalTok{(}\StringTok{"none"}\NormalTok{)}
-\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (reg }\OperatorTok{==}\StringTok{ "0"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem}\OperatorTok{==}\StringTok{"1"}\NormalTok{) \{}
-    \KeywordTok{return}\NormalTok{(}\StringTok{"memory"}\NormalTok{)}
-\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (reg}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem}\OperatorTok{==}\StringTok{"0"}\NormalTok{) \{}
-    \KeywordTok{return}\NormalTok{(}\StringTok{"regulation"}\NormalTok{)}
-\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (reg}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem}\OperatorTok{==}\StringTok{"1"}\NormalTok{) \{}
-    \KeywordTok{return}\NormalTok{(}\StringTok{"both"}\NormalTok{)}
-\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
-    \KeywordTok{return}\NormalTok{(}\StringTok{"UNKNOWN"}\NormalTok{)}
-\NormalTok{  \}}
-\NormalTok{\}}
-
-\CommentTok{\# Specify experimental condition for each datum.}
-\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(}
-\NormalTok{  get\_con,}
-\NormalTok{  data}\OperatorTok{$}\NormalTok{USE\_FUNC\_REGULATION,}
-\NormalTok{  data}\OperatorTok{$}\NormalTok{USE\_GLOBAL\_MEMORY}
-\NormalTok{)}
-
-\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
-\NormalTok{  data}\OperatorTok{$}\NormalTok{condition,}
-  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{"regulation"}\NormalTok{, }\StringTok{"memory"}\NormalTok{, }\StringTok{"none"}\NormalTok{, }\StringTok{"both"}\NormalTok{)}
-\NormalTok{)}
-
-\CommentTok{\# For convenience, create a data set with only solutions}
-\CommentTok{\# Filter data to include only replicates labeled as solutions}
-\NormalTok{sol\_data \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(}
-\NormalTok{  data,}
-\NormalTok{  solution}\OperatorTok{==}\StringTok{"1"}
-\NormalTok{)}
-
-\CommentTok{\# A lookup table for task complexities}
-\NormalTok{task\_label\_lu \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}
-  \StringTok{"2"}\NormalTok{ =}\StringTok{ "2{-}signal task"}\NormalTok{,}
-  \StringTok{"4"}\NormalTok{ =}\StringTok{ "4{-}signal task"}\NormalTok{,}
-  \StringTok{"8"}\NormalTok{ =}\StringTok{ "8{-}signal task"}\NormalTok{,}
-  \StringTok{"16"}\NormalTok{ =}\StringTok{ "16{-}signal task"}\NormalTok{,}
-  \StringTok{"32"}\NormalTok{ =}\StringTok{"32{-}signal task"}
-\NormalTok{)}
-
-\CommentTok{\# Configure our default graphing theme}
-\KeywordTok{theme\_set}\NormalTok{(}\KeywordTok{theme\_cowplot}\NormalTok{())}
-\end{Highlighting}
-\end{Shaded}
-
-\hypertarget{does-regulation-hinder-the-evolution-of-successful-genotypes}{%
-\section{Does regulation hinder the evolution of successful genotypes?}\label{does-regulation-hinder-the-evolution-of-successful-genotypes}}
-
-Here, we look at the number of solutions evolved under regulation-enabled and regulation-disabled conditions.
-A program is categorized as a `solution' if it can correctly respond to each of the \(K\) environmental signals \emph{during evaluation}.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Graph the number of solutions evolved in each condition, faceted by environmental complexity}
-\KeywordTok{ggplot}\NormalTok{( sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_bar}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}
-    \DataTypeTok{stat=}\StringTok{"count"}\NormalTok{,}
-    \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{..count..),}
-    \DataTypeTok{position=}\KeywordTok{position\_dodge}\NormalTok{(}\FloatTok{0.9}\NormalTok{),}
-    \DataTypeTok{vjust=}\DecValTok{0}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
-    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# successful replciates (/200)"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Successful replicates"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-12-1.pdf}
-
-Programs capable of achieving a perfect score on the changing-signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
-These programs, however, do not necessarily generalize across all possible sequences of environmental signals.
-
-\hypertarget{does-access-to-regulation-slow-adaptation}{%
-\subsection{Does access to regulation slow adaptation?}\label{does-access-to-regulation-slow-adaptation}}
-
-I.e., did successful regulation-enabled programs take longer (more generations) to evolve than those evolved in the regulation-disabled treatment?
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{( sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_flat\_violin}\NormalTok{(}
-    \DataTypeTok{position =} \KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
-    \DataTypeTok{alpha =} \FloatTok{.8}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
-    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ update, }\DataTypeTok{color =}\NormalTok{ condition),}
-    \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
-    \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
-    \DataTypeTok{alpha =} \FloatTok{0.8}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{(}
-    \DataTypeTok{width =} \FloatTok{.1}\NormalTok{,}
-    \DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{,}
-    \DataTypeTok{alpha =} \FloatTok{0.5}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
-    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"Generation first solution evolved }\CharTok{\textbackslash{}n}\StringTok{(log scale)"}\NormalTok{,}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-13-1.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{print}\NormalTok{(}\KeywordTok{wilcox.test}\NormalTok{(}\DataTypeTok{formula=}\NormalTok{update}\OperatorTok{\textasciitilde{}}\NormalTok{condition, }\DataTypeTok{data=}\NormalTok{sol\_data, }\DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 
-##  Wilcoxon rank sum test with continuity correction
-## 
-## data:  update by condition
-## W = 22188, p-value = 0.05845
-## alternative hypothesis: true location shift is not equal to 0
-## 95 percent confidence interval:
-##  -3.860236e-05  1.000000e+01
-## sample estimates:
-## difference in location 
-##               5.000013
-\end{verbatim}
-
-The difference in the number of generations before a solution arises is not significantly different.
-
-\hypertarget{do-they-generalize}{%
-\subsection{Do they generalize?}\label{do-they-generalize}}
-
-Note that solutions may or may not generalize beyond the sequence of environmental signals on which they achieved a perfect score (and were thus categorized as a `solution').
-We re-evaluated each `solution' on a random sample of 5000 sequences of environmental signals to test for generalization.
-We deem programs as having successfully generalized only if they responded correctly in all 5000 tests.
-
-To see if regulation is preventing some regulation-enabled solutions from generalizing, we test generalization for regulation-enabled solutions with their regulation faculties knocked out (i.e., regulation instructions replaced with no-operations).
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Grab count data to make bar plot life easier}
-\NormalTok{num\_solutions\_reg \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
-\NormalTok{num\_generalize\_reg \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
-\NormalTok{num\_generalize\_ko\_reg \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution\_ko\_reg}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
-
-\NormalTok{num\_generalize\_mem \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"memory"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
-
-\NormalTok{sol\_cnts \textless{}{-}}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x=}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{)}
-\NormalTok{sol\_cnts}\OperatorTok{$}\NormalTok{type \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"reg\_generalize"}\NormalTok{, }\StringTok{"reg\_generalize\_ko\_reg"}\NormalTok{, }\StringTok{"mem\_generalize"}\NormalTok{)}
-\NormalTok{sol\_cnts}\OperatorTok{$}\NormalTok{val \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(num\_generalize\_reg, num\_generalize\_ko\_reg, num\_generalize\_mem)}
-
-\KeywordTok{ggplot}\NormalTok{( sol\_cnts, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{type, }\DataTypeTok{y=}\NormalTok{val, }\DataTypeTok{fill=}\NormalTok{type) ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_bar}\NormalTok{(}\DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}
-    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{val),}
-    \DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{,}
-    \DataTypeTok{position=}\KeywordTok{position\_dodge}\NormalTok{(}\FloatTok{0.75}\NormalTok{),}
-    \DataTypeTok{vjust=}\OperatorTok{{-}}\FloatTok{0.01}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
-    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}
-      \StringTok{"mem\_generalize"}\NormalTok{,}
-      \StringTok{"reg\_generalize"}\NormalTok{,}
-      \StringTok{"reg\_generalize\_ko\_reg"}
-\NormalTok{      ),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}
-      \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}
-      \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{,}
-      \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled}\CharTok{\textbackslash{}n}\StringTok{(reg. KO)"}
-\NormalTok{    )}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"Solutions that generalize"}\NormalTok{,}
-    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{210}\NormalTok{),}
-    \DataTypeTok{breaks=}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{200}\NormalTok{,}\DecValTok{50}\NormalTok{)}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}
-    \DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{,}
-    \DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{10}\NormalTok{)}
-\NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/chg{-}env{-}16{-}generalization.png"}\NormalTok{), }\DataTypeTok{width=}\DecValTok{4}\NormalTok{,}\DataTypeTok{height=}\DecValTok{4}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-14-1.pdf}
-
-All regulation-disabled programs successfully generalized.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{table \textless{}{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{c}\NormalTok{(num\_generalize\_reg,}
-\NormalTok{                  num\_generalize\_mem,}
-                  \DecValTok{200} \OperatorTok{{-}}\StringTok{ }\NormalTok{num\_generalize\_reg,}
-                  \DecValTok{200} \OperatorTok{{-}}\StringTok{ }\NormalTok{num\_generalize\_mem),}
-                \DataTypeTok{nrow=}\DecValTok{2}\NormalTok{)}
-\KeywordTok{rownames}\NormalTok{(table) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"reg{-}augmented"}\NormalTok{, }\StringTok{"reg{-}disabled"}\NormalTok{)}
-\KeywordTok{colnames}\NormalTok{(table) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"success"}\NormalTok{, }\StringTok{"fail"}\NormalTok{)}
-\KeywordTok{print}\NormalTok{(table)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##               success fail
-## reg-augmented     182   18
-## reg-disabled      200    0
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{fisher.test}\NormalTok{(table)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 
-##  Fisher's Exact Test for Count Data
-## 
-## data:  table
-## p-value = 5.113e-06
-## alternative hypothesis: true odds ratio is not equal to 1
-## 95 percent confidence interval:
-##  0.0000000 0.2115509
-## sample estimates:
-## odds ratio 
-##          0
-\end{verbatim}
-
-The difference in number of generalizing solutions between regulation-enabled and regulation-disabled conditions is statistically significant (Fisher's exact test).
-
-Moreover, 5 of the 18 non-generalizing programs generalize when we knockout genetic regulation.
-Upon close inspection, the other 13 non-general programs relied on genetic regulation to achieve initial success but failed to generalize to arbitrary environment signal sequences.
-
 \hypertarget{repeated-signal-problem-analysis}{%
 \chapter{Repeated-signal problem analysis}\label{repeated-signal-problem-analysis}}
 
@@ -1658,8 +1294,8 @@ The raw data can be found on the OSF project associated with this work \citep{La
 
 \textbf{Please \href{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues}{file an issue or make a pull request on github} to report any mistakes, ask questions, request more explanation, et cetera.}
 
-\hypertarget{overview-1}{%
-\section{Overview}\label{overview-1}}
+\hypertarget{overview}{%
+\section{Overview}\label{overview}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1693,8 +1329,8 @@ A program must use the global memory buffer or genetic regulation to correctly s
 Evaluation continues in this way until the program correctly responds to each of the \(K\) environmental signals or until the program executes an incorrect response.
 A program's fitness equals the number of correct responses given during evaluation, and a program is considered a solution if it correctly responds to each of the \(K\) environmental signals.
 
-\hypertarget{analysis-dependencies-2}{%
-\section{Analysis Dependencies}\label{analysis-dependencies-2}}
+\hypertarget{analysis-dependencies-1}{%
+\section{Analysis Dependencies}\label{analysis-dependencies-1}}
 
 Load all required R libraries.
 
@@ -1737,8 +1373,8 @@ These analyses were conducted in the following computing environment:
 ## nickname       Taking Off Again
 \end{verbatim}
 
-\hypertarget{setup-1}{%
-\section{Setup}\label{setup-1}}
+\hypertarget{setup}{%
+\section{Setup}\label{setup}}
 
 Load data, initial data cleanup, configure some global settings.
 
@@ -1960,7 +1596,7 @@ Note that a program is categorized as a `solution' only if it can correctly resp
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-20-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-12-1.pdf}
 
 We confirmed that each difficulty level of the repeated-signal problem is solvable without regulation using \href{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/documents/handcoded-examples.md}{hand-coded SignalGP programs}.
 
@@ -2129,7 +1765,7 @@ Here, we visualize the raw task scores for the highest-fitness program from each
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-22-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-14-1.pdf}
 
 \hypertarget{how-many-generations-elapse-before-solutions-evolve}{%
 \section{How many generations elapse before solutions evolve?}\label{how-many-generations-elapse-before-solutions-evolve}}
@@ -2183,12 +1819,12 @@ Here, we compare the generation at which solutions arise (only at difficulty lev
 \end{Shaded}
 
 \begin{verbatim}
-## Warning: Removed 88 rows containing missing values (geom_point).
+## Warning: Removed 99 rows containing missing values (geom_point).
 
-## Warning: Removed 88 rows containing missing values (geom_point).
+## Warning: Removed 99 rows containing missing values (geom_point).
 \end{verbatim}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-23-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-15-1.pdf}
 
 \hypertarget{two-signal-task---statistical-analysis}{%
 \subsection{Two-signal task - statistical analysis}\label{two-signal-task---statistical-analysis}}
@@ -2299,7 +1935,7 @@ Proportions as stacked bar chart:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-26-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-18-1.pdf}
 
 As fun donuts(?!):
 
@@ -2357,7 +1993,7 @@ As fun donuts(?!):
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-27-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-19-1.pdf}
 
 We can see that in conditions where programs have access to regulation, evolved solutions generally rely on regulation to adjust their responses to input signals.
 In conditions where memory is the only mechanism for solving the repeated-signal task, we see that all evolved solutions rely exclusively on global memory access for adjusting responses to input signals.
@@ -2415,7 +2051,7 @@ First, total edges as a function of problem difficulty.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-28-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-20-1.pdf}
 
 Next, let's look at edges by type.
 
@@ -2453,7 +2089,7 @@ Next, let's look at edges by type.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-29-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-21-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2643,7 +2279,7 @@ Note that there are 661 total programs represented in the graphs below.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-32-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-24-1.pdf}
 
 \hypertarget{regulation-usage-across-all-environments}{%
 \paragraph{Regulation usage across all environments}\label{regulation-usage-across-all-environments}}
@@ -2685,7 +2321,7 @@ Note that there are 661 total programs represented in the graphs below.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-33-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-25-1.pdf}
 
 \hypertarget{are-evolved-programs-relying-on-stochastic-strategies}{%
 \subsection{Are evolved programs relying on stochastic strategies?}\label{are-evolved-programs-relying-on-stochastic-strategies}}
@@ -2723,7 +2359,7 @@ If program's behavior was not identical across each of the three trials, we labe
 ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
 \end{verbatim}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-34-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-26-1.pdf}
 
 We see no evidence of evolved programs relying on stochastic strategies to solve the repeated signal task: all programs responded consistently across trials.
 Note, this is unsurprising, as we did not give programs access to instructions capable of generating random values and ensured that the version of SignalGP virtual hardware used in this work operated in a deterministic manner.
@@ -2765,7 +2401,7 @@ How many time steps do evolved programs use to solve the repeated-signal task?
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-35-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-27-1.pdf}
 
 Two-signal task:
 
@@ -2856,7 +2492,7 @@ For this work, we are primarily interested in the proportions of control flow in
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-38-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-30-1.pdf}
 
 Two-signal task statistical comparison:
 
@@ -2955,7 +2591,7 @@ In case you're curious, here's all categories of instructions:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-41-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-33-1.pdf}
 
 \hypertarget{case-study-visualizing-regulation-in-an-evolved-program}{%
 \section{Case study: visualizing regulation in an evolved program}\label{case-study-visualizing-regulation-in-an-evolved-program}}
@@ -3175,7 +2811,7 @@ Vertical orientation:
 ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
 \end{verbatim}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-44-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-36-1.pdf}
 
 Horizontal orientation:
 
@@ -3272,7 +2908,7 @@ Horizontal orientation:
 ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
 \end{verbatim}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-45-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-37-1.pdf}
 
 \hypertarget{environmental-signal-tag-match-score-over-time}{%
 \subsection{Environmental signal tag-match score over time}\label{environmental-signal-tag-match-score-over-time}}
@@ -3356,7 +2992,7 @@ Again, we'll omit unexecuted functions.
 ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
 \end{verbatim}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-46-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-38-1.pdf}
 
 \hypertarget{evolved-regulatory-network}{%
 \subsection{Evolved regulatory network}\label{evolved-regulatory-network}}
@@ -3446,7 +3082,7 @@ We use the igraph package to draw this program's gene regulatory network.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-47-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-39-1.pdf}
 
 \hypertarget{all-regulation-traces}{%
 \section{All regulation traces}\label{all-regulation-traces}}
@@ -3462,8 +3098,8 @@ The raw data can be found on the OSF project associated with this work \citep{La
 
 \textbf{Please \href{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues}{file an issue or make a pull request on github} to report any mistakes, ask questions, request more explanation, et cetera.}
 
-\hypertarget{overview-2}{%
-\section{Overview}\label{overview-2}}
+\hypertarget{overview-1}{%
+\section{Overview}\label{overview-1}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -3515,8 +3151,8 @@ The dataframe below gives the correct output for each combination of input signa
 ## 16 OP:S3;OP:S3      2 S3;S3
 \end{verbatim}
 
-\hypertarget{analysis-dependencies-3}{%
-\section{Analysis Dependencies}\label{analysis-dependencies-3}}
+\hypertarget{analysis-dependencies-2}{%
+\section{Analysis Dependencies}\label{analysis-dependencies-2}}
 
 Load all required R libraries.
 
@@ -3558,8 +3194,8 @@ These analyses were conducted in the following computing environment:
 ## nickname       Taking Off Again
 \end{verbatim}
 
-\hypertarget{setup-2}{%
-\section{Setup}\label{setup-2}}
+\hypertarget{setup-1}{%
+\section{Setup}\label{setup-1}}
 
 Load data, initial data cleanup, configure some global settings.
 
@@ -3720,7 +3356,7 @@ The number of successful replicates by condition:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-53-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-45-1.pdf}
 
 Test for significance using Fisher's exact test.
 
@@ -3814,7 +3450,7 @@ Test for significance using Fisher's exact test.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-55-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-47-1.pdf}
 
 Test for statistical difference between conditions using a Wilcoxon rank sum test.
 
@@ -3883,7 +3519,7 @@ We used indpendent knockouts of tag-based genetic regulation and global memory b
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-57-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-49-1.pdf}
 
 \hypertarget{gene-regulatory-networks}{%
 \subsection{Gene regulatory networks}\label{gene-regulatory-networks}}
@@ -3918,7 +3554,7 @@ First, the total edges found in networks:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-58-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-50-1.pdf}
 
 Next, let's look at edges by type.
 
@@ -3958,7 +3594,7 @@ Next, let's look at edges by type.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-59-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-51-1.pdf}
 
 Test for a statistical difference between edge types using a wilcoxon rank sum test:
 
@@ -4038,7 +3674,7 @@ How many time steps do evolved programs use to solve the contextual-signal task?
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-61-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-53-1.pdf}
 
 Test for significant difference between conditions using Wilcoxon rank sum test:
 
@@ -4091,7 +3727,7 @@ We're primarily interested in the proportion of control flow instructions, so le
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-63-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-55-1.pdf}
 
 Test for significant difference between conditions using a Wilcoxon rank sum test:
 
@@ -4155,7 +3791,7 @@ In case you're curious, here's all categories of instructions:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-65-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-57-1.pdf}
 
 \hypertarget{visualizing-an-evolved-gene-regulatory-network}{%
 \section{Visualizing an evolved gene regulatory network}\label{visualizing-an-evolved-gene-regulatory-network}}
@@ -4247,7 +3883,7 @@ We use the igraph package to draw this program's gene regulatory network.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-67-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-59-1.pdf}
 
 \hypertarget{boolean-calculator-problem-prefix-notation}{%
 \chapter{Boolean calculator problem (prefix notation)}\label{boolean-calculator-problem-prefix-notation}}
@@ -4258,8 +3894,8 @@ The raw data can be found on the OSF project associated with this work \citep{La
 
 \textbf{Please \href{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues}{file an issue or make a pull request on github} to report any mistakes, ask questions, request more explanation, et cetera.}
 
-\hypertarget{overview-3}{%
-\section{Overview}\label{overview-3}}
+\hypertarget{overview-2}{%
+\section{Overview}\label{overview-2}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4285,8 +3921,8 @@ Each distinct signal type is associated with a unique tag and is meant to repres
 Programs receive a sequence of input signals in \emph{prefix notation}, receiving an operator signal followed by the appropriate number of numeric input signals (that each contain an operand to use in the computation).
 After receiving the requisite input signals, programs must output the correct result of the requested computation.
 
-\hypertarget{analysis-dependencies-4}{%
-\section{Analysis Dependencies}\label{analysis-dependencies-4}}
+\hypertarget{analysis-dependencies-3}{%
+\section{Analysis Dependencies}\label{analysis-dependencies-3}}
 
 Load all required R libraries.
 
@@ -4328,8 +3964,8 @@ These analyses were conducted in the following computing environment:
 ## nickname       Taking Off Again
 \end{verbatim}
 
-\hypertarget{setup-3}{%
-\section{Setup}\label{setup-3}}
+\hypertarget{setup-2}{%
+\section{Setup}\label{setup-2}}
 
 Load data, initial data cleanup, configure some global settings.
 
@@ -4491,7 +4127,7 @@ The number of successful replicates by condition:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-72-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-64-1.pdf}
 
 Test for significance using Fisher's exact test.
 
@@ -4585,7 +4221,7 @@ Test for significance using Fisher's exact test.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-74-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-66-1.pdf}
 
 Test for statistical difference between conditions using a Wilcoxon rank sum test.
 
@@ -4654,7 +4290,7 @@ We used indpendent knockouts of tag-based genetic regulation and global memory b
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-76-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-68-1.pdf}
 
 \hypertarget{gene-regulatory-networks-1}{%
 \subsection{Gene regulatory networks}\label{gene-regulatory-networks-1}}
@@ -4689,7 +4325,7 @@ First, the total edges found in networks:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-77-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-69-1.pdf}
 
 Next, let's look at edges by type.
 
@@ -4729,7 +4365,7 @@ Next, let's look at edges by type.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-78-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-70-1.pdf}
 
 Test for a statistical difference between edge types using a wilcoxon rank sum test:
 
@@ -4809,7 +4445,7 @@ How many time steps do successful programs take to solve the boolean calculator 
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-80-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-72-1.pdf}
 
 Test for significant difference between conditions using Wilcoxon rank sum test:
 
@@ -4862,7 +4498,7 @@ We're primarily interested in the proportion of control flow instructions, so le
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-82-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-74-1.pdf}
 
 Test for significant difference between conditions using a Wilcoxon rank sum test:
 
@@ -4926,7 +4562,7 @@ In case you're curious, here's all categories of instructions:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-84-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-76-1.pdf}
 
 \hypertarget{visualizaing-an-evolved-regulatory-network}{%
 \section{Visualizaing an evolved regulatory network}\label{visualizaing-an-evolved-regulatory-network}}
@@ -5125,7 +4761,7 @@ Horizontal orientation:
 ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
 \end{verbatim}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-87-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-79-1.pdf}
 
 Vertical orientation:
 
@@ -5231,7 +4867,7 @@ Vertical orientation:
 ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
 \end{verbatim}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-88-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-80-1.pdf}
 
 \hypertarget{evolved-regulatory-network-2}{%
 \subsection{Evolved regulatory network}\label{evolved-regulatory-network-2}}
@@ -5310,7 +4946,371 @@ We use the igraph package to draw this program's gene regulatory network.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-89-1.pdf}
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-81-1.pdf}
+
+\hypertarget{changing-signal-problem-analysis}{%
+\chapter{Changing-signal problem analysis}\label{changing-signal-problem-analysis}}
+
+Here, we give an overview of the changing-signal diagnostic problem, and we provide our data analyses for related experiments.
+All of our source code for statistical analyses and data visualizations is embedded in this document.
+The raw data can be found on the OSF project associated with this work \citep{Lalejini_Moreno_Ofria_Data_2020}.
+
+\textbf{Please \href{https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues}{file an issue or make a pull request on github} to report any mistakes, ask questions, request more explanation, et cetera.}
+
+\hypertarget{overview-3}{%
+\section{Overview}\label{overview-3}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Experimental parameters referenced in{-}text all in one convenient place.}
+\NormalTok{time\_steps \textless{}{-}}\StringTok{ }\DecValTok{128}
+\NormalTok{replicates \textless{}{-}}\StringTok{ }\DecValTok{200}
+\NormalTok{population\_size \textless{}{-}}\StringTok{ }\DecValTok{1000}
+\NormalTok{generations \textless{}{-}}\StringTok{ }\DecValTok{10000}
+\NormalTok{env\_complexities \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{16}\NormalTok{)}
+
+\CommentTok{\# Settings for statistical analyses.}
+\NormalTok{alpha \textless{}{-}}\StringTok{ }\FloatTok{0.05}
+\NormalTok{correction\_method \textless{}{-}}\StringTok{ "bonferroni"}
+
+\CommentTok{\# Relative location of data.}
+\NormalTok{working\_directory \textless{}{-}}\StringTok{ "experiments/2020{-}11{-}11{-}chg{-}sig/analysis/"} \CommentTok{\# \textless{}\textless{} For bookdown}
+\CommentTok{\# working\_directory \textless{}{-} "./"                                     \# \textless{}\textless{} For local analysis}
+\end{Highlighting}
+\end{Shaded}
+
+The changing-signal task requires programs to express a unique response for each of \(K\) distinct environmental signals (i.e., each signal has a distinct tag); the figure below is given as an example.
+Because signals are distinct, programs do not need to alter their responses to particular signals over time.
+Instead, programs may `hardware' each of the \(K\) possible responses to the appropriate environmental signal.
+However, environmental signals are presented in a random order; thus, the correct \emph{order} of responses will vary and cannot be hardcoded.
+As in the repeated signal task, programs respond by executing one of \(K\) response instructions.
+Otherwise, evaluation (and fitness assignment) on the changing-signal task mirrors that of the repeated signal task.
+
+\includegraphics{experiments/2020-11-11-chg-sig/analysis/../../../media/changing-signal-task.png}
+
+Requiring programs to express a distinct instruction in response to each environmental signal represents programs having to perform distinct behaviors.
+
+We afforded programs 128 time steps to express the appropriate response after receiving an environmental signal.
+Once the allotted time to respond expires or the program expresses any response, the program's threads of execution are reset, resulting in a loss of all thread-local memory.
+\emph{Only} the contents of a program's global memory and each function's regulatory state persist.
+The environment then produces the next signal (distinct from all previous signals) to which the program may respond.
+A program's fitness is equal to the number of correct responses expressed during evaluation.
+
+We evolved populations of 1000 SignalGP programs to solve the changing-signal task at \(K=16\) (where \(K\) denotes the number of environmental signals).
+We evolved populations for \ensuremath{10^{4}} generations or until an program capable of achieving a perfect score during task evaluation (i.e., able to express the appropriate response to each of the \(K\) signals) evolved.
+
+We ran 200 replicate populations (each with a distinct random number seed) of each of the following experimental conditions:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  a regulation-enabled treatment where programs have access to genetic regulation.
+\item
+  a regulation-disabled treatment where programs do not have access to genetic regulation.
+\end{enumerate}
+
+Note this task does not require programs to shift their response to particular signals over time, and as such, genetic regulation is unnecessary.
+Further, because programs experience environmental inputs in a random order, erroneous genetic regulation can manifest as cryptic variation.
+For example, non-adaptive down-regulation of a particular response function may be neutral given one sequence of environmental signals, but may be deleterious in another.
+\textbf{We expected regulation-enabled SignalGP to exhibit non-adaptive plasticity, potentially resulting in slower adaptation and non-general solutions.}
+
+\hypertarget{analysis-dependencies-4}{%
+\section{Analysis Dependencies}\label{analysis-dependencies-4}}
+
+Load all required R libraries.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\KeywordTok{library}\NormalTok{(cowplot)}
+\KeywordTok{library}\NormalTok{(viridis)}
+\KeywordTok{source}\NormalTok{(}\StringTok{"https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom\_flat\_violin.R"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+These analyses were conducted in the following computing environment:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(version)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                _                           
+## platform       x86_64-pc-linux-gnu         
+## arch           x86_64                      
+## os             linux-gnu                   
+## system         x86_64, linux-gnu           
+## status                                     
+## major          4                           
+## minor          0.2                         
+## year           2020                        
+## month          06                          
+## day            22                          
+## svn rev        78730                       
+## language       R                           
+## version.string R version 4.0.2 (2020-06-22)
+## nickname       Taking Off Again
+\end{verbatim}
+
+\hypertarget{setup-3}{%
+\section{Setup}\label{setup-3}}
+
+Load data, initial data cleanup, configure some global settings.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load data file}
+\NormalTok{data\_loc \textless{}{-}}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"data/max\_fit\_orgs.csv"}\NormalTok{)}
+\NormalTok{data \textless{}{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(data\_loc, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
+
+\CommentTok{\# Define function to summarize regulation/memory configurations.}
+\NormalTok{get\_con \textless{}{-}}\StringTok{ }\ControlFlowTok{function}\NormalTok{(reg, mem) \{}
+  \ControlFlowTok{if}\NormalTok{ (reg }\OperatorTok{==}\StringTok{ "0"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem }\OperatorTok{==}\StringTok{ "0"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"none"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (reg }\OperatorTok{==}\StringTok{ "0"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem}\OperatorTok{==}\StringTok{"1"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"memory"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (reg}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem}\OperatorTok{==}\StringTok{"0"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"regulation"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (reg}\OperatorTok{==}\StringTok{"1"} \OperatorTok{\&\&}\StringTok{ }\NormalTok{mem}\OperatorTok{==}\StringTok{"1"}\NormalTok{) \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"both"}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+    \KeywordTok{return}\NormalTok{(}\StringTok{"UNKNOWN"}\NormalTok{)}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\CommentTok{\# Specify experimental condition for each datum.}
+\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(}
+\NormalTok{  get\_con,}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{USE\_FUNC\_REGULATION,}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{USE\_GLOBAL\_MEMORY}
+\NormalTok{)}
+
+\NormalTok{data}\OperatorTok{$}\NormalTok{condition \textless{}{-}}\StringTok{ }\KeywordTok{factor}\NormalTok{(}
+\NormalTok{  data}\OperatorTok{$}\NormalTok{condition,}
+  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\StringTok{"regulation"}\NormalTok{, }\StringTok{"memory"}\NormalTok{, }\StringTok{"none"}\NormalTok{, }\StringTok{"both"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# For convenience, create a data set with only solutions}
+\CommentTok{\# Filter data to include only replicates labeled as solutions}
+\NormalTok{sol\_data \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(}
+\NormalTok{  data,}
+\NormalTok{  solution}\OperatorTok{==}\StringTok{"1"}
+\NormalTok{)}
+
+\CommentTok{\# A lookup table for task complexities}
+\NormalTok{task\_label\_lu \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}
+  \StringTok{"2"}\NormalTok{ =}\StringTok{ "2{-}signal task"}\NormalTok{,}
+  \StringTok{"4"}\NormalTok{ =}\StringTok{ "4{-}signal task"}\NormalTok{,}
+  \StringTok{"8"}\NormalTok{ =}\StringTok{ "8{-}signal task"}\NormalTok{,}
+  \StringTok{"16"}\NormalTok{ =}\StringTok{ "16{-}signal task"}\NormalTok{,}
+  \StringTok{"32"}\NormalTok{ =}\StringTok{"32{-}signal task"}
+\NormalTok{)}
+
+\CommentTok{\# Configure our default graphing theme}
+\KeywordTok{theme\_set}\NormalTok{(}\KeywordTok{theme\_cowplot}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{does-regulation-hinder-the-evolution-of-successful-genotypes}{%
+\section{Does regulation hinder the evolution of successful genotypes?}\label{does-regulation-hinder-the-evolution-of-successful-genotypes}}
+
+Here, we look at the number of solutions evolved under regulation-enabled and regulation-disabled conditions.
+A program is categorized as a `solution' if it can correctly respond to each of the \(K\) environmental signals \emph{during evaluation}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Graph the number of solutions evolved in each condition, faceted by environmental complexity}
+\KeywordTok{ggplot}\NormalTok{( sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_bar}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}
+    \DataTypeTok{stat=}\StringTok{"count"}\NormalTok{,}
+    \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{..count..),}
+    \DataTypeTok{position=}\KeywordTok{position\_dodge}\NormalTok{(}\FloatTok{0.9}\NormalTok{),}
+    \DataTypeTok{vjust=}\DecValTok{0}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"\# successful replciates (/200)"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Successful replicates"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-86-1.pdf}
+
+Programs capable of achieving a perfect score on the changing-signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
+These programs, however, do not necessarily generalize across all possible sequences of environmental signals.
+
+\hypertarget{does-access-to-regulation-slow-adaptation}{%
+\subsection{Does access to regulation slow adaptation?}\label{does-access-to-regulation-slow-adaptation}}
+
+I.e., did successful regulation-enabled programs take longer (more generations) to evolve than those evolved in the regulation-disabled treatment?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{( sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_flat\_violin}\NormalTok{(}
+    \DataTypeTok{position =} \KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
+    \DataTypeTok{alpha =} \FloatTok{.8}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ update, }\DataTypeTok{color =}\NormalTok{ condition),}
+    \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
+    \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.8}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{(}
+    \DataTypeTok{width =} \FloatTok{.1}\NormalTok{,}
+    \DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.5}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Generation first solution evolved }\CharTok{\textbackslash{}n}\StringTok{(log scale)"}\NormalTok{,}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-87-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}\KeywordTok{wilcox.test}\NormalTok{(}\DataTypeTok{formula=}\NormalTok{update}\OperatorTok{\textasciitilde{}}\NormalTok{condition, }\DataTypeTok{data=}\NormalTok{sol\_data, }\DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  update by condition
+## W = 22188, p-value = 0.05845
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  -3.860236e-05  1.000000e+01
+## sample estimates:
+## difference in location 
+##               5.000013
+\end{verbatim}
+
+The difference in the number of generations before a solution arises is not significantly different.
+
+\hypertarget{do-they-generalize}{%
+\subsection{Do they generalize?}\label{do-they-generalize}}
+
+Note that solutions may or may not generalize beyond the sequence of environmental signals on which they achieved a perfect score (and were thus categorized as a `solution').
+We re-evaluated each `solution' on a random sample of 5000 sequences of environmental signals to test for generalization.
+We deem programs as having successfully generalized only if they responded correctly in all 5000 tests.
+
+To see if regulation is preventing some regulation-enabled solutions from generalizing, we test generalization for regulation-enabled solutions with their regulation faculties knocked out (i.e., regulation instructions replaced with no-operations).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Grab count data to make bar plot life easier}
+\NormalTok{num\_solutions\_reg \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
+\NormalTok{num\_generalize\_reg \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
+\NormalTok{num\_generalize\_ko\_reg \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"both"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution\_ko\_reg}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
+
+\NormalTok{num\_generalize\_mem \textless{}{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{filter}\NormalTok{(data, condition}\OperatorTok{==}\StringTok{"memory"} \OperatorTok{\&}\StringTok{ }\NormalTok{all\_solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}\OperatorTok{$}\NormalTok{SEED)}
+
+\NormalTok{sol\_cnts \textless{}{-}}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x=}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{)}
+\NormalTok{sol\_cnts}\OperatorTok{$}\NormalTok{type \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"reg\_generalize"}\NormalTok{, }\StringTok{"reg\_generalize\_ko\_reg"}\NormalTok{, }\StringTok{"mem\_generalize"}\NormalTok{)}
+\NormalTok{sol\_cnts}\OperatorTok{$}\NormalTok{val \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(num\_generalize\_reg, num\_generalize\_ko\_reg, num\_generalize\_mem)}
+
+\KeywordTok{ggplot}\NormalTok{( sol\_cnts, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{type, }\DataTypeTok{y=}\NormalTok{val, }\DataTypeTok{fill=}\NormalTok{type) ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_bar}\NormalTok{(}\DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_text}\NormalTok{(}
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{val),}
+    \DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{,}
+    \DataTypeTok{position=}\KeywordTok{position\_dodge}\NormalTok{(}\FloatTok{0.75}\NormalTok{),}
+    \DataTypeTok{vjust=}\OperatorTok{{-}}\FloatTok{0.01}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}
+      \StringTok{"mem\_generalize"}\NormalTok{,}
+      \StringTok{"reg\_generalize"}\NormalTok{,}
+      \StringTok{"reg\_generalize\_ko\_reg"}
+\NormalTok{      ),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}
+      \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{,}
+      \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{,}
+      \StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled}\CharTok{\textbackslash{}n}\StringTok{(reg. KO)"}
+\NormalTok{    )}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Solutions that generalize"}\NormalTok{,}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{210}\NormalTok{),}
+    \DataTypeTok{breaks=}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{200}\NormalTok{,}\DecValTok{50}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}
+    \DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{,}
+    \DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{10}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/chg{-}env{-}16{-}generalization.png"}\NormalTok{), }\DataTypeTok{width=}\DecValTok{4}\NormalTok{,}\DataTypeTok{height=}\DecValTok{4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-88-1.pdf}
+
+All regulation-disabled programs successfully generalized.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{table \textless{}{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{c}\NormalTok{(num\_generalize\_reg,}
+\NormalTok{                  num\_generalize\_mem,}
+                  \DecValTok{200} \OperatorTok{{-}}\StringTok{ }\NormalTok{num\_generalize\_reg,}
+                  \DecValTok{200} \OperatorTok{{-}}\StringTok{ }\NormalTok{num\_generalize\_mem),}
+                \DataTypeTok{nrow=}\DecValTok{2}\NormalTok{)}
+\KeywordTok{rownames}\NormalTok{(table) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"reg{-}augmented"}\NormalTok{, }\StringTok{"reg{-}disabled"}\NormalTok{)}
+\KeywordTok{colnames}\NormalTok{(table) \textless{}{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"success"}\NormalTok{, }\StringTok{"fail"}\NormalTok{)}
+\KeywordTok{print}\NormalTok{(table)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##               success fail
+## reg-augmented     182   18
+## reg-disabled      200    0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{fisher.test}\NormalTok{(table)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Fisher's Exact Test for Count Data
+## 
+## data:  table
+## p-value = 5.113e-06
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  0.0000000 0.2115509
+## sample estimates:
+## odds ratio 
+##          0
+\end{verbatim}
+
+The difference in number of generalizing solutions between regulation-enabled and regulation-disabled conditions is statistically significant (Fisher's exact test).
+
+Moreover, 5 of the 18 non-generalizing programs generalize when we knockout genetic regulation.
+Upon close inspection, the other 13 non-general programs relied on genetic regulation to achieve initial success but failed to generalize to arbitrary environment signal sequences.
 
 \hypertarget{boolean-calculator-problem-postfix-notation}{%
 \chapter{Boolean calculator problem (postfix notation)}\label{boolean-calculator-problem-postfix-notation}}
