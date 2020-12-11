@@ -115,8 +115,6 @@ def main():
                     edge_delta = reg_deltas[int(promoted_id)]
                     promoted_edges[edge]["reg_delta"] += edge_delta
 
-
-
         # Write out the nodes file
         if dump_igraphs:
             nodes_fields = ["id", "times_active", "times_repressed","times_promoted"]
