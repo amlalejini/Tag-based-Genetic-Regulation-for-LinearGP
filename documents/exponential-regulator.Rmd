@@ -63,19 +63,23 @@ data$above_perfect <- data$regulated_match > 1.0
 ```{r}
 ggplot(data, aes(y=reg_modifier, x=raw_match, fill=regulated_match)) +
   geom_raster() +
-  geom_hline(yintercept=0, size=1.2, color="white") +
   geom_hline(yintercept=0, size=1, color="black") +
+  geom_vline(xintercept=0.33, size=1, color="black", linetype="dashed") +
+  geom_vline(xintercept=0.66, size=1, color="black", linetype="dashed") +
   scale_x_continuous(name="Raw tag-match score") +
   scale_y_continuous(name="Module regulation modifier") +
-  scale_fill_distiller(palette = "Spectral") +
+  scale_fill_distiller(
+    name="Regulated match:  ",
+    palette = "Spectral"
+  ) +
   theme(
     legend.position = "top",
-    legend.key.width=unit(2, 'cm')
+    legend.key.width=unit(1.5, 'cm')
   ) +
   ggsave(
     paste0(output_directory, "exp-reg-match.png"),
-    width=10,
-    height=10
+    width=6,
+    height=6
   )
 ```
 
