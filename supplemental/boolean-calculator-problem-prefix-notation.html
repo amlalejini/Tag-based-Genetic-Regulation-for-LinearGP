@@ -24,7 +24,7 @@
 <meta name="author" content="Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria" />
 
 
-<meta name="date" content="2020-12-09" />
+<meta name="date" content="2020-12-10" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -252,7 +252,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="9.7" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#visualizaing-an-evolved-regulatory-network"><i class="fa fa-check"></i><b>9.7</b> Visualizaing an evolved regulatory network</a>
 <ul>
-<li class="chapter" data-level="9.7.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-regulatory-network-2"><i class="fa fa-check"></i><b>9.7.1</b> Evolved regulatory network</a></li>
+<li class="chapter" data-level="9.7.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#data-wrangling-1"><i class="fa fa-check"></i><b>9.7.1</b> Data wrangling</a></li>
+<li class="chapter" data-level="9.7.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#function-regulation-over-time-1"><i class="fa fa-check"></i><b>9.7.2</b> Function regulation over time</a></li>
+<li class="chapter" data-level="9.7.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-regulatory-network-2"><i class="fa fa-check"></i><b>9.7.3</b> Evolved regulatory network</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="10" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html"><i class="fa fa-check"></i><b>10</b> Boolean calculator problem (postfix notation)</a>
@@ -690,7 +692,7 @@ After receiving the requisite input signals, programs must output the correct re
 <span id="cb140-4"><a href="boolean-calculator-problem-prefix-notation.html#cb140-4" aria-hidden="true"></a>    <span class="kw">median</span>(<span class="kw">filter</span>(melted_network_data, reg_edge_type<span class="op">==</span><span class="st">&quot;repressed_edges_cnt&quot;</span>)<span class="op">$</span>reg_edges_cnt)</span>
 <span id="cb140-5"><a href="boolean-calculator-problem-prefix-notation.html#cb140-5" aria-hidden="true"></a>  )</span>
 <span id="cb140-6"><a href="boolean-calculator-problem-prefix-notation.html#cb140-6" aria-hidden="true"></a>)</span></code></pre></div>
-<pre><code>## [1] &quot;Median # repressed edges: 34&quot;</code></pre>
+<pre><code>## [1] &quot;Median # repressed edges: 33&quot;</code></pre>
 <div class="sourceCode" id="cb142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb142-1"><a href="boolean-calculator-problem-prefix-notation.html#cb142-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
 <span id="cb142-2"><a href="boolean-calculator-problem-prefix-notation.html#cb142-2" aria-hidden="true"></a>  <span class="kw">paste0</span>(</span>
 <span id="cb142-3"><a href="boolean-calculator-problem-prefix-notation.html#cb142-3" aria-hidden="true"></a>    <span class="st">&quot;Median # promoting edges: &quot;</span>,</span>
@@ -703,13 +705,13 @@ After receiving the requisite input signals, programs must output the correct re
 ##  Wilcoxon rank sum test with continuity correction
 ## 
 ## data:  reg_edges_cnt by reg_edge_type
-## W = 1961.5, p-value = 0.3254
+## W = 1950.5, p-value = 0.3014
 ## alternative hypothesis: true location shift is not equal to 0
 ## 95 percent confidence interval:
-##  -8.999963  2.999998
+##  -8.999949  2.999926
 ## sample estimates:
 ## difference in location 
-##              -2.999964</code></pre>
+##              -2.999963</code></pre>
 </div>
 <div id="program-instruction-execution-traces-2" class="section level3" number="9.6.3">
 <h3><span class="header-section-number">9.6.3</span> Program instruction execution traces</h3>
@@ -821,71 +823,337 @@ We’re primarily interested in the proportion of control flow instructions, so 
 <div id="visualizaing-an-evolved-regulatory-network" class="section level2" number="9.7">
 <h2><span class="header-section-number">9.7</span> Visualizaing an evolved regulatory network</h2>
 <p>Let’s take a closer look at a successful gene regulatory network.</p>
-<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="boolean-calculator-problem-prefix-notation.html#cb153-1" aria-hidden="true"></a>trace_id &lt;-<span class="st"> </span><span class="dv">24386</span></span></code></pre></div>
-<p>Specifically, we’ll be looking at the solution evolved in run id 2.4386^{4} (arbitrarily selected).</p>
-<div id="evolved-regulatory-network-2" class="section level3" number="9.7.1">
-<h3><span class="header-section-number">9.7.1</span> Evolved regulatory network</h3>
-<p>We use the igraph package to draw this program’s gene regulatory network.</p>
-<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="boolean-calculator-problem-prefix-notation.html#cb154-1" aria-hidden="true"></a><span class="co"># Networks!</span></span>
-<span id="cb154-2"><a href="boolean-calculator-problem-prefix-notation.html#cb154-2" aria-hidden="true"></a>graph_nodes_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_nodes.csv&quot;</span>)</span>
-<span id="cb154-3"><a href="boolean-calculator-problem-prefix-notation.html#cb154-3" aria-hidden="true"></a>graph_edges_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_edges.csv&quot;</span>)</span>
-<span id="cb154-4"><a href="boolean-calculator-problem-prefix-notation.html#cb154-4" aria-hidden="true"></a>graph_nodes_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_nodes_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
-<span id="cb154-5"><a href="boolean-calculator-problem-prefix-notation.html#cb154-5" aria-hidden="true"></a>graph_edges_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_edges_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
-<span id="cb154-6"><a href="boolean-calculator-problem-prefix-notation.html#cb154-6" aria-hidden="true"></a></span>
-<span id="cb154-7"><a href="boolean-calculator-problem-prefix-notation.html#cb154-7" aria-hidden="true"></a>network &lt;-<span class="st"> </span><span class="kw">graph_from_data_frame</span>(</span>
-<span id="cb154-8"><a href="boolean-calculator-problem-prefix-notation.html#cb154-8" aria-hidden="true"></a>  <span class="dt">d=</span>graph_edges_data,</span>
-<span id="cb154-9"><a href="boolean-calculator-problem-prefix-notation.html#cb154-9" aria-hidden="true"></a>  <span class="dt">vertices=</span>graph_nodes_data,</span>
-<span id="cb154-10"><a href="boolean-calculator-problem-prefix-notation.html#cb154-10" aria-hidden="true"></a>  <span class="dt">directed=</span><span class="ot">TRUE</span></span>
-<span id="cb154-11"><a href="boolean-calculator-problem-prefix-notation.html#cb154-11" aria-hidden="true"></a>)</span>
-<span id="cb154-12"><a href="boolean-calculator-problem-prefix-notation.html#cb154-12" aria-hidden="true"></a></span>
-<span id="cb154-13"><a href="boolean-calculator-problem-prefix-notation.html#cb154-13" aria-hidden="true"></a><span class="co"># Setup edge styling</span></span>
-<span id="cb154-14"><a href="boolean-calculator-problem-prefix-notation.html#cb154-14" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> &quot;#FCE640&quot;</span></span>
-<span id="cb154-15"><a href="boolean-calculator-problem-prefix-notation.html#cb154-15" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
-<span id="cb154-16"><a href="boolean-calculator-problem-prefix-notation.html#cb154-16" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> &quot;#441152&quot;</span></span>
-<span id="cb154-17"><a href="boolean-calculator-problem-prefix-notation.html#cb154-17" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
-<span id="cb154-18"><a href="boolean-calculator-problem-prefix-notation.html#cb154-18" aria-hidden="true"></a></span>
-<span id="cb154-19"><a href="boolean-calculator-problem-prefix-notation.html#cb154-19" aria-hidden="true"></a>network_out_name &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/case-study-id-&quot;</span>, trace_id, <span class="st">&quot;-network.svg&quot;</span>)</span>
-<span id="cb154-20"><a href="boolean-calculator-problem-prefix-notation.html#cb154-20" aria-hidden="true"></a></span>
-<span id="cb154-21"><a href="boolean-calculator-problem-prefix-notation.html#cb154-21" aria-hidden="true"></a>draw_network &lt;-<span class="st"> </span><span class="cf">function</span>(net, write_out, out_name) {</span>
-<span id="cb154-22"><a href="boolean-calculator-problem-prefix-notation.html#cb154-22" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
-<span id="cb154-23"><a href="boolean-calculator-problem-prefix-notation.html#cb154-23" aria-hidden="true"></a>    <span class="kw">svg</span>(out_name, <span class="dt">width=</span><span class="dv">4</span>,<span class="dt">height=</span><span class="fl">1.5</span>)</span>
-<span id="cb154-24"><a href="boolean-calculator-problem-prefix-notation.html#cb154-24" aria-hidden="true"></a>    <span class="co"># bottom, left, top, right</span></span>
-<span id="cb154-25"><a href="boolean-calculator-problem-prefix-notation.html#cb154-25" aria-hidden="true"></a>    <span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="fl">0.2</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.5</span>))</span>
-<span id="cb154-26"><a href="boolean-calculator-problem-prefix-notation.html#cb154-26" aria-hidden="true"></a>  }</span>
-<span id="cb154-27"><a href="boolean-calculator-problem-prefix-notation.html#cb154-27" aria-hidden="true"></a>  <span class="kw">plot</span>(</span>
-<span id="cb154-28"><a href="boolean-calculator-problem-prefix-notation.html#cb154-28" aria-hidden="true"></a>    net,</span>
-<span id="cb154-29"><a href="boolean-calculator-problem-prefix-notation.html#cb154-29" aria-hidden="true"></a>    <span class="dt">edge.arrow.size=</span><span class="fl">0.4</span>,</span>
-<span id="cb154-30"><a href="boolean-calculator-problem-prefix-notation.html#cb154-30" aria-hidden="true"></a>    <span class="dt">edge.arrow.width=</span><span class="fl">0.75</span>,</span>
-<span id="cb154-31"><a href="boolean-calculator-problem-prefix-notation.html#cb154-31" aria-hidden="true"></a>    <span class="dt">edge.width=</span><span class="dv">2</span>,</span>
-<span id="cb154-32"><a href="boolean-calculator-problem-prefix-notation.html#cb154-32" aria-hidden="true"></a>    <span class="dt">vertex.size=</span><span class="dv">10</span>,</span>
-<span id="cb154-33"><a href="boolean-calculator-problem-prefix-notation.html#cb154-33" aria-hidden="true"></a>    <span class="dt">vertex.label.cex=</span><span class="fl">0.65</span>,</span>
-<span id="cb154-34"><a href="boolean-calculator-problem-prefix-notation.html#cb154-34" aria-hidden="true"></a>    <span class="dt">curved=</span><span class="ot">TRUE</span>,</span>
-<span id="cb154-35"><a href="boolean-calculator-problem-prefix-notation.html#cb154-35" aria-hidden="true"></a>    <span class="dt">vertex.color=</span><span class="st">&quot;grey99&quot;</span>,</span>
-<span id="cb154-36"><a href="boolean-calculator-problem-prefix-notation.html#cb154-36" aria-hidden="true"></a>    <span class="dt">vertex.label.color=</span><span class="st">&quot;black&quot;</span>,</span>
-<span id="cb154-37"><a href="boolean-calculator-problem-prefix-notation.html#cb154-37" aria-hidden="true"></a>    <span class="dt">vertex.label.family=</span><span class="st">&quot;sans&quot;</span>,</span>
-<span id="cb154-38"><a href="boolean-calculator-problem-prefix-notation.html#cb154-38" aria-hidden="true"></a>    <span class="dt">layout=</span><span class="kw">layout.circle</span>(net)</span>
-<span id="cb154-39"><a href="boolean-calculator-problem-prefix-notation.html#cb154-39" aria-hidden="true"></a>  )</span>
-<span id="cb154-40"><a href="boolean-calculator-problem-prefix-notation.html#cb154-40" aria-hidden="true"></a>  <span class="kw">legend</span>(</span>
-<span id="cb154-41"><a href="boolean-calculator-problem-prefix-notation.html#cb154-41" aria-hidden="true"></a>    <span class="dt">x =</span> <span class="st">&quot;bottomleft&quot;</span>,      <span class="co">## position, also takes x,y coordinates</span></span>
-<span id="cb154-42"><a href="boolean-calculator-problem-prefix-notation.html#cb154-42" aria-hidden="true"></a>    <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;Promoted&quot;</span>, <span class="st">&quot;Repressed&quot;</span>),</span>
-<span id="cb154-43"><a href="boolean-calculator-problem-prefix-notation.html#cb154-43" aria-hidden="true"></a>    <span class="dt">pch =</span> <span class="dv">19</span>,              <span class="co">## legend symbols see ?points</span></span>
-<span id="cb154-44"><a href="boolean-calculator-problem-prefix-notation.html#cb154-44" aria-hidden="true"></a>    <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#FCE640&quot;</span>, <span class="st">&quot;#441152&quot;</span>),</span>
-<span id="cb154-45"><a href="boolean-calculator-problem-prefix-notation.html#cb154-45" aria-hidden="true"></a>    <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>,</span>
-<span id="cb154-46"><a href="boolean-calculator-problem-prefix-notation.html#cb154-46" aria-hidden="true"></a>    <span class="dt">border=</span><span class="st">&quot;black&quot;</span>,</span>
-<span id="cb154-47"><a href="boolean-calculator-problem-prefix-notation.html#cb154-47" aria-hidden="true"></a>    <span class="dt">xpd=</span><span class="ot">TRUE</span>,</span>
-<span id="cb154-48"><a href="boolean-calculator-problem-prefix-notation.html#cb154-48" aria-hidden="true"></a>    <span class="dt">title =</span> <span class="st">&quot;Edges&quot;</span></span>
-<span id="cb154-49"><a href="boolean-calculator-problem-prefix-notation.html#cb154-49" aria-hidden="true"></a>  )</span>
-<span id="cb154-50"><a href="boolean-calculator-problem-prefix-notation.html#cb154-50" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
-<span id="cb154-51"><a href="boolean-calculator-problem-prefix-notation.html#cb154-51" aria-hidden="true"></a>    <span class="kw">dev.flush</span>()</span>
-<span id="cb154-52"><a href="boolean-calculator-problem-prefix-notation.html#cb154-52" aria-hidden="true"></a>    <span class="kw">dev.off</span>()</span>
-<span id="cb154-53"><a href="boolean-calculator-problem-prefix-notation.html#cb154-53" aria-hidden="true"></a>  }</span>
-<span id="cb154-54"><a href="boolean-calculator-problem-prefix-notation.html#cb154-54" aria-hidden="true"></a>}</span>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="boolean-calculator-problem-prefix-notation.html#cb153-1" aria-hidden="true"></a><span class="co"># 24386-393 24391-394 24392-394 24393 24398 24400</span></span>
+<span id="cb153-2"><a href="boolean-calculator-problem-prefix-notation.html#cb153-2" aria-hidden="true"></a>trace_id &lt;-<span class="st"> </span><span class="dv">24400</span></span>
+<span id="cb153-3"><a href="boolean-calculator-problem-prefix-notation.html#cb153-3" aria-hidden="true"></a>test_id &lt;-<span class="st"> </span><span class="dv">420</span></span></code></pre></div>
+<p>Specifically, we’ll be looking at the solution evolved in run id 2.44^{4} (arbitrarily selected).</p>
+<div id="data-wrangling-1" class="section level3" number="9.7.1">
+<h3><span class="header-section-number">9.7.1</span> Data wrangling</h3>
+<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="boolean-calculator-problem-prefix-notation.html#cb154-1" aria-hidden="true"></a>case_study_info &lt;-<span class="st"> </span><span class="kw">read.csv</span>(</span>
+<span id="cb154-2"><a href="boolean-calculator-problem-prefix-notation.html#cb154-2" aria-hidden="true"></a>  <span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/max_fit_orgs.csv&quot;</span>),</span>
+<span id="cb154-3"><a href="boolean-calculator-problem-prefix-notation.html#cb154-3" aria-hidden="true"></a>  <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span></span>
+<span id="cb154-4"><a href="boolean-calculator-problem-prefix-notation.html#cb154-4" aria-hidden="true"></a>)</span>
+<span id="cb154-5"><a href="boolean-calculator-problem-prefix-notation.html#cb154-5" aria-hidden="true"></a></span>
+<span id="cb154-6"><a href="boolean-calculator-problem-prefix-notation.html#cb154-6" aria-hidden="true"></a>case_study_info &lt;-<span class="st"> </span><span class="kw">filter</span>(</span>
+<span id="cb154-7"><a href="boolean-calculator-problem-prefix-notation.html#cb154-7" aria-hidden="true"></a>  case_study_info,</span>
+<span id="cb154-8"><a href="boolean-calculator-problem-prefix-notation.html#cb154-8" aria-hidden="true"></a>  SEED<span class="op">==</span>trace_id</span>
+<span id="cb154-9"><a href="boolean-calculator-problem-prefix-notation.html#cb154-9" aria-hidden="true"></a>)</span>
+<span id="cb154-10"><a href="boolean-calculator-problem-prefix-notation.html#cb154-10" aria-hidden="true"></a></span>
+<span id="cb154-11"><a href="boolean-calculator-problem-prefix-notation.html#cb154-11" aria-hidden="true"></a><span class="co"># Extract relevant information about solution of interest.</span></span>
+<span id="cb154-12"><a href="boolean-calculator-problem-prefix-notation.html#cb154-12" aria-hidden="true"></a>is_sol &lt;-<span class="st"> </span>case_study_info<span class="op">$</span>solution</span>
+<span id="cb154-13"><a href="boolean-calculator-problem-prefix-notation.html#cb154-13" aria-hidden="true"></a>num_modules &lt;-<span class="st"> </span>case_study_info<span class="op">$</span>num_modules</span>
+<span id="cb154-14"><a href="boolean-calculator-problem-prefix-notation.html#cb154-14" aria-hidden="true"></a></span>
+<span id="cb154-15"><a href="boolean-calculator-problem-prefix-notation.html#cb154-15" aria-hidden="true"></a><span class="co"># Load trace file associated with this solution.</span></span>
+<span id="cb154-16"><a href="boolean-calculator-problem-prefix-notation.html#cb154-16" aria-hidden="true"></a>trace_file &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/reg-traces/trace-reg_update-10000_run-id-&quot;</span>, trace_id, <span class="st">&quot;.csv&quot;</span>)</span>
+<span id="cb154-17"><a href="boolean-calculator-problem-prefix-notation.html#cb154-17" aria-hidden="true"></a>trace_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(trace_file, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb154-18"><a href="boolean-calculator-problem-prefix-notation.html#cb154-18" aria-hidden="true"></a>trace_data &lt;-<span class="st"> </span><span class="kw">filter</span>(trace_data, cur_test_id <span class="op">==</span><span class="st"> </span>test_id)</span>
+<span id="cb154-19"><a href="boolean-calculator-problem-prefix-notation.html#cb154-19" aria-hidden="true"></a></span>
+<span id="cb154-20"><a href="boolean-calculator-problem-prefix-notation.html#cb154-20" aria-hidden="true"></a><span class="co"># Data cleanup/summarizing</span></span>
+<span id="cb154-21"><a href="boolean-calculator-problem-prefix-notation.html#cb154-21" aria-hidden="true"></a>trace_data<span class="op">$</span>is_running &lt;-<span class="st"> </span>trace_data<span class="op">$</span>is_running <span class="op">==</span><span class="st"> &quot;1&quot;</span> <span class="op">|</span><span class="st"> </span>trace_data<span class="op">$</span>is_triggered <span class="op">==</span><span class="st"> &quot;1&quot;</span> <span class="op">|</span><span class="st"> </span>trace_data<span class="op">$</span>is_cur_responding_function <span class="op">==</span><span class="st"> &quot;1&quot;</span></span>
+<span id="cb154-22"><a href="boolean-calculator-problem-prefix-notation.html#cb154-22" aria-hidden="true"></a></span>
+<span id="cb154-23"><a href="boolean-calculator-problem-prefix-notation.html#cb154-23" aria-hidden="true"></a><span class="co"># Build a list of modules that were triggered &amp; those that responded to a signal</span></span>
+<span id="cb154-24"><a href="boolean-calculator-problem-prefix-notation.html#cb154-24" aria-hidden="true"></a>triggered_ids &lt;-<span class="st"> </span><span class="kw">levels</span>(<span class="kw">factor</span>(<span class="kw">filter</span>(trace_data, is_triggered<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>module_id))</span>
+<span id="cb154-25"><a href="boolean-calculator-problem-prefix-notation.html#cb154-25" aria-hidden="true"></a>response_ids &lt;-<span class="st"> </span><span class="kw">levels</span>(<span class="kw">factor</span>(<span class="kw">filter</span>(trace_data, is_cur_responding_function<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>module_id))</span>
+<span id="cb154-26"><a href="boolean-calculator-problem-prefix-notation.html#cb154-26" aria-hidden="true"></a>regulated_ids &lt;-<span class="st"> </span><span class="kw">levels</span>(<span class="kw">factor</span>(<span class="kw">filter</span>(trace_data, regulator_state <span class="op">!=</span><span class="st"> </span><span class="dv">0</span>)<span class="op">$</span>module_id))</span>
+<span id="cb154-27"><a href="boolean-calculator-problem-prefix-notation.html#cb154-27" aria-hidden="true"></a>final_response_ids &lt;-<span class="st"> </span><span class="kw">levels</span>(<span class="kw">factor</span>(<span class="kw">filter</span>(trace_data, is_cur_responding_function<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;</span><span class="st"> </span>cur_response_type <span class="op">==</span><span class="st"> &quot;NUMERIC&quot;</span>)<span class="op">$</span>module_id))</span>
+<span id="cb154-28"><a href="boolean-calculator-problem-prefix-notation.html#cb154-28" aria-hidden="true"></a></span>
+<span id="cb154-29"><a href="boolean-calculator-problem-prefix-notation.html#cb154-29" aria-hidden="true"></a>trace_data<span class="op">$</span>is_ever_active &lt;-</span>
+<span id="cb154-30"><a href="boolean-calculator-problem-prefix-notation.html#cb154-30" aria-hidden="true"></a><span class="st">  </span>trace_data<span class="op">$</span>is_ever_active<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">|</span></span>
+<span id="cb154-31"><a href="boolean-calculator-problem-prefix-notation.html#cb154-31" aria-hidden="true"></a><span class="st">  </span>trace_data<span class="op">$</span>is_running <span class="op">|</span></span>
+<span id="cb154-32"><a href="boolean-calculator-problem-prefix-notation.html#cb154-32" aria-hidden="true"></a><span class="st">  </span>trace_data<span class="op">$</span>module_id <span class="op">%in%</span><span class="st"> </span>triggered_ids <span class="op">|</span></span>
+<span id="cb154-33"><a href="boolean-calculator-problem-prefix-notation.html#cb154-33" aria-hidden="true"></a><span class="st">  </span>trace_data<span class="op">$</span>module_id <span class="op">%in%</span><span class="st"> </span>response_ids <span class="op">|</span></span>
+<span id="cb154-34"><a href="boolean-calculator-problem-prefix-notation.html#cb154-34" aria-hidden="true"></a><span class="st">  </span>trace_data<span class="op">$</span>module_id <span class="op">%in%</span><span class="st"> </span>regulated_ids</span>
+<span id="cb154-35"><a href="boolean-calculator-problem-prefix-notation.html#cb154-35" aria-hidden="true"></a></span>
+<span id="cb154-36"><a href="boolean-calculator-problem-prefix-notation.html#cb154-36" aria-hidden="true"></a><span class="co"># function to categorize each regulatory state as promoted, neutral, or repressed</span></span>
+<span id="cb154-37"><a href="boolean-calculator-problem-prefix-notation.html#cb154-37" aria-hidden="true"></a><span class="co"># remember, the regulatory states in our data file operate with tag DISTANCE in mind</span></span>
+<span id="cb154-38"><a href="boolean-calculator-problem-prefix-notation.html#cb154-38" aria-hidden="true"></a><span class="co"># as opposed to tag similarity, so: promotion =&gt; reg &lt; 0, repression =&gt; reg &gt; 0</span></span>
+<span id="cb154-39"><a href="boolean-calculator-problem-prefix-notation.html#cb154-39" aria-hidden="true"></a>categorize_reg_state &lt;-<span class="st"> </span><span class="cf">function</span>(reg_state) {</span>
+<span id="cb154-40"><a href="boolean-calculator-problem-prefix-notation.html#cb154-40" aria-hidden="true"></a>  <span class="cf">if</span> (reg_state <span class="op">==</span><span class="st"> </span><span class="dv">0</span>) {</span>
+<span id="cb154-41"><a href="boolean-calculator-problem-prefix-notation.html#cb154-41" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;neutral&quot;</span>)</span>
+<span id="cb154-42"><a href="boolean-calculator-problem-prefix-notation.html#cb154-42" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg_state <span class="op">&lt;</span><span class="st"> </span><span class="dv">0</span>) {</span>
+<span id="cb154-43"><a href="boolean-calculator-problem-prefix-notation.html#cb154-43" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;promoted&quot;</span>)</span>
+<span id="cb154-44"><a href="boolean-calculator-problem-prefix-notation.html#cb154-44" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg_state <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</span>
+<span id="cb154-45"><a href="boolean-calculator-problem-prefix-notation.html#cb154-45" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;repressed&quot;</span>)</span>
+<span id="cb154-46"><a href="boolean-calculator-problem-prefix-notation.html#cb154-46" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
+<span id="cb154-47"><a href="boolean-calculator-problem-prefix-notation.html#cb154-47" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;unknown&quot;</span>)</span>
+<span id="cb154-48"><a href="boolean-calculator-problem-prefix-notation.html#cb154-48" aria-hidden="true"></a>  }</span>
+<span id="cb154-49"><a href="boolean-calculator-problem-prefix-notation.html#cb154-49" aria-hidden="true"></a>}</span>
+<span id="cb154-50"><a href="boolean-calculator-problem-prefix-notation.html#cb154-50" aria-hidden="true"></a></span>
+<span id="cb154-51"><a href="boolean-calculator-problem-prefix-notation.html#cb154-51" aria-hidden="true"></a>trace_data<span class="op">$</span>regulator_state_simplified &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb154-52"><a href="boolean-calculator-problem-prefix-notation.html#cb154-52" aria-hidden="true"></a>  categorize_reg_state,</span>
+<span id="cb154-53"><a href="boolean-calculator-problem-prefix-notation.html#cb154-53" aria-hidden="true"></a>  trace_data<span class="op">$</span>regulator_state</span>
+<span id="cb154-54"><a href="boolean-calculator-problem-prefix-notation.html#cb154-54" aria-hidden="true"></a>)</span>
 <span id="cb154-55"><a href="boolean-calculator-problem-prefix-notation.html#cb154-55" aria-hidden="true"></a></span>
-<span id="cb154-56"><a href="boolean-calculator-problem-prefix-notation.html#cb154-56" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">TRUE</span>, network_out_name)</span></code></pre></div>
+<span id="cb154-56"><a href="boolean-calculator-problem-prefix-notation.html#cb154-56" aria-hidden="true"></a><span class="co"># Omit all in-active rows</span></span>
+<span id="cb154-57"><a href="boolean-calculator-problem-prefix-notation.html#cb154-57" aria-hidden="true"></a><span class="co"># Extract only rows that correspond with modules that were active during evaluation.</span></span>
+<span id="cb154-58"><a href="boolean-calculator-problem-prefix-notation.html#cb154-58" aria-hidden="true"></a>active_data &lt;-<span class="st"> </span><span class="kw">filter</span>(trace_data, is_ever_active<span class="op">==</span><span class="ot">TRUE</span>)</span>
+<span id="cb154-59"><a href="boolean-calculator-problem-prefix-notation.html#cb154-59" aria-hidden="true"></a></span>
+<span id="cb154-60"><a href="boolean-calculator-problem-prefix-notation.html#cb154-60" aria-hidden="true"></a><span class="co"># Do some work to have module ids appear in a nice order along axis.</span></span>
+<span id="cb154-61"><a href="boolean-calculator-problem-prefix-notation.html#cb154-61" aria-hidden="true"></a>active_module_ids &lt;-<span class="st"> </span><span class="kw">levels</span>(<span class="kw">factor</span>(active_data<span class="op">$</span>module_id))</span>
+<span id="cb154-62"><a href="boolean-calculator-problem-prefix-notation.html#cb154-62" aria-hidden="true"></a>active_module_ids &lt;-<span class="st"> </span><span class="kw">as.integer</span>(active_module_ids)</span>
+<span id="cb154-63"><a href="boolean-calculator-problem-prefix-notation.html#cb154-63" aria-hidden="true"></a>module_id_map &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(active_module_ids)</span>
+<span id="cb154-64"><a href="boolean-calculator-problem-prefix-notation.html#cb154-64" aria-hidden="true"></a>module_id_map<span class="op">$</span>order &lt;-<span class="st"> </span><span class="kw">order</span>(module_id_map<span class="op">$</span>active_module_ids) <span class="op">-</span><span class="st"> </span><span class="dv">1</span></span>
+<span id="cb154-65"><a href="boolean-calculator-problem-prefix-notation.html#cb154-65" aria-hidden="true"></a></span>
+<span id="cb154-66"><a href="boolean-calculator-problem-prefix-notation.html#cb154-66" aria-hidden="true"></a>get_module_x_pos &lt;-<span class="st"> </span><span class="cf">function</span>(module_id) {</span>
+<span id="cb154-67"><a href="boolean-calculator-problem-prefix-notation.html#cb154-67" aria-hidden="true"></a>  <span class="kw">return</span>(<span class="kw">filter</span>(module_id_map, active_module_ids<span class="op">==</span>module_id)<span class="op">$</span>order)</span>
+<span id="cb154-68"><a href="boolean-calculator-problem-prefix-notation.html#cb154-68" aria-hidden="true"></a>}</span>
+<span id="cb154-69"><a href="boolean-calculator-problem-prefix-notation.html#cb154-69" aria-hidden="true"></a></span>
+<span id="cb154-70"><a href="boolean-calculator-problem-prefix-notation.html#cb154-70" aria-hidden="true"></a>active_data<span class="op">$</span>mod_id_x_pos &lt;-<span class="st"> </span><span class="kw">mapply</span>(get_module_x_pos, active_data<span class="op">$</span>module_id)</span></code></pre></div>
+</div>
+<div id="function-regulation-over-time-1" class="section level3" number="9.7.2">
+<h3><span class="header-section-number">9.7.2</span> Function regulation over time</h3>
+<p>First, let’s omit all non-active funcitons.</p>
+<p>Horizontal orientation:</p>
+<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="boolean-calculator-problem-prefix-notation.html#cb155-1" aria-hidden="true"></a>out_name &lt;-<span class="st"> </span><span class="kw">paste0</span>(</span>
+<span id="cb155-2"><a href="boolean-calculator-problem-prefix-notation.html#cb155-2" aria-hidden="true"></a>  working_directory,</span>
+<span id="cb155-3"><a href="boolean-calculator-problem-prefix-notation.html#cb155-3" aria-hidden="true"></a>  <span class="st">&quot;imgs/case-study-trace-id-&quot;</span>,</span>
+<span id="cb155-4"><a href="boolean-calculator-problem-prefix-notation.html#cb155-4" aria-hidden="true"></a>   trace_id,</span>
+<span id="cb155-5"><a href="boolean-calculator-problem-prefix-notation.html#cb155-5" aria-hidden="true"></a>   <span class="st">&quot;-test_id-&quot;</span>,</span>
+<span id="cb155-6"><a href="boolean-calculator-problem-prefix-notation.html#cb155-6" aria-hidden="true"></a>   test_id,</span>
+<span id="cb155-7"><a href="boolean-calculator-problem-prefix-notation.html#cb155-7" aria-hidden="true"></a>   <span class="st">&quot;-regulator-state-horizontal.pdf&quot;</span></span>
+<span id="cb155-8"><a href="boolean-calculator-problem-prefix-notation.html#cb155-8" aria-hidden="true"></a>)</span>
+<span id="cb155-9"><a href="boolean-calculator-problem-prefix-notation.html#cb155-9" aria-hidden="true"></a></span>
+<span id="cb155-10"><a href="boolean-calculator-problem-prefix-notation.html#cb155-10" aria-hidden="true"></a>active_data<span class="op">$</span>module_id &lt;-<span class="st"> </span><span class="kw">factor</span>(active_data<span class="op">$</span>module_id)</span>
+<span id="cb155-11"><a href="boolean-calculator-problem-prefix-notation.html#cb155-11" aria-hidden="true"></a>active_data<span class="op">$</span>graph_time_step &lt;-<span class="st"> </span>active_data<span class="op">$</span>time_step <span class="op">-</span><span class="st"> </span><span class="kw">min</span>(active_data<span class="op">$</span>time_step)</span>
+<span id="cb155-12"><a href="boolean-calculator-problem-prefix-notation.html#cb155-12" aria-hidden="true"></a></span>
+<span id="cb155-13"><a href="boolean-calculator-problem-prefix-notation.html#cb155-13" aria-hidden="true"></a><span class="kw">ggplot</span>(active_data, <span class="kw">aes</span>(<span class="dt">x=</span>mod_id_x_pos, <span class="dt">y=</span>graph_time_step, <span class="dt">fill=</span>regulator_state_simplified)) <span class="op">+</span></span>
+<span id="cb155-14"><a href="boolean-calculator-problem-prefix-notation.html#cb155-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_fill_viridis</span>(</span>
+<span id="cb155-15"><a href="boolean-calculator-problem-prefix-notation.html#cb155-15" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Regulation:&quot;</span>,</span>
+<span id="cb155-16"><a href="boolean-calculator-problem-prefix-notation.html#cb155-16" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(</span>
+<span id="cb155-17"><a href="boolean-calculator-problem-prefix-notation.html#cb155-17" aria-hidden="true"></a>      <span class="st">&quot;promoted&quot;</span>,</span>
+<span id="cb155-18"><a href="boolean-calculator-problem-prefix-notation.html#cb155-18" aria-hidden="true"></a>      <span class="st">&quot;neutral&quot;</span>,</span>
+<span id="cb155-19"><a href="boolean-calculator-problem-prefix-notation.html#cb155-19" aria-hidden="true"></a>      <span class="st">&quot;repressed&quot;</span></span>
+<span id="cb155-20"><a href="boolean-calculator-problem-prefix-notation.html#cb155-20" aria-hidden="true"></a>    ),</span>
+<span id="cb155-21"><a href="boolean-calculator-problem-prefix-notation.html#cb155-21" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(</span>
+<span id="cb155-22"><a href="boolean-calculator-problem-prefix-notation.html#cb155-22" aria-hidden="true"></a>      <span class="st">&quot;+&quot;</span>,</span>
+<span id="cb155-23"><a href="boolean-calculator-problem-prefix-notation.html#cb155-23" aria-hidden="true"></a>      <span class="st">&quot;\u00F8&quot;</span>,</span>
+<span id="cb155-24"><a href="boolean-calculator-problem-prefix-notation.html#cb155-24" aria-hidden="true"></a>      <span class="st">&quot;-&quot;</span></span>
+<span id="cb155-25"><a href="boolean-calculator-problem-prefix-notation.html#cb155-25" aria-hidden="true"></a>    ),</span>
+<span id="cb155-26"><a href="boolean-calculator-problem-prefix-notation.html#cb155-26" aria-hidden="true"></a>    <span class="dt">discrete=</span><span class="ot">TRUE</span>,</span>
+<span id="cb155-27"><a href="boolean-calculator-problem-prefix-notation.html#cb155-27" aria-hidden="true"></a>    <span class="dt">direction=</span><span class="op">-</span><span class="dv">1</span></span>
+<span id="cb155-28"><a href="boolean-calculator-problem-prefix-notation.html#cb155-28" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb155-29"><a href="boolean-calculator-problem-prefix-notation.html#cb155-29" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb155-30"><a href="boolean-calculator-problem-prefix-notation.html#cb155-30" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Function ID&quot;</span>,</span>
+<span id="cb155-31"><a href="boolean-calculator-problem-prefix-notation.html#cb155-31" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="kw">length</span>(active_module_ids)<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>),</span>
+<span id="cb155-32"><a href="boolean-calculator-problem-prefix-notation.html#cb155-32" aria-hidden="true"></a>    <span class="dt">labels=</span>active_module_ids</span>
+<span id="cb155-33"><a href="boolean-calculator-problem-prefix-notation.html#cb155-33" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb155-34"><a href="boolean-calculator-problem-prefix-notation.html#cb155-34" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Time Step&quot;</span>) <span class="op">+</span></span>
+<span id="cb155-35"><a href="boolean-calculator-problem-prefix-notation.html#cb155-35" aria-hidden="true"></a><span class="st">  </span><span class="co"># Background tile color</span></span>
+<span id="cb155-36"><a href="boolean-calculator-problem-prefix-notation.html#cb155-36" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_tile</span>(</span>
+<span id="cb155-37"><a href="boolean-calculator-problem-prefix-notation.html#cb155-37" aria-hidden="true"></a>    <span class="dt">color=</span><span class="st">&quot;white&quot;</span>,</span>
+<span id="cb155-38"><a href="boolean-calculator-problem-prefix-notation.html#cb155-38" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">0.2</span>,</span>
+<span id="cb155-39"><a href="boolean-calculator-problem-prefix-notation.html#cb155-39" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">1</span>,</span>
+<span id="cb155-40"><a href="boolean-calculator-problem-prefix-notation.html#cb155-40" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">1</span>,</span>
+<span id="cb155-41"><a href="boolean-calculator-problem-prefix-notation.html#cb155-41" aria-hidden="true"></a>    <span class="dt">alpha=</span><span class="fl">0.75</span></span>
+<span id="cb155-42"><a href="boolean-calculator-problem-prefix-notation.html#cb155-42" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb155-43"><a href="boolean-calculator-problem-prefix-notation.html#cb155-43" aria-hidden="true"></a><span class="st">  </span><span class="co"># Highlight actively running functions</span></span>
+<span id="cb155-44"><a href="boolean-calculator-problem-prefix-notation.html#cb155-44" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_tile</span>(</span>
+<span id="cb155-45"><a href="boolean-calculator-problem-prefix-notation.html#cb155-45" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(active_data, is_running<span class="op">==</span><span class="ot">TRUE</span> <span class="op">|</span><span class="st"> </span>is_triggered<span class="op">==</span><span class="st">&quot;1&quot;</span>),</span>
+<span id="cb155-46"><a href="boolean-calculator-problem-prefix-notation.html#cb155-46" aria-hidden="true"></a>    <span class="dt">color=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb155-47"><a href="boolean-calculator-problem-prefix-notation.html#cb155-47" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">0.8</span>,</span>
+<span id="cb155-48"><a href="boolean-calculator-problem-prefix-notation.html#cb155-48" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">1</span>,</span>
+<span id="cb155-49"><a href="boolean-calculator-problem-prefix-notation.html#cb155-49" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">1</span></span>
+<span id="cb155-50"><a href="boolean-calculator-problem-prefix-notation.html#cb155-50" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb155-51"><a href="boolean-calculator-problem-prefix-notation.html#cb155-51" aria-hidden="true"></a><span class="st">  </span><span class="co"># Environment delimiters</span></span>
+<span id="cb155-52"><a href="boolean-calculator-problem-prefix-notation.html#cb155-52" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_hline</span>(</span>
+<span id="cb155-53"><a href="boolean-calculator-problem-prefix-notation.html#cb155-53" aria-hidden="true"></a>    <span class="dt">yintercept=</span><span class="kw">filter</span>(active_data, cpu_step<span class="op">==</span><span class="dv">0</span>)<span class="op">$</span>graph_time_step <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>,</span>
+<span id="cb155-54"><a href="boolean-calculator-problem-prefix-notation.html#cb155-54" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">1.25</span>,</span>
+<span id="cb155-55"><a href="boolean-calculator-problem-prefix-notation.html#cb155-55" aria-hidden="true"></a>    <span class="dt">color=</span><span class="st">&quot;black&quot;</span></span>
+<span id="cb155-56"><a href="boolean-calculator-problem-prefix-notation.html#cb155-56" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb155-57"><a href="boolean-calculator-problem-prefix-notation.html#cb155-57" aria-hidden="true"></a><span class="st">  </span><span class="co"># Draw points on triggered modules</span></span>
+<span id="cb155-58"><a href="boolean-calculator-problem-prefix-notation.html#cb155-58" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
+<span id="cb155-59"><a href="boolean-calculator-problem-prefix-notation.html#cb155-59" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(active_data, is_triggered<span class="op">==</span><span class="st">&quot;1&quot;</span>),</span>
+<span id="cb155-60"><a href="boolean-calculator-problem-prefix-notation.html#cb155-60" aria-hidden="true"></a>    <span class="dt">shape=</span><span class="dv">23</span>,</span>
+<span id="cb155-61"><a href="boolean-calculator-problem-prefix-notation.html#cb155-61" aria-hidden="true"></a>    <span class="dt">colour=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb155-62"><a href="boolean-calculator-problem-prefix-notation.html#cb155-62" aria-hidden="true"></a>    <span class="dt">fill=</span><span class="st">&quot;white&quot;</span>,</span>
+<span id="cb155-63"><a href="boolean-calculator-problem-prefix-notation.html#cb155-63" aria-hidden="true"></a>    <span class="dt">stroke=</span><span class="fl">0.5</span>,</span>
+<span id="cb155-64"><a href="boolean-calculator-problem-prefix-notation.html#cb155-64" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">1.75</span>,</span>
+<span id="cb155-65"><a href="boolean-calculator-problem-prefix-notation.html#cb155-65" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="dv">0</span>, <span class="dt">y =</span> <span class="fl">0.01</span>)</span>
+<span id="cb155-66"><a href="boolean-calculator-problem-prefix-notation.html#cb155-66" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb155-67"><a href="boolean-calculator-problem-prefix-notation.html#cb155-67" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
+<span id="cb155-68"><a href="boolean-calculator-problem-prefix-notation.html#cb155-68" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(active_data, is_cur_responding_function<span class="op">==</span><span class="st">&quot;1&quot;</span>),</span>
+<span id="cb155-69"><a href="boolean-calculator-problem-prefix-notation.html#cb155-69" aria-hidden="true"></a>    <span class="dt">shape=</span><span class="dv">21</span>,</span>
+<span id="cb155-70"><a href="boolean-calculator-problem-prefix-notation.html#cb155-70" aria-hidden="true"></a>    <span class="dt">colour=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb155-71"><a href="boolean-calculator-problem-prefix-notation.html#cb155-71" aria-hidden="true"></a>    <span class="dt">fill=</span><span class="st">&quot;white&quot;</span>,</span>
+<span id="cb155-72"><a href="boolean-calculator-problem-prefix-notation.html#cb155-72" aria-hidden="true"></a>    <span class="dt">stroke=</span><span class="fl">0.5</span>,</span>
+<span id="cb155-73"><a href="boolean-calculator-problem-prefix-notation.html#cb155-73" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">1.5</span>,</span>
+<span id="cb155-74"><a href="boolean-calculator-problem-prefix-notation.html#cb155-74" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="dv">0</span>, <span class="dt">y =</span> <span class="fl">0.01</span>)</span>
+<span id="cb155-75"><a href="boolean-calculator-problem-prefix-notation.html#cb155-75" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb155-76"><a href="boolean-calculator-problem-prefix-notation.html#cb155-76" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb155-77"><a href="boolean-calculator-problem-prefix-notation.html#cb155-77" aria-hidden="true"></a>    <span class="dt">legend.position =</span> <span class="st">&quot;top&quot;</span>,</span>
+<span id="cb155-78"><a href="boolean-calculator-problem-prefix-notation.html#cb155-78" aria-hidden="true"></a>    <span class="dt">legend.text =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
+<span id="cb155-79"><a href="boolean-calculator-problem-prefix-notation.html#cb155-79" aria-hidden="true"></a>    <span class="dt">legend.title=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
+<span id="cb155-80"><a href="boolean-calculator-problem-prefix-notation.html#cb155-80" aria-hidden="true"></a>    <span class="dt">axis.text.y =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
+<span id="cb155-81"><a href="boolean-calculator-problem-prefix-notation.html#cb155-81" aria-hidden="true"></a>    <span class="dt">axis.title.y =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
+<span id="cb155-82"><a href="boolean-calculator-problem-prefix-notation.html#cb155-82" aria-hidden="true"></a>    <span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">9</span>),</span>
+<span id="cb155-83"><a href="boolean-calculator-problem-prefix-notation.html#cb155-83" aria-hidden="true"></a>    <span class="dt">axis.title.x =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
+<span id="cb155-84"><a href="boolean-calculator-problem-prefix-notation.html#cb155-84" aria-hidden="true"></a>    <span class="dt">plot.title =</span> <span class="kw">element_text</span>(<span class="dt">hjust =</span> <span class="fl">0.5</span>)</span>
+<span id="cb155-85"><a href="boolean-calculator-problem-prefix-notation.html#cb155-85" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb155-86"><a href="boolean-calculator-problem-prefix-notation.html#cb155-86" aria-hidden="true"></a><span class="st">  </span><span class="kw">coord_flip</span>() <span class="op">+</span></span>
+<span id="cb155-87"><a href="boolean-calculator-problem-prefix-notation.html#cb155-87" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(out_name, <span class="dt">height=</span><span class="dv">4</span>, <span class="dt">width=</span><span class="dv">8</span>)</span></code></pre></div>
+<pre><code>## Warning: Continuous limits supplied to discrete scale.
+## Did you mean `limits = factor(...)` or `scale_*_continuous()`?</code></pre>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-87-1.png" width="672" /></p>
+<p>Vertical orientation:</p>
+<div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb157-1"><a href="boolean-calculator-problem-prefix-notation.html#cb157-1" aria-hidden="true"></a>out_name &lt;-<span class="st"> </span><span class="kw">paste0</span>(</span>
+<span id="cb157-2"><a href="boolean-calculator-problem-prefix-notation.html#cb157-2" aria-hidden="true"></a>  working_directory,</span>
+<span id="cb157-3"><a href="boolean-calculator-problem-prefix-notation.html#cb157-3" aria-hidden="true"></a>  <span class="st">&quot;imgs/case-study-trace-id-&quot;</span>,</span>
+<span id="cb157-4"><a href="boolean-calculator-problem-prefix-notation.html#cb157-4" aria-hidden="true"></a>   trace_id,</span>
+<span id="cb157-5"><a href="boolean-calculator-problem-prefix-notation.html#cb157-5" aria-hidden="true"></a>   <span class="st">&quot;-test_id-&quot;</span>,</span>
+<span id="cb157-6"><a href="boolean-calculator-problem-prefix-notation.html#cb157-6" aria-hidden="true"></a>   test_id,</span>
+<span id="cb157-7"><a href="boolean-calculator-problem-prefix-notation.html#cb157-7" aria-hidden="true"></a>   <span class="st">&quot;-regulator-state-vertical.pdf&quot;</span></span>
+<span id="cb157-8"><a href="boolean-calculator-problem-prefix-notation.html#cb157-8" aria-hidden="true"></a>)</span>
+<span id="cb157-9"><a href="boolean-calculator-problem-prefix-notation.html#cb157-9" aria-hidden="true"></a></span>
+<span id="cb157-10"><a href="boolean-calculator-problem-prefix-notation.html#cb157-10" aria-hidden="true"></a><span class="kw">ggplot</span>(</span>
+<span id="cb157-11"><a href="boolean-calculator-problem-prefix-notation.html#cb157-11" aria-hidden="true"></a>    active_data,</span>
+<span id="cb157-12"><a href="boolean-calculator-problem-prefix-notation.html#cb157-12" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">x=</span>mod_id_x_pos, <span class="dt">y=</span>time_step, <span class="dt">fill=</span>regulator_state_simplified)</span>
+<span id="cb157-13"><a href="boolean-calculator-problem-prefix-notation.html#cb157-13" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-14"><a href="boolean-calculator-problem-prefix-notation.html#cb157-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_fill_viridis</span>(</span>
+<span id="cb157-15"><a href="boolean-calculator-problem-prefix-notation.html#cb157-15" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Regulation:&quot;</span>,</span>
+<span id="cb157-16"><a href="boolean-calculator-problem-prefix-notation.html#cb157-16" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(</span>
+<span id="cb157-17"><a href="boolean-calculator-problem-prefix-notation.html#cb157-17" aria-hidden="true"></a>      <span class="st">&quot;promoted&quot;</span>,</span>
+<span id="cb157-18"><a href="boolean-calculator-problem-prefix-notation.html#cb157-18" aria-hidden="true"></a>      <span class="st">&quot;neutral&quot;</span>,</span>
+<span id="cb157-19"><a href="boolean-calculator-problem-prefix-notation.html#cb157-19" aria-hidden="true"></a>      <span class="st">&quot;repressed&quot;</span></span>
+<span id="cb157-20"><a href="boolean-calculator-problem-prefix-notation.html#cb157-20" aria-hidden="true"></a>    ),</span>
+<span id="cb157-21"><a href="boolean-calculator-problem-prefix-notation.html#cb157-21" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(</span>
+<span id="cb157-22"><a href="boolean-calculator-problem-prefix-notation.html#cb157-22" aria-hidden="true"></a>      <span class="st">&quot;+&quot;</span>,</span>
+<span id="cb157-23"><a href="boolean-calculator-problem-prefix-notation.html#cb157-23" aria-hidden="true"></a>      <span class="st">&quot;\u00F8&quot;</span>,</span>
+<span id="cb157-24"><a href="boolean-calculator-problem-prefix-notation.html#cb157-24" aria-hidden="true"></a>      <span class="st">&quot;-&quot;</span></span>
+<span id="cb157-25"><a href="boolean-calculator-problem-prefix-notation.html#cb157-25" aria-hidden="true"></a>    ),</span>
+<span id="cb157-26"><a href="boolean-calculator-problem-prefix-notation.html#cb157-26" aria-hidden="true"></a>    <span class="dt">discrete=</span><span class="ot">TRUE</span>,</span>
+<span id="cb157-27"><a href="boolean-calculator-problem-prefix-notation.html#cb157-27" aria-hidden="true"></a>    <span class="dt">direction=</span><span class="op">-</span><span class="dv">1</span></span>
+<span id="cb157-28"><a href="boolean-calculator-problem-prefix-notation.html#cb157-28" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-29"><a href="boolean-calculator-problem-prefix-notation.html#cb157-29" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb157-30"><a href="boolean-calculator-problem-prefix-notation.html#cb157-30" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Function ID&quot;</span>,</span>
+<span id="cb157-31"><a href="boolean-calculator-problem-prefix-notation.html#cb157-31" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="kw">length</span>(active_module_ids)<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>),</span>
+<span id="cb157-32"><a href="boolean-calculator-problem-prefix-notation.html#cb157-32" aria-hidden="true"></a>    <span class="dt">labels=</span>active_module_ids</span>
+<span id="cb157-33"><a href="boolean-calculator-problem-prefix-notation.html#cb157-33" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-34"><a href="boolean-calculator-problem-prefix-notation.html#cb157-34" aria-hidden="true"></a><span class="st">  </span><span class="co"># scale_y_discrete(</span></span>
+<span id="cb157-35"><a href="boolean-calculator-problem-prefix-notation.html#cb157-35" aria-hidden="true"></a><span class="st">  </span><span class="co">#   name=&quot;Time Step&quot;</span></span>
+<span id="cb157-36"><a href="boolean-calculator-problem-prefix-notation.html#cb157-36" aria-hidden="true"></a><span class="st">  </span><span class="co"># ) +</span></span>
+<span id="cb157-37"><a href="boolean-calculator-problem-prefix-notation.html#cb157-37" aria-hidden="true"></a><span class="st">  </span><span class="co"># Background tile color</span></span>
+<span id="cb157-38"><a href="boolean-calculator-problem-prefix-notation.html#cb157-38" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_tile</span>(</span>
+<span id="cb157-39"><a href="boolean-calculator-problem-prefix-notation.html#cb157-39" aria-hidden="true"></a>    <span class="dt">color=</span><span class="st">&quot;white&quot;</span>,</span>
+<span id="cb157-40"><a href="boolean-calculator-problem-prefix-notation.html#cb157-40" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">0.2</span>,</span>
+<span id="cb157-41"><a href="boolean-calculator-problem-prefix-notation.html#cb157-41" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">1</span>,</span>
+<span id="cb157-42"><a href="boolean-calculator-problem-prefix-notation.html#cb157-42" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">1</span>,</span>
+<span id="cb157-43"><a href="boolean-calculator-problem-prefix-notation.html#cb157-43" aria-hidden="true"></a>    <span class="dt">alpha=</span><span class="fl">0.75</span></span>
+<span id="cb157-44"><a href="boolean-calculator-problem-prefix-notation.html#cb157-44" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-45"><a href="boolean-calculator-problem-prefix-notation.html#cb157-45" aria-hidden="true"></a><span class="st">  </span><span class="co"># Highlight actively running functions</span></span>
+<span id="cb157-46"><a href="boolean-calculator-problem-prefix-notation.html#cb157-46" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_tile</span>(</span>
+<span id="cb157-47"><a href="boolean-calculator-problem-prefix-notation.html#cb157-47" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(active_data, is_running<span class="op">==</span><span class="ot">TRUE</span> <span class="op">|</span><span class="st"> </span>is_triggered<span class="op">==</span><span class="st">&quot;1&quot;</span>),</span>
+<span id="cb157-48"><a href="boolean-calculator-problem-prefix-notation.html#cb157-48" aria-hidden="true"></a>    <span class="dt">color=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb157-49"><a href="boolean-calculator-problem-prefix-notation.html#cb157-49" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">0.8</span>,</span>
+<span id="cb157-50"><a href="boolean-calculator-problem-prefix-notation.html#cb157-50" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">1</span>,</span>
+<span id="cb157-51"><a href="boolean-calculator-problem-prefix-notation.html#cb157-51" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">1</span></span>
+<span id="cb157-52"><a href="boolean-calculator-problem-prefix-notation.html#cb157-52" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-53"><a href="boolean-calculator-problem-prefix-notation.html#cb157-53" aria-hidden="true"></a><span class="st">  </span><span class="co"># Environment delimiters</span></span>
+<span id="cb157-54"><a href="boolean-calculator-problem-prefix-notation.html#cb157-54" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_hline</span>(</span>
+<span id="cb157-55"><a href="boolean-calculator-problem-prefix-notation.html#cb157-55" aria-hidden="true"></a>    <span class="dt">yintercept=</span><span class="kw">filter</span>(active_data, cpu_step<span class="op">==</span><span class="dv">0</span>)<span class="op">$</span>time_step <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>,</span>
+<span id="cb157-56"><a href="boolean-calculator-problem-prefix-notation.html#cb157-56" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">1.25</span>,</span>
+<span id="cb157-57"><a href="boolean-calculator-problem-prefix-notation.html#cb157-57" aria-hidden="true"></a>    <span class="dt">color=</span><span class="st">&quot;black&quot;</span></span>
+<span id="cb157-58"><a href="boolean-calculator-problem-prefix-notation.html#cb157-58" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-59"><a href="boolean-calculator-problem-prefix-notation.html#cb157-59" aria-hidden="true"></a><span class="st">  </span><span class="co"># Draw points on triggered modules</span></span>
+<span id="cb157-60"><a href="boolean-calculator-problem-prefix-notation.html#cb157-60" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
+<span id="cb157-61"><a href="boolean-calculator-problem-prefix-notation.html#cb157-61" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(active_data, is_triggered<span class="op">==</span><span class="st">&quot;1&quot;</span>),</span>
+<span id="cb157-62"><a href="boolean-calculator-problem-prefix-notation.html#cb157-62" aria-hidden="true"></a>    <span class="dt">shape=</span><span class="dv">8</span>,</span>
+<span id="cb157-63"><a href="boolean-calculator-problem-prefix-notation.html#cb157-63" aria-hidden="true"></a>    <span class="dt">colour=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb157-64"><a href="boolean-calculator-problem-prefix-notation.html#cb157-64" aria-hidden="true"></a>    <span class="dt">fill=</span><span class="st">&quot;white&quot;</span>,</span>
+<span id="cb157-65"><a href="boolean-calculator-problem-prefix-notation.html#cb157-65" aria-hidden="true"></a>    <span class="dt">stroke=</span><span class="fl">0.5</span>,</span>
+<span id="cb157-66"><a href="boolean-calculator-problem-prefix-notation.html#cb157-66" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">1.5</span>,</span>
+<span id="cb157-67"><a href="boolean-calculator-problem-prefix-notation.html#cb157-67" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="dv">0</span>, <span class="dt">y =</span> <span class="fl">0.01</span>)</span>
+<span id="cb157-68"><a href="boolean-calculator-problem-prefix-notation.html#cb157-68" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-69"><a href="boolean-calculator-problem-prefix-notation.html#cb157-69" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
+<span id="cb157-70"><a href="boolean-calculator-problem-prefix-notation.html#cb157-70" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(active_data, is_cur_responding_function<span class="op">==</span><span class="st">&quot;1&quot;</span>),</span>
+<span id="cb157-71"><a href="boolean-calculator-problem-prefix-notation.html#cb157-71" aria-hidden="true"></a>    <span class="dt">shape=</span><span class="dv">21</span>,</span>
+<span id="cb157-72"><a href="boolean-calculator-problem-prefix-notation.html#cb157-72" aria-hidden="true"></a>    <span class="dt">colour=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb157-73"><a href="boolean-calculator-problem-prefix-notation.html#cb157-73" aria-hidden="true"></a>    <span class="dt">fill=</span><span class="st">&quot;white&quot;</span>,</span>
+<span id="cb157-74"><a href="boolean-calculator-problem-prefix-notation.html#cb157-74" aria-hidden="true"></a>    <span class="dt">stroke=</span><span class="fl">0.5</span>,</span>
+<span id="cb157-75"><a href="boolean-calculator-problem-prefix-notation.html#cb157-75" aria-hidden="true"></a>    <span class="dt">size=</span><span class="fl">1.5</span>,</span>
+<span id="cb157-76"><a href="boolean-calculator-problem-prefix-notation.html#cb157-76" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="dv">0</span>, <span class="dt">y =</span> <span class="fl">0.01</span>)</span>
+<span id="cb157-77"><a href="boolean-calculator-problem-prefix-notation.html#cb157-77" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-78"><a href="boolean-calculator-problem-prefix-notation.html#cb157-78" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb157-79"><a href="boolean-calculator-problem-prefix-notation.html#cb157-79" aria-hidden="true"></a>    <span class="dt">legend.position =</span> <span class="st">&quot;top&quot;</span>,</span>
+<span id="cb157-80"><a href="boolean-calculator-problem-prefix-notation.html#cb157-80" aria-hidden="true"></a>    <span class="dt">legend.text =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">9</span>),</span>
+<span id="cb157-81"><a href="boolean-calculator-problem-prefix-notation.html#cb157-81" aria-hidden="true"></a>    <span class="dt">legend.title=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">8</span>),</span>
+<span id="cb157-82"><a href="boolean-calculator-problem-prefix-notation.html#cb157-82" aria-hidden="true"></a>    <span class="dt">axis.text.y =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">8</span>),</span>
+<span id="cb157-83"><a href="boolean-calculator-problem-prefix-notation.html#cb157-83" aria-hidden="true"></a>    <span class="dt">axis.title.y =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">8</span>),</span>
+<span id="cb157-84"><a href="boolean-calculator-problem-prefix-notation.html#cb157-84" aria-hidden="true"></a>    <span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">8</span>),</span>
+<span id="cb157-85"><a href="boolean-calculator-problem-prefix-notation.html#cb157-85" aria-hidden="true"></a>    <span class="dt">axis.title.x =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">8</span>),</span>
+<span id="cb157-86"><a href="boolean-calculator-problem-prefix-notation.html#cb157-86" aria-hidden="true"></a>    <span class="dt">plot.title =</span> <span class="kw">element_text</span>(<span class="dt">hjust =</span> <span class="fl">0.5</span>)</span>
+<span id="cb157-87"><a href="boolean-calculator-problem-prefix-notation.html#cb157-87" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-88"><a href="boolean-calculator-problem-prefix-notation.html#cb157-88" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
+<span id="cb157-89"><a href="boolean-calculator-problem-prefix-notation.html#cb157-89" aria-hidden="true"></a>    out_name,</span>
+<span id="cb157-90"><a href="boolean-calculator-problem-prefix-notation.html#cb157-90" aria-hidden="true"></a>    <span class="dt">height=</span><span class="fl">3.5</span>,</span>
+<span id="cb157-91"><a href="boolean-calculator-problem-prefix-notation.html#cb157-91" aria-hidden="true"></a>    <span class="dt">width=</span><span class="fl">2.25</span></span>
+<span id="cb157-92"><a href="boolean-calculator-problem-prefix-notation.html#cb157-92" aria-hidden="true"></a>  )</span></code></pre></div>
+<pre><code>## Warning: Continuous limits supplied to discrete scale.
+## Did you mean `limits = factor(...)` or `scale_*_continuous()`?</code></pre>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-88-1.png" width="672" /></p>
+</div>
+<div id="evolved-regulatory-network-2" class="section level3" number="9.7.3">
+<h3><span class="header-section-number">9.7.3</span> Evolved regulatory network</h3>
+<p>We use the igraph package to draw this program’s gene regulatory network.</p>
+<div class="sourceCode" id="cb159"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb159-1"><a href="boolean-calculator-problem-prefix-notation.html#cb159-1" aria-hidden="true"></a><span class="co"># Networks!</span></span>
+<span id="cb159-2"><a href="boolean-calculator-problem-prefix-notation.html#cb159-2" aria-hidden="true"></a>graph_nodes_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_test-&quot;</span>, test_id , <span class="st">&quot;_nodes.csv&quot;</span>)</span>
+<span id="cb159-3"><a href="boolean-calculator-problem-prefix-notation.html#cb159-3" aria-hidden="true"></a>graph_edges_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_test-&quot;</span>, test_id , <span class="st">&quot;_edges.csv&quot;</span>)</span>
+<span id="cb159-4"><a href="boolean-calculator-problem-prefix-notation.html#cb159-4" aria-hidden="true"></a>graph_nodes_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_nodes_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb159-5"><a href="boolean-calculator-problem-prefix-notation.html#cb159-5" aria-hidden="true"></a>graph_edges_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_edges_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb159-6"><a href="boolean-calculator-problem-prefix-notation.html#cb159-6" aria-hidden="true"></a></span>
+<span id="cb159-7"><a href="boolean-calculator-problem-prefix-notation.html#cb159-7" aria-hidden="true"></a>network &lt;-<span class="st"> </span><span class="kw">graph_from_data_frame</span>(</span>
+<span id="cb159-8"><a href="boolean-calculator-problem-prefix-notation.html#cb159-8" aria-hidden="true"></a>  <span class="dt">d=</span>graph_edges_data,</span>
+<span id="cb159-9"><a href="boolean-calculator-problem-prefix-notation.html#cb159-9" aria-hidden="true"></a>  <span class="dt">vertices=</span>graph_nodes_data,</span>
+<span id="cb159-10"><a href="boolean-calculator-problem-prefix-notation.html#cb159-10" aria-hidden="true"></a>  <span class="dt">directed=</span><span class="ot">TRUE</span></span>
+<span id="cb159-11"><a href="boolean-calculator-problem-prefix-notation.html#cb159-11" aria-hidden="true"></a>)</span>
+<span id="cb159-12"><a href="boolean-calculator-problem-prefix-notation.html#cb159-12" aria-hidden="true"></a></span>
+<span id="cb159-13"><a href="boolean-calculator-problem-prefix-notation.html#cb159-13" aria-hidden="true"></a><span class="co"># Setup edge styling</span></span>
+<span id="cb159-14"><a href="boolean-calculator-problem-prefix-notation.html#cb159-14" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> &quot;#FCE640&quot;</span></span>
+<span id="cb159-15"><a href="boolean-calculator-problem-prefix-notation.html#cb159-15" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb159-16"><a href="boolean-calculator-problem-prefix-notation.html#cb159-16" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> &quot;#441152&quot;</span></span>
+<span id="cb159-17"><a href="boolean-calculator-problem-prefix-notation.html#cb159-17" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb159-18"><a href="boolean-calculator-problem-prefix-notation.html#cb159-18" aria-hidden="true"></a></span>
+<span id="cb159-19"><a href="boolean-calculator-problem-prefix-notation.html#cb159-19" aria-hidden="true"></a>network_out_name &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/case-study-id-&quot;</span>, trace_id, <span class="st">&quot;-test-&quot;</span>, test_id, <span class="st">&quot;-network.svg&quot;</span>)</span>
+<span id="cb159-20"><a href="boolean-calculator-problem-prefix-notation.html#cb159-20" aria-hidden="true"></a></span>
+<span id="cb159-21"><a href="boolean-calculator-problem-prefix-notation.html#cb159-21" aria-hidden="true"></a>draw_network &lt;-<span class="st"> </span><span class="cf">function</span>(net, write_out, out_name) {</span>
+<span id="cb159-22"><a href="boolean-calculator-problem-prefix-notation.html#cb159-22" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
+<span id="cb159-23"><a href="boolean-calculator-problem-prefix-notation.html#cb159-23" aria-hidden="true"></a>    <span class="kw">svg</span>(out_name, <span class="dt">width=</span><span class="dv">6</span>,<span class="dt">height=</span><span class="dv">3</span>)</span>
+<span id="cb159-24"><a href="boolean-calculator-problem-prefix-notation.html#cb159-24" aria-hidden="true"></a>    <span class="co"># bottom, left, top, right</span></span>
+<span id="cb159-25"><a href="boolean-calculator-problem-prefix-notation.html#cb159-25" aria-hidden="true"></a>    <span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="fl">0.2</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.5</span>))</span>
+<span id="cb159-26"><a href="boolean-calculator-problem-prefix-notation.html#cb159-26" aria-hidden="true"></a>  }</span>
+<span id="cb159-27"><a href="boolean-calculator-problem-prefix-notation.html#cb159-27" aria-hidden="true"></a>  <span class="kw">plot</span>(</span>
+<span id="cb159-28"><a href="boolean-calculator-problem-prefix-notation.html#cb159-28" aria-hidden="true"></a>    net,</span>
+<span id="cb159-29"><a href="boolean-calculator-problem-prefix-notation.html#cb159-29" aria-hidden="true"></a>    <span class="dt">edge.arrow.size=</span><span class="fl">0.4</span>,</span>
+<span id="cb159-30"><a href="boolean-calculator-problem-prefix-notation.html#cb159-30" aria-hidden="true"></a>    <span class="dt">edge.arrow.width=</span><span class="fl">0.75</span>,</span>
+<span id="cb159-31"><a href="boolean-calculator-problem-prefix-notation.html#cb159-31" aria-hidden="true"></a>    <span class="dt">edge.width=</span><span class="dv">2</span>,</span>
+<span id="cb159-32"><a href="boolean-calculator-problem-prefix-notation.html#cb159-32" aria-hidden="true"></a>    <span class="dt">vertex.size=</span><span class="dv">20</span>,</span>
+<span id="cb159-33"><a href="boolean-calculator-problem-prefix-notation.html#cb159-33" aria-hidden="true"></a>    <span class="dt">vertex.label.cex=</span><span class="fl">0.65</span>,</span>
+<span id="cb159-34"><a href="boolean-calculator-problem-prefix-notation.html#cb159-34" aria-hidden="true"></a>    <span class="dt">curved=</span><span class="ot">TRUE</span>,</span>
+<span id="cb159-35"><a href="boolean-calculator-problem-prefix-notation.html#cb159-35" aria-hidden="true"></a>    <span class="dt">vertex.color=</span><span class="st">&quot;grey99&quot;</span>,</span>
+<span id="cb159-36"><a href="boolean-calculator-problem-prefix-notation.html#cb159-36" aria-hidden="true"></a>    <span class="dt">vertex.label.color=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb159-37"><a href="boolean-calculator-problem-prefix-notation.html#cb159-37" aria-hidden="true"></a>    <span class="dt">vertex.label.family=</span><span class="st">&quot;sans&quot;</span>,</span>
+<span id="cb159-38"><a href="boolean-calculator-problem-prefix-notation.html#cb159-38" aria-hidden="true"></a>    <span class="dt">layout=</span><span class="kw">layout.circle</span>(net)</span>
+<span id="cb159-39"><a href="boolean-calculator-problem-prefix-notation.html#cb159-39" aria-hidden="true"></a>  )</span>
+<span id="cb159-40"><a href="boolean-calculator-problem-prefix-notation.html#cb159-40" aria-hidden="true"></a>  <span class="kw">legend</span>(</span>
+<span id="cb159-41"><a href="boolean-calculator-problem-prefix-notation.html#cb159-41" aria-hidden="true"></a>    <span class="dt">x =</span> <span class="st">&quot;bottomleft&quot;</span>,      <span class="co">## position, also takes x,y coordinates</span></span>
+<span id="cb159-42"><a href="boolean-calculator-problem-prefix-notation.html#cb159-42" aria-hidden="true"></a>    <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;Promoted&quot;</span>, <span class="st">&quot;Repressed&quot;</span>),</span>
+<span id="cb159-43"><a href="boolean-calculator-problem-prefix-notation.html#cb159-43" aria-hidden="true"></a>    <span class="dt">pch =</span> <span class="dv">19</span>,              <span class="co">## legend symbols see ?points</span></span>
+<span id="cb159-44"><a href="boolean-calculator-problem-prefix-notation.html#cb159-44" aria-hidden="true"></a>    <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#FCE640&quot;</span>, <span class="st">&quot;#441152&quot;</span>),</span>
+<span id="cb159-45"><a href="boolean-calculator-problem-prefix-notation.html#cb159-45" aria-hidden="true"></a>    <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb159-46"><a href="boolean-calculator-problem-prefix-notation.html#cb159-46" aria-hidden="true"></a>    <span class="dt">border=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb159-47"><a href="boolean-calculator-problem-prefix-notation.html#cb159-47" aria-hidden="true"></a>    <span class="dt">xpd=</span><span class="ot">TRUE</span>,</span>
+<span id="cb159-48"><a href="boolean-calculator-problem-prefix-notation.html#cb159-48" aria-hidden="true"></a>    <span class="dt">title =</span> <span class="st">&quot;Edges&quot;</span></span>
+<span id="cb159-49"><a href="boolean-calculator-problem-prefix-notation.html#cb159-49" aria-hidden="true"></a>  )</span>
+<span id="cb159-50"><a href="boolean-calculator-problem-prefix-notation.html#cb159-50" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
+<span id="cb159-51"><a href="boolean-calculator-problem-prefix-notation.html#cb159-51" aria-hidden="true"></a>    <span class="kw">dev.flush</span>()</span>
+<span id="cb159-52"><a href="boolean-calculator-problem-prefix-notation.html#cb159-52" aria-hidden="true"></a>    <span class="kw">dev.off</span>()</span>
+<span id="cb159-53"><a href="boolean-calculator-problem-prefix-notation.html#cb159-53" aria-hidden="true"></a>  }</span>
+<span id="cb159-54"><a href="boolean-calculator-problem-prefix-notation.html#cb159-54" aria-hidden="true"></a>}</span>
+<span id="cb159-55"><a href="boolean-calculator-problem-prefix-notation.html#cb159-55" aria-hidden="true"></a></span>
+<span id="cb159-56"><a href="boolean-calculator-problem-prefix-notation.html#cb159-56" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">TRUE</span>, network_out_name)</span></code></pre></div>
 <pre><code>## png 
 ##   2</code></pre>
-<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="boolean-calculator-problem-prefix-notation.html#cb156-1" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">FALSE</span>, <span class="st">&quot;&quot;</span>)</span></code></pre></div>
-<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-86-1.png" width="672" /></p>
+<div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb161-1"><a href="boolean-calculator-problem-prefix-notation.html#cb161-1" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">FALSE</span>, <span class="st">&quot;&quot;</span>)</span></code></pre></div>
+<p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-89-1.png" width="672" /></p>
 
 </div>
 </div>

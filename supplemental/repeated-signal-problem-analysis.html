@@ -24,7 +24,7 @@
 <meta name="author" content="Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria" />
 
 
-<meta name="date" content="2020-12-09" />
+<meta name="date" content="2020-12-10" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -252,7 +252,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="9.7" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#visualizaing-an-evolved-regulatory-network"><i class="fa fa-check"></i><b>9.7</b> Visualizaing an evolved regulatory network</a>
 <ul>
-<li class="chapter" data-level="9.7.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-regulatory-network-2"><i class="fa fa-check"></i><b>9.7.1</b> Evolved regulatory network</a></li>
+<li class="chapter" data-level="9.7.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#data-wrangling-1"><i class="fa fa-check"></i><b>9.7.1</b> Data wrangling</a></li>
+<li class="chapter" data-level="9.7.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#function-regulation-over-time-1"><i class="fa fa-check"></i><b>9.7.2</b> Function regulation over time</a></li>
+<li class="chapter" data-level="9.7.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-regulatory-network-2"><i class="fa fa-check"></i><b>9.7.3</b> Evolved regulatory network</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="10" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html"><i class="fa fa-check"></i><b>10</b> Boolean calculator problem (postfix notation)</a>
@@ -752,9 +754,9 @@ odds ratio
 <span id="cb47-37"><a href="repeated-signal-problem-analysis.html#cb47-37" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">5</span>,</span>
 <span id="cb47-38"><a href="repeated-signal-problem-analysis.html#cb47-38" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">4</span></span>
 <span id="cb47-39"><a href="repeated-signal-problem-analysis.html#cb47-39" aria-hidden="true"></a>  )</span></code></pre></div>
-<pre><code>## Warning: Removed 96 rows containing missing values (geom_point).
+<pre><code>## Warning: Removed 102 rows containing missing values (geom_point).
 
-## Warning: Removed 96 rows containing missing values (geom_point).</code></pre>
+## Warning: Removed 102 rows containing missing values (geom_point).</code></pre>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 <div id="two-signal-task---statistical-analysis" class="section level3" number="7.5.1">
 <h3><span class="header-section-number">7.5.1</span> Two-signal task - statistical analysis</h3>
@@ -1603,7 +1605,7 @@ For this work, we are primarily interested in the proportions of control flow in
 <span id="cb80-50"><a href="repeated-signal-problem-analysis.html#cb80-50" aria-hidden="true"></a><span class="st">  </span><span class="co"># Draw points on triggered modules</span></span>
 <span id="cb80-51"><a href="repeated-signal-problem-analysis.html#cb80-51" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
 <span id="cb80-52"><a href="repeated-signal-problem-analysis.html#cb80-52" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(active_data, triggered<span class="op">==</span><span class="ot">TRUE</span>),</span>
-<span id="cb80-53"><a href="repeated-signal-problem-analysis.html#cb80-53" aria-hidden="true"></a>    <span class="dt">shape=</span><span class="dv">8</span>,</span>
+<span id="cb80-53"><a href="repeated-signal-problem-analysis.html#cb80-53" aria-hidden="true"></a>    <span class="dt">shape=</span><span class="dv">23</span>,</span>
 <span id="cb80-54"><a href="repeated-signal-problem-analysis.html#cb80-54" aria-hidden="true"></a>    <span class="dt">colour=</span><span class="st">&quot;black&quot;</span>,</span>
 <span id="cb80-55"><a href="repeated-signal-problem-analysis.html#cb80-55" aria-hidden="true"></a>    <span class="dt">fill=</span><span class="st">&quot;white&quot;</span>,</span>
 <span id="cb80-56"><a href="repeated-signal-problem-analysis.html#cb80-56" aria-hidden="true"></a>    <span class="dt">stroke=</span><span class="fl">0.5</span>,</span>
