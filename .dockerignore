@@ -1,0 +1,13 @@
+# R
+.RData
+.Rhistory
+
+_site/
+
+# Data
+experiments/*/analysis/data
+experiments/*/analysis/traces
+*.tar.gz
+
+supplemental
+supplemental_files
