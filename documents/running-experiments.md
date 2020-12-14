@@ -12,7 +12,12 @@ On docker hub: <https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation
 docker pull amlalejini/tag-based-genetic-regulation-for-gp
 ```
 
-This will create an image with all the requisite dependencies installed/downloaded and with our experiments compiled.
+This will create a docker image with:
+
+- all the requisite dependencies installed/downloaded
+- all experiments compiled
+- our raw data downloaded
+- a build of our supplemental material (which will also run all of our analyses)
 
 To run the container interactively:
 
