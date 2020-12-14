@@ -24,7 +24,7 @@
 <meta name="author" content="Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria" />
 
 
-<meta name="date" content="2020-12-11" />
+<meta name="date" content="2020-12-14" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -314,7 +314,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">3.1</span> Docker</h2>
 <p>On docker hub: <a href="https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp" class="uri">https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp</a></p>
 <pre><code>docker pull amlalejini/tag-based-genetic-regulation-for-gp</code></pre>
-<p>This will create an image with all the requisite dependencies installed/downloaded and with our experiments compiled.</p>
+<p>This will create a docker image with:</p>
+<ul>
+<li>all the requisite dependencies installed/downloaded</li>
+<li>all experiments compiled</li>
+<li>our raw data downloaded</li>
+<li>a build of our supplemental material (which will also run all of our analyses)</li>
+</ul>
 <p>To run the container interactively:</p>
 <pre><code>docker run -it --entrypoint bash amlalejini/tag-based-genetic-regulation-for-gp</code></pre>
 <p>You can exit the container at any point with <code>ctrl-d</code>.</p>

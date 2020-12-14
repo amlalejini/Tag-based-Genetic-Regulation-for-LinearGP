@@ -112,7 +112,7 @@
 
 \title{Supplemental Material for Tag-based Genetic Regulation for Genetic Programming}
 \author{Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria}
-\date{2020-12-11}
+\date{2020-12-14}
 
 \begin{document}
 \maketitle
@@ -319,7 +319,19 @@ On docker hub: \url{https://hub.docker.com/r/amlalejini/tag-based-genetic-regula
 docker pull amlalejini/tag-based-genetic-regulation-for-gp
 \end{verbatim}
 
-This will create an image with all the requisite dependencies installed/downloaded and with our experiments compiled.
+This will create a docker image with:
+
+\begin{itemize}
+\tightlist
+\item
+  all the requisite dependencies installed/downloaded
+\item
+  all experiments compiled
+\item
+  our raw data downloaded
+\item
+  a build of our supplemental material (which will also run all of our analyses)
+\end{itemize}
 
 To run the container interactively:
 
@@ -1819,9 +1831,9 @@ Here, we compare the generation at which solutions arise (only at difficulty lev
 \end{Shaded}
 
 \begin{verbatim}
-## Warning: Removed 99 rows containing missing values (geom_point).
+## Warning: Removed 109 rows containing missing values (geom_point).
 
-## Warning: Removed 99 rows containing missing values (geom_point).
+## Warning: Removed 109 rows containing missing values (geom_point).
 \end{verbatim}
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-15-1.pdf}
