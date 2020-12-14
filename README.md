@@ -2,7 +2,7 @@
 
 <!-- TODO: This repository is the supplemental material associated with the following research article: ... -->
 
-[![supplemental](https://img.shields.io/badge/-supplemental%20material-ff69b4
+[![supplemental](https://img.shields.io/badge/go%20to-supplemental%20material-ff69b4
 )](https://lalejini.com/Tag-based-Genetic-Regulation-for-LinearGP/supplemental/)
 [![DOI](https://zenodo.org/badge/268869271.svg)](https://zenodo.org/badge/latestdoi/268869271)
 [![OSF](https://img.shields.io/badge/data%20%40%20OSF-10.17605%2FOSF.IO%2F928FX-blue)](https://osf.io/928fx/)
