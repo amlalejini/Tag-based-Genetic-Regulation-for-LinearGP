@@ -7,7 +7,8 @@
 [![DOI](https://zenodo.org/badge/268869271.svg)](https://zenodo.org/badge/latestdoi/268869271)
 [![OSF](https://img.shields.io/badge/data%20%40%20OSF-10.17605%2FOSF.IO%2F928FX-blue)](https://osf.io/928fx/)
 [![DockerHub link](https://img.shields.io/badge/DockerHub-Hosted-blue)](https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp)
-![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/amlalejini/tag-based-genetic-regulation-for-gp)
+[![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/amlalejini/tag-based-genetic-regulation-for-gp/2020-12-15)](https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp/tags?page=1&ordering=last_updated)
+<!-- ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/amlalejini/tag-based-genetic-regulation-for-gp) -->
 
 **Navigation**
 
