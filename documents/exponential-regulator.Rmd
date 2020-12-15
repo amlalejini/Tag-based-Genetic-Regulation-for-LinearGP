@@ -60,12 +60,16 @@ data$regulated_match <- mapply(
 data$above_perfect <- data$regulated_match > 1.0
 ```
 
+We expect that 90% of random pairs of tags fall between the two vertical dashed lines.
+
 ```{r}
+lower_5 <- 0.0579369
+upper_5 <- 0.942063
 ggplot(data, aes(y=reg_modifier, x=raw_match, fill=regulated_match)) +
   geom_raster() +
   geom_hline(yintercept=0, size=1, color="black") +
-  geom_vline(xintercept=0.33, size=1, color="black", linetype="dashed") +
-  geom_vline(xintercept=0.66, size=1, color="black", linetype="dashed") +
+  geom_vline(xintercept=lower_5, size=1, color="black", linetype="dashed") +
+  geom_vline(xintercept=upper_5, size=1, color="black", linetype="dashed") +
   scale_x_continuous(name="Raw tag-match score") +
   scale_y_continuous(name="Module regulation modifier") +
   scale_fill_distiller(

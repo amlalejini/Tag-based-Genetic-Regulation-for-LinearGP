@@ -55,7 +55,7 @@ The important thing is that there should be three executables (with absurdly lon
   - Use this to run the repeated-signal problem.
   - To generate a default configuration file, `alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen`
 - `bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp`
-  - Use this to run any of the boolean logic calculator problems and the contextual-signal problem.
+  - Use this to run any of the boolean-logic calculator problems and the contextual-signal problem.
   - To generate a default configuration file, `bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen`
 
 Find the exact configurations we used for our experiments here: <https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments>
@@ -143,7 +143,7 @@ This should create three executables (with absurdly long names):
   - Use this to run the repeated-signal problem.
   - To generate a default configuration file, `alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen`
 - `bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp`
-  - Use this to run any of the boolean logic calculator problems and the contextual-signal problem.
+  - Use this to run any of the boolean-logic calculator problems and the contextual-signal problem.
   - To generate a default configuration file, `bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen`
 
 Find the exact configurations we used for our experiments here: <https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments>

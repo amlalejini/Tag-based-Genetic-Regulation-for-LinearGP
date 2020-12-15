@@ -5,7 +5,7 @@
 - Repeated-signal problem (alt-signal-exp.cc)
 - Contextual-signal problem (bool-calc-exp.cc)
 - Changing-signal problem (chg-env-exp.cc)
-- Boolean logic calculator problem (bool-calc-exp.cc)
+- Boolean-logic calculator problem (bool-calc-exp.cc)
 
 Below, we give the external dependencies for compiling our experiments, and we give which source files are associated with each of the problems.
 
@@ -34,7 +34,7 @@ Experiment-specific source files:
 
 ## Contextual-signal problem
 
-The contextual-signal problem is (perhaps confusingly) carried out using the boolean logic calculator source code. Except, instead of providing input/output examples that describe calculator problems, we configure categorical output (`CATEGORICAL_OUTPUT`) and provide examples that look more like [this](../experiments/2020-11-27-context-sig/hpcc/examples_S4.csv).
+The contextual-signal problem is (perhaps confusingly) carried out using the boolean-logic calculator source code. Except, instead of providing input/output examples that describe calculator problems, we configure categorical output (`CATEGORICAL_OUTPUT`) and provide examples that look more like [this](../experiments/2020-11-27-context-sig/hpcc/examples_S4.csv).
 
 - [BoolCalcConfig.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcConfig.h)
 - [BoolCalcOrg.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcOrg.h)
@@ -53,7 +53,7 @@ Experiment-specific source files:
 - [ChgEnvConfig.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/ChgEnvConfig.h)
 - [native/chg-env-exp.cc](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/native/chg-env-exp.cc)
 
-## Boolean logic calculator problem
+## Boolean-logic calculator problem
 
 - [BoolCalcConfig.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcConfig.h)
 - [BoolCalcOrg.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcOrg.h)

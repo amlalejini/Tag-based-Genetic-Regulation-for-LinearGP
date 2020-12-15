@@ -9,8 +9,8 @@ See the log below for more information on each experiment.
 - [2020-11-11 - Changing-signal problem](#2020-11-11---changing-signal-problem)
 - [2020-11-25 - Repeated-signal problem](#2020-11-25---repeated-signal-problem)
 - [2020-11-27 - Contextual-signal problem](#2020-11-27---contextual-signal-problem)
-- [2020-11-28 - Boolean logic calculator problem (prefix notation)](#2020-11-28---boolean-logic-calculator-problem-prefix-notation)
-- [2020-11-28 - Boolean logic calculator problem (postfix notation)](#2020-11-28---boolean-logic-calculator-problem-postfix-notation)
+- [2020-11-28 - Boolean-logic calculator problem (prefix notation)](#2020-11-28---boolean-logic-calculator-problem-prefix-notation)
+- [2020-11-28 - Boolean-logic calculator problem (postfix notation)](#2020-11-28---boolean-logic-calculator-problem-postfix-notation)
 - [ALife 2020 experiments](#alife-2020-experiments)
 - [Exploratory experiments](#exploratory-experiments)
 
@@ -32,15 +32,15 @@ Final contextual-signal problem experiment.
 
 [./2020-11-27-context-sig/](./2020-11-27-context-sig/)
 
-## 2020-11-28 - Boolean logic calculator problem (prefix notation)
+## 2020-11-28 - Boolean-logic calculator problem (prefix notation)
 
-Final prefix notation Boolean logic calculator problem experiment.
+Final prefix notation Boolean-logic calculator problem experiment.
 
 [2020-11-28-bool-calc-prefix](2020-11-28-bool-calc-prefix)
 
-## 2020-11-28 - Boolean logic calculator problem (postfix notation)
+## 2020-11-28 - Boolean-logic calculator problem (postfix notation)
 
-Final postfix notation Boolean logic calculator problem experiment.
+Final postfix notation Boolean-logic calculator problem experiment.
 
 [2020-11-28-bool-calc-postfix](2020-11-28-bool-calc-postfix)
 
@@ -62,7 +62,7 @@ We carried out a series of exploratory experiments for proof of concept and para
 - [2020-08-04 - sig-reprog](./exploratory/2020-08-04-sig-reprog/)
   - Early version of the contextual-signal problem
 - [2020-08-05 - bc-prefix](./exploratory/2020-08-05-bc-prefix/)
-  - First exploration of prefix notation with boolean logic calculator problem.
+  - First exploration of prefix notation with boolean-logic calculator problem.
 - [2020-11-10 - rep-sig](./exploratory/2020-11-10-rep-sig/)
   - Identical to 2020-11-25 experiment, except did not include instruction execution traces.
 - [2020-11-12 - context-sig](./exploratory/2020-11-12-context-sig/)

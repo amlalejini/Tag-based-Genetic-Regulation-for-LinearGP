@@ -1,4 +1,4 @@
-# 2020-11-28 - Boolean logic calculator problem (prefix notation)
+# 2020-11-28 - Boolean-logic calculator problem (prefix notation)
 
 ## Directory guide:
 
@@ -9,7 +9,7 @@
 
 ## Overview
 
-In this experiment, we compare the problem-solving success of regulation-enabled SignalGP with that of regulation-disabled SignalGP on the boolean logic calculator (prefix notation) problem.
+In this experiment, we compare the problem-solving success of regulation-enabled SignalGP with that of regulation-disabled SignalGP on the boolean-logic calculator (prefix notation) problem.
 
 - IO examples (for the problem used in the paper)
   - training set ./hpcc/training_set_prefix.csv

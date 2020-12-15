@@ -1,6 +1,6 @@
 # Boolean calculator problem (postfix notation)
 
-Here, we give an overview of the boolean logic calculator problem, and we provide our data analyses for related experiments.
+Here, we give an overview of the boolean-logic calculator problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
 The raw data can be found on the OSF project associated with this work [@Lalejini_Moreno_Ofria_Data_2020].
 
@@ -23,8 +23,8 @@ working_directory <- "experiments/2020-11-28-bool-calc-postfix/analysis/" # << F
 # working_directory <- "./"                                              # << For local analysis
 ```
 
-We use a modified version of the Boolean logic calculator problem to further investigate the potential for our implementation of tag-based regulation to impede adaptive evolution.
-Our previous experiments with the Boolean logic calculator problem provided inputs in prefix notation: the operator (e.g., AND, OR, XOR, etc.) is specified first, followed by the requisite number of numeric operands.
+We use a modified version of the Boolean-logic calculator problem to further investigate the potential for our implementation of tag-based regulation to impede adaptive evolution.
+Our previous experiments with the Boolean-logic calculator problem provided inputs in prefix notation: the operator (e.g., AND, OR, XOR, etc.) is specified first, followed by the requisite number of numeric operands.
 As such, the final input signal does not differentiate which type of computation a program is expected to perform (e.g., AND, OR, XOR, etc.).
 This requires programs to adjust their response to the final input signal based on the context provided by the previous two signals, thereby increasing the value of regulation.
 

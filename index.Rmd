@@ -114,8 +114,8 @@ We compared the performance of regulation-enabled and regulation-disabled Signal
 - Repeated-signal Problem
 - Contextual-signal Problem
 - Changing-signal Problem
-- Boolean Logic Calculator Problem (prefix notation)
-- Boolean Logic Calculator Problem (postfix notation)
+- Boolean-logic Calculator Problem (prefix notation)
+- Boolean-logic Calculator Problem (postfix notation)
 
 The repeated-signal, contextual-signal, and prefix notation calculator problems each required programs to dynamically adjust their responses to particular inputs over time.
 The changing-signal and postfix notation calculator problems did not require programs to adjust responses to inputs over time.
