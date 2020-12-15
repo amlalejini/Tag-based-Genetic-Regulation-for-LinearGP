@@ -112,7 +112,7 @@
 
 \title{Supplemental Material for Tag-based Genetic Regulation for Genetic Programming}
 \author{Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria}
-\date{2020-12-14}
+\date{2020-12-15}
 
 \begin{document}
 \maketitle
@@ -275,9 +275,9 @@ We compared the performance of regulation-enabled and regulation-disabled Signal
 \item
   Changing-signal Problem
 \item
-  Boolean Logic Calculator Problem (prefix notation)
+  Boolean-logic Calculator Problem (prefix notation)
 \item
-  Boolean Logic Calculator Problem (postfix notation)
+  Boolean-logic Calculator Problem (postfix notation)
 \end{itemize}
 
 The repeated-signal, contextual-signal, and prefix notation calculator problems each required programs to dynamically adjust their responses to particular inputs over time.
@@ -390,7 +390,7 @@ The important thing is that there should be three executables (with absurdly lon
   \begin{itemize}
   \tightlist
   \item
-    Use this to run any of the boolean logic calculator problems and the contextual-signal problem.
+    Use this to run any of the boolean-logic calculator problems and the contextual-signal problem.
   \item
     To generate a default configuration file, \texttt{bool-calc-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp\ -\/-gen}
   \end{itemize}
@@ -504,7 +504,7 @@ This should create three executables (with absurdly long names):
   \begin{itemize}
   \tightlist
   \item
-    Use this to run any of the boolean logic calculator problems and the contextual-signal problem.
+    Use this to run any of the boolean-logic calculator problems and the contextual-signal problem.
   \item
     To generate a default configuration file, \texttt{bool-calc-exp\_tag-len-256\_match-metric-streak\_thresh-0\_reg-exp\ -\/-gen}
   \end{itemize}
@@ -1254,13 +1254,17 @@ Generate data to graph. We want to visualize regulated match scores as a functio
 \end{Highlighting}
 \end{Shaded}
 
+We expect that 90\% of random pairs of tags fall between the two vertical dashed lines.
+
 \begin{Shaded}
 \begin{Highlighting}[]
+\NormalTok{lower\_}\DecValTok{5}\NormalTok{ \textless{}{-}}\StringTok{ }\FloatTok{0.0579369}
+\NormalTok{upper\_}\DecValTok{5}\NormalTok{ \textless{}{-}}\StringTok{ }\FloatTok{0.942063}
 \KeywordTok{ggplot}\NormalTok{(data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{reg\_modifier, }\DataTypeTok{x=}\NormalTok{raw\_match, }\DataTypeTok{fill=}\NormalTok{regulated\_match)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_raster}\NormalTok{() }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_hline}\NormalTok{(}\DataTypeTok{yintercept=}\DecValTok{0}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_vline}\NormalTok{(}\DataTypeTok{xintercept=}\FloatTok{0.33}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom\_vline}\NormalTok{(}\DataTypeTok{xintercept=}\FloatTok{0.66}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_vline}\NormalTok{(}\DataTypeTok{xintercept=}\NormalTok{lower\_}\DecValTok{5}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_vline}\NormalTok{(}\DataTypeTok{xintercept=}\NormalTok{upper\_}\DecValTok{5}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale\_x\_continuous}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Raw tag{-}match score"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Module regulation modifier"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale\_fill\_distiller}\NormalTok{(}
@@ -1831,9 +1835,9 @@ Here, we compare the generation at which solutions arise (only at difficulty lev
 \end{Shaded}
 
 \begin{verbatim}
-## Warning: Removed 109 rows containing missing values (geom_point).
+## Warning: Removed 114 rows containing missing values (geom_point).
 
-## Warning: Removed 109 rows containing missing values (geom_point).
+## Warning: Removed 114 rows containing missing values (geom_point).
 \end{verbatim}
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-15-1.pdf}
@@ -3900,7 +3904,7 @@ We use the igraph package to draw this program's gene regulatory network.
 \hypertarget{boolean-calculator-problem-prefix-notation}{%
 \chapter{Boolean calculator problem (prefix notation)}\label{boolean-calculator-problem-prefix-notation}}
 
-Here, we give an overview of the boolean logic calculator problem, and we provide our data analyses for related experiments.
+Here, we give an overview of the boolean-logic calculator problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
 The raw data can be found on the OSF project associated with this work \citep{Lalejini_Moreno_Ofria_Data_2020}.
 
@@ -3926,7 +3930,7 @@ The raw data can be found on the OSF project associated with this work \citep{La
 \end{Highlighting}
 \end{Shaded}
 
-The Boolean logic calculator problem requires programs to implement a calculator capable of performing each of the following 10 bitwise logic operations:
+The Boolean-logic calculator problem requires programs to implement a calculator capable of performing each of the following 10 bitwise logic operations:
 ECHO, NOT, NAND, AND, OR-NOT, OR, AND-NOT, NOR, XOR, and EQUALS.
 In this problem, there are 11 distinct types of input signals: one for each of the 10 possible operators and one for numeric inputs.
 Each distinct signal type is associated with a unique tag and is meant to represent different types of buttons that could be pressed on a physical calculator.
@@ -5327,7 +5331,7 @@ Upon close inspection, the other 13 non-general programs relied on genetic regul
 \hypertarget{boolean-calculator-problem-postfix-notation}{%
 \chapter{Boolean calculator problem (postfix notation)}\label{boolean-calculator-problem-postfix-notation}}
 
-Here, we give an overview of the boolean logic calculator problem, and we provide our data analyses for related experiments.
+Here, we give an overview of the boolean-logic calculator problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
 The raw data can be found on the OSF project associated with this work \citep{Lalejini_Moreno_Ofria_Data_2020}.
 
@@ -5353,8 +5357,8 @@ The raw data can be found on the OSF project associated with this work \citep{La
 \end{Highlighting}
 \end{Shaded}
 
-We use a modified version of the Boolean logic calculator problem to further investigate the potential for our implementation of tag-based regulation to impede adaptive evolution.
-Our previous experiments with the Boolean logic calculator problem provided inputs in prefix notation: the operator (e.g., AND, OR, XOR, etc.) is specified first, followed by the requisite number of numeric operands.
+We use a modified version of the Boolean-logic calculator problem to further investigate the potential for our implementation of tag-based regulation to impede adaptive evolution.
+Our previous experiments with the Boolean-logic calculator problem provided inputs in prefix notation: the operator (e.g., AND, OR, XOR, etc.) is specified first, followed by the requisite number of numeric operands.
 As such, the final input signal does not differentiate which type of computation a program is expected to perform (e.g., AND, OR, XOR, etc.).
 This requires programs to adjust their response to the final input signal based on the context provided by the previous two signals, thereby increasing the value of regulation.
 

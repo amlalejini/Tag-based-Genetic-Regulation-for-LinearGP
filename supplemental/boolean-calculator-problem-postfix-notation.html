@@ -24,7 +24,7 @@
 <meta name="author" content="Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria" />
 
 
-<meta name="date" content="2020-12-14" />
+<meta name="date" content="2020-12-15" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -308,7 +308,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="boolean-calculator-problem-postfix-notation" class="section level1" number="10">
 <h1><span class="header-section-number">Chapter 10</span> Boolean calculator problem (postfix notation)</h1>
-<p>Here, we give an overview of the boolean logic calculator problem, and we provide our data analyses for related experiments.
+<p>Here, we give an overview of the boolean-logic calculator problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
 The raw data can be found on the OSF project associated with this work <span class="citation">(Lalejini, Moreno, and Ofria <a href="#ref-Lalejini_Moreno_Ofria_Data_2020" role="doc-biblioref">2020</a>)</span>.</p>
 <p><strong>Please <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues">file an issue or make a pull request on github</a> to report any mistakes, ask questions, request more explanation, et cetera.</strong></p>
@@ -326,8 +326,8 @@ The raw data can be found on the OSF project associated with this work <span cla
 <span id="cb162-10"><a href="boolean-calculator-problem-postfix-notation.html#cb162-10" aria-hidden="true"></a><span class="co"># Relative location of data.</span></span>
 <span id="cb162-11"><a href="boolean-calculator-problem-postfix-notation.html#cb162-11" aria-hidden="true"></a>working_directory &lt;-<span class="st"> &quot;experiments/2020-11-28-bool-calc-postfix/analysis/&quot;</span> <span class="co"># &lt;&lt; For bookdown</span></span>
 <span id="cb162-12"><a href="boolean-calculator-problem-postfix-notation.html#cb162-12" aria-hidden="true"></a><span class="co"># working_directory &lt;- &quot;./&quot;                                              # &lt;&lt; For local analysis</span></span></code></pre></div>
-<p>We use a modified version of the Boolean logic calculator problem to further investigate the potential for our implementation of tag-based regulation to impede adaptive evolution.
-Our previous experiments with the Boolean logic calculator problem provided inputs in prefix notation: the operator (e.g., AND, OR, XOR, etc.) is specified first, followed by the requisite number of numeric operands.
+<p>We use a modified version of the Boolean-logic calculator problem to further investigate the potential for our implementation of tag-based regulation to impede adaptive evolution.
+Our previous experiments with the Boolean-logic calculator problem provided inputs in prefix notation: the operator (e.g., AND, OR, XOR, etc.) is specified first, followed by the requisite number of numeric operands.
 As such, the final input signal does not differentiate which type of computation a program is expected to perform (e.g., AND, OR, XOR, etc.).
 This requires programs to adjust their response to the final input signal based on the context provided by the previous two signals, thereby increasing the value of regulation.</p>
 <p>We explore whether the calculator problem’s context-dependence is driving the benefit of tag-based regulation that we identified in previous experiments.
