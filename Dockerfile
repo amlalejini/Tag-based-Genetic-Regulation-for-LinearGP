@@ -116,7 +116,7 @@ RUN \
     && \
   echo "downloaded ${EXP_CONTEXT_SIG_TAG} data" \
     && \
-  export EXP_BC_PREFIX_TAG=2020-11-28-bool-calc-postfix \
+  export EXP_BC_PREFIX_TAG=2020-11-28-bool-calc-prefix \
     && \
   osf -p ${OSF_PROJECT} fetch \
     data/${EXP_BC_PREFIX_TAG}-data.tar.gz ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/${EXP_BC_PREFIX_TAG}-data.tar.gz \
@@ -126,7 +126,7 @@ RUN \
     && \
   echo "downloaded ${EXP_BC_PREFIX_TAG} data" \
     && \
-  export EXP_BC_POSTFIX_TAG=2020-11-28-bool-calc-prefix \
+  export EXP_BC_POSTFIX_TAG=2020-11-28-bool-calc-postfix \
     && \
   osf -p ${OSF_PROJECT} fetch \
     data/${EXP_BC_POSTFIX_TAG}-data.tar.gz ${PROJECT_PATH}/experiments/${EXP_BC_POSTFIX_TAG}/analysis/${EXP_BC_POSTFIX_TAG}-data.tar.gz \
