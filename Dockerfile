@@ -99,10 +99,12 @@ RUN \
   export EXP_REP_SIG_TAG=2020-11-25-rep-sig \
     && \
   osf -p ${OSF_PROJECT} fetch \
-    data/${EXP_REP_SIG_TAG}-data-no-programs.tar.gz ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/${EXP_REP_SIG_TAG}-data.tar.gz \
+    data/${EXP_REP_SIG_TAG}-data-no-programs.tar.gz ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/${EXP_REP_SIG_TAG}-data-no-programs.tar.gz \
     && \
-  tar -xzf ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/${EXP_REP_SIG_TAG}-data.tar.gz \
+  tar -xzf ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/${EXP_REP_SIG_TAG}-data-no-programs.tar.gz \
     -C ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/ \
+    && \
+  mv ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/data-no-programs ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/data \
     && \
   echo "downloaded ${EXP_REP_SIG_TAG} data" \
     && \
