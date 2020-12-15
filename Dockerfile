@@ -104,7 +104,7 @@ RUN \
   tar -xzf ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/${EXP_REP_SIG_TAG}-data-no-programs.tar.gz \
     -C ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/ \
     && \
-  mv ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/data-no-programs ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/data \
+  mv ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/data-noprograms ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/data \
     && \
   echo "downloaded ${EXP_REP_SIG_TAG} data" \
     && \
