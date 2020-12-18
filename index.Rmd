@@ -23,6 +23,8 @@ This is not intended as a stand-alone document, but as a companion to our paper.
 As you may have noticed (unless you're reading a pdf version of this), our supplemental material is hosted using [GitHub pages](https://pages.github.com/).
 We compiled our data analyses and supplemental documentation into this nifty web-accessible book using [bookdown](https://bookdown.org).
 
+The source code/configuration files for this supplemental material can be found in [this GitHub repository](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP).
+
 Our supplemental material includes the following:
 
 - Data availability (Section \@ref(data-availability))
