@@ -139,10 +139,12 @@ In addition to our source code (found in this repository), we compiled our data 
 
 ### Repository guide
 
-- todo
+- [documents/](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/documents) contains supplemental documentation for our methods. These documents are best viewed in [our compiled supplemental material](https://lalejini.com/Tag-based-Genetic-Regulation-for-LinearGP/supplemental/)
+- [experiments/](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments) contains the configuration files, HPCC job submission scripts, and data analysis scripts for our experiments.
 - [media/](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/media) contains images used throughout repository documentation.
 - [scripts/](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/scripts) contains several root-level utility scripts for data wrangling and for generating input/output examples for test-based problems. Note that experiment-specific scripts are located in their associated experiment directory.
 - [source/](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/source) contains the C++ implementations of our genetic programming experiments.
+- [supplemental/](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/supplemental) contains our compiled supplemental material. Best viewed here: <https://lalejini.com/Tag-based-Genetic-Regulation-for-LinearGP/supplemental/>.
 
 <!-- **Repository guide:**
 
