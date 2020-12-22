@@ -24,7 +24,7 @@
 <meta name="author" content="Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria" />
 
 
-<meta name="date" content="2020-12-18" />
+<meta name="date" content="2020-12-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -314,20 +314,20 @@ The raw data can be found on the OSF project associated with this work <span cla
 <p><strong>Please <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues">file an issue or make a pull request on github</a> to report any mistakes, ask questions, request more explanation, et cetera.</strong></p>
 <div id="overview-3" class="section level2" number="9.1">
 <h2><span class="header-section-number">9.1</span> Overview</h2>
-<div class="sourceCode" id="cb148"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb148-1"><a href="changing-signal-problem-analysis.html#cb148-1" aria-hidden="true"></a><span class="co"># Experimental parameters referenced in-text all in one convenient place.</span></span>
-<span id="cb148-2"><a href="changing-signal-problem-analysis.html#cb148-2" aria-hidden="true"></a>time_steps &lt;-<span class="st"> </span><span class="dv">128</span></span>
-<span id="cb148-3"><a href="changing-signal-problem-analysis.html#cb148-3" aria-hidden="true"></a>replicates &lt;-<span class="st"> </span><span class="dv">200</span></span>
-<span id="cb148-4"><a href="changing-signal-problem-analysis.html#cb148-4" aria-hidden="true"></a>population_size &lt;-<span class="st"> </span><span class="dv">1000</span></span>
-<span id="cb148-5"><a href="changing-signal-problem-analysis.html#cb148-5" aria-hidden="true"></a>generations &lt;-<span class="st"> </span><span class="dv">10000</span></span>
-<span id="cb148-6"><a href="changing-signal-problem-analysis.html#cb148-6" aria-hidden="true"></a>env_complexities &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">16</span>)</span>
-<span id="cb148-7"><a href="changing-signal-problem-analysis.html#cb148-7" aria-hidden="true"></a></span>
-<span id="cb148-8"><a href="changing-signal-problem-analysis.html#cb148-8" aria-hidden="true"></a><span class="co"># Settings for statistical analyses.</span></span>
-<span id="cb148-9"><a href="changing-signal-problem-analysis.html#cb148-9" aria-hidden="true"></a>alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></span>
-<span id="cb148-10"><a href="changing-signal-problem-analysis.html#cb148-10" aria-hidden="true"></a>correction_method &lt;-<span class="st"> &quot;bonferroni&quot;</span></span>
-<span id="cb148-11"><a href="changing-signal-problem-analysis.html#cb148-11" aria-hidden="true"></a></span>
-<span id="cb148-12"><a href="changing-signal-problem-analysis.html#cb148-12" aria-hidden="true"></a><span class="co"># Relative location of data.</span></span>
-<span id="cb148-13"><a href="changing-signal-problem-analysis.html#cb148-13" aria-hidden="true"></a>working_directory &lt;-<span class="st"> &quot;experiments/2020-11-11-chg-sig/analysis/&quot;</span> <span class="co"># &lt;&lt; For bookdown</span></span>
-<span id="cb148-14"><a href="changing-signal-problem-analysis.html#cb148-14" aria-hidden="true"></a><span class="co"># working_directory &lt;- &quot;./&quot;                                     # &lt;&lt; For local analysis</span></span></code></pre></div>
+<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="changing-signal-problem-analysis.html#cb151-1" aria-hidden="true"></a><span class="co"># Experimental parameters referenced in-text all in one convenient place.</span></span>
+<span id="cb151-2"><a href="changing-signal-problem-analysis.html#cb151-2" aria-hidden="true"></a>time_steps &lt;-<span class="st"> </span><span class="dv">128</span></span>
+<span id="cb151-3"><a href="changing-signal-problem-analysis.html#cb151-3" aria-hidden="true"></a>replicates &lt;-<span class="st"> </span><span class="dv">200</span></span>
+<span id="cb151-4"><a href="changing-signal-problem-analysis.html#cb151-4" aria-hidden="true"></a>population_size &lt;-<span class="st"> </span><span class="dv">1000</span></span>
+<span id="cb151-5"><a href="changing-signal-problem-analysis.html#cb151-5" aria-hidden="true"></a>generations &lt;-<span class="st"> </span><span class="dv">10000</span></span>
+<span id="cb151-6"><a href="changing-signal-problem-analysis.html#cb151-6" aria-hidden="true"></a>env_complexities &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">16</span>)</span>
+<span id="cb151-7"><a href="changing-signal-problem-analysis.html#cb151-7" aria-hidden="true"></a></span>
+<span id="cb151-8"><a href="changing-signal-problem-analysis.html#cb151-8" aria-hidden="true"></a><span class="co"># Settings for statistical analyses.</span></span>
+<span id="cb151-9"><a href="changing-signal-problem-analysis.html#cb151-9" aria-hidden="true"></a>alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></span>
+<span id="cb151-10"><a href="changing-signal-problem-analysis.html#cb151-10" aria-hidden="true"></a>correction_method &lt;-<span class="st"> &quot;bonferroni&quot;</span></span>
+<span id="cb151-11"><a href="changing-signal-problem-analysis.html#cb151-11" aria-hidden="true"></a></span>
+<span id="cb151-12"><a href="changing-signal-problem-analysis.html#cb151-12" aria-hidden="true"></a><span class="co"># Relative location of data.</span></span>
+<span id="cb151-13"><a href="changing-signal-problem-analysis.html#cb151-13" aria-hidden="true"></a>working_directory &lt;-<span class="st"> &quot;experiments/2020-11-11-chg-sig/analysis/&quot;</span> <span class="co"># &lt;&lt; For bookdown</span></span>
+<span id="cb151-14"><a href="changing-signal-problem-analysis.html#cb151-14" aria-hidden="true"></a><span class="co"># working_directory &lt;- &quot;./&quot;                                     # &lt;&lt; For local analysis</span></span></code></pre></div>
 <p>The changing-signal task requires programs to express a unique response for each of <span class="math inline">\(K\)</span> distinct environmental signals (i.e., each signal has a distinct tag); the figure below is given as an example.
 Because signals are distinct, programs do not need to alter their responses to particular signals over time.
 Instead, programs may ‘hardware’ each of the <span class="math inline">\(K\)</span> possible responses to the appropriate environmental signal.
@@ -356,13 +356,13 @@ For example, non-adaptive down-regulation of a particular response function may 
 <div id="analysis-dependencies-4" class="section level2" number="9.2">
 <h2><span class="header-section-number">9.2</span> Analysis Dependencies</h2>
 <p>Load all required R libraries.</p>
-<div class="sourceCode" id="cb149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb149-1"><a href="changing-signal-problem-analysis.html#cb149-1" aria-hidden="true"></a><span class="kw">library</span>(ggplot2)</span>
-<span id="cb149-2"><a href="changing-signal-problem-analysis.html#cb149-2" aria-hidden="true"></a><span class="kw">library</span>(tidyverse)</span>
-<span id="cb149-3"><a href="changing-signal-problem-analysis.html#cb149-3" aria-hidden="true"></a><span class="kw">library</span>(cowplot)</span>
-<span id="cb149-4"><a href="changing-signal-problem-analysis.html#cb149-4" aria-hidden="true"></a><span class="kw">library</span>(viridis)</span>
-<span id="cb149-5"><a href="changing-signal-problem-analysis.html#cb149-5" aria-hidden="true"></a><span class="kw">source</span>(<span class="st">&quot;https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb152"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb152-1"><a href="changing-signal-problem-analysis.html#cb152-1" aria-hidden="true"></a><span class="kw">library</span>(ggplot2)</span>
+<span id="cb152-2"><a href="changing-signal-problem-analysis.html#cb152-2" aria-hidden="true"></a><span class="kw">library</span>(tidyverse)</span>
+<span id="cb152-3"><a href="changing-signal-problem-analysis.html#cb152-3" aria-hidden="true"></a><span class="kw">library</span>(cowplot)</span>
+<span id="cb152-4"><a href="changing-signal-problem-analysis.html#cb152-4" aria-hidden="true"></a><span class="kw">library</span>(viridis)</span>
+<span id="cb152-5"><a href="changing-signal-problem-analysis.html#cb152-5" aria-hidden="true"></a><span class="kw">source</span>(<span class="st">&quot;https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R&quot;</span>)</span></code></pre></div>
 <p>These analyses were conducted in the following computing environment:</p>
-<div class="sourceCode" id="cb150"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb150-1"><a href="changing-signal-problem-analysis.html#cb150-1" aria-hidden="true"></a><span class="kw">print</span>(version)</span></code></pre></div>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="changing-signal-problem-analysis.html#cb153-1" aria-hidden="true"></a><span class="kw">print</span>(version)</span></code></pre></div>
 <pre><code>##                _                           
 ## platform       x86_64-pc-linux-gnu         
 ## arch           x86_64                      
@@ -382,111 +382,111 @@ For example, non-adaptive down-regulation of a particular response function may 
 <div id="setup-3" class="section level2" number="9.3">
 <h2><span class="header-section-number">9.3</span> Setup</h2>
 <p>Load data, initial data cleanup, configure some global settings.</p>
-<div class="sourceCode" id="cb152"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb152-1"><a href="changing-signal-problem-analysis.html#cb152-1" aria-hidden="true"></a><span class="co"># Load data file</span></span>
-<span id="cb152-2"><a href="changing-signal-problem-analysis.html#cb152-2" aria-hidden="true"></a>data_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/max_fit_orgs.csv&quot;</span>)</span>
-<span id="cb152-3"><a href="changing-signal-problem-analysis.html#cb152-3" aria-hidden="true"></a>data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(data_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
-<span id="cb152-4"><a href="changing-signal-problem-analysis.html#cb152-4" aria-hidden="true"></a></span>
-<span id="cb152-5"><a href="changing-signal-problem-analysis.html#cb152-5" aria-hidden="true"></a><span class="co"># Define function to summarize regulation/memory configurations.</span></span>
-<span id="cb152-6"><a href="changing-signal-problem-analysis.html#cb152-6" aria-hidden="true"></a>get_con &lt;-<span class="st"> </span><span class="cf">function</span>(reg, mem) {</span>
-<span id="cb152-7"><a href="changing-signal-problem-analysis.html#cb152-7" aria-hidden="true"></a>  <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem <span class="op">==</span><span class="st"> &quot;0&quot;</span>) {</span>
-<span id="cb152-8"><a href="changing-signal-problem-analysis.html#cb152-8" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;none&quot;</span>)</span>
-<span id="cb152-9"><a href="changing-signal-problem-analysis.html#cb152-9" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
-<span id="cb152-10"><a href="changing-signal-problem-analysis.html#cb152-10" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;memory&quot;</span>)</span>
-<span id="cb152-11"><a href="changing-signal-problem-analysis.html#cb152-11" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
-<span id="cb152-12"><a href="changing-signal-problem-analysis.html#cb152-12" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;regulation&quot;</span>)</span>
-<span id="cb152-13"><a href="changing-signal-problem-analysis.html#cb152-13" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
-<span id="cb152-14"><a href="changing-signal-problem-analysis.html#cb152-14" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;both&quot;</span>)</span>
-<span id="cb152-15"><a href="changing-signal-problem-analysis.html#cb152-15" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
-<span id="cb152-16"><a href="changing-signal-problem-analysis.html#cb152-16" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
-<span id="cb152-17"><a href="changing-signal-problem-analysis.html#cb152-17" aria-hidden="true"></a>  }</span>
-<span id="cb152-18"><a href="changing-signal-problem-analysis.html#cb152-18" aria-hidden="true"></a>}</span>
-<span id="cb152-19"><a href="changing-signal-problem-analysis.html#cb152-19" aria-hidden="true"></a></span>
-<span id="cb152-20"><a href="changing-signal-problem-analysis.html#cb152-20" aria-hidden="true"></a><span class="co"># Specify experimental condition for each datum.</span></span>
-<span id="cb152-21"><a href="changing-signal-problem-analysis.html#cb152-21" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
-<span id="cb152-22"><a href="changing-signal-problem-analysis.html#cb152-22" aria-hidden="true"></a>  get_con,</span>
-<span id="cb152-23"><a href="changing-signal-problem-analysis.html#cb152-23" aria-hidden="true"></a>  data<span class="op">$</span>USE_FUNC_REGULATION,</span>
-<span id="cb152-24"><a href="changing-signal-problem-analysis.html#cb152-24" aria-hidden="true"></a>  data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
-<span id="cb152-25"><a href="changing-signal-problem-analysis.html#cb152-25" aria-hidden="true"></a>)</span>
-<span id="cb152-26"><a href="changing-signal-problem-analysis.html#cb152-26" aria-hidden="true"></a></span>
-<span id="cb152-27"><a href="changing-signal-problem-analysis.html#cb152-27" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb152-28"><a href="changing-signal-problem-analysis.html#cb152-28" aria-hidden="true"></a>  data<span class="op">$</span>condition,</span>
-<span id="cb152-29"><a href="changing-signal-problem-analysis.html#cb152-29" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
-<span id="cb152-30"><a href="changing-signal-problem-analysis.html#cb152-30" aria-hidden="true"></a>)</span>
-<span id="cb152-31"><a href="changing-signal-problem-analysis.html#cb152-31" aria-hidden="true"></a></span>
-<span id="cb152-32"><a href="changing-signal-problem-analysis.html#cb152-32" aria-hidden="true"></a><span class="co"># For convenience, create a data set with only solutions</span></span>
-<span id="cb152-33"><a href="changing-signal-problem-analysis.html#cb152-33" aria-hidden="true"></a><span class="co"># Filter data to include only replicates labeled as solutions</span></span>
-<span id="cb152-34"><a href="changing-signal-problem-analysis.html#cb152-34" aria-hidden="true"></a>sol_data &lt;-<span class="st"> </span><span class="kw">filter</span>(</span>
-<span id="cb152-35"><a href="changing-signal-problem-analysis.html#cb152-35" aria-hidden="true"></a>  data,</span>
-<span id="cb152-36"><a href="changing-signal-problem-analysis.html#cb152-36" aria-hidden="true"></a>  solution<span class="op">==</span><span class="st">&quot;1&quot;</span></span>
-<span id="cb152-37"><a href="changing-signal-problem-analysis.html#cb152-37" aria-hidden="true"></a>)</span>
-<span id="cb152-38"><a href="changing-signal-problem-analysis.html#cb152-38" aria-hidden="true"></a></span>
-<span id="cb152-39"><a href="changing-signal-problem-analysis.html#cb152-39" aria-hidden="true"></a><span class="co"># A lookup table for task complexities</span></span>
-<span id="cb152-40"><a href="changing-signal-problem-analysis.html#cb152-40" aria-hidden="true"></a>task_label_lu &lt;-<span class="st"> </span><span class="kw">c</span>(</span>
-<span id="cb152-41"><a href="changing-signal-problem-analysis.html#cb152-41" aria-hidden="true"></a>  <span class="st">&quot;2&quot;</span> =<span class="st"> &quot;2-signal task&quot;</span>,</span>
-<span id="cb152-42"><a href="changing-signal-problem-analysis.html#cb152-42" aria-hidden="true"></a>  <span class="st">&quot;4&quot;</span> =<span class="st"> &quot;4-signal task&quot;</span>,</span>
-<span id="cb152-43"><a href="changing-signal-problem-analysis.html#cb152-43" aria-hidden="true"></a>  <span class="st">&quot;8&quot;</span> =<span class="st"> &quot;8-signal task&quot;</span>,</span>
-<span id="cb152-44"><a href="changing-signal-problem-analysis.html#cb152-44" aria-hidden="true"></a>  <span class="st">&quot;16&quot;</span> =<span class="st"> &quot;16-signal task&quot;</span>,</span>
-<span id="cb152-45"><a href="changing-signal-problem-analysis.html#cb152-45" aria-hidden="true"></a>  <span class="st">&quot;32&quot;</span> =<span class="st">&quot;32-signal task&quot;</span></span>
-<span id="cb152-46"><a href="changing-signal-problem-analysis.html#cb152-46" aria-hidden="true"></a>)</span>
-<span id="cb152-47"><a href="changing-signal-problem-analysis.html#cb152-47" aria-hidden="true"></a></span>
-<span id="cb152-48"><a href="changing-signal-problem-analysis.html#cb152-48" aria-hidden="true"></a><span class="co"># Configure our default graphing theme</span></span>
-<span id="cb152-49"><a href="changing-signal-problem-analysis.html#cb152-49" aria-hidden="true"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>())</span></code></pre></div>
+<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="changing-signal-problem-analysis.html#cb155-1" aria-hidden="true"></a><span class="co"># Load data file</span></span>
+<span id="cb155-2"><a href="changing-signal-problem-analysis.html#cb155-2" aria-hidden="true"></a>data_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/max_fit_orgs.csv&quot;</span>)</span>
+<span id="cb155-3"><a href="changing-signal-problem-analysis.html#cb155-3" aria-hidden="true"></a>data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(data_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb155-4"><a href="changing-signal-problem-analysis.html#cb155-4" aria-hidden="true"></a></span>
+<span id="cb155-5"><a href="changing-signal-problem-analysis.html#cb155-5" aria-hidden="true"></a><span class="co"># Define function to summarize regulation/memory configurations.</span></span>
+<span id="cb155-6"><a href="changing-signal-problem-analysis.html#cb155-6" aria-hidden="true"></a>get_con &lt;-<span class="st"> </span><span class="cf">function</span>(reg, mem) {</span>
+<span id="cb155-7"><a href="changing-signal-problem-analysis.html#cb155-7" aria-hidden="true"></a>  <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem <span class="op">==</span><span class="st"> &quot;0&quot;</span>) {</span>
+<span id="cb155-8"><a href="changing-signal-problem-analysis.html#cb155-8" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;none&quot;</span>)</span>
+<span id="cb155-9"><a href="changing-signal-problem-analysis.html#cb155-9" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb155-10"><a href="changing-signal-problem-analysis.html#cb155-10" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;memory&quot;</span>)</span>
+<span id="cb155-11"><a href="changing-signal-problem-analysis.html#cb155-11" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
+<span id="cb155-12"><a href="changing-signal-problem-analysis.html#cb155-12" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;regulation&quot;</span>)</span>
+<span id="cb155-13"><a href="changing-signal-problem-analysis.html#cb155-13" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb155-14"><a href="changing-signal-problem-analysis.html#cb155-14" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;both&quot;</span>)</span>
+<span id="cb155-15"><a href="changing-signal-problem-analysis.html#cb155-15" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
+<span id="cb155-16"><a href="changing-signal-problem-analysis.html#cb155-16" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
+<span id="cb155-17"><a href="changing-signal-problem-analysis.html#cb155-17" aria-hidden="true"></a>  }</span>
+<span id="cb155-18"><a href="changing-signal-problem-analysis.html#cb155-18" aria-hidden="true"></a>}</span>
+<span id="cb155-19"><a href="changing-signal-problem-analysis.html#cb155-19" aria-hidden="true"></a></span>
+<span id="cb155-20"><a href="changing-signal-problem-analysis.html#cb155-20" aria-hidden="true"></a><span class="co"># Specify experimental condition for each datum.</span></span>
+<span id="cb155-21"><a href="changing-signal-problem-analysis.html#cb155-21" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb155-22"><a href="changing-signal-problem-analysis.html#cb155-22" aria-hidden="true"></a>  get_con,</span>
+<span id="cb155-23"><a href="changing-signal-problem-analysis.html#cb155-23" aria-hidden="true"></a>  data<span class="op">$</span>USE_FUNC_REGULATION,</span>
+<span id="cb155-24"><a href="changing-signal-problem-analysis.html#cb155-24" aria-hidden="true"></a>  data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
+<span id="cb155-25"><a href="changing-signal-problem-analysis.html#cb155-25" aria-hidden="true"></a>)</span>
+<span id="cb155-26"><a href="changing-signal-problem-analysis.html#cb155-26" aria-hidden="true"></a></span>
+<span id="cb155-27"><a href="changing-signal-problem-analysis.html#cb155-27" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb155-28"><a href="changing-signal-problem-analysis.html#cb155-28" aria-hidden="true"></a>  data<span class="op">$</span>condition,</span>
+<span id="cb155-29"><a href="changing-signal-problem-analysis.html#cb155-29" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb155-30"><a href="changing-signal-problem-analysis.html#cb155-30" aria-hidden="true"></a>)</span>
+<span id="cb155-31"><a href="changing-signal-problem-analysis.html#cb155-31" aria-hidden="true"></a></span>
+<span id="cb155-32"><a href="changing-signal-problem-analysis.html#cb155-32" aria-hidden="true"></a><span class="co"># For convenience, create a data set with only solutions</span></span>
+<span id="cb155-33"><a href="changing-signal-problem-analysis.html#cb155-33" aria-hidden="true"></a><span class="co"># Filter data to include only replicates labeled as solutions</span></span>
+<span id="cb155-34"><a href="changing-signal-problem-analysis.html#cb155-34" aria-hidden="true"></a>sol_data &lt;-<span class="st"> </span><span class="kw">filter</span>(</span>
+<span id="cb155-35"><a href="changing-signal-problem-analysis.html#cb155-35" aria-hidden="true"></a>  data,</span>
+<span id="cb155-36"><a href="changing-signal-problem-analysis.html#cb155-36" aria-hidden="true"></a>  solution<span class="op">==</span><span class="st">&quot;1&quot;</span></span>
+<span id="cb155-37"><a href="changing-signal-problem-analysis.html#cb155-37" aria-hidden="true"></a>)</span>
+<span id="cb155-38"><a href="changing-signal-problem-analysis.html#cb155-38" aria-hidden="true"></a></span>
+<span id="cb155-39"><a href="changing-signal-problem-analysis.html#cb155-39" aria-hidden="true"></a><span class="co"># A lookup table for task complexities</span></span>
+<span id="cb155-40"><a href="changing-signal-problem-analysis.html#cb155-40" aria-hidden="true"></a>task_label_lu &lt;-<span class="st"> </span><span class="kw">c</span>(</span>
+<span id="cb155-41"><a href="changing-signal-problem-analysis.html#cb155-41" aria-hidden="true"></a>  <span class="st">&quot;2&quot;</span> =<span class="st"> &quot;2-signal task&quot;</span>,</span>
+<span id="cb155-42"><a href="changing-signal-problem-analysis.html#cb155-42" aria-hidden="true"></a>  <span class="st">&quot;4&quot;</span> =<span class="st"> &quot;4-signal task&quot;</span>,</span>
+<span id="cb155-43"><a href="changing-signal-problem-analysis.html#cb155-43" aria-hidden="true"></a>  <span class="st">&quot;8&quot;</span> =<span class="st"> &quot;8-signal task&quot;</span>,</span>
+<span id="cb155-44"><a href="changing-signal-problem-analysis.html#cb155-44" aria-hidden="true"></a>  <span class="st">&quot;16&quot;</span> =<span class="st"> &quot;16-signal task&quot;</span>,</span>
+<span id="cb155-45"><a href="changing-signal-problem-analysis.html#cb155-45" aria-hidden="true"></a>  <span class="st">&quot;32&quot;</span> =<span class="st">&quot;32-signal task&quot;</span></span>
+<span id="cb155-46"><a href="changing-signal-problem-analysis.html#cb155-46" aria-hidden="true"></a>)</span>
+<span id="cb155-47"><a href="changing-signal-problem-analysis.html#cb155-47" aria-hidden="true"></a></span>
+<span id="cb155-48"><a href="changing-signal-problem-analysis.html#cb155-48" aria-hidden="true"></a><span class="co"># Configure our default graphing theme</span></span>
+<span id="cb155-49"><a href="changing-signal-problem-analysis.html#cb155-49" aria-hidden="true"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>())</span></code></pre></div>
 </div>
 <div id="does-regulation-hinder-the-evolution-of-successful-genotypes" class="section level2" number="9.4">
 <h2><span class="header-section-number">9.4</span> Does regulation hinder the evolution of successful genotypes?</h2>
 <p>Here, we look at the number of solutions evolved under regulation-enabled and regulation-disabled conditions.
 A program is categorized as a ‘solution’ if it can correctly respond to each of the <span class="math inline">\(K\)</span> environmental signals <em>during evaluation</em>.</p>
-<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="changing-signal-problem-analysis.html#cb153-1" aria-hidden="true"></a><span class="co"># Graph the number of solutions evolved in each condition, faceted by environmental complexity</span></span>
-<span id="cb153-2"><a href="changing-signal-problem-analysis.html#cb153-2" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
-<span id="cb153-3"><a href="changing-signal-problem-analysis.html#cb153-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>() <span class="op">+</span></span>
-<span id="cb153-4"><a href="changing-signal-problem-analysis.html#cb153-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
-<span id="cb153-5"><a href="changing-signal-problem-analysis.html#cb153-5" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span>,</span>
-<span id="cb153-6"><a href="changing-signal-problem-analysis.html#cb153-6" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
-<span id="cb153-7"><a href="changing-signal-problem-analysis.html#cb153-7" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.9</span>),</span>
-<span id="cb153-8"><a href="changing-signal-problem-analysis.html#cb153-8" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="dv">0</span></span>
-<span id="cb153-9"><a href="changing-signal-problem-analysis.html#cb153-9" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb153-10"><a href="changing-signal-problem-analysis.html#cb153-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb153-11"><a href="changing-signal-problem-analysis.html#cb153-11" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb153-12"><a href="changing-signal-problem-analysis.html#cb153-12" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>,<span class="st">&quot;both&quot;</span>),</span>
-<span id="cb153-13"><a href="changing-signal-problem-analysis.html#cb153-13" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
-<span id="cb153-14"><a href="changing-signal-problem-analysis.html#cb153-14" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb153-15"><a href="changing-signal-problem-analysis.html#cb153-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# successful replciates (/200)&quot;</span>) <span class="op">+</span></span>
-<span id="cb153-16"><a href="changing-signal-problem-analysis.html#cb153-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="op">+</span></span>
-<span id="cb153-17"><a href="changing-signal-problem-analysis.html#cb153-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Successful replicates&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="changing-signal-problem-analysis.html#cb156-1" aria-hidden="true"></a><span class="co"># Graph the number of solutions evolved in each condition, faceted by environmental complexity</span></span>
+<span id="cb156-2"><a href="changing-signal-problem-analysis.html#cb156-2" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
+<span id="cb156-3"><a href="changing-signal-problem-analysis.html#cb156-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>() <span class="op">+</span></span>
+<span id="cb156-4"><a href="changing-signal-problem-analysis.html#cb156-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
+<span id="cb156-5"><a href="changing-signal-problem-analysis.html#cb156-5" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span>,</span>
+<span id="cb156-6"><a href="changing-signal-problem-analysis.html#cb156-6" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
+<span id="cb156-7"><a href="changing-signal-problem-analysis.html#cb156-7" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.9</span>),</span>
+<span id="cb156-8"><a href="changing-signal-problem-analysis.html#cb156-8" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="dv">0</span></span>
+<span id="cb156-9"><a href="changing-signal-problem-analysis.html#cb156-9" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb156-10"><a href="changing-signal-problem-analysis.html#cb156-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb156-11"><a href="changing-signal-problem-analysis.html#cb156-11" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb156-12"><a href="changing-signal-problem-analysis.html#cb156-12" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>,<span class="st">&quot;both&quot;</span>),</span>
+<span id="cb156-13"><a href="changing-signal-problem-analysis.html#cb156-13" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb156-14"><a href="changing-signal-problem-analysis.html#cb156-14" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb156-15"><a href="changing-signal-problem-analysis.html#cb156-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# successful replciates (/200)&quot;</span>) <span class="op">+</span></span>
+<span id="cb156-16"><a href="changing-signal-problem-analysis.html#cb156-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="op">+</span></span>
+<span id="cb156-17"><a href="changing-signal-problem-analysis.html#cb156-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Successful replicates&quot;</span>)</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-86-1.png" width="672" /></p>
 <p>Programs capable of achieving a perfect score on the changing-signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
 These programs, however, do not necessarily generalize across all possible sequences of environmental signals.</p>
 <div id="does-access-to-regulation-slow-adaptation" class="section level3" number="9.4.1">
 <h3><span class="header-section-number">9.4.1</span> Does access to regulation slow adaptation?</h3>
 <p>I.e., did successful regulation-enabled programs take longer (more generations) to evolve than those evolved in the regulation-disabled treatment?</p>
-<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="changing-signal-problem-analysis.html#cb154-1" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>update, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
-<span id="cb154-2"><a href="changing-signal-problem-analysis.html#cb154-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_flat_violin</span>(</span>
-<span id="cb154-3"><a href="changing-signal-problem-analysis.html#cb154-3" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="fl">.2</span>, <span class="dt">y =</span> <span class="dv">0</span>),</span>
-<span id="cb154-4"><a href="changing-signal-problem-analysis.html#cb154-4" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">.8</span></span>
-<span id="cb154-5"><a href="changing-signal-problem-analysis.html#cb154-5" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb154-6"><a href="changing-signal-problem-analysis.html#cb154-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
-<span id="cb154-7"><a href="changing-signal-problem-analysis.html#cb154-7" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">y =</span> update, <span class="dt">color =</span> condition),</span>
-<span id="cb154-8"><a href="changing-signal-problem-analysis.html#cb154-8" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_jitter</span>(<span class="dt">width =</span> <span class="fl">.15</span>),</span>
-<span id="cb154-9"><a href="changing-signal-problem-analysis.html#cb154-9" aria-hidden="true"></a>    <span class="dt">size =</span> <span class="fl">.5</span>,</span>
-<span id="cb154-10"><a href="changing-signal-problem-analysis.html#cb154-10" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.8</span></span>
-<span id="cb154-11"><a href="changing-signal-problem-analysis.html#cb154-11" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb154-12"><a href="changing-signal-problem-analysis.html#cb154-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>(</span>
-<span id="cb154-13"><a href="changing-signal-problem-analysis.html#cb154-13" aria-hidden="true"></a>    <span class="dt">width =</span> <span class="fl">.1</span>,</span>
-<span id="cb154-14"><a href="changing-signal-problem-analysis.html#cb154-14" aria-hidden="true"></a>    <span class="dt">outlier.shape =</span> <span class="ot">NA</span>,</span>
-<span id="cb154-15"><a href="changing-signal-problem-analysis.html#cb154-15" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.5</span></span>
-<span id="cb154-16"><a href="changing-signal-problem-analysis.html#cb154-16" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb154-17"><a href="changing-signal-problem-analysis.html#cb154-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb154-18"><a href="changing-signal-problem-analysis.html#cb154-18" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb154-19"><a href="changing-signal-problem-analysis.html#cb154-19" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
-<span id="cb154-20"><a href="changing-signal-problem-analysis.html#cb154-20" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
-<span id="cb154-21"><a href="changing-signal-problem-analysis.html#cb154-21" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb154-22"><a href="changing-signal-problem-analysis.html#cb154-22" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(</span>
-<span id="cb154-23"><a href="changing-signal-problem-analysis.html#cb154-23" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Generation first solution evolved </span><span class="ch">\n</span><span class="st">(log scale)&quot;</span>,</span>
-<span id="cb154-24"><a href="changing-signal-problem-analysis.html#cb154-24" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb154-25"><a href="changing-signal-problem-analysis.html#cb154-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
-<span id="cb154-26"><a href="changing-signal-problem-analysis.html#cb154-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb157-1"><a href="changing-signal-problem-analysis.html#cb157-1" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>update, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
+<span id="cb157-2"><a href="changing-signal-problem-analysis.html#cb157-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_flat_violin</span>(</span>
+<span id="cb157-3"><a href="changing-signal-problem-analysis.html#cb157-3" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="fl">.2</span>, <span class="dt">y =</span> <span class="dv">0</span>),</span>
+<span id="cb157-4"><a href="changing-signal-problem-analysis.html#cb157-4" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">.8</span></span>
+<span id="cb157-5"><a href="changing-signal-problem-analysis.html#cb157-5" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-6"><a href="changing-signal-problem-analysis.html#cb157-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
+<span id="cb157-7"><a href="changing-signal-problem-analysis.html#cb157-7" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">y =</span> update, <span class="dt">color =</span> condition),</span>
+<span id="cb157-8"><a href="changing-signal-problem-analysis.html#cb157-8" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_jitter</span>(<span class="dt">width =</span> <span class="fl">.15</span>),</span>
+<span id="cb157-9"><a href="changing-signal-problem-analysis.html#cb157-9" aria-hidden="true"></a>    <span class="dt">size =</span> <span class="fl">.5</span>,</span>
+<span id="cb157-10"><a href="changing-signal-problem-analysis.html#cb157-10" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.8</span></span>
+<span id="cb157-11"><a href="changing-signal-problem-analysis.html#cb157-11" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-12"><a href="changing-signal-problem-analysis.html#cb157-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>(</span>
+<span id="cb157-13"><a href="changing-signal-problem-analysis.html#cb157-13" aria-hidden="true"></a>    <span class="dt">width =</span> <span class="fl">.1</span>,</span>
+<span id="cb157-14"><a href="changing-signal-problem-analysis.html#cb157-14" aria-hidden="true"></a>    <span class="dt">outlier.shape =</span> <span class="ot">NA</span>,</span>
+<span id="cb157-15"><a href="changing-signal-problem-analysis.html#cb157-15" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb157-16"><a href="changing-signal-problem-analysis.html#cb157-16" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-17"><a href="changing-signal-problem-analysis.html#cb157-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb157-18"><a href="changing-signal-problem-analysis.html#cb157-18" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb157-19"><a href="changing-signal-problem-analysis.html#cb157-19" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb157-20"><a href="changing-signal-problem-analysis.html#cb157-20" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb157-21"><a href="changing-signal-problem-analysis.html#cb157-21" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-22"><a href="changing-signal-problem-analysis.html#cb157-22" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(</span>
+<span id="cb157-23"><a href="changing-signal-problem-analysis.html#cb157-23" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Generation first solution evolved </span><span class="ch">\n</span><span class="st">(log scale)&quot;</span>,</span>
+<span id="cb157-24"><a href="changing-signal-problem-analysis.html#cb157-24" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb157-25"><a href="changing-signal-problem-analysis.html#cb157-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
+<span id="cb157-26"><a href="changing-signal-problem-analysis.html#cb157-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>)</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-87-1.png" width="672" /></p>
-<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="changing-signal-problem-analysis.html#cb155-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>update<span class="op">~</span>condition, <span class="dt">data=</span>sol_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="changing-signal-problem-analysis.html#cb158-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>update<span class="op">~</span>condition, <span class="dt">data=</span>sol_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
 <pre><code>## 
 ##  Wilcoxon rank sum test with continuity correction
 ## 
@@ -506,62 +506,62 @@ These programs, however, do not necessarily generalize across all possible seque
 We re-evaluated each ‘solution’ on a random sample of 5000 sequences of environmental signals to test for generalization.
 We deem programs as having successfully generalized only if they responded correctly in all 5000 tests.</p>
 <p>To see if regulation is preventing some regulation-enabled solutions from generalizing, we test generalization for regulation-enabled solutions with their regulation faculties knocked out (i.e., regulation instructions replaced with no-operations).</p>
-<div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb157-1"><a href="changing-signal-problem-analysis.html#cb157-1" aria-hidden="true"></a><span class="co"># Grab count data to make bar plot life easier</span></span>
-<span id="cb157-2"><a href="changing-signal-problem-analysis.html#cb157-2" aria-hidden="true"></a>num_solutions_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
-<span id="cb157-3"><a href="changing-signal-problem-analysis.html#cb157-3" aria-hidden="true"></a>num_generalize_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
-<span id="cb157-4"><a href="changing-signal-problem-analysis.html#cb157-4" aria-hidden="true"></a>num_generalize_ko_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution_ko_reg<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
-<span id="cb157-5"><a href="changing-signal-problem-analysis.html#cb157-5" aria-hidden="true"></a></span>
-<span id="cb157-6"><a href="changing-signal-problem-analysis.html#cb157-6" aria-hidden="true"></a>num_generalize_mem &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;memory&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
-<span id="cb157-7"><a href="changing-signal-problem-analysis.html#cb157-7" aria-hidden="true"></a></span>
-<span id="cb157-8"><a href="changing-signal-problem-analysis.html#cb157-8" aria-hidden="true"></a>sol_cnts &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x=</span><span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)</span>
-<span id="cb157-9"><a href="changing-signal-problem-analysis.html#cb157-9" aria-hidden="true"></a>sol_cnts<span class="op">$</span>type &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg_generalize&quot;</span>, <span class="st">&quot;reg_generalize_ko_reg&quot;</span>, <span class="st">&quot;mem_generalize&quot;</span>)</span>
-<span id="cb157-10"><a href="changing-signal-problem-analysis.html#cb157-10" aria-hidden="true"></a>sol_cnts<span class="op">$</span>val &lt;-<span class="st"> </span><span class="kw">c</span>(num_generalize_reg, num_generalize_ko_reg, num_generalize_mem)</span>
-<span id="cb157-11"><a href="changing-signal-problem-analysis.html#cb157-11" aria-hidden="true"></a></span>
-<span id="cb157-12"><a href="changing-signal-problem-analysis.html#cb157-12" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_cnts, <span class="kw">aes</span>(<span class="dt">x=</span>type, <span class="dt">y=</span>val, <span class="dt">fill=</span>type) ) <span class="op">+</span></span>
-<span id="cb157-13"><a href="changing-signal-problem-analysis.html#cb157-13" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>) <span class="op">+</span></span>
-<span id="cb157-14"><a href="changing-signal-problem-analysis.html#cb157-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
-<span id="cb157-15"><a href="changing-signal-problem-analysis.html#cb157-15" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">label=</span>val),</span>
-<span id="cb157-16"><a href="changing-signal-problem-analysis.html#cb157-16" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>,</span>
-<span id="cb157-17"><a href="changing-signal-problem-analysis.html#cb157-17" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.75</span>),</span>
-<span id="cb157-18"><a href="changing-signal-problem-analysis.html#cb157-18" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.01</span></span>
-<span id="cb157-19"><a href="changing-signal-problem-analysis.html#cb157-19" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb157-20"><a href="changing-signal-problem-analysis.html#cb157-20" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb157-21"><a href="changing-signal-problem-analysis.html#cb157-21" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb157-22"><a href="changing-signal-problem-analysis.html#cb157-22" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(</span>
-<span id="cb157-23"><a href="changing-signal-problem-analysis.html#cb157-23" aria-hidden="true"></a>      <span class="st">&quot;mem_generalize&quot;</span>,</span>
-<span id="cb157-24"><a href="changing-signal-problem-analysis.html#cb157-24" aria-hidden="true"></a>      <span class="st">&quot;reg_generalize&quot;</span>,</span>
-<span id="cb157-25"><a href="changing-signal-problem-analysis.html#cb157-25" aria-hidden="true"></a>      <span class="st">&quot;reg_generalize_ko_reg&quot;</span></span>
-<span id="cb157-26"><a href="changing-signal-problem-analysis.html#cb157-26" aria-hidden="true"></a>      ),</span>
-<span id="cb157-27"><a href="changing-signal-problem-analysis.html#cb157-27" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(</span>
-<span id="cb157-28"><a href="changing-signal-problem-analysis.html#cb157-28" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,</span>
-<span id="cb157-29"><a href="changing-signal-problem-analysis.html#cb157-29" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>,</span>
-<span id="cb157-30"><a href="changing-signal-problem-analysis.html#cb157-30" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled</span><span class="ch">\n</span><span class="st">(reg. KO)&quot;</span></span>
-<span id="cb157-31"><a href="changing-signal-problem-analysis.html#cb157-31" aria-hidden="true"></a>    )</span>
-<span id="cb157-32"><a href="changing-signal-problem-analysis.html#cb157-32" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb157-33"><a href="changing-signal-problem-analysis.html#cb157-33" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(</span>
-<span id="cb157-34"><a href="changing-signal-problem-analysis.html#cb157-34" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Solutions that generalize&quot;</span>,</span>
-<span id="cb157-35"><a href="changing-signal-problem-analysis.html#cb157-35" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">210</span>),</span>
-<span id="cb157-36"><a href="changing-signal-problem-analysis.html#cb157-36" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">seq</span>(<span class="dv">0</span>,<span class="dv">200</span>,<span class="dv">50</span>)</span>
-<span id="cb157-37"><a href="changing-signal-problem-analysis.html#cb157-37" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb157-38"><a href="changing-signal-problem-analysis.html#cb157-38" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
-<span id="cb157-39"><a href="changing-signal-problem-analysis.html#cb157-39" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span>,</span>
-<span id="cb157-40"><a href="changing-signal-problem-analysis.html#cb157-40" aria-hidden="true"></a>    <span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>)</span>
-<span id="cb157-41"><a href="changing-signal-problem-analysis.html#cb157-41" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb157-42"><a href="changing-signal-problem-analysis.html#cb157-42" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/chg-env-16-generalization.png&quot;</span>), <span class="dt">width=</span><span class="dv">4</span>,<span class="dt">height=</span><span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb160"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb160-1"><a href="changing-signal-problem-analysis.html#cb160-1" aria-hidden="true"></a><span class="co"># Grab count data to make bar plot life easier</span></span>
+<span id="cb160-2"><a href="changing-signal-problem-analysis.html#cb160-2" aria-hidden="true"></a>num_solutions_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
+<span id="cb160-3"><a href="changing-signal-problem-analysis.html#cb160-3" aria-hidden="true"></a>num_generalize_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
+<span id="cb160-4"><a href="changing-signal-problem-analysis.html#cb160-4" aria-hidden="true"></a>num_generalize_ko_reg &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;both&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution_ko_reg<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
+<span id="cb160-5"><a href="changing-signal-problem-analysis.html#cb160-5" aria-hidden="true"></a></span>
+<span id="cb160-6"><a href="changing-signal-problem-analysis.html#cb160-6" aria-hidden="true"></a>num_generalize_mem &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">filter</span>(data, condition<span class="op">==</span><span class="st">&quot;memory&quot;</span> <span class="op">&amp;</span><span class="st"> </span>all_solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)<span class="op">$</span>SEED)</span>
+<span id="cb160-7"><a href="changing-signal-problem-analysis.html#cb160-7" aria-hidden="true"></a></span>
+<span id="cb160-8"><a href="changing-signal-problem-analysis.html#cb160-8" aria-hidden="true"></a>sol_cnts &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x=</span><span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)</span>
+<span id="cb160-9"><a href="changing-signal-problem-analysis.html#cb160-9" aria-hidden="true"></a>sol_cnts<span class="op">$</span>type &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg_generalize&quot;</span>, <span class="st">&quot;reg_generalize_ko_reg&quot;</span>, <span class="st">&quot;mem_generalize&quot;</span>)</span>
+<span id="cb160-10"><a href="changing-signal-problem-analysis.html#cb160-10" aria-hidden="true"></a>sol_cnts<span class="op">$</span>val &lt;-<span class="st"> </span><span class="kw">c</span>(num_generalize_reg, num_generalize_ko_reg, num_generalize_mem)</span>
+<span id="cb160-11"><a href="changing-signal-problem-analysis.html#cb160-11" aria-hidden="true"></a></span>
+<span id="cb160-12"><a href="changing-signal-problem-analysis.html#cb160-12" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_cnts, <span class="kw">aes</span>(<span class="dt">x=</span>type, <span class="dt">y=</span>val, <span class="dt">fill=</span>type) ) <span class="op">+</span></span>
+<span id="cb160-13"><a href="changing-signal-problem-analysis.html#cb160-13" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>) <span class="op">+</span></span>
+<span id="cb160-14"><a href="changing-signal-problem-analysis.html#cb160-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
+<span id="cb160-15"><a href="changing-signal-problem-analysis.html#cb160-15" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">label=</span>val),</span>
+<span id="cb160-16"><a href="changing-signal-problem-analysis.html#cb160-16" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>,</span>
+<span id="cb160-17"><a href="changing-signal-problem-analysis.html#cb160-17" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.75</span>),</span>
+<span id="cb160-18"><a href="changing-signal-problem-analysis.html#cb160-18" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="op">-</span><span class="fl">0.01</span></span>
+<span id="cb160-19"><a href="changing-signal-problem-analysis.html#cb160-19" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb160-20"><a href="changing-signal-problem-analysis.html#cb160-20" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb160-21"><a href="changing-signal-problem-analysis.html#cb160-21" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb160-22"><a href="changing-signal-problem-analysis.html#cb160-22" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(</span>
+<span id="cb160-23"><a href="changing-signal-problem-analysis.html#cb160-23" aria-hidden="true"></a>      <span class="st">&quot;mem_generalize&quot;</span>,</span>
+<span id="cb160-24"><a href="changing-signal-problem-analysis.html#cb160-24" aria-hidden="true"></a>      <span class="st">&quot;reg_generalize&quot;</span>,</span>
+<span id="cb160-25"><a href="changing-signal-problem-analysis.html#cb160-25" aria-hidden="true"></a>      <span class="st">&quot;reg_generalize_ko_reg&quot;</span></span>
+<span id="cb160-26"><a href="changing-signal-problem-analysis.html#cb160-26" aria-hidden="true"></a>      ),</span>
+<span id="cb160-27"><a href="changing-signal-problem-analysis.html#cb160-27" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(</span>
+<span id="cb160-28"><a href="changing-signal-problem-analysis.html#cb160-28" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>,</span>
+<span id="cb160-29"><a href="changing-signal-problem-analysis.html#cb160-29" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>,</span>
+<span id="cb160-30"><a href="changing-signal-problem-analysis.html#cb160-30" aria-hidden="true"></a>      <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled</span><span class="ch">\n</span><span class="st">(reg. KO)&quot;</span></span>
+<span id="cb160-31"><a href="changing-signal-problem-analysis.html#cb160-31" aria-hidden="true"></a>    )</span>
+<span id="cb160-32"><a href="changing-signal-problem-analysis.html#cb160-32" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb160-33"><a href="changing-signal-problem-analysis.html#cb160-33" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(</span>
+<span id="cb160-34"><a href="changing-signal-problem-analysis.html#cb160-34" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Solutions that generalize&quot;</span>,</span>
+<span id="cb160-35"><a href="changing-signal-problem-analysis.html#cb160-35" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">210</span>),</span>
+<span id="cb160-36"><a href="changing-signal-problem-analysis.html#cb160-36" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">seq</span>(<span class="dv">0</span>,<span class="dv">200</span>,<span class="dv">50</span>)</span>
+<span id="cb160-37"><a href="changing-signal-problem-analysis.html#cb160-37" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb160-38"><a href="changing-signal-problem-analysis.html#cb160-38" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb160-39"><a href="changing-signal-problem-analysis.html#cb160-39" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span>,</span>
+<span id="cb160-40"><a href="changing-signal-problem-analysis.html#cb160-40" aria-hidden="true"></a>    <span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>)</span>
+<span id="cb160-41"><a href="changing-signal-problem-analysis.html#cb160-41" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb160-42"><a href="changing-signal-problem-analysis.html#cb160-42" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/chg-env-16-generalization.png&quot;</span>), <span class="dt">width=</span><span class="dv">4</span>,<span class="dt">height=</span><span class="dv">4</span>)</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-88-1.png" width="672" /></p>
 <p>All regulation-disabled programs successfully generalized.</p>
-<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="changing-signal-problem-analysis.html#cb158-1" aria-hidden="true"></a>table &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(num_generalize_reg,</span>
-<span id="cb158-2"><a href="changing-signal-problem-analysis.html#cb158-2" aria-hidden="true"></a>                  num_generalize_mem,</span>
-<span id="cb158-3"><a href="changing-signal-problem-analysis.html#cb158-3" aria-hidden="true"></a>                  <span class="dv">200</span> <span class="op">-</span><span class="st"> </span>num_generalize_reg,</span>
-<span id="cb158-4"><a href="changing-signal-problem-analysis.html#cb158-4" aria-hidden="true"></a>                  <span class="dv">200</span> <span class="op">-</span><span class="st"> </span>num_generalize_mem),</span>
-<span id="cb158-5"><a href="changing-signal-problem-analysis.html#cb158-5" aria-hidden="true"></a>                <span class="dt">nrow=</span><span class="dv">2</span>)</span>
-<span id="cb158-6"><a href="changing-signal-problem-analysis.html#cb158-6" aria-hidden="true"></a><span class="kw">rownames</span>(table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg-augmented&quot;</span>, <span class="st">&quot;reg-disabled&quot;</span>)</span>
-<span id="cb158-7"><a href="changing-signal-problem-analysis.html#cb158-7" aria-hidden="true"></a><span class="kw">colnames</span>(table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;success&quot;</span>, <span class="st">&quot;fail&quot;</span>)</span>
-<span id="cb158-8"><a href="changing-signal-problem-analysis.html#cb158-8" aria-hidden="true"></a><span class="kw">print</span>(table)</span></code></pre></div>
+<div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb161-1"><a href="changing-signal-problem-analysis.html#cb161-1" aria-hidden="true"></a>table &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(num_generalize_reg,</span>
+<span id="cb161-2"><a href="changing-signal-problem-analysis.html#cb161-2" aria-hidden="true"></a>                  num_generalize_mem,</span>
+<span id="cb161-3"><a href="changing-signal-problem-analysis.html#cb161-3" aria-hidden="true"></a>                  <span class="dv">200</span> <span class="op">-</span><span class="st"> </span>num_generalize_reg,</span>
+<span id="cb161-4"><a href="changing-signal-problem-analysis.html#cb161-4" aria-hidden="true"></a>                  <span class="dv">200</span> <span class="op">-</span><span class="st"> </span>num_generalize_mem),</span>
+<span id="cb161-5"><a href="changing-signal-problem-analysis.html#cb161-5" aria-hidden="true"></a>                <span class="dt">nrow=</span><span class="dv">2</span>)</span>
+<span id="cb161-6"><a href="changing-signal-problem-analysis.html#cb161-6" aria-hidden="true"></a><span class="kw">rownames</span>(table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg-augmented&quot;</span>, <span class="st">&quot;reg-disabled&quot;</span>)</span>
+<span id="cb161-7"><a href="changing-signal-problem-analysis.html#cb161-7" aria-hidden="true"></a><span class="kw">colnames</span>(table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;success&quot;</span>, <span class="st">&quot;fail&quot;</span>)</span>
+<span id="cb161-8"><a href="changing-signal-problem-analysis.html#cb161-8" aria-hidden="true"></a><span class="kw">print</span>(table)</span></code></pre></div>
 <pre><code>##               success fail
 ## reg-augmented     182   18
 ## reg-disabled      200    0</code></pre>
-<div class="sourceCode" id="cb160"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb160-1"><a href="changing-signal-problem-analysis.html#cb160-1" aria-hidden="true"></a><span class="kw">fisher.test</span>(table)</span></code></pre></div>
+<div class="sourceCode" id="cb163"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb163-1"><a href="changing-signal-problem-analysis.html#cb163-1" aria-hidden="true"></a><span class="kw">fisher.test</span>(table)</span></code></pre></div>
 <pre><code>## 
 ##  Fisher&#39;s Exact Test for Count Data
 ## 

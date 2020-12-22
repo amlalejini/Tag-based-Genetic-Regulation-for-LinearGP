@@ -112,7 +112,7 @@
 
 \title{Supplemental Material for Tag-based Genetic Regulation for Genetic Programming}
 \author{Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria}
-\date{2020-12-18}
+\date{2020-12-22}
 
 \begin{document}
 \maketitle
@@ -1794,18 +1794,34 @@ Here, we compare the generation at which solutions arise (only at difficulty lev
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{( }\DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(sol\_data, NUM\_SIGNAL\_RESPONSES }\OperatorTok{\%in\%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{)), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
+\NormalTok{unfinished\_data \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(max\_fit\_org\_data, solution}\OperatorTok{==}\StringTok{"0"}\NormalTok{)}
+\NormalTok{unfinished\_data}\OperatorTok{$}\NormalTok{graph\_update \textless{}{-}}\StringTok{ }\DecValTok{100000}
+
+\KeywordTok{ggplot}\NormalTok{( ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_flat\_violin}\NormalTok{(}
+    \DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(sol\_data, NUM\_SIGNAL\_RESPONSES }\OperatorTok{\%in\%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{)),}
+    \DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition),}
     \DataTypeTok{position =} \KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
     \DataTypeTok{alpha =} \FloatTok{.8}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
-    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition),}
+    \DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(sol\_data, NUM\_SIGNAL\_RESPONSES }\OperatorTok{\%in\%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{)),}
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition),}
+    \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
+    \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.8}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
+    \DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(unfinished\_data, NUM\_SIGNAL\_RESPONSES }\OperatorTok{\%in\%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{) ) ,}
+    \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{graph\_update),}
+    \DataTypeTok{color=}\StringTok{"gray"}\NormalTok{,}
     \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
     \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
     \DataTypeTok{alpha =} \FloatTok{0.8}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{(}
+    \DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(sol\_data, NUM\_SIGNAL\_RESPONSES }\OperatorTok{\%in\%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{)),}
+    \DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition),}
     \DataTypeTok{width =} \FloatTok{.1}\NormalTok{,}
     \DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{,}
     \DataTypeTok{alpha =} \FloatTok{0.5}
@@ -1813,33 +1829,52 @@ Here, we compare the generation at which solutions arise (only at difficulty lev
 \StringTok{  }\KeywordTok{scale\_x\_discrete}\NormalTok{(}
     \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}enabled"}\NormalTok{)}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
     \DataTypeTok{name=}\StringTok{"Generation first solution evolved }\CharTok{\textbackslash{}n}\StringTok{(log scale)"}\NormalTok{,}
-    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, generations),}
-    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{10000}\NormalTok{),}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100000}\NormalTok{),}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{10000}\NormalTok{, }\DecValTok{100000}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"0"}\NormalTok{, }\StringTok{"10"}\NormalTok{, }\StringTok{"100"}\NormalTok{, }\StringTok{"1000"}\NormalTok{, }\StringTok{"10000"}\NormalTok{, }\StringTok{"Unsolved"}\NormalTok{),}
     \DataTypeTok{trans=}\StringTok{"pseudo\_log"}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{facet\_wrap}\NormalTok{(}
     \OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{NUM\_SIGNAL\_RESPONSES,}
     \DataTypeTok{nrow=}\DecValTok{1}\NormalTok{,}
-    \DataTypeTok{labeller=}\KeywordTok{labeller}\NormalTok{(}\DataTypeTok{NUM\_SIGNAL\_RESPONSES=}\NormalTok{label\_lu)}
+    \DataTypeTok{labeller=}\KeywordTok{labeller}\NormalTok{(}
+      \DataTypeTok{NUM\_SIGNAL\_RESPONSES=}\KeywordTok{c}\NormalTok{(}
+        \StringTok{"2"}\NormalTok{ =}\StringTok{ "Two{-}signal task"}\NormalTok{,}
+        \StringTok{"4"}\NormalTok{ =}\StringTok{ "Four{-}signal task"}\NormalTok{,}
+        \StringTok{"8"}\NormalTok{ =}\StringTok{ "Eight{-}signal task"}\NormalTok{,}
+        \StringTok{"16"}\NormalTok{ =}\StringTok{ "Sixteen{-}signal task"}
+\NormalTok{      )}
+\NormalTok{    )}
 \NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\CommentTok{\# coord\_flip() +}
 \StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
-    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"./imgs/repeated{-}signal{-}solve{-}time{-}cloud.png"}\NormalTok{),}
-    \DataTypeTok{width=}\DecValTok{5}\NormalTok{,}
-    \DataTypeTok{height=}\DecValTok{4}
+    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"./imgs/repeated{-}signal{-}solve{-}time{-}cloud.pdf"}\NormalTok{),}
+    \DataTypeTok{width=}\DecValTok{8}\NormalTok{,}
+    \DataTypeTok{height=}\DecValTok{5}
 \NormalTok{  )}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## Warning: Removed 100 rows containing missing values (geom_point).
+## Warning: Removed 106 rows containing missing values (geom_point).
+\end{verbatim}
 
-## Warning: Removed 100 rows containing missing values (geom_point).
+\begin{verbatim}
+## Warning: Removed 120 rows containing missing values (geom_point).
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 106 rows containing missing values (geom_point).
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 120 rows containing missing values (geom_point).
 \end{verbatim}
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-15-1.pdf}
@@ -2845,10 +2880,15 @@ Horizontal orientation:
       \StringTok{"neutral"}\NormalTok{,}
       \StringTok{"repressed"}
 \NormalTok{    ),}
+    \CommentTok{\# labels=c(}
+    \CommentTok{\#   "+",}
+    \CommentTok{\#   "\textbackslash{}u00F8",}
+    \CommentTok{\#   "{-}"}
+    \CommentTok{\# ),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}
-      \StringTok{"+"}\NormalTok{,}
-      \StringTok{"\textbackslash{}u00F8"}\NormalTok{,}
-      \StringTok{"{-}"}
+      \StringTok{"Promoted"}\NormalTok{,}
+      \StringTok{"Neutral"}\NormalTok{,}
+      \StringTok{"Repressed"}
 \NormalTok{    ),}
     \DataTypeTok{discrete=}\OtherTok{TRUE}\NormalTok{,}
     \DataTypeTok{direction=}\OperatorTok{{-}}\DecValTok{1}
@@ -2905,7 +2945,7 @@ Horizontal orientation:
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}
     \DataTypeTok{legend.position =} \StringTok{"top"}\NormalTok{,}
-    \DataTypeTok{legend.text =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{9}\NormalTok{),}
+    \DataTypeTok{legend.text =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{8}\NormalTok{),}
     \DataTypeTok{legend.title=}\KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{8}\NormalTok{),}
     \DataTypeTok{axis.text.y =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{8}\NormalTok{),}
     \DataTypeTok{axis.title.y =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{8}\NormalTok{),}
@@ -3436,18 +3476,34 @@ Test for significance using Fisher's exact test.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{( }\DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(sol\_data, task}\OperatorTok{==}\StringTok{"S4"}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
+\NormalTok{unfinished\_data \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(data, solution}\OperatorTok{==}\StringTok{"0"}\NormalTok{)}
+\NormalTok{unfinished\_data}\OperatorTok{$}\NormalTok{graph\_update \textless{}{-}}\StringTok{ }\DecValTok{12500}
+
+\KeywordTok{ggplot}\NormalTok{( ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_flat\_violin}\NormalTok{(}
-    \DataTypeTok{position=}\KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
-    \DataTypeTok{alpha=}\NormalTok{.}\DecValTok{8}
+    \DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(sol\_data, task}\OperatorTok{==}\StringTok{"S4"}\NormalTok{),}
+    \DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition),}
+    \DataTypeTok{position =} \KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
+    \DataTypeTok{alpha =} \FloatTok{.8}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
-    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition),}
+    \DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(sol\_data, task}\OperatorTok{==}\StringTok{"S4"}\NormalTok{),}
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition),}
+    \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
+    \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.8}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
+    \DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(unfinished\_data, task}\OperatorTok{==}\StringTok{"S4"}\NormalTok{ ),}
+    \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{graph\_update),}
+    \DataTypeTok{color=}\StringTok{"gray"}\NormalTok{,}
     \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
     \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
     \DataTypeTok{alpha =} \FloatTok{0.8}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{(}
+    \DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(sol\_data, task}\OperatorTok{==}\StringTok{"S4"}\NormalTok{),}
+    \DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition),}
     \DataTypeTok{width =} \FloatTok{.1}\NormalTok{,}
     \DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{,}
     \DataTypeTok{alpha =} \FloatTok{0.5}
@@ -3457,11 +3513,17 @@ Test for significance using Fisher's exact test.
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Generation first solution evolved"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Generation first solution evolved"}\NormalTok{,}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{13000}\NormalTok{),}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{2500}\NormalTok{, }\DecValTok{5000}\NormalTok{, }\DecValTok{7500}\NormalTok{, }\DecValTok{10000}\NormalTok{, }\DecValTok{12500}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"0"}\NormalTok{, }\StringTok{"2500"}\NormalTok{, }\StringTok{"5000"}\NormalTok{, }\StringTok{"7500"}\NormalTok{, }\StringTok{"10000"}\NormalTok{, }\StringTok{"Unsolved"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\CommentTok{\# coord\_flip() +}
 \StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
-    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/context{-}signal{-}solve{-}time{-}cloud.png"}\NormalTok{),}
+    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/context{-}signal{-}solve{-}time{-}cloud.pdf"}\NormalTok{),}
     \DataTypeTok{width=}\DecValTok{4}\NormalTok{,}
     \DataTypeTok{height=}\DecValTok{4}
 \NormalTok{  )}
@@ -4207,18 +4269,34 @@ Test for significance using Fisher's exact test.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{( }\DataTypeTok{data =}\NormalTok{ sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
+\NormalTok{unfinished\_data \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(data, solution}\OperatorTok{==}\StringTok{"0"}\NormalTok{)}
+\NormalTok{unfinished\_data}\OperatorTok{$}\NormalTok{graph\_update \textless{}{-}}\StringTok{ }\DecValTok{12500}
+
+\KeywordTok{ggplot}\NormalTok{( ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_flat\_violin}\NormalTok{(}
-    \DataTypeTok{position=}\KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
-    \DataTypeTok{alpha=}\NormalTok{.}\DecValTok{8}
+    \DataTypeTok{data =}\NormalTok{ sol\_data,}
+    \DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition),}
+    \DataTypeTok{position =} \KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
+    \DataTypeTok{alpha =} \FloatTok{.8}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
-    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition),}
+    \DataTypeTok{data =}\NormalTok{ sol\_data,}
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition),}
     \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
     \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
     \DataTypeTok{alpha =} \FloatTok{0.8}
 \NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
+    \DataTypeTok{data =}\NormalTok{ unfinished\_data,}
+    \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{graph\_update),}
+    \DataTypeTok{color=}\StringTok{"gray"}\NormalTok{,}
+    \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{, }\DataTypeTok{height=}\DecValTok{500}\NormalTok{),}
+    \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.8}
+\NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{(}
+    \DataTypeTok{data =}\NormalTok{ sol\_data,}
+    \DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition),}
     \DataTypeTok{width =} \FloatTok{.1}\NormalTok{,}
     \DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{,}
     \DataTypeTok{alpha =} \FloatTok{0.5}
@@ -4228,11 +4306,17 @@ Test for significance using Fisher's exact test.
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Generation first solution evolved"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Generation first solution evolved"}\NormalTok{,}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{13000}\NormalTok{),}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{2500}\NormalTok{, }\DecValTok{5000}\NormalTok{, }\DecValTok{7500}\NormalTok{, }\DecValTok{10000}\NormalTok{, }\DecValTok{12500}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"0"}\NormalTok{, }\StringTok{"2500"}\NormalTok{, }\StringTok{"5000"}\NormalTok{, }\StringTok{"7500"}\NormalTok{, }\StringTok{"10000"}\NormalTok{, }\StringTok{"Unsolved"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\CommentTok{\# coord\_flip() +}
 \StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
-    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/boolean{-}calc{-}prefix{-}solve{-}time{-}cloud.png"}\NormalTok{),}
+    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/boolean{-}calc{-}prefix{-}solve{-}time{-}cloud.pdf"}\NormalTok{),}
     \DataTypeTok{width=}\DecValTok{4}\NormalTok{,}
     \DataTypeTok{height=}\DecValTok{4}
 \NormalTok{  )}
@@ -4705,9 +4789,9 @@ Horizontal orientation:
       \StringTok{"repressed"}
 \NormalTok{    ),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}
-      \StringTok{"+"}\NormalTok{,}
-      \StringTok{"\textbackslash{}u00F8"}\NormalTok{,}
-      \StringTok{"{-}"}
+      \StringTok{"Promoted"}\NormalTok{,}
+      \StringTok{"Neutral"}\NormalTok{,}
+      \StringTok{"Repressed"}
 \NormalTok{    ),}
     \DataTypeTok{discrete=}\OtherTok{TRUE}\NormalTok{,}
     \DataTypeTok{direction=}\OperatorTok{{-}}\DecValTok{1}
@@ -5638,18 +5722,34 @@ Test for significance using Fisher's exact test.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{( }\DataTypeTok{data =}\NormalTok{ sol\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition) ) }\OperatorTok{+}
+\NormalTok{unfinished\_data \textless{}{-}}\StringTok{ }\KeywordTok{filter}\NormalTok{(data, solution}\OperatorTok{==}\StringTok{"0"}\NormalTok{)}
+\NormalTok{unfinished\_data}\OperatorTok{$}\NormalTok{graph\_update \textless{}{-}}\StringTok{ }\DecValTok{12500}
+
+\KeywordTok{ggplot}\NormalTok{( ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_flat\_violin}\NormalTok{(}
-    \DataTypeTok{position=}\KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
-    \DataTypeTok{alpha=}\NormalTok{.}\DecValTok{8}
+    \DataTypeTok{data =}\NormalTok{ sol\_data,}
+    \DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition),}
+    \DataTypeTok{position =} \KeywordTok{position\_nudge}\NormalTok{(}\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{),}
+    \DataTypeTok{alpha =} \FloatTok{.8}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
-    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition),}
+    \DataTypeTok{data =}\NormalTok{ sol\_data,}
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{color=}\NormalTok{condition),}
     \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{),}
     \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
     \DataTypeTok{alpha =} \FloatTok{0.8}
 \NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{(}
+    \DataTypeTok{data =}\NormalTok{ unfinished\_data,}
+    \DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{graph\_update),}
+    \DataTypeTok{color=}\StringTok{"gray"}\NormalTok{,}
+    \DataTypeTok{position =} \KeywordTok{position\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.15}\NormalTok{, }\DataTypeTok{height=}\DecValTok{500}\NormalTok{),}
+    \DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
+    \DataTypeTok{alpha =} \FloatTok{0.8}
+\NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom\_boxplot}\NormalTok{(}
+    \DataTypeTok{data =}\NormalTok{ sol\_data,}
+    \DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{condition, }\DataTypeTok{y=}\NormalTok{update, }\DataTypeTok{fill=}\NormalTok{condition),}
     \DataTypeTok{width =} \FloatTok{.1}\NormalTok{,}
     \DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{,}
     \DataTypeTok{alpha =} \FloatTok{0.5}
@@ -5659,11 +5759,17 @@ Test for significance using Fisher's exact test.
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation{-}}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}\DataTypeTok{name=}\StringTok{"Generation first solution evolved"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale\_y\_continuous}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Generation first solution evolved"}\NormalTok{,}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{13000}\NormalTok{),}
+    \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{2500}\NormalTok{, }\DecValTok{5000}\NormalTok{, }\DecValTok{7500}\NormalTok{, }\DecValTok{10000}\NormalTok{, }\DecValTok{12500}\NormalTok{),}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"0"}\NormalTok{, }\StringTok{"2500"}\NormalTok{, }\StringTok{"5000"}\NormalTok{, }\StringTok{"7500"}\NormalTok{, }\StringTok{"10000"}\NormalTok{, }\StringTok{"Unsolved"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\CommentTok{\# coord\_flip() +}
 \StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}
-    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/boolean{-}calc{-}postfix{-}solve{-}time{-}cloud.png"}\NormalTok{),}
+    \KeywordTok{paste0}\NormalTok{(working\_directory, }\StringTok{"imgs/boolean{-}calc{-}postfix{-}solve{-}time{-}cloud.pdf"}\NormalTok{),}
     \DataTypeTok{width=}\DecValTok{4}\NormalTok{,}
     \DataTypeTok{height=}\DecValTok{4}
 \NormalTok{  )}

@@ -24,7 +24,7 @@
 <meta name="author" content="Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria" />
 
 
-<meta name="date" content="2020-12-18" />
+<meta name="date" content="2020-12-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -314,18 +314,18 @@ The raw data can be found on the OSF project associated with this work <span cla
 <p><strong>Please <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues">file an issue or make a pull request on github</a> to report any mistakes, ask questions, request more explanation, et cetera.</strong></p>
 <div id="overview-4" class="section level2" number="10.1">
 <h2><span class="header-section-number">10.1</span> Overview</h2>
-<div class="sourceCode" id="cb162"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb162-1"><a href="boolean-calculator-problem-postfix-notation.html#cb162-1" aria-hidden="true"></a><span class="co"># Experimental parameters referenced in-text all in one convenient place.</span></span>
-<span id="cb162-2"><a href="boolean-calculator-problem-postfix-notation.html#cb162-2" aria-hidden="true"></a>time_steps &lt;-<span class="st"> </span><span class="dv">128</span></span>
-<span id="cb162-3"><a href="boolean-calculator-problem-postfix-notation.html#cb162-3" aria-hidden="true"></a>replicates &lt;-<span class="st"> </span><span class="dv">200</span></span>
-<span id="cb162-4"><a href="boolean-calculator-problem-postfix-notation.html#cb162-4" aria-hidden="true"></a>population_size &lt;-<span class="st"> </span><span class="dv">1000</span></span>
-<span id="cb162-5"><a href="boolean-calculator-problem-postfix-notation.html#cb162-5" aria-hidden="true"></a>generations &lt;-<span class="st"> </span><span class="dv">10000</span></span>
-<span id="cb162-6"><a href="boolean-calculator-problem-postfix-notation.html#cb162-6" aria-hidden="true"></a></span>
-<span id="cb162-7"><a href="boolean-calculator-problem-postfix-notation.html#cb162-7" aria-hidden="true"></a><span class="co"># Settings for statistical analyses.</span></span>
-<span id="cb162-8"><a href="boolean-calculator-problem-postfix-notation.html#cb162-8" aria-hidden="true"></a>alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></span>
-<span id="cb162-9"><a href="boolean-calculator-problem-postfix-notation.html#cb162-9" aria-hidden="true"></a></span>
-<span id="cb162-10"><a href="boolean-calculator-problem-postfix-notation.html#cb162-10" aria-hidden="true"></a><span class="co"># Relative location of data.</span></span>
-<span id="cb162-11"><a href="boolean-calculator-problem-postfix-notation.html#cb162-11" aria-hidden="true"></a>working_directory &lt;-<span class="st"> &quot;experiments/2020-11-28-bool-calc-postfix/analysis/&quot;</span> <span class="co"># &lt;&lt; For bookdown</span></span>
-<span id="cb162-12"><a href="boolean-calculator-problem-postfix-notation.html#cb162-12" aria-hidden="true"></a><span class="co"># working_directory &lt;- &quot;./&quot;                                              # &lt;&lt; For local analysis</span></span></code></pre></div>
+<div class="sourceCode" id="cb165"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb165-1"><a href="boolean-calculator-problem-postfix-notation.html#cb165-1" aria-hidden="true"></a><span class="co"># Experimental parameters referenced in-text all in one convenient place.</span></span>
+<span id="cb165-2"><a href="boolean-calculator-problem-postfix-notation.html#cb165-2" aria-hidden="true"></a>time_steps &lt;-<span class="st"> </span><span class="dv">128</span></span>
+<span id="cb165-3"><a href="boolean-calculator-problem-postfix-notation.html#cb165-3" aria-hidden="true"></a>replicates &lt;-<span class="st"> </span><span class="dv">200</span></span>
+<span id="cb165-4"><a href="boolean-calculator-problem-postfix-notation.html#cb165-4" aria-hidden="true"></a>population_size &lt;-<span class="st"> </span><span class="dv">1000</span></span>
+<span id="cb165-5"><a href="boolean-calculator-problem-postfix-notation.html#cb165-5" aria-hidden="true"></a>generations &lt;-<span class="st"> </span><span class="dv">10000</span></span>
+<span id="cb165-6"><a href="boolean-calculator-problem-postfix-notation.html#cb165-6" aria-hidden="true"></a></span>
+<span id="cb165-7"><a href="boolean-calculator-problem-postfix-notation.html#cb165-7" aria-hidden="true"></a><span class="co"># Settings for statistical analyses.</span></span>
+<span id="cb165-8"><a href="boolean-calculator-problem-postfix-notation.html#cb165-8" aria-hidden="true"></a>alpha &lt;-<span class="st"> </span><span class="fl">0.05</span></span>
+<span id="cb165-9"><a href="boolean-calculator-problem-postfix-notation.html#cb165-9" aria-hidden="true"></a></span>
+<span id="cb165-10"><a href="boolean-calculator-problem-postfix-notation.html#cb165-10" aria-hidden="true"></a><span class="co"># Relative location of data.</span></span>
+<span id="cb165-11"><a href="boolean-calculator-problem-postfix-notation.html#cb165-11" aria-hidden="true"></a>working_directory &lt;-<span class="st"> &quot;experiments/2020-11-28-bool-calc-postfix/analysis/&quot;</span> <span class="co"># &lt;&lt; For bookdown</span></span>
+<span id="cb165-12"><a href="boolean-calculator-problem-postfix-notation.html#cb165-12" aria-hidden="true"></a><span class="co"># working_directory &lt;- &quot;./&quot;                                              # &lt;&lt; For local analysis</span></span></code></pre></div>
 <p>We use a modified version of the Boolean-logic calculator problem to further investigate the potential for our implementation of tag-based regulation to impede adaptive evolution.
 Our previous experiments with the Boolean-logic calculator problem provided inputs in prefix notation: the operator (e.g., AND, OR, XOR, etc.) is specified first, followed by the requisite number of numeric operands.
 As such, the final input signal does not differentiate which type of computation a program is expected to perform (e.g., AND, OR, XOR, etc.).
@@ -339,15 +339,15 @@ Successful programs must store the numeric inputs embedded in operand signals, a
 <div id="analysis-dependencies-5" class="section level2" number="10.2">
 <h2><span class="header-section-number">10.2</span> Analysis Dependencies</h2>
 <p>Load all required R libraries.</p>
-<div class="sourceCode" id="cb163"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb163-1"><a href="boolean-calculator-problem-postfix-notation.html#cb163-1" aria-hidden="true"></a><span class="kw">library</span>(ggplot2)</span>
-<span id="cb163-2"><a href="boolean-calculator-problem-postfix-notation.html#cb163-2" aria-hidden="true"></a><span class="kw">library</span>(tidyverse)</span>
-<span id="cb163-3"><a href="boolean-calculator-problem-postfix-notation.html#cb163-3" aria-hidden="true"></a><span class="kw">library</span>(cowplot)</span>
-<span id="cb163-4"><a href="boolean-calculator-problem-postfix-notation.html#cb163-4" aria-hidden="true"></a><span class="kw">library</span>(viridis)</span>
-<span id="cb163-5"><a href="boolean-calculator-problem-postfix-notation.html#cb163-5" aria-hidden="true"></a><span class="kw">library</span>(reshape2)</span>
-<span id="cb163-6"><a href="boolean-calculator-problem-postfix-notation.html#cb163-6" aria-hidden="true"></a><span class="kw">library</span>(igraph)</span>
-<span id="cb163-7"><a href="boolean-calculator-problem-postfix-notation.html#cb163-7" aria-hidden="true"></a><span class="kw">source</span>(<span class="st">&quot;https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="boolean-calculator-problem-postfix-notation.html#cb166-1" aria-hidden="true"></a><span class="kw">library</span>(ggplot2)</span>
+<span id="cb166-2"><a href="boolean-calculator-problem-postfix-notation.html#cb166-2" aria-hidden="true"></a><span class="kw">library</span>(tidyverse)</span>
+<span id="cb166-3"><a href="boolean-calculator-problem-postfix-notation.html#cb166-3" aria-hidden="true"></a><span class="kw">library</span>(cowplot)</span>
+<span id="cb166-4"><a href="boolean-calculator-problem-postfix-notation.html#cb166-4" aria-hidden="true"></a><span class="kw">library</span>(viridis)</span>
+<span id="cb166-5"><a href="boolean-calculator-problem-postfix-notation.html#cb166-5" aria-hidden="true"></a><span class="kw">library</span>(reshape2)</span>
+<span id="cb166-6"><a href="boolean-calculator-problem-postfix-notation.html#cb166-6" aria-hidden="true"></a><span class="kw">library</span>(igraph)</span>
+<span id="cb166-7"><a href="boolean-calculator-problem-postfix-notation.html#cb166-7" aria-hidden="true"></a><span class="kw">source</span>(<span class="st">&quot;https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R&quot;</span>)</span></code></pre></div>
 <p>These analyses were conducted in the following computing environment:</p>
-<div class="sourceCode" id="cb164"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb164-1"><a href="boolean-calculator-problem-postfix-notation.html#cb164-1" aria-hidden="true"></a><span class="kw">print</span>(version)</span></code></pre></div>
+<div class="sourceCode" id="cb167"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb167-1"><a href="boolean-calculator-problem-postfix-notation.html#cb167-1" aria-hidden="true"></a><span class="kw">print</span>(version)</span></code></pre></div>
 <pre><code>##                _                           
 ## platform       x86_64-pc-linux-gnu         
 ## arch           x86_64                      
@@ -367,181 +367,181 @@ Successful programs must store the numeric inputs embedded in operand signals, a
 <div id="setup-4" class="section level2" number="10.3">
 <h2><span class="header-section-number">10.3</span> Setup</h2>
 <p>Load data, initial data cleanup, configure some global settings.</p>
-<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="boolean-calculator-problem-postfix-notation.html#cb166-1" aria-hidden="true"></a>data_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/max_fit_orgs.csv&quot;</span>)</span>
-<span id="cb166-2"><a href="boolean-calculator-problem-postfix-notation.html#cb166-2" aria-hidden="true"></a>data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(data_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
-<span id="cb166-3"><a href="boolean-calculator-problem-postfix-notation.html#cb166-3" aria-hidden="true"></a></span>
-<span id="cb166-4"><a href="boolean-calculator-problem-postfix-notation.html#cb166-4" aria-hidden="true"></a><span class="co"># Specify factors (not all of these matter for this set of runs).</span></span>
-<span id="cb166-5"><a href="boolean-calculator-problem-postfix-notation.html#cb166-5" aria-hidden="true"></a>data<span class="op">$</span>matchbin_thresh &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb166-6"><a href="boolean-calculator-problem-postfix-notation.html#cb166-6" aria-hidden="true"></a>  data<span class="op">$</span>matchbin_thresh,</span>
-<span id="cb166-7"><a href="boolean-calculator-problem-postfix-notation.html#cb166-7" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">75</span>)</span>
-<span id="cb166-8"><a href="boolean-calculator-problem-postfix-notation.html#cb166-8" aria-hidden="true"></a>)</span>
-<span id="cb166-9"><a href="boolean-calculator-problem-postfix-notation.html#cb166-9" aria-hidden="true"></a></span>
-<span id="cb166-10"><a href="boolean-calculator-problem-postfix-notation.html#cb166-10" aria-hidden="true"></a>data<span class="op">$</span>TAG_LEN &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb166-11"><a href="boolean-calculator-problem-postfix-notation.html#cb166-11" aria-hidden="true"></a>  data<span class="op">$</span>TAG_LEN,</span>
-<span id="cb166-12"><a href="boolean-calculator-problem-postfix-notation.html#cb166-12" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="dv">32</span>, <span class="dv">64</span>, <span class="dv">128</span>, <span class="dv">256</span>)</span>
-<span id="cb166-13"><a href="boolean-calculator-problem-postfix-notation.html#cb166-13" aria-hidden="true"></a>)</span>
-<span id="cb166-14"><a href="boolean-calculator-problem-postfix-notation.html#cb166-14" aria-hidden="true"></a></span>
-<span id="cb166-15"><a href="boolean-calculator-problem-postfix-notation.html#cb166-15" aria-hidden="true"></a>data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb166-16"><a href="boolean-calculator-problem-postfix-notation.html#cb166-16" aria-hidden="true"></a>  data<span class="op">$</span>notation,</span>
-<span id="cb166-17"><a href="boolean-calculator-problem-postfix-notation.html#cb166-17" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;prefix&quot;</span>, <span class="st">&quot;postfix&quot;</span>)</span>
-<span id="cb166-18"><a href="boolean-calculator-problem-postfix-notation.html#cb166-18" aria-hidden="true"></a>)</span>
-<span id="cb166-19"><a href="boolean-calculator-problem-postfix-notation.html#cb166-19" aria-hidden="true"></a></span>
-<span id="cb166-20"><a href="boolean-calculator-problem-postfix-notation.html#cb166-20" aria-hidden="true"></a><span class="co"># Define function to summarize regulation/memory configurations.</span></span>
-<span id="cb166-21"><a href="boolean-calculator-problem-postfix-notation.html#cb166-21" aria-hidden="true"></a>get_con &lt;-<span class="st"> </span><span class="cf">function</span>(reg, mem) {</span>
-<span id="cb166-22"><a href="boolean-calculator-problem-postfix-notation.html#cb166-22" aria-hidden="true"></a>  <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem <span class="op">==</span><span class="st"> &quot;0&quot;</span>) {</span>
-<span id="cb166-23"><a href="boolean-calculator-problem-postfix-notation.html#cb166-23" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;none&quot;</span>)</span>
-<span id="cb166-24"><a href="boolean-calculator-problem-postfix-notation.html#cb166-24" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
-<span id="cb166-25"><a href="boolean-calculator-problem-postfix-notation.html#cb166-25" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;memory&quot;</span>)</span>
-<span id="cb166-26"><a href="boolean-calculator-problem-postfix-notation.html#cb166-26" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
-<span id="cb166-27"><a href="boolean-calculator-problem-postfix-notation.html#cb166-27" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;regulation&quot;</span>)</span>
-<span id="cb166-28"><a href="boolean-calculator-problem-postfix-notation.html#cb166-28" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
-<span id="cb166-29"><a href="boolean-calculator-problem-postfix-notation.html#cb166-29" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;both&quot;</span>)</span>
-<span id="cb166-30"><a href="boolean-calculator-problem-postfix-notation.html#cb166-30" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
-<span id="cb166-31"><a href="boolean-calculator-problem-postfix-notation.html#cb166-31" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
-<span id="cb166-32"><a href="boolean-calculator-problem-postfix-notation.html#cb166-32" aria-hidden="true"></a>  }</span>
-<span id="cb166-33"><a href="boolean-calculator-problem-postfix-notation.html#cb166-33" aria-hidden="true"></a>}</span>
-<span id="cb166-34"><a href="boolean-calculator-problem-postfix-notation.html#cb166-34" aria-hidden="true"></a></span>
-<span id="cb166-35"><a href="boolean-calculator-problem-postfix-notation.html#cb166-35" aria-hidden="true"></a><span class="co"># Specify experimental condition for each datum.</span></span>
-<span id="cb166-36"><a href="boolean-calculator-problem-postfix-notation.html#cb166-36" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
-<span id="cb166-37"><a href="boolean-calculator-problem-postfix-notation.html#cb166-37" aria-hidden="true"></a>  get_con,</span>
-<span id="cb166-38"><a href="boolean-calculator-problem-postfix-notation.html#cb166-38" aria-hidden="true"></a>  data<span class="op">$</span>USE_FUNC_REGULATION,</span>
-<span id="cb166-39"><a href="boolean-calculator-problem-postfix-notation.html#cb166-39" aria-hidden="true"></a>  data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
-<span id="cb166-40"><a href="boolean-calculator-problem-postfix-notation.html#cb166-40" aria-hidden="true"></a>)</span>
-<span id="cb166-41"><a href="boolean-calculator-problem-postfix-notation.html#cb166-41" aria-hidden="true"></a></span>
-<span id="cb166-42"><a href="boolean-calculator-problem-postfix-notation.html#cb166-42" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb166-43"><a href="boolean-calculator-problem-postfix-notation.html#cb166-43" aria-hidden="true"></a>  data<span class="op">$</span>condition,</span>
-<span id="cb166-44"><a href="boolean-calculator-problem-postfix-notation.html#cb166-44" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
-<span id="cb166-45"><a href="boolean-calculator-problem-postfix-notation.html#cb166-45" aria-hidden="true"></a>)</span>
-<span id="cb166-46"><a href="boolean-calculator-problem-postfix-notation.html#cb166-46" aria-hidden="true"></a></span>
-<span id="cb166-47"><a href="boolean-calculator-problem-postfix-notation.html#cb166-47" aria-hidden="true"></a><span class="co"># Given knockout info, what strategy does a program use?</span></span>
-<span id="cb166-48"><a href="boolean-calculator-problem-postfix-notation.html#cb166-48" aria-hidden="true"></a>get_strategy &lt;-<span class="st"> </span><span class="cf">function</span>(use_reg, use_mem) {</span>
-<span id="cb166-49"><a href="boolean-calculator-problem-postfix-notation.html#cb166-49" aria-hidden="true"></a>  <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
-<span id="cb166-50"><a href="boolean-calculator-problem-postfix-notation.html#cb166-50" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use neither&quot;</span>)</span>
-<span id="cb166-51"><a href="boolean-calculator-problem-postfix-notation.html#cb166-51" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
-<span id="cb166-52"><a href="boolean-calculator-problem-postfix-notation.html#cb166-52" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use memory&quot;</span>)</span>
-<span id="cb166-53"><a href="boolean-calculator-problem-postfix-notation.html#cb166-53" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
-<span id="cb166-54"><a href="boolean-calculator-problem-postfix-notation.html#cb166-54" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use regulation&quot;</span>)</span>
-<span id="cb166-55"><a href="boolean-calculator-problem-postfix-notation.html#cb166-55" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
-<span id="cb166-56"><a href="boolean-calculator-problem-postfix-notation.html#cb166-56" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use both&quot;</span>)</span>
-<span id="cb166-57"><a href="boolean-calculator-problem-postfix-notation.html#cb166-57" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
-<span id="cb166-58"><a href="boolean-calculator-problem-postfix-notation.html#cb166-58" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
-<span id="cb166-59"><a href="boolean-calculator-problem-postfix-notation.html#cb166-59" aria-hidden="true"></a>  }</span>
-<span id="cb166-60"><a href="boolean-calculator-problem-postfix-notation.html#cb166-60" aria-hidden="true"></a>}</span>
-<span id="cb166-61"><a href="boolean-calculator-problem-postfix-notation.html#cb166-61" aria-hidden="true"></a></span>
-<span id="cb166-62"><a href="boolean-calculator-problem-postfix-notation.html#cb166-62" aria-hidden="true"></a><span class="co"># Specify experimental conditions (to make labeling easier).</span></span>
-<span id="cb166-63"><a href="boolean-calculator-problem-postfix-notation.html#cb166-63" aria-hidden="true"></a>data<span class="op">$</span>strategy &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
-<span id="cb166-64"><a href="boolean-calculator-problem-postfix-notation.html#cb166-64" aria-hidden="true"></a>  get_strategy,</span>
-<span id="cb166-65"><a href="boolean-calculator-problem-postfix-notation.html#cb166-65" aria-hidden="true"></a>  data<span class="op">$</span>relies_on_regulation,</span>
-<span id="cb166-66"><a href="boolean-calculator-problem-postfix-notation.html#cb166-66" aria-hidden="true"></a>  data<span class="op">$</span>relies_on_global_memory</span>
-<span id="cb166-67"><a href="boolean-calculator-problem-postfix-notation.html#cb166-67" aria-hidden="true"></a>)</span>
-<span id="cb166-68"><a href="boolean-calculator-problem-postfix-notation.html#cb166-68" aria-hidden="true"></a></span>
-<span id="cb166-69"><a href="boolean-calculator-problem-postfix-notation.html#cb166-69" aria-hidden="true"></a>data<span class="op">$</span>strategy &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb166-70"><a href="boolean-calculator-problem-postfix-notation.html#cb166-70" aria-hidden="true"></a>  data<span class="op">$</span>strategy,</span>
-<span id="cb166-71"><a href="boolean-calculator-problem-postfix-notation.html#cb166-71" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(</span>
-<span id="cb166-72"><a href="boolean-calculator-problem-postfix-notation.html#cb166-72" aria-hidden="true"></a>    <span class="st">&quot;use regulation&quot;</span>,</span>
-<span id="cb166-73"><a href="boolean-calculator-problem-postfix-notation.html#cb166-73" aria-hidden="true"></a>    <span class="st">&quot;use memory&quot;</span>,</span>
-<span id="cb166-74"><a href="boolean-calculator-problem-postfix-notation.html#cb166-74" aria-hidden="true"></a>    <span class="st">&quot;use neither&quot;</span>,</span>
-<span id="cb166-75"><a href="boolean-calculator-problem-postfix-notation.html#cb166-75" aria-hidden="true"></a>    <span class="st">&quot;use both&quot;</span></span>
-<span id="cb166-76"><a href="boolean-calculator-problem-postfix-notation.html#cb166-76" aria-hidden="true"></a>  )</span>
-<span id="cb166-77"><a href="boolean-calculator-problem-postfix-notation.html#cb166-77" aria-hidden="true"></a>)</span>
-<span id="cb166-78"><a href="boolean-calculator-problem-postfix-notation.html#cb166-78" aria-hidden="true"></a></span>
-<span id="cb166-79"><a href="boolean-calculator-problem-postfix-notation.html#cb166-79" aria-hidden="true"></a><span class="co"># Filter data to include only replicates labeled as solutions</span></span>
-<span id="cb166-80"><a href="boolean-calculator-problem-postfix-notation.html#cb166-80" aria-hidden="true"></a>sol_data &lt;-<span class="st"> </span><span class="kw">filter</span>(data, solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)</span>
-<span id="cb166-81"><a href="boolean-calculator-problem-postfix-notation.html#cb166-81" aria-hidden="true"></a></span>
-<span id="cb166-82"><a href="boolean-calculator-problem-postfix-notation.html#cb166-82" aria-hidden="true"></a><span class="co">####### Load instruction execution data #######</span></span>
-<span id="cb166-83"><a href="boolean-calculator-problem-postfix-notation.html#cb166-83" aria-hidden="true"></a>inst_exec_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/exec_trace_summary.csv&quot;</span>), <span class="dt">na.strings=</span><span class="st">&quot;NA&quot;</span>)</span>
-<span id="cb166-84"><a href="boolean-calculator-problem-postfix-notation.html#cb166-84" aria-hidden="true"></a></span>
-<span id="cb166-85"><a href="boolean-calculator-problem-postfix-notation.html#cb166-85" aria-hidden="true"></a>inst_exec_data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
-<span id="cb166-86"><a href="boolean-calculator-problem-postfix-notation.html#cb166-86" aria-hidden="true"></a>  get_con,</span>
-<span id="cb166-87"><a href="boolean-calculator-problem-postfix-notation.html#cb166-87" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>USE_FUNC_REGULATION,</span>
-<span id="cb166-88"><a href="boolean-calculator-problem-postfix-notation.html#cb166-88" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
-<span id="cb166-89"><a href="boolean-calculator-problem-postfix-notation.html#cb166-89" aria-hidden="true"></a>)</span>
-<span id="cb166-90"><a href="boolean-calculator-problem-postfix-notation.html#cb166-90" aria-hidden="true"></a></span>
-<span id="cb166-91"><a href="boolean-calculator-problem-postfix-notation.html#cb166-91" aria-hidden="true"></a>inst_exec_data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb166-92"><a href="boolean-calculator-problem-postfix-notation.html#cb166-92" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>condition,</span>
-<span id="cb166-93"><a href="boolean-calculator-problem-postfix-notation.html#cb166-93" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
-<span id="cb166-94"><a href="boolean-calculator-problem-postfix-notation.html#cb166-94" aria-hidden="true"></a>)</span>
-<span id="cb166-95"><a href="boolean-calculator-problem-postfix-notation.html#cb166-95" aria-hidden="true"></a></span>
-<span id="cb166-96"><a href="boolean-calculator-problem-postfix-notation.html#cb166-96" aria-hidden="true"></a>inst_exec_data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb166-97"><a href="boolean-calculator-problem-postfix-notation.html#cb166-97" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>notation,</span>
-<span id="cb166-98"><a href="boolean-calculator-problem-postfix-notation.html#cb166-98" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;prefix&quot;</span>, <span class="st">&quot;postfix&quot;</span>)</span>
-<span id="cb166-99"><a href="boolean-calculator-problem-postfix-notation.html#cb166-99" aria-hidden="true"></a>)</span>
-<span id="cb166-100"><a href="boolean-calculator-problem-postfix-notation.html#cb166-100" aria-hidden="true"></a></span>
-<span id="cb166-101"><a href="boolean-calculator-problem-postfix-notation.html#cb166-101" aria-hidden="true"></a><span class="co">####### Load network data #######</span></span>
-<span id="cb166-102"><a href="boolean-calculator-problem-postfix-notation.html#cb166-102" aria-hidden="true"></a>reg_network_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/reg_graphs_summary.csv&quot;</span>), <span class="dt">na.strings=</span><span class="st">&quot;NA&quot;</span>)</span>
-<span id="cb166-103"><a href="boolean-calculator-problem-postfix-notation.html#cb166-103" aria-hidden="true"></a>reg_network_data &lt;-<span class="st"> </span><span class="kw">filter</span>(reg_network_data, run_id <span class="op">%in%</span><span class="st"> </span>data<span class="op">$</span>SEED)</span>
-<span id="cb166-104"><a href="boolean-calculator-problem-postfix-notation.html#cb166-104" aria-hidden="true"></a></span>
-<span id="cb166-105"><a href="boolean-calculator-problem-postfix-notation.html#cb166-105" aria-hidden="true"></a>get_notation &lt;-<span class="st"> </span><span class="cf">function</span>(seed) {</span>
-<span id="cb166-106"><a href="boolean-calculator-problem-postfix-notation.html#cb166-106" aria-hidden="true"></a>  <span class="kw">return</span>(<span class="kw">filter</span>(data, SEED<span class="op">==</span>seed)<span class="op">$</span>notation)</span>
-<span id="cb166-107"><a href="boolean-calculator-problem-postfix-notation.html#cb166-107" aria-hidden="true"></a>}</span>
-<span id="cb166-108"><a href="boolean-calculator-problem-postfix-notation.html#cb166-108" aria-hidden="true"></a></span>
-<span id="cb166-109"><a href="boolean-calculator-problem-postfix-notation.html#cb166-109" aria-hidden="true"></a>reg_network_data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
-<span id="cb166-110"><a href="boolean-calculator-problem-postfix-notation.html#cb166-110" aria-hidden="true"></a>  get_notation,</span>
-<span id="cb166-111"><a href="boolean-calculator-problem-postfix-notation.html#cb166-111" aria-hidden="true"></a>  reg_network_data<span class="op">$</span>run_id</span>
-<span id="cb166-112"><a href="boolean-calculator-problem-postfix-notation.html#cb166-112" aria-hidden="true"></a>)</span>
-<span id="cb166-113"><a href="boolean-calculator-problem-postfix-notation.html#cb166-113" aria-hidden="true"></a></span>
-<span id="cb166-114"><a href="boolean-calculator-problem-postfix-notation.html#cb166-114" aria-hidden="true"></a>reg_network_data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
-<span id="cb166-115"><a href="boolean-calculator-problem-postfix-notation.html#cb166-115" aria-hidden="true"></a>  reg_network_data<span class="op">$</span>notation,</span>
-<span id="cb166-116"><a href="boolean-calculator-problem-postfix-notation.html#cb166-116" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;prefix&quot;</span>, <span class="st">&quot;postfix&quot;</span>)</span>
-<span id="cb166-117"><a href="boolean-calculator-problem-postfix-notation.html#cb166-117" aria-hidden="true"></a>)</span>
-<span id="cb166-118"><a href="boolean-calculator-problem-postfix-notation.html#cb166-118" aria-hidden="true"></a></span>
-<span id="cb166-119"><a href="boolean-calculator-problem-postfix-notation.html#cb166-119" aria-hidden="true"></a><span class="co">####### misc #######</span></span>
-<span id="cb166-120"><a href="boolean-calculator-problem-postfix-notation.html#cb166-120" aria-hidden="true"></a><span class="co"># Configure our default graphing theme</span></span>
-<span id="cb166-121"><a href="boolean-calculator-problem-postfix-notation.html#cb166-121" aria-hidden="true"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>())</span></code></pre></div>
+<div class="sourceCode" id="cb169"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb169-1"><a href="boolean-calculator-problem-postfix-notation.html#cb169-1" aria-hidden="true"></a>data_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/max_fit_orgs.csv&quot;</span>)</span>
+<span id="cb169-2"><a href="boolean-calculator-problem-postfix-notation.html#cb169-2" aria-hidden="true"></a>data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(data_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb169-3"><a href="boolean-calculator-problem-postfix-notation.html#cb169-3" aria-hidden="true"></a></span>
+<span id="cb169-4"><a href="boolean-calculator-problem-postfix-notation.html#cb169-4" aria-hidden="true"></a><span class="co"># Specify factors (not all of these matter for this set of runs).</span></span>
+<span id="cb169-5"><a href="boolean-calculator-problem-postfix-notation.html#cb169-5" aria-hidden="true"></a>data<span class="op">$</span>matchbin_thresh &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb169-6"><a href="boolean-calculator-problem-postfix-notation.html#cb169-6" aria-hidden="true"></a>  data<span class="op">$</span>matchbin_thresh,</span>
+<span id="cb169-7"><a href="boolean-calculator-problem-postfix-notation.html#cb169-7" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">75</span>)</span>
+<span id="cb169-8"><a href="boolean-calculator-problem-postfix-notation.html#cb169-8" aria-hidden="true"></a>)</span>
+<span id="cb169-9"><a href="boolean-calculator-problem-postfix-notation.html#cb169-9" aria-hidden="true"></a></span>
+<span id="cb169-10"><a href="boolean-calculator-problem-postfix-notation.html#cb169-10" aria-hidden="true"></a>data<span class="op">$</span>TAG_LEN &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb169-11"><a href="boolean-calculator-problem-postfix-notation.html#cb169-11" aria-hidden="true"></a>  data<span class="op">$</span>TAG_LEN,</span>
+<span id="cb169-12"><a href="boolean-calculator-problem-postfix-notation.html#cb169-12" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="dv">32</span>, <span class="dv">64</span>, <span class="dv">128</span>, <span class="dv">256</span>)</span>
+<span id="cb169-13"><a href="boolean-calculator-problem-postfix-notation.html#cb169-13" aria-hidden="true"></a>)</span>
+<span id="cb169-14"><a href="boolean-calculator-problem-postfix-notation.html#cb169-14" aria-hidden="true"></a></span>
+<span id="cb169-15"><a href="boolean-calculator-problem-postfix-notation.html#cb169-15" aria-hidden="true"></a>data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb169-16"><a href="boolean-calculator-problem-postfix-notation.html#cb169-16" aria-hidden="true"></a>  data<span class="op">$</span>notation,</span>
+<span id="cb169-17"><a href="boolean-calculator-problem-postfix-notation.html#cb169-17" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;prefix&quot;</span>, <span class="st">&quot;postfix&quot;</span>)</span>
+<span id="cb169-18"><a href="boolean-calculator-problem-postfix-notation.html#cb169-18" aria-hidden="true"></a>)</span>
+<span id="cb169-19"><a href="boolean-calculator-problem-postfix-notation.html#cb169-19" aria-hidden="true"></a></span>
+<span id="cb169-20"><a href="boolean-calculator-problem-postfix-notation.html#cb169-20" aria-hidden="true"></a><span class="co"># Define function to summarize regulation/memory configurations.</span></span>
+<span id="cb169-21"><a href="boolean-calculator-problem-postfix-notation.html#cb169-21" aria-hidden="true"></a>get_con &lt;-<span class="st"> </span><span class="cf">function</span>(reg, mem) {</span>
+<span id="cb169-22"><a href="boolean-calculator-problem-postfix-notation.html#cb169-22" aria-hidden="true"></a>  <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem <span class="op">==</span><span class="st"> &quot;0&quot;</span>) {</span>
+<span id="cb169-23"><a href="boolean-calculator-problem-postfix-notation.html#cb169-23" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;none&quot;</span>)</span>
+<span id="cb169-24"><a href="boolean-calculator-problem-postfix-notation.html#cb169-24" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg <span class="op">==</span><span class="st"> &quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb169-25"><a href="boolean-calculator-problem-postfix-notation.html#cb169-25" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;memory&quot;</span>)</span>
+<span id="cb169-26"><a href="boolean-calculator-problem-postfix-notation.html#cb169-26" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
+<span id="cb169-27"><a href="boolean-calculator-problem-postfix-notation.html#cb169-27" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;regulation&quot;</span>)</span>
+<span id="cb169-28"><a href="boolean-calculator-problem-postfix-notation.html#cb169-28" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb169-29"><a href="boolean-calculator-problem-postfix-notation.html#cb169-29" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;both&quot;</span>)</span>
+<span id="cb169-30"><a href="boolean-calculator-problem-postfix-notation.html#cb169-30" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
+<span id="cb169-31"><a href="boolean-calculator-problem-postfix-notation.html#cb169-31" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
+<span id="cb169-32"><a href="boolean-calculator-problem-postfix-notation.html#cb169-32" aria-hidden="true"></a>  }</span>
+<span id="cb169-33"><a href="boolean-calculator-problem-postfix-notation.html#cb169-33" aria-hidden="true"></a>}</span>
+<span id="cb169-34"><a href="boolean-calculator-problem-postfix-notation.html#cb169-34" aria-hidden="true"></a></span>
+<span id="cb169-35"><a href="boolean-calculator-problem-postfix-notation.html#cb169-35" aria-hidden="true"></a><span class="co"># Specify experimental condition for each datum.</span></span>
+<span id="cb169-36"><a href="boolean-calculator-problem-postfix-notation.html#cb169-36" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb169-37"><a href="boolean-calculator-problem-postfix-notation.html#cb169-37" aria-hidden="true"></a>  get_con,</span>
+<span id="cb169-38"><a href="boolean-calculator-problem-postfix-notation.html#cb169-38" aria-hidden="true"></a>  data<span class="op">$</span>USE_FUNC_REGULATION,</span>
+<span id="cb169-39"><a href="boolean-calculator-problem-postfix-notation.html#cb169-39" aria-hidden="true"></a>  data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
+<span id="cb169-40"><a href="boolean-calculator-problem-postfix-notation.html#cb169-40" aria-hidden="true"></a>)</span>
+<span id="cb169-41"><a href="boolean-calculator-problem-postfix-notation.html#cb169-41" aria-hidden="true"></a></span>
+<span id="cb169-42"><a href="boolean-calculator-problem-postfix-notation.html#cb169-42" aria-hidden="true"></a>data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb169-43"><a href="boolean-calculator-problem-postfix-notation.html#cb169-43" aria-hidden="true"></a>  data<span class="op">$</span>condition,</span>
+<span id="cb169-44"><a href="boolean-calculator-problem-postfix-notation.html#cb169-44" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb169-45"><a href="boolean-calculator-problem-postfix-notation.html#cb169-45" aria-hidden="true"></a>)</span>
+<span id="cb169-46"><a href="boolean-calculator-problem-postfix-notation.html#cb169-46" aria-hidden="true"></a></span>
+<span id="cb169-47"><a href="boolean-calculator-problem-postfix-notation.html#cb169-47" aria-hidden="true"></a><span class="co"># Given knockout info, what strategy does a program use?</span></span>
+<span id="cb169-48"><a href="boolean-calculator-problem-postfix-notation.html#cb169-48" aria-hidden="true"></a>get_strategy &lt;-<span class="st"> </span><span class="cf">function</span>(use_reg, use_mem) {</span>
+<span id="cb169-49"><a href="boolean-calculator-problem-postfix-notation.html#cb169-49" aria-hidden="true"></a>  <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
+<span id="cb169-50"><a href="boolean-calculator-problem-postfix-notation.html#cb169-50" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use neither&quot;</span>)</span>
+<span id="cb169-51"><a href="boolean-calculator-problem-postfix-notation.html#cb169-51" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;0&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb169-52"><a href="boolean-calculator-problem-postfix-notation.html#cb169-52" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use memory&quot;</span>)</span>
+<span id="cb169-53"><a href="boolean-calculator-problem-postfix-notation.html#cb169-53" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;0&quot;</span>) {</span>
+<span id="cb169-54"><a href="boolean-calculator-problem-postfix-notation.html#cb169-54" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use regulation&quot;</span>)</span>
+<span id="cb169-55"><a href="boolean-calculator-problem-postfix-notation.html#cb169-55" aria-hidden="true"></a>  } <span class="cf">else</span> <span class="cf">if</span> (use_reg<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;&amp;</span><span class="st"> </span>use_mem<span class="op">==</span><span class="st">&quot;1&quot;</span>) {</span>
+<span id="cb169-56"><a href="boolean-calculator-problem-postfix-notation.html#cb169-56" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;use both&quot;</span>)</span>
+<span id="cb169-57"><a href="boolean-calculator-problem-postfix-notation.html#cb169-57" aria-hidden="true"></a>  } <span class="cf">else</span> {</span>
+<span id="cb169-58"><a href="boolean-calculator-problem-postfix-notation.html#cb169-58" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="st">&quot;UNKNOWN&quot;</span>)</span>
+<span id="cb169-59"><a href="boolean-calculator-problem-postfix-notation.html#cb169-59" aria-hidden="true"></a>  }</span>
+<span id="cb169-60"><a href="boolean-calculator-problem-postfix-notation.html#cb169-60" aria-hidden="true"></a>}</span>
+<span id="cb169-61"><a href="boolean-calculator-problem-postfix-notation.html#cb169-61" aria-hidden="true"></a></span>
+<span id="cb169-62"><a href="boolean-calculator-problem-postfix-notation.html#cb169-62" aria-hidden="true"></a><span class="co"># Specify experimental conditions (to make labeling easier).</span></span>
+<span id="cb169-63"><a href="boolean-calculator-problem-postfix-notation.html#cb169-63" aria-hidden="true"></a>data<span class="op">$</span>strategy &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb169-64"><a href="boolean-calculator-problem-postfix-notation.html#cb169-64" aria-hidden="true"></a>  get_strategy,</span>
+<span id="cb169-65"><a href="boolean-calculator-problem-postfix-notation.html#cb169-65" aria-hidden="true"></a>  data<span class="op">$</span>relies_on_regulation,</span>
+<span id="cb169-66"><a href="boolean-calculator-problem-postfix-notation.html#cb169-66" aria-hidden="true"></a>  data<span class="op">$</span>relies_on_global_memory</span>
+<span id="cb169-67"><a href="boolean-calculator-problem-postfix-notation.html#cb169-67" aria-hidden="true"></a>)</span>
+<span id="cb169-68"><a href="boolean-calculator-problem-postfix-notation.html#cb169-68" aria-hidden="true"></a></span>
+<span id="cb169-69"><a href="boolean-calculator-problem-postfix-notation.html#cb169-69" aria-hidden="true"></a>data<span class="op">$</span>strategy &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb169-70"><a href="boolean-calculator-problem-postfix-notation.html#cb169-70" aria-hidden="true"></a>  data<span class="op">$</span>strategy,</span>
+<span id="cb169-71"><a href="boolean-calculator-problem-postfix-notation.html#cb169-71" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(</span>
+<span id="cb169-72"><a href="boolean-calculator-problem-postfix-notation.html#cb169-72" aria-hidden="true"></a>    <span class="st">&quot;use regulation&quot;</span>,</span>
+<span id="cb169-73"><a href="boolean-calculator-problem-postfix-notation.html#cb169-73" aria-hidden="true"></a>    <span class="st">&quot;use memory&quot;</span>,</span>
+<span id="cb169-74"><a href="boolean-calculator-problem-postfix-notation.html#cb169-74" aria-hidden="true"></a>    <span class="st">&quot;use neither&quot;</span>,</span>
+<span id="cb169-75"><a href="boolean-calculator-problem-postfix-notation.html#cb169-75" aria-hidden="true"></a>    <span class="st">&quot;use both&quot;</span></span>
+<span id="cb169-76"><a href="boolean-calculator-problem-postfix-notation.html#cb169-76" aria-hidden="true"></a>  )</span>
+<span id="cb169-77"><a href="boolean-calculator-problem-postfix-notation.html#cb169-77" aria-hidden="true"></a>)</span>
+<span id="cb169-78"><a href="boolean-calculator-problem-postfix-notation.html#cb169-78" aria-hidden="true"></a></span>
+<span id="cb169-79"><a href="boolean-calculator-problem-postfix-notation.html#cb169-79" aria-hidden="true"></a><span class="co"># Filter data to include only replicates labeled as solutions</span></span>
+<span id="cb169-80"><a href="boolean-calculator-problem-postfix-notation.html#cb169-80" aria-hidden="true"></a>sol_data &lt;-<span class="st"> </span><span class="kw">filter</span>(data, solution<span class="op">==</span><span class="st">&quot;1&quot;</span>)</span>
+<span id="cb169-81"><a href="boolean-calculator-problem-postfix-notation.html#cb169-81" aria-hidden="true"></a></span>
+<span id="cb169-82"><a href="boolean-calculator-problem-postfix-notation.html#cb169-82" aria-hidden="true"></a><span class="co">####### Load instruction execution data #######</span></span>
+<span id="cb169-83"><a href="boolean-calculator-problem-postfix-notation.html#cb169-83" aria-hidden="true"></a>inst_exec_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/exec_trace_summary.csv&quot;</span>), <span class="dt">na.strings=</span><span class="st">&quot;NA&quot;</span>)</span>
+<span id="cb169-84"><a href="boolean-calculator-problem-postfix-notation.html#cb169-84" aria-hidden="true"></a></span>
+<span id="cb169-85"><a href="boolean-calculator-problem-postfix-notation.html#cb169-85" aria-hidden="true"></a>inst_exec_data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb169-86"><a href="boolean-calculator-problem-postfix-notation.html#cb169-86" aria-hidden="true"></a>  get_con,</span>
+<span id="cb169-87"><a href="boolean-calculator-problem-postfix-notation.html#cb169-87" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>USE_FUNC_REGULATION,</span>
+<span id="cb169-88"><a href="boolean-calculator-problem-postfix-notation.html#cb169-88" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>USE_GLOBAL_MEMORY</span>
+<span id="cb169-89"><a href="boolean-calculator-problem-postfix-notation.html#cb169-89" aria-hidden="true"></a>)</span>
+<span id="cb169-90"><a href="boolean-calculator-problem-postfix-notation.html#cb169-90" aria-hidden="true"></a></span>
+<span id="cb169-91"><a href="boolean-calculator-problem-postfix-notation.html#cb169-91" aria-hidden="true"></a>inst_exec_data<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb169-92"><a href="boolean-calculator-problem-postfix-notation.html#cb169-92" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>condition,</span>
+<span id="cb169-93"><a href="boolean-calculator-problem-postfix-notation.html#cb169-93" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;regulation&quot;</span>, <span class="st">&quot;memory&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb169-94"><a href="boolean-calculator-problem-postfix-notation.html#cb169-94" aria-hidden="true"></a>)</span>
+<span id="cb169-95"><a href="boolean-calculator-problem-postfix-notation.html#cb169-95" aria-hidden="true"></a></span>
+<span id="cb169-96"><a href="boolean-calculator-problem-postfix-notation.html#cb169-96" aria-hidden="true"></a>inst_exec_data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb169-97"><a href="boolean-calculator-problem-postfix-notation.html#cb169-97" aria-hidden="true"></a>  inst_exec_data<span class="op">$</span>notation,</span>
+<span id="cb169-98"><a href="boolean-calculator-problem-postfix-notation.html#cb169-98" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;prefix&quot;</span>, <span class="st">&quot;postfix&quot;</span>)</span>
+<span id="cb169-99"><a href="boolean-calculator-problem-postfix-notation.html#cb169-99" aria-hidden="true"></a>)</span>
+<span id="cb169-100"><a href="boolean-calculator-problem-postfix-notation.html#cb169-100" aria-hidden="true"></a></span>
+<span id="cb169-101"><a href="boolean-calculator-problem-postfix-notation.html#cb169-101" aria-hidden="true"></a><span class="co">####### Load network data #######</span></span>
+<span id="cb169-102"><a href="boolean-calculator-problem-postfix-notation.html#cb169-102" aria-hidden="true"></a>reg_network_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/reg_graphs_summary.csv&quot;</span>), <span class="dt">na.strings=</span><span class="st">&quot;NA&quot;</span>)</span>
+<span id="cb169-103"><a href="boolean-calculator-problem-postfix-notation.html#cb169-103" aria-hidden="true"></a>reg_network_data &lt;-<span class="st"> </span><span class="kw">filter</span>(reg_network_data, run_id <span class="op">%in%</span><span class="st"> </span>data<span class="op">$</span>SEED)</span>
+<span id="cb169-104"><a href="boolean-calculator-problem-postfix-notation.html#cb169-104" aria-hidden="true"></a></span>
+<span id="cb169-105"><a href="boolean-calculator-problem-postfix-notation.html#cb169-105" aria-hidden="true"></a>get_notation &lt;-<span class="st"> </span><span class="cf">function</span>(seed) {</span>
+<span id="cb169-106"><a href="boolean-calculator-problem-postfix-notation.html#cb169-106" aria-hidden="true"></a>  <span class="kw">return</span>(<span class="kw">filter</span>(data, SEED<span class="op">==</span>seed)<span class="op">$</span>notation)</span>
+<span id="cb169-107"><a href="boolean-calculator-problem-postfix-notation.html#cb169-107" aria-hidden="true"></a>}</span>
+<span id="cb169-108"><a href="boolean-calculator-problem-postfix-notation.html#cb169-108" aria-hidden="true"></a></span>
+<span id="cb169-109"><a href="boolean-calculator-problem-postfix-notation.html#cb169-109" aria-hidden="true"></a>reg_network_data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">mapply</span>(</span>
+<span id="cb169-110"><a href="boolean-calculator-problem-postfix-notation.html#cb169-110" aria-hidden="true"></a>  get_notation,</span>
+<span id="cb169-111"><a href="boolean-calculator-problem-postfix-notation.html#cb169-111" aria-hidden="true"></a>  reg_network_data<span class="op">$</span>run_id</span>
+<span id="cb169-112"><a href="boolean-calculator-problem-postfix-notation.html#cb169-112" aria-hidden="true"></a>)</span>
+<span id="cb169-113"><a href="boolean-calculator-problem-postfix-notation.html#cb169-113" aria-hidden="true"></a></span>
+<span id="cb169-114"><a href="boolean-calculator-problem-postfix-notation.html#cb169-114" aria-hidden="true"></a>reg_network_data<span class="op">$</span>notation &lt;-<span class="st"> </span><span class="kw">factor</span>(</span>
+<span id="cb169-115"><a href="boolean-calculator-problem-postfix-notation.html#cb169-115" aria-hidden="true"></a>  reg_network_data<span class="op">$</span>notation,</span>
+<span id="cb169-116"><a href="boolean-calculator-problem-postfix-notation.html#cb169-116" aria-hidden="true"></a>  <span class="dt">levels=</span><span class="kw">c</span>(<span class="st">&quot;prefix&quot;</span>, <span class="st">&quot;postfix&quot;</span>)</span>
+<span id="cb169-117"><a href="boolean-calculator-problem-postfix-notation.html#cb169-117" aria-hidden="true"></a>)</span>
+<span id="cb169-118"><a href="boolean-calculator-problem-postfix-notation.html#cb169-118" aria-hidden="true"></a></span>
+<span id="cb169-119"><a href="boolean-calculator-problem-postfix-notation.html#cb169-119" aria-hidden="true"></a><span class="co">####### misc #######</span></span>
+<span id="cb169-120"><a href="boolean-calculator-problem-postfix-notation.html#cb169-120" aria-hidden="true"></a><span class="co"># Configure our default graphing theme</span></span>
+<span id="cb169-121"><a href="boolean-calculator-problem-postfix-notation.html#cb169-121" aria-hidden="true"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>())</span></code></pre></div>
 </div>
 <div id="problem-solving-success-3" class="section level2" number="10.4">
 <h2><span class="header-section-number">10.4</span> Problem-solving success</h2>
 <p>The number of successful replicates by condition:</p>
-<div class="sourceCode" id="cb167"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb167-1"><a href="boolean-calculator-problem-postfix-notation.html#cb167-1" aria-hidden="true"></a><span class="co"># Graph the number of solutions evolved in each condition, faceted by environmental complexity</span></span>
-<span id="cb167-2"><a href="boolean-calculator-problem-postfix-notation.html#cb167-2" aria-hidden="true"></a><span class="kw">ggplot</span>(sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>condition)) <span class="op">+</span></span>
-<span id="cb167-3"><a href="boolean-calculator-problem-postfix-notation.html#cb167-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>() <span class="op">+</span></span>
-<span id="cb167-4"><a href="boolean-calculator-problem-postfix-notation.html#cb167-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
-<span id="cb167-5"><a href="boolean-calculator-problem-postfix-notation.html#cb167-5" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span>,</span>
-<span id="cb167-6"><a href="boolean-calculator-problem-postfix-notation.html#cb167-6" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
-<span id="cb167-7"><a href="boolean-calculator-problem-postfix-notation.html#cb167-7" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.9</span>),</span>
-<span id="cb167-8"><a href="boolean-calculator-problem-postfix-notation.html#cb167-8" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="dv">0</span></span>
-<span id="cb167-9"><a href="boolean-calculator-problem-postfix-notation.html#cb167-9" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb167-10"><a href="boolean-calculator-problem-postfix-notation.html#cb167-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb167-11"><a href="boolean-calculator-problem-postfix-notation.html#cb167-11" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb167-12"><a href="boolean-calculator-problem-postfix-notation.html#cb167-12" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>,<span class="st">&quot;both&quot;</span>),</span>
-<span id="cb167-13"><a href="boolean-calculator-problem-postfix-notation.html#cb167-13" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
-<span id="cb167-14"><a href="boolean-calculator-problem-postfix-notation.html#cb167-14" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb167-15"><a href="boolean-calculator-problem-postfix-notation.html#cb167-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Successful replciates&quot;</span>) <span class="op">+</span></span>
-<span id="cb167-16"><a href="boolean-calculator-problem-postfix-notation.html#cb167-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylim</span>(<span class="dv">0</span>, <span class="dv">200</span>) <span class="op">+</span></span>
-<span id="cb167-17"><a href="boolean-calculator-problem-postfix-notation.html#cb167-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="op">+</span></span>
-<span id="cb167-18"><a href="boolean-calculator-problem-postfix-notation.html#cb167-18" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
-<span id="cb167-19"><a href="boolean-calculator-problem-postfix-notation.html#cb167-19" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-postfix-solution-counts.pdf&quot;</span>),</span>
-<span id="cb167-20"><a href="boolean-calculator-problem-postfix-notation.html#cb167-20" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
-<span id="cb167-21"><a href="boolean-calculator-problem-postfix-notation.html#cb167-21" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">4</span></span>
-<span id="cb167-22"><a href="boolean-calculator-problem-postfix-notation.html#cb167-22" aria-hidden="true"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="boolean-calculator-problem-postfix-notation.html#cb170-1" aria-hidden="true"></a><span class="co"># Graph the number of solutions evolved in each condition, faceted by environmental complexity</span></span>
+<span id="cb170-2"><a href="boolean-calculator-problem-postfix-notation.html#cb170-2" aria-hidden="true"></a><span class="kw">ggplot</span>(sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>condition)) <span class="op">+</span></span>
+<span id="cb170-3"><a href="boolean-calculator-problem-postfix-notation.html#cb170-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>() <span class="op">+</span></span>
+<span id="cb170-4"><a href="boolean-calculator-problem-postfix-notation.html#cb170-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
+<span id="cb170-5"><a href="boolean-calculator-problem-postfix-notation.html#cb170-5" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span>,</span>
+<span id="cb170-6"><a href="boolean-calculator-problem-postfix-notation.html#cb170-6" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
+<span id="cb170-7"><a href="boolean-calculator-problem-postfix-notation.html#cb170-7" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_dodge</span>(<span class="fl">0.9</span>),</span>
+<span id="cb170-8"><a href="boolean-calculator-problem-postfix-notation.html#cb170-8" aria-hidden="true"></a>    <span class="dt">vjust=</span><span class="dv">0</span></span>
+<span id="cb170-9"><a href="boolean-calculator-problem-postfix-notation.html#cb170-9" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb170-10"><a href="boolean-calculator-problem-postfix-notation.html#cb170-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb170-11"><a href="boolean-calculator-problem-postfix-notation.html#cb170-11" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb170-12"><a href="boolean-calculator-problem-postfix-notation.html#cb170-12" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>,<span class="st">&quot;both&quot;</span>),</span>
+<span id="cb170-13"><a href="boolean-calculator-problem-postfix-notation.html#cb170-13" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb170-14"><a href="boolean-calculator-problem-postfix-notation.html#cb170-14" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb170-15"><a href="boolean-calculator-problem-postfix-notation.html#cb170-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Successful replciates&quot;</span>) <span class="op">+</span></span>
+<span id="cb170-16"><a href="boolean-calculator-problem-postfix-notation.html#cb170-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylim</span>(<span class="dv">0</span>, <span class="dv">200</span>) <span class="op">+</span></span>
+<span id="cb170-17"><a href="boolean-calculator-problem-postfix-notation.html#cb170-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="op">+</span></span>
+<span id="cb170-18"><a href="boolean-calculator-problem-postfix-notation.html#cb170-18" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
+<span id="cb170-19"><a href="boolean-calculator-problem-postfix-notation.html#cb170-19" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-postfix-solution-counts.pdf&quot;</span>),</span>
+<span id="cb170-20"><a href="boolean-calculator-problem-postfix-notation.html#cb170-20" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
+<span id="cb170-21"><a href="boolean-calculator-problem-postfix-notation.html#cb170-21" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">4</span></span>
+<span id="cb170-22"><a href="boolean-calculator-problem-postfix-notation.html#cb170-22" aria-hidden="true"></a>  )</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-94-1.png" width="672" /></p>
 <p>Test for significance using Fisher’s exact test.</p>
-<div class="sourceCode" id="cb168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb168-1"><a href="boolean-calculator-problem-postfix-notation.html#cb168-1" aria-hidden="true"></a><span class="co"># Extract successes/fails for each condition.</span></span>
-<span id="cb168-2"><a href="boolean-calculator-problem-postfix-notation.html#cb168-2" aria-hidden="true"></a>reg_disabled_success_cnt &lt;-<span class="st"> </span><span class="kw">nrow</span>(<span class="kw">filter</span>(sol_data, solution<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;</span><span class="st"> </span>condition<span class="op">==</span><span class="st">&quot;memory&quot;</span>))</span>
-<span id="cb168-3"><a href="boolean-calculator-problem-postfix-notation.html#cb168-3" aria-hidden="true"></a>reg_disabled_fail_cnt &lt;-<span class="st"> </span>replicates <span class="op">-</span><span class="st"> </span>reg_disabled_success_cnt</span>
-<span id="cb168-4"><a href="boolean-calculator-problem-postfix-notation.html#cb168-4" aria-hidden="true"></a></span>
-<span id="cb168-5"><a href="boolean-calculator-problem-postfix-notation.html#cb168-5" aria-hidden="true"></a>reg_enabled_success_cnt &lt;-<span class="st"> </span><span class="kw">nrow</span>(<span class="kw">filter</span>(sol_data, solution<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;</span><span class="st"> </span>condition<span class="op">==</span><span class="st">&quot;both&quot;</span>))</span>
-<span id="cb168-6"><a href="boolean-calculator-problem-postfix-notation.html#cb168-6" aria-hidden="true"></a>reg_enabled_fail_cnt &lt;-<span class="st"> </span>replicates <span class="op">-</span><span class="st"> </span>reg_enabled_success_cnt</span>
-<span id="cb168-7"><a href="boolean-calculator-problem-postfix-notation.html#cb168-7" aria-hidden="true"></a></span>
-<span id="cb168-8"><a href="boolean-calculator-problem-postfix-notation.html#cb168-8" aria-hidden="true"></a><span class="co"># Regulation-disabled vs regulation-enabled</span></span>
-<span id="cb168-9"><a href="boolean-calculator-problem-postfix-notation.html#cb168-9" aria-hidden="true"></a>perf_table &lt;-<span class="st"> </span><span class="kw">matrix</span>(</span>
-<span id="cb168-10"><a href="boolean-calculator-problem-postfix-notation.html#cb168-10" aria-hidden="true"></a>  <span class="kw">c</span>(</span>
-<span id="cb168-11"><a href="boolean-calculator-problem-postfix-notation.html#cb168-11" aria-hidden="true"></a>    reg_enabled_success_cnt,</span>
-<span id="cb168-12"><a href="boolean-calculator-problem-postfix-notation.html#cb168-12" aria-hidden="true"></a>    reg_disabled_success_cnt,</span>
-<span id="cb168-13"><a href="boolean-calculator-problem-postfix-notation.html#cb168-13" aria-hidden="true"></a>    reg_enabled_fail_cnt,</span>
-<span id="cb168-14"><a href="boolean-calculator-problem-postfix-notation.html#cb168-14" aria-hidden="true"></a>    reg_disabled_fail_cnt</span>
-<span id="cb168-15"><a href="boolean-calculator-problem-postfix-notation.html#cb168-15" aria-hidden="true"></a>    ),</span>
-<span id="cb168-16"><a href="boolean-calculator-problem-postfix-notation.html#cb168-16" aria-hidden="true"></a>    <span class="dt">nrow=</span><span class="dv">2</span></span>
-<span id="cb168-17"><a href="boolean-calculator-problem-postfix-notation.html#cb168-17" aria-hidden="true"></a>)</span>
-<span id="cb168-18"><a href="boolean-calculator-problem-postfix-notation.html#cb168-18" aria-hidden="true"></a></span>
-<span id="cb168-19"><a href="boolean-calculator-problem-postfix-notation.html#cb168-19" aria-hidden="true"></a><span class="kw">rownames</span>(perf_table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg-enabled&quot;</span>, <span class="st">&quot;reg-disabled&quot;</span>)</span>
-<span id="cb168-20"><a href="boolean-calculator-problem-postfix-notation.html#cb168-20" aria-hidden="true"></a><span class="kw">colnames</span>(perf_table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;success&quot;</span>, <span class="st">&quot;fail&quot;</span>)</span>
-<span id="cb168-21"><a href="boolean-calculator-problem-postfix-notation.html#cb168-21" aria-hidden="true"></a></span>
-<span id="cb168-22"><a href="boolean-calculator-problem-postfix-notation.html#cb168-22" aria-hidden="true"></a><span class="kw">print</span>(perf_table)</span></code></pre></div>
+<div class="sourceCode" id="cb171"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb171-1"><a href="boolean-calculator-problem-postfix-notation.html#cb171-1" aria-hidden="true"></a><span class="co"># Extract successes/fails for each condition.</span></span>
+<span id="cb171-2"><a href="boolean-calculator-problem-postfix-notation.html#cb171-2" aria-hidden="true"></a>reg_disabled_success_cnt &lt;-<span class="st"> </span><span class="kw">nrow</span>(<span class="kw">filter</span>(sol_data, solution<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;</span><span class="st"> </span>condition<span class="op">==</span><span class="st">&quot;memory&quot;</span>))</span>
+<span id="cb171-3"><a href="boolean-calculator-problem-postfix-notation.html#cb171-3" aria-hidden="true"></a>reg_disabled_fail_cnt &lt;-<span class="st"> </span>replicates <span class="op">-</span><span class="st"> </span>reg_disabled_success_cnt</span>
+<span id="cb171-4"><a href="boolean-calculator-problem-postfix-notation.html#cb171-4" aria-hidden="true"></a></span>
+<span id="cb171-5"><a href="boolean-calculator-problem-postfix-notation.html#cb171-5" aria-hidden="true"></a>reg_enabled_success_cnt &lt;-<span class="st"> </span><span class="kw">nrow</span>(<span class="kw">filter</span>(sol_data, solution<span class="op">==</span><span class="st">&quot;1&quot;</span> <span class="op">&amp;</span><span class="st"> </span>condition<span class="op">==</span><span class="st">&quot;both&quot;</span>))</span>
+<span id="cb171-6"><a href="boolean-calculator-problem-postfix-notation.html#cb171-6" aria-hidden="true"></a>reg_enabled_fail_cnt &lt;-<span class="st"> </span>replicates <span class="op">-</span><span class="st"> </span>reg_enabled_success_cnt</span>
+<span id="cb171-7"><a href="boolean-calculator-problem-postfix-notation.html#cb171-7" aria-hidden="true"></a></span>
+<span id="cb171-8"><a href="boolean-calculator-problem-postfix-notation.html#cb171-8" aria-hidden="true"></a><span class="co"># Regulation-disabled vs regulation-enabled</span></span>
+<span id="cb171-9"><a href="boolean-calculator-problem-postfix-notation.html#cb171-9" aria-hidden="true"></a>perf_table &lt;-<span class="st"> </span><span class="kw">matrix</span>(</span>
+<span id="cb171-10"><a href="boolean-calculator-problem-postfix-notation.html#cb171-10" aria-hidden="true"></a>  <span class="kw">c</span>(</span>
+<span id="cb171-11"><a href="boolean-calculator-problem-postfix-notation.html#cb171-11" aria-hidden="true"></a>    reg_enabled_success_cnt,</span>
+<span id="cb171-12"><a href="boolean-calculator-problem-postfix-notation.html#cb171-12" aria-hidden="true"></a>    reg_disabled_success_cnt,</span>
+<span id="cb171-13"><a href="boolean-calculator-problem-postfix-notation.html#cb171-13" aria-hidden="true"></a>    reg_enabled_fail_cnt,</span>
+<span id="cb171-14"><a href="boolean-calculator-problem-postfix-notation.html#cb171-14" aria-hidden="true"></a>    reg_disabled_fail_cnt</span>
+<span id="cb171-15"><a href="boolean-calculator-problem-postfix-notation.html#cb171-15" aria-hidden="true"></a>    ),</span>
+<span id="cb171-16"><a href="boolean-calculator-problem-postfix-notation.html#cb171-16" aria-hidden="true"></a>    <span class="dt">nrow=</span><span class="dv">2</span></span>
+<span id="cb171-17"><a href="boolean-calculator-problem-postfix-notation.html#cb171-17" aria-hidden="true"></a>)</span>
+<span id="cb171-18"><a href="boolean-calculator-problem-postfix-notation.html#cb171-18" aria-hidden="true"></a></span>
+<span id="cb171-19"><a href="boolean-calculator-problem-postfix-notation.html#cb171-19" aria-hidden="true"></a><span class="kw">rownames</span>(perf_table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;reg-enabled&quot;</span>, <span class="st">&quot;reg-disabled&quot;</span>)</span>
+<span id="cb171-20"><a href="boolean-calculator-problem-postfix-notation.html#cb171-20" aria-hidden="true"></a><span class="kw">colnames</span>(perf_table) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;success&quot;</span>, <span class="st">&quot;fail&quot;</span>)</span>
+<span id="cb171-21"><a href="boolean-calculator-problem-postfix-notation.html#cb171-21" aria-hidden="true"></a></span>
+<span id="cb171-22"><a href="boolean-calculator-problem-postfix-notation.html#cb171-22" aria-hidden="true"></a><span class="kw">print</span>(perf_table)</span></code></pre></div>
 <pre><code>##              success fail
 ## reg-enabled      120   80
 ## reg-disabled     151   49</code></pre>
-<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="boolean-calculator-problem-postfix-notation.html#cb170-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">fisher.test</span>(perf_table))</span></code></pre></div>
+<div class="sourceCode" id="cb173"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb173-1"><a href="boolean-calculator-problem-postfix-notation.html#cb173-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">fisher.test</span>(perf_table))</span></code></pre></div>
 <pre><code>## 
 ##  Fisher&#39;s Exact Test for Count Data
 ## 
@@ -556,38 +556,60 @@ Successful programs must store the numeric inputs embedded in operand signals, a
 </div>
 <div id="how-many-generations-elapse-before-solutions-evolve-3" class="section level2" number="10.5">
 <h2><span class="header-section-number">10.5</span> How many generations elapse before solutions evolve?</h2>
-<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="boolean-calculator-problem-postfix-notation.html#cb172-1" aria-hidden="true"></a><span class="kw">ggplot</span>( <span class="dt">data =</span> sol_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>update, <span class="dt">fill=</span>condition) ) <span class="op">+</span></span>
-<span id="cb172-2"><a href="boolean-calculator-problem-postfix-notation.html#cb172-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_flat_violin</span>(</span>
-<span id="cb172-3"><a href="boolean-calculator-problem-postfix-notation.html#cb172-3" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="fl">.2</span>, <span class="dt">y =</span> <span class="dv">0</span>),</span>
-<span id="cb172-4"><a href="boolean-calculator-problem-postfix-notation.html#cb172-4" aria-hidden="true"></a>    <span class="dt">alpha=</span>.<span class="dv">8</span></span>
-<span id="cb172-5"><a href="boolean-calculator-problem-postfix-notation.html#cb172-5" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb172-6"><a href="boolean-calculator-problem-postfix-notation.html#cb172-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
-<span id="cb172-7"><a href="boolean-calculator-problem-postfix-notation.html#cb172-7" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">y=</span>update, <span class="dt">color=</span>condition),</span>
-<span id="cb172-8"><a href="boolean-calculator-problem-postfix-notation.html#cb172-8" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_jitter</span>(<span class="dt">width =</span> <span class="fl">.15</span>),</span>
-<span id="cb172-9"><a href="boolean-calculator-problem-postfix-notation.html#cb172-9" aria-hidden="true"></a>    <span class="dt">size =</span> <span class="fl">.5</span>,</span>
-<span id="cb172-10"><a href="boolean-calculator-problem-postfix-notation.html#cb172-10" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.8</span></span>
-<span id="cb172-11"><a href="boolean-calculator-problem-postfix-notation.html#cb172-11" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb172-12"><a href="boolean-calculator-problem-postfix-notation.html#cb172-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>(</span>
-<span id="cb172-13"><a href="boolean-calculator-problem-postfix-notation.html#cb172-13" aria-hidden="true"></a>    <span class="dt">width =</span> <span class="fl">.1</span>,</span>
-<span id="cb172-14"><a href="boolean-calculator-problem-postfix-notation.html#cb172-14" aria-hidden="true"></a>    <span class="dt">outlier.shape =</span> <span class="ot">NA</span>,</span>
-<span id="cb172-15"><a href="boolean-calculator-problem-postfix-notation.html#cb172-15" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.5</span></span>
-<span id="cb172-16"><a href="boolean-calculator-problem-postfix-notation.html#cb172-16" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb172-17"><a href="boolean-calculator-problem-postfix-notation.html#cb172-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb172-18"><a href="boolean-calculator-problem-postfix-notation.html#cb172-18" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb172-19"><a href="boolean-calculator-problem-postfix-notation.html#cb172-19" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
-<span id="cb172-20"><a href="boolean-calculator-problem-postfix-notation.html#cb172-20" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
-<span id="cb172-21"><a href="boolean-calculator-problem-postfix-notation.html#cb172-21" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb172-22"><a href="boolean-calculator-problem-postfix-notation.html#cb172-22" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name=</span><span class="st">&quot;Generation first solution evolved&quot;</span>) <span class="op">+</span></span>
-<span id="cb172-23"><a href="boolean-calculator-problem-postfix-notation.html#cb172-23" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
-<span id="cb172-24"><a href="boolean-calculator-problem-postfix-notation.html#cb172-24" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
-<span id="cb172-25"><a href="boolean-calculator-problem-postfix-notation.html#cb172-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
-<span id="cb172-26"><a href="boolean-calculator-problem-postfix-notation.html#cb172-26" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-postfix-solve-time-cloud.png&quot;</span>),</span>
-<span id="cb172-27"><a href="boolean-calculator-problem-postfix-notation.html#cb172-27" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
-<span id="cb172-28"><a href="boolean-calculator-problem-postfix-notation.html#cb172-28" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">4</span></span>
-<span id="cb172-29"><a href="boolean-calculator-problem-postfix-notation.html#cb172-29" aria-hidden="true"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb175"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb175-1"><a href="boolean-calculator-problem-postfix-notation.html#cb175-1" aria-hidden="true"></a>unfinished_data &lt;-<span class="st"> </span><span class="kw">filter</span>(data, solution<span class="op">==</span><span class="st">&quot;0&quot;</span>)</span>
+<span id="cb175-2"><a href="boolean-calculator-problem-postfix-notation.html#cb175-2" aria-hidden="true"></a>unfinished_data<span class="op">$</span>graph_update &lt;-<span class="st"> </span><span class="dv">12500</span></span>
+<span id="cb175-3"><a href="boolean-calculator-problem-postfix-notation.html#cb175-3" aria-hidden="true"></a></span>
+<span id="cb175-4"><a href="boolean-calculator-problem-postfix-notation.html#cb175-4" aria-hidden="true"></a><span class="kw">ggplot</span>( ) <span class="op">+</span></span>
+<span id="cb175-5"><a href="boolean-calculator-problem-postfix-notation.html#cb175-5" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_flat_violin</span>(</span>
+<span id="cb175-6"><a href="boolean-calculator-problem-postfix-notation.html#cb175-6" aria-hidden="true"></a>    <span class="dt">data =</span> sol_data,</span>
+<span id="cb175-7"><a href="boolean-calculator-problem-postfix-notation.html#cb175-7" aria-hidden="true"></a>    <span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>update, <span class="dt">fill=</span>condition),</span>
+<span id="cb175-8"><a href="boolean-calculator-problem-postfix-notation.html#cb175-8" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_nudge</span>(<span class="dt">x =</span> <span class="fl">.2</span>, <span class="dt">y =</span> <span class="dv">0</span>),</span>
+<span id="cb175-9"><a href="boolean-calculator-problem-postfix-notation.html#cb175-9" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">.8</span></span>
+<span id="cb175-10"><a href="boolean-calculator-problem-postfix-notation.html#cb175-10" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb175-11"><a href="boolean-calculator-problem-postfix-notation.html#cb175-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
+<span id="cb175-12"><a href="boolean-calculator-problem-postfix-notation.html#cb175-12" aria-hidden="true"></a>    <span class="dt">data =</span> sol_data,</span>
+<span id="cb175-13"><a href="boolean-calculator-problem-postfix-notation.html#cb175-13" aria-hidden="true"></a>    <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>update, <span class="dt">color=</span>condition),</span>
+<span id="cb175-14"><a href="boolean-calculator-problem-postfix-notation.html#cb175-14" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_jitter</span>(<span class="dt">width =</span> <span class="fl">.15</span>),</span>
+<span id="cb175-15"><a href="boolean-calculator-problem-postfix-notation.html#cb175-15" aria-hidden="true"></a>    <span class="dt">size =</span> <span class="fl">.5</span>,</span>
+<span id="cb175-16"><a href="boolean-calculator-problem-postfix-notation.html#cb175-16" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.8</span></span>
+<span id="cb175-17"><a href="boolean-calculator-problem-postfix-notation.html#cb175-17" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb175-18"><a href="boolean-calculator-problem-postfix-notation.html#cb175-18" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_point</span>(</span>
+<span id="cb175-19"><a href="boolean-calculator-problem-postfix-notation.html#cb175-19" aria-hidden="true"></a>    <span class="dt">data =</span> unfinished_data,</span>
+<span id="cb175-20"><a href="boolean-calculator-problem-postfix-notation.html#cb175-20" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>graph_update),</span>
+<span id="cb175-21"><a href="boolean-calculator-problem-postfix-notation.html#cb175-21" aria-hidden="true"></a>    <span class="dt">color=</span><span class="st">&quot;gray&quot;</span>,</span>
+<span id="cb175-22"><a href="boolean-calculator-problem-postfix-notation.html#cb175-22" aria-hidden="true"></a>    <span class="dt">position =</span> <span class="kw">position_jitter</span>(<span class="dt">width =</span> <span class="fl">.15</span>, <span class="dt">height=</span><span class="dv">500</span>),</span>
+<span id="cb175-23"><a href="boolean-calculator-problem-postfix-notation.html#cb175-23" aria-hidden="true"></a>    <span class="dt">size =</span> <span class="fl">.5</span>,</span>
+<span id="cb175-24"><a href="boolean-calculator-problem-postfix-notation.html#cb175-24" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.8</span></span>
+<span id="cb175-25"><a href="boolean-calculator-problem-postfix-notation.html#cb175-25" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb175-26"><a href="boolean-calculator-problem-postfix-notation.html#cb175-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>(</span>
+<span id="cb175-27"><a href="boolean-calculator-problem-postfix-notation.html#cb175-27" aria-hidden="true"></a>    <span class="dt">data =</span> sol_data,</span>
+<span id="cb175-28"><a href="boolean-calculator-problem-postfix-notation.html#cb175-28" aria-hidden="true"></a>    <span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>update, <span class="dt">fill=</span>condition),</span>
+<span id="cb175-29"><a href="boolean-calculator-problem-postfix-notation.html#cb175-29" aria-hidden="true"></a>    <span class="dt">width =</span> <span class="fl">.1</span>,</span>
+<span id="cb175-30"><a href="boolean-calculator-problem-postfix-notation.html#cb175-30" aria-hidden="true"></a>    <span class="dt">outlier.shape =</span> <span class="ot">NA</span>,</span>
+<span id="cb175-31"><a href="boolean-calculator-problem-postfix-notation.html#cb175-31" aria-hidden="true"></a>    <span class="dt">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb175-32"><a href="boolean-calculator-problem-postfix-notation.html#cb175-32" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb175-33"><a href="boolean-calculator-problem-postfix-notation.html#cb175-33" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb175-34"><a href="boolean-calculator-problem-postfix-notation.html#cb175-34" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb175-35"><a href="boolean-calculator-problem-postfix-notation.html#cb175-35" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb175-36"><a href="boolean-calculator-problem-postfix-notation.html#cb175-36" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb175-37"><a href="boolean-calculator-problem-postfix-notation.html#cb175-37" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb175-38"><a href="boolean-calculator-problem-postfix-notation.html#cb175-38" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(</span>
+<span id="cb175-39"><a href="boolean-calculator-problem-postfix-notation.html#cb175-39" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Generation first solution evolved&quot;</span>,</span>
+<span id="cb175-40"><a href="boolean-calculator-problem-postfix-notation.html#cb175-40" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">13000</span>),</span>
+<span id="cb175-41"><a href="boolean-calculator-problem-postfix-notation.html#cb175-41" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">2500</span>, <span class="dv">5000</span>, <span class="dv">7500</span>, <span class="dv">10000</span>, <span class="dv">12500</span>),</span>
+<span id="cb175-42"><a href="boolean-calculator-problem-postfix-notation.html#cb175-42" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;0&quot;</span>, <span class="st">&quot;2500&quot;</span>, <span class="st">&quot;5000&quot;</span>, <span class="st">&quot;7500&quot;</span>, <span class="st">&quot;10000&quot;</span>, <span class="st">&quot;Unsolved&quot;</span>)</span>
+<span id="cb175-43"><a href="boolean-calculator-problem-postfix-notation.html#cb175-43" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb175-44"><a href="boolean-calculator-problem-postfix-notation.html#cb175-44" aria-hidden="true"></a><span class="st">  </span><span class="co"># coord_flip() +</span></span>
+<span id="cb175-45"><a href="boolean-calculator-problem-postfix-notation.html#cb175-45" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
+<span id="cb175-46"><a href="boolean-calculator-problem-postfix-notation.html#cb175-46" aria-hidden="true"></a><span class="st">  </span><span class="kw">guides</span>(<span class="dt">color =</span> <span class="ot">FALSE</span>) <span class="op">+</span></span>
+<span id="cb175-47"><a href="boolean-calculator-problem-postfix-notation.html#cb175-47" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
+<span id="cb175-48"><a href="boolean-calculator-problem-postfix-notation.html#cb175-48" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-postfix-solve-time-cloud.pdf&quot;</span>),</span>
+<span id="cb175-49"><a href="boolean-calculator-problem-postfix-notation.html#cb175-49" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
+<span id="cb175-50"><a href="boolean-calculator-problem-postfix-notation.html#cb175-50" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">4</span></span>
+<span id="cb175-51"><a href="boolean-calculator-problem-postfix-notation.html#cb175-51" aria-hidden="true"></a>  )</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-96-1.png" width="672" /></p>
 <p>Test for statistical difference between conditions using a Wilcoxon rank sum test.</p>
-<div class="sourceCode" id="cb173"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb173-1"><a href="boolean-calculator-problem-postfix-notation.html#cb173-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>update<span class="op">~</span>condition, <span class="dt">data=</span>sol_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="boolean-calculator-problem-postfix-notation.html#cb176-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>update<span class="op">~</span>condition, <span class="dt">data=</span>sol_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
 <pre><code>## 
 ##  Wilcoxon rank sum test with continuity correction
 ## 
@@ -605,115 +627,115 @@ Successful programs must store the numeric inputs embedded in operand signals, a
 <div id="what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-2" class="section level3" number="10.6.1">
 <h3><span class="header-section-number">10.6.1</span> What mechanisms do programs rely on to adjust responses to signals over time?</h3>
 <p>We used indpendent knockouts of tag-based genetic regulation and global memory buffer access to investigate the mechanisms underpinning successful programs.</p>
-<div class="sourceCode" id="cb175"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb175-1"><a href="boolean-calculator-problem-postfix-notation.html#cb175-1" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>strategy) ) <span class="op">+</span></span>
-<span id="cb175-2"><a href="boolean-calculator-problem-postfix-notation.html#cb175-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>(</span>
-<span id="cb175-3"><a href="boolean-calculator-problem-postfix-notation.html#cb175-3" aria-hidden="true"></a>    <span class="dt">position=</span><span class="st">&quot;fill&quot;</span>,</span>
-<span id="cb175-4"><a href="boolean-calculator-problem-postfix-notation.html#cb175-4" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span></span>
-<span id="cb175-5"><a href="boolean-calculator-problem-postfix-notation.html#cb175-5" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb175-6"><a href="boolean-calculator-problem-postfix-notation.html#cb175-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
-<span id="cb175-7"><a href="boolean-calculator-problem-postfix-notation.html#cb175-7" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&#39;count&#39;</span>,</span>
-<span id="cb175-8"><a href="boolean-calculator-problem-postfix-notation.html#cb175-8" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
-<span id="cb175-9"><a href="boolean-calculator-problem-postfix-notation.html#cb175-9" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_fill</span>(<span class="dt">vjust=</span><span class="fl">0.05</span>)</span>
-<span id="cb175-10"><a href="boolean-calculator-problem-postfix-notation.html#cb175-10" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb175-11"><a href="boolean-calculator-problem-postfix-notation.html#cb175-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;% of Solutions&quot;</span>) <span class="op">+</span></span>
-<span id="cb175-12"><a href="boolean-calculator-problem-postfix-notation.html#cb175-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_fill_discrete</span>(</span>
-<span id="cb175-13"><a href="boolean-calculator-problem-postfix-notation.html#cb175-13" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Strategy:&quot;</span>,</span>
-<span id="cb175-14"><a href="boolean-calculator-problem-postfix-notation.html#cb175-14" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(</span>
-<span id="cb175-15"><a href="boolean-calculator-problem-postfix-notation.html#cb175-15" aria-hidden="true"></a>      <span class="st">&quot;use regulation&quot;</span>,</span>
-<span id="cb175-16"><a href="boolean-calculator-problem-postfix-notation.html#cb175-16" aria-hidden="true"></a>      <span class="st">&quot;use memory&quot;</span>,</span>
-<span id="cb175-17"><a href="boolean-calculator-problem-postfix-notation.html#cb175-17" aria-hidden="true"></a>      <span class="st">&quot;use neither&quot;</span>,</span>
-<span id="cb175-18"><a href="boolean-calculator-problem-postfix-notation.html#cb175-18" aria-hidden="true"></a>      <span class="st">&quot;use both&quot;</span></span>
-<span id="cb175-19"><a href="boolean-calculator-problem-postfix-notation.html#cb175-19" aria-hidden="true"></a>    ),</span>
-<span id="cb175-20"><a href="boolean-calculator-problem-postfix-notation.html#cb175-20" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(</span>
-<span id="cb175-21"><a href="boolean-calculator-problem-postfix-notation.html#cb175-21" aria-hidden="true"></a>      <span class="st">&quot;Use regulation (only)&quot;</span>,</span>
-<span id="cb175-22"><a href="boolean-calculator-problem-postfix-notation.html#cb175-22" aria-hidden="true"></a>      <span class="st">&quot;Use global memory (only)&quot;</span>,</span>
-<span id="cb175-23"><a href="boolean-calculator-problem-postfix-notation.html#cb175-23" aria-hidden="true"></a>      <span class="st">&quot;Use neither&quot;</span>,</span>
-<span id="cb175-24"><a href="boolean-calculator-problem-postfix-notation.html#cb175-24" aria-hidden="true"></a>      <span class="st">&quot;Use both&quot;</span></span>
-<span id="cb175-25"><a href="boolean-calculator-problem-postfix-notation.html#cb175-25" aria-hidden="true"></a>    )</span>
-<span id="cb175-26"><a href="boolean-calculator-problem-postfix-notation.html#cb175-26" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb175-27"><a href="boolean-calculator-problem-postfix-notation.html#cb175-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb175-28"><a href="boolean-calculator-problem-postfix-notation.html#cb175-28" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb175-29"><a href="boolean-calculator-problem-postfix-notation.html#cb175-29" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
-<span id="cb175-30"><a href="boolean-calculator-problem-postfix-notation.html#cb175-30" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
-<span id="cb175-31"><a href="boolean-calculator-problem-postfix-notation.html#cb175-31" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb175-32"><a href="boolean-calculator-problem-postfix-notation.html#cb175-32" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="boolean-calculator-problem-postfix-notation.html#cb178-1" aria-hidden="true"></a><span class="kw">ggplot</span>( sol_data, <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">fill=</span>strategy) ) <span class="op">+</span></span>
+<span id="cb178-2"><a href="boolean-calculator-problem-postfix-notation.html#cb178-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_bar</span>(</span>
+<span id="cb178-3"><a href="boolean-calculator-problem-postfix-notation.html#cb178-3" aria-hidden="true"></a>    <span class="dt">position=</span><span class="st">&quot;fill&quot;</span>,</span>
+<span id="cb178-4"><a href="boolean-calculator-problem-postfix-notation.html#cb178-4" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&quot;count&quot;</span></span>
+<span id="cb178-5"><a href="boolean-calculator-problem-postfix-notation.html#cb178-5" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb178-6"><a href="boolean-calculator-problem-postfix-notation.html#cb178-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_text</span>(</span>
+<span id="cb178-7"><a href="boolean-calculator-problem-postfix-notation.html#cb178-7" aria-hidden="true"></a>    <span class="dt">stat=</span><span class="st">&#39;count&#39;</span>,</span>
+<span id="cb178-8"><a href="boolean-calculator-problem-postfix-notation.html#cb178-8" aria-hidden="true"></a>    <span class="dt">mapping=</span><span class="kw">aes</span>(<span class="dt">label=</span>..count..),</span>
+<span id="cb178-9"><a href="boolean-calculator-problem-postfix-notation.html#cb178-9" aria-hidden="true"></a>    <span class="dt">position=</span><span class="kw">position_fill</span>(<span class="dt">vjust=</span><span class="fl">0.05</span>)</span>
+<span id="cb178-10"><a href="boolean-calculator-problem-postfix-notation.html#cb178-10" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb178-11"><a href="boolean-calculator-problem-postfix-notation.html#cb178-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;% of Solutions&quot;</span>) <span class="op">+</span></span>
+<span id="cb178-12"><a href="boolean-calculator-problem-postfix-notation.html#cb178-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_fill_discrete</span>(</span>
+<span id="cb178-13"><a href="boolean-calculator-problem-postfix-notation.html#cb178-13" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Strategy:&quot;</span>,</span>
+<span id="cb178-14"><a href="boolean-calculator-problem-postfix-notation.html#cb178-14" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(</span>
+<span id="cb178-15"><a href="boolean-calculator-problem-postfix-notation.html#cb178-15" aria-hidden="true"></a>      <span class="st">&quot;use regulation&quot;</span>,</span>
+<span id="cb178-16"><a href="boolean-calculator-problem-postfix-notation.html#cb178-16" aria-hidden="true"></a>      <span class="st">&quot;use memory&quot;</span>,</span>
+<span id="cb178-17"><a href="boolean-calculator-problem-postfix-notation.html#cb178-17" aria-hidden="true"></a>      <span class="st">&quot;use neither&quot;</span>,</span>
+<span id="cb178-18"><a href="boolean-calculator-problem-postfix-notation.html#cb178-18" aria-hidden="true"></a>      <span class="st">&quot;use both&quot;</span></span>
+<span id="cb178-19"><a href="boolean-calculator-problem-postfix-notation.html#cb178-19" aria-hidden="true"></a>    ),</span>
+<span id="cb178-20"><a href="boolean-calculator-problem-postfix-notation.html#cb178-20" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(</span>
+<span id="cb178-21"><a href="boolean-calculator-problem-postfix-notation.html#cb178-21" aria-hidden="true"></a>      <span class="st">&quot;Use regulation (only)&quot;</span>,</span>
+<span id="cb178-22"><a href="boolean-calculator-problem-postfix-notation.html#cb178-22" aria-hidden="true"></a>      <span class="st">&quot;Use global memory (only)&quot;</span>,</span>
+<span id="cb178-23"><a href="boolean-calculator-problem-postfix-notation.html#cb178-23" aria-hidden="true"></a>      <span class="st">&quot;Use neither&quot;</span>,</span>
+<span id="cb178-24"><a href="boolean-calculator-problem-postfix-notation.html#cb178-24" aria-hidden="true"></a>      <span class="st">&quot;Use both&quot;</span></span>
+<span id="cb178-25"><a href="boolean-calculator-problem-postfix-notation.html#cb178-25" aria-hidden="true"></a>    )</span>
+<span id="cb178-26"><a href="boolean-calculator-problem-postfix-notation.html#cb178-26" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb178-27"><a href="boolean-calculator-problem-postfix-notation.html#cb178-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb178-28"><a href="boolean-calculator-problem-postfix-notation.html#cb178-28" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb178-29"><a href="boolean-calculator-problem-postfix-notation.html#cb178-29" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb178-30"><a href="boolean-calculator-problem-postfix-notation.html#cb178-30" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb178-31"><a href="boolean-calculator-problem-postfix-notation.html#cb178-31" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb178-32"><a href="boolean-calculator-problem-postfix-notation.html#cb178-32" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-98-1.png" width="672" /></p>
 </div>
 <div id="gene-regulatory-networks-2" class="section level3" number="10.6.2">
 <h3><span class="header-section-number">10.6.2</span> Gene regulatory networks</h3>
 <p>Looking only at successful programs that rely on regulation. At a glance, what do gene regulatory networks look like?</p>
 <p>First, the total edges found in networks:</p>
-<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="boolean-calculator-problem-postfix-notation.html#cb176-1" aria-hidden="true"></a>relies_on_reg &lt;-<span class="st"> </span><span class="kw">filter</span>(</span>
-<span id="cb176-2"><a href="boolean-calculator-problem-postfix-notation.html#cb176-2" aria-hidden="true"></a>  sol_data,</span>
-<span id="cb176-3"><a href="boolean-calculator-problem-postfix-notation.html#cb176-3" aria-hidden="true"></a>  relies_on_regulation<span class="op">==</span><span class="st">&quot;1&quot;</span></span>
-<span id="cb176-4"><a href="boolean-calculator-problem-postfix-notation.html#cb176-4" aria-hidden="true"></a>)<span class="op">$</span>SEED</span>
-<span id="cb176-5"><a href="boolean-calculator-problem-postfix-notation.html#cb176-5" aria-hidden="true"></a></span>
-<span id="cb176-6"><a href="boolean-calculator-problem-postfix-notation.html#cb176-6" aria-hidden="true"></a><span class="kw">ggplot</span>( <span class="kw">filter</span>(reg_network_data, run_id <span class="op">%in%</span><span class="st"> </span>relies_on_reg), <span class="kw">aes</span>(<span class="dt">x=</span>notation, <span class="dt">y=</span>edge_cnt) ) <span class="op">+</span></span>
-<span id="cb176-7"><a href="boolean-calculator-problem-postfix-notation.html#cb176-7" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
-<span id="cb176-8"><a href="boolean-calculator-problem-postfix-notation.html#cb176-8" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.1</span>) <span class="op">+</span></span>
-<span id="cb176-9"><a href="boolean-calculator-problem-postfix-notation.html#cb176-9" aria-hidden="true"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Notation&quot;</span>) <span class="op">+</span></span>
-<span id="cb176-10"><a href="boolean-calculator-problem-postfix-notation.html#cb176-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# Edges&quot;</span>) <span class="op">+</span></span>
-<span id="cb176-11"><a href="boolean-calculator-problem-postfix-notation.html#cb176-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
-<span id="cb176-12"><a href="boolean-calculator-problem-postfix-notation.html#cb176-12" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;bottom&quot;</span>,</span>
-<span id="cb176-13"><a href="boolean-calculator-problem-postfix-notation.html#cb176-13" aria-hidden="true"></a>    <span class="dt">legend.text=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">9</span>),</span>
-<span id="cb176-14"><a href="boolean-calculator-problem-postfix-notation.html#cb176-14" aria-hidden="true"></a>    <span class="dt">legend.title=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
-<span id="cb176-15"><a href="boolean-calculator-problem-postfix-notation.html#cb176-15" aria-hidden="true"></a>    <span class="dt">axis.title.x=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">12</span>)</span>
-<span id="cb176-16"><a href="boolean-calculator-problem-postfix-notation.html#cb176-16" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb176-17"><a href="boolean-calculator-problem-postfix-notation.html#cb176-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
-<span id="cb176-18"><a href="boolean-calculator-problem-postfix-notation.html#cb176-18" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-postfix-regulation-edges.png&quot;</span>),</span>
-<span id="cb176-19"><a href="boolean-calculator-problem-postfix-notation.html#cb176-19" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
-<span id="cb176-20"><a href="boolean-calculator-problem-postfix-notation.html#cb176-20" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">3</span></span>
-<span id="cb176-21"><a href="boolean-calculator-problem-postfix-notation.html#cb176-21" aria-hidden="true"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb179"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb179-1"><a href="boolean-calculator-problem-postfix-notation.html#cb179-1" aria-hidden="true"></a>relies_on_reg &lt;-<span class="st"> </span><span class="kw">filter</span>(</span>
+<span id="cb179-2"><a href="boolean-calculator-problem-postfix-notation.html#cb179-2" aria-hidden="true"></a>  sol_data,</span>
+<span id="cb179-3"><a href="boolean-calculator-problem-postfix-notation.html#cb179-3" aria-hidden="true"></a>  relies_on_regulation<span class="op">==</span><span class="st">&quot;1&quot;</span></span>
+<span id="cb179-4"><a href="boolean-calculator-problem-postfix-notation.html#cb179-4" aria-hidden="true"></a>)<span class="op">$</span>SEED</span>
+<span id="cb179-5"><a href="boolean-calculator-problem-postfix-notation.html#cb179-5" aria-hidden="true"></a></span>
+<span id="cb179-6"><a href="boolean-calculator-problem-postfix-notation.html#cb179-6" aria-hidden="true"></a><span class="kw">ggplot</span>( <span class="kw">filter</span>(reg_network_data, run_id <span class="op">%in%</span><span class="st"> </span>relies_on_reg), <span class="kw">aes</span>(<span class="dt">x=</span>notation, <span class="dt">y=</span>edge_cnt) ) <span class="op">+</span></span>
+<span id="cb179-7"><a href="boolean-calculator-problem-postfix-notation.html#cb179-7" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb179-8"><a href="boolean-calculator-problem-postfix-notation.html#cb179-8" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.1</span>) <span class="op">+</span></span>
+<span id="cb179-9"><a href="boolean-calculator-problem-postfix-notation.html#cb179-9" aria-hidden="true"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Notation&quot;</span>) <span class="op">+</span></span>
+<span id="cb179-10"><a href="boolean-calculator-problem-postfix-notation.html#cb179-10" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# Edges&quot;</span>) <span class="op">+</span></span>
+<span id="cb179-11"><a href="boolean-calculator-problem-postfix-notation.html#cb179-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb179-12"><a href="boolean-calculator-problem-postfix-notation.html#cb179-12" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb179-13"><a href="boolean-calculator-problem-postfix-notation.html#cb179-13" aria-hidden="true"></a>    <span class="dt">legend.text=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">9</span>),</span>
+<span id="cb179-14"><a href="boolean-calculator-problem-postfix-notation.html#cb179-14" aria-hidden="true"></a>    <span class="dt">legend.title=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
+<span id="cb179-15"><a href="boolean-calculator-problem-postfix-notation.html#cb179-15" aria-hidden="true"></a>    <span class="dt">axis.title.x=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">12</span>)</span>
+<span id="cb179-16"><a href="boolean-calculator-problem-postfix-notation.html#cb179-16" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb179-17"><a href="boolean-calculator-problem-postfix-notation.html#cb179-17" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
+<span id="cb179-18"><a href="boolean-calculator-problem-postfix-notation.html#cb179-18" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-postfix-regulation-edges.png&quot;</span>),</span>
+<span id="cb179-19"><a href="boolean-calculator-problem-postfix-notation.html#cb179-19" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
+<span id="cb179-20"><a href="boolean-calculator-problem-postfix-notation.html#cb179-20" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">3</span></span>
+<span id="cb179-21"><a href="boolean-calculator-problem-postfix-notation.html#cb179-21" aria-hidden="true"></a>  )</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-99-1.png" width="672" /></p>
 <p>Next, let’s look at edges by type.</p>
-<div class="sourceCode" id="cb177"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb177-1"><a href="boolean-calculator-problem-postfix-notation.html#cb177-1" aria-hidden="true"></a><span class="co"># Process/cleanup the network data</span></span>
-<span id="cb177-2"><a href="boolean-calculator-problem-postfix-notation.html#cb177-2" aria-hidden="true"></a>melted_network_data &lt;-<span class="st"> </span><span class="kw">melt</span>(</span>
-<span id="cb177-3"><a href="boolean-calculator-problem-postfix-notation.html#cb177-3" aria-hidden="true"></a>  <span class="kw">filter</span>(reg_network_data,</span>
-<span id="cb177-4"><a href="boolean-calculator-problem-postfix-notation.html#cb177-4" aria-hidden="true"></a>         run_id <span class="op">%in%</span><span class="st"> </span>relies_on_reg</span>
-<span id="cb177-5"><a href="boolean-calculator-problem-postfix-notation.html#cb177-5" aria-hidden="true"></a>        ),</span>
-<span id="cb177-6"><a href="boolean-calculator-problem-postfix-notation.html#cb177-6" aria-hidden="true"></a>  <span class="dt">variable.name =</span> <span class="st">&quot;reg_edge_type&quot;</span>,</span>
-<span id="cb177-7"><a href="boolean-calculator-problem-postfix-notation.html#cb177-7" aria-hidden="true"></a>  <span class="dt">value.name =</span> <span class="st">&quot;reg_edges_cnt&quot;</span>,</span>
-<span id="cb177-8"><a href="boolean-calculator-problem-postfix-notation.html#cb177-8" aria-hidden="true"></a>  <span class="dt">measure.vars=</span><span class="kw">c</span>(<span class="st">&quot;repressed_edges_cnt&quot;</span>, <span class="st">&quot;promoted_edges_cnt&quot;</span>)</span>
-<span id="cb177-9"><a href="boolean-calculator-problem-postfix-notation.html#cb177-9" aria-hidden="true"></a>)</span>
-<span id="cb177-10"><a href="boolean-calculator-problem-postfix-notation.html#cb177-10" aria-hidden="true"></a></span>
-<span id="cb177-11"><a href="boolean-calculator-problem-postfix-notation.html#cb177-11" aria-hidden="true"></a><span class="kw">ggplot</span>( melted_network_data, <span class="kw">aes</span>(<span class="dt">x=</span>reg_edge_type, <span class="dt">y=</span>reg_edges_cnt, <span class="dt">color=</span>reg_edge_type) ) <span class="op">+</span></span>
-<span id="cb177-12"><a href="boolean-calculator-problem-postfix-notation.html#cb177-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
-<span id="cb177-13"><a href="boolean-calculator-problem-postfix-notation.html#cb177-13" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>) <span class="op">+</span></span>
-<span id="cb177-14"><a href="boolean-calculator-problem-postfix-notation.html#cb177-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Environmental Complexity&quot;</span>) <span class="op">+</span></span>
-<span id="cb177-15"><a href="boolean-calculator-problem-postfix-notation.html#cb177-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# Edges&quot;</span>) <span class="op">+</span></span>
-<span id="cb177-16"><a href="boolean-calculator-problem-postfix-notation.html#cb177-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb177-17"><a href="boolean-calculator-problem-postfix-notation.html#cb177-17" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Edge type&quot;</span>,</span>
-<span id="cb177-18"><a href="boolean-calculator-problem-postfix-notation.html#cb177-18" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(<span class="st">&quot;repressed_edges_cnt&quot;</span>, <span class="st">&quot;promoted_edges_cnt&quot;</span>),</span>
-<span id="cb177-19"><a href="boolean-calculator-problem-postfix-notation.html#cb177-19" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Repressing edges&quot;</span>, <span class="st">&quot;Promoting edges&quot;</span>)</span>
-<span id="cb177-20"><a href="boolean-calculator-problem-postfix-notation.html#cb177-20" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb177-21"><a href="boolean-calculator-problem-postfix-notation.html#cb177-21" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
-<span id="cb177-22"><a href="boolean-calculator-problem-postfix-notation.html#cb177-22" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span>,</span>
-<span id="cb177-23"><a href="boolean-calculator-problem-postfix-notation.html#cb177-23" aria-hidden="true"></a>    <span class="dt">legend.text=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">9</span>),</span>
-<span id="cb177-24"><a href="boolean-calculator-problem-postfix-notation.html#cb177-24" aria-hidden="true"></a>    <span class="dt">legend.title=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
-<span id="cb177-25"><a href="boolean-calculator-problem-postfix-notation.html#cb177-25" aria-hidden="true"></a>    <span class="dt">axis.title.x=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">12</span>)</span>
-<span id="cb177-26"><a href="boolean-calculator-problem-postfix-notation.html#cb177-26" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb177-27"><a href="boolean-calculator-problem-postfix-notation.html#cb177-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
-<span id="cb177-28"><a href="boolean-calculator-problem-postfix-notation.html#cb177-28" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-postfix-regulation-edge-types.png&quot;</span>),</span>
-<span id="cb177-29"><a href="boolean-calculator-problem-postfix-notation.html#cb177-29" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
-<span id="cb177-30"><a href="boolean-calculator-problem-postfix-notation.html#cb177-30" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">3</span></span>
-<span id="cb177-31"><a href="boolean-calculator-problem-postfix-notation.html#cb177-31" aria-hidden="true"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb180-1"><a href="boolean-calculator-problem-postfix-notation.html#cb180-1" aria-hidden="true"></a><span class="co"># Process/cleanup the network data</span></span>
+<span id="cb180-2"><a href="boolean-calculator-problem-postfix-notation.html#cb180-2" aria-hidden="true"></a>melted_network_data &lt;-<span class="st"> </span><span class="kw">melt</span>(</span>
+<span id="cb180-3"><a href="boolean-calculator-problem-postfix-notation.html#cb180-3" aria-hidden="true"></a>  <span class="kw">filter</span>(reg_network_data,</span>
+<span id="cb180-4"><a href="boolean-calculator-problem-postfix-notation.html#cb180-4" aria-hidden="true"></a>         run_id <span class="op">%in%</span><span class="st"> </span>relies_on_reg</span>
+<span id="cb180-5"><a href="boolean-calculator-problem-postfix-notation.html#cb180-5" aria-hidden="true"></a>        ),</span>
+<span id="cb180-6"><a href="boolean-calculator-problem-postfix-notation.html#cb180-6" aria-hidden="true"></a>  <span class="dt">variable.name =</span> <span class="st">&quot;reg_edge_type&quot;</span>,</span>
+<span id="cb180-7"><a href="boolean-calculator-problem-postfix-notation.html#cb180-7" aria-hidden="true"></a>  <span class="dt">value.name =</span> <span class="st">&quot;reg_edges_cnt&quot;</span>,</span>
+<span id="cb180-8"><a href="boolean-calculator-problem-postfix-notation.html#cb180-8" aria-hidden="true"></a>  <span class="dt">measure.vars=</span><span class="kw">c</span>(<span class="st">&quot;repressed_edges_cnt&quot;</span>, <span class="st">&quot;promoted_edges_cnt&quot;</span>)</span>
+<span id="cb180-9"><a href="boolean-calculator-problem-postfix-notation.html#cb180-9" aria-hidden="true"></a>)</span>
+<span id="cb180-10"><a href="boolean-calculator-problem-postfix-notation.html#cb180-10" aria-hidden="true"></a></span>
+<span id="cb180-11"><a href="boolean-calculator-problem-postfix-notation.html#cb180-11" aria-hidden="true"></a><span class="kw">ggplot</span>( melted_network_data, <span class="kw">aes</span>(<span class="dt">x=</span>reg_edge_type, <span class="dt">y=</span>reg_edges_cnt, <span class="dt">color=</span>reg_edge_type) ) <span class="op">+</span></span>
+<span id="cb180-12"><a href="boolean-calculator-problem-postfix-notation.html#cb180-12" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb180-13"><a href="boolean-calculator-problem-postfix-notation.html#cb180-13" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>) <span class="op">+</span></span>
+<span id="cb180-14"><a href="boolean-calculator-problem-postfix-notation.html#cb180-14" aria-hidden="true"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Environmental Complexity&quot;</span>) <span class="op">+</span></span>
+<span id="cb180-15"><a href="boolean-calculator-problem-postfix-notation.html#cb180-15" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;# Edges&quot;</span>) <span class="op">+</span></span>
+<span id="cb180-16"><a href="boolean-calculator-problem-postfix-notation.html#cb180-16" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb180-17"><a href="boolean-calculator-problem-postfix-notation.html#cb180-17" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Edge type&quot;</span>,</span>
+<span id="cb180-18"><a href="boolean-calculator-problem-postfix-notation.html#cb180-18" aria-hidden="true"></a>    <span class="dt">limits=</span><span class="kw">c</span>(<span class="st">&quot;repressed_edges_cnt&quot;</span>, <span class="st">&quot;promoted_edges_cnt&quot;</span>),</span>
+<span id="cb180-19"><a href="boolean-calculator-problem-postfix-notation.html#cb180-19" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Repressing edges&quot;</span>, <span class="st">&quot;Promoting edges&quot;</span>)</span>
+<span id="cb180-20"><a href="boolean-calculator-problem-postfix-notation.html#cb180-20" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb180-21"><a href="boolean-calculator-problem-postfix-notation.html#cb180-21" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb180-22"><a href="boolean-calculator-problem-postfix-notation.html#cb180-22" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span>,</span>
+<span id="cb180-23"><a href="boolean-calculator-problem-postfix-notation.html#cb180-23" aria-hidden="true"></a>    <span class="dt">legend.text=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">9</span>),</span>
+<span id="cb180-24"><a href="boolean-calculator-problem-postfix-notation.html#cb180-24" aria-hidden="true"></a>    <span class="dt">legend.title=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">10</span>),</span>
+<span id="cb180-25"><a href="boolean-calculator-problem-postfix-notation.html#cb180-25" aria-hidden="true"></a>    <span class="dt">axis.title.x=</span><span class="kw">element_text</span>(<span class="dt">size=</span><span class="dv">12</span>)</span>
+<span id="cb180-26"><a href="boolean-calculator-problem-postfix-notation.html#cb180-26" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb180-27"><a href="boolean-calculator-problem-postfix-notation.html#cb180-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">ggsave</span>(</span>
+<span id="cb180-28"><a href="boolean-calculator-problem-postfix-notation.html#cb180-28" aria-hidden="true"></a>    <span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/boolean-calc-postfix-regulation-edge-types.png&quot;</span>),</span>
+<span id="cb180-29"><a href="boolean-calculator-problem-postfix-notation.html#cb180-29" aria-hidden="true"></a>    <span class="dt">width=</span><span class="dv">4</span>,</span>
+<span id="cb180-30"><a href="boolean-calculator-problem-postfix-notation.html#cb180-30" aria-hidden="true"></a>    <span class="dt">height=</span><span class="dv">3</span></span>
+<span id="cb180-31"><a href="boolean-calculator-problem-postfix-notation.html#cb180-31" aria-hidden="true"></a>  )</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-100-1.png" width="672" /></p>
 <p>Test for a statistical difference between edge types using a wilcoxon rank sum test:</p>
-<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="boolean-calculator-problem-postfix-notation.html#cb178-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
-<span id="cb178-2"><a href="boolean-calculator-problem-postfix-notation.html#cb178-2" aria-hidden="true"></a>  <span class="kw">paste0</span>(</span>
-<span id="cb178-3"><a href="boolean-calculator-problem-postfix-notation.html#cb178-3" aria-hidden="true"></a>    <span class="st">&quot;Median # repressed edges: &quot;</span>,</span>
-<span id="cb178-4"><a href="boolean-calculator-problem-postfix-notation.html#cb178-4" aria-hidden="true"></a>    <span class="kw">median</span>(<span class="kw">filter</span>(melted_network_data, reg_edge_type<span class="op">==</span><span class="st">&quot;repressed_edges_cnt&quot;</span>)<span class="op">$</span>reg_edges_cnt)</span>
-<span id="cb178-5"><a href="boolean-calculator-problem-postfix-notation.html#cb178-5" aria-hidden="true"></a>  )</span>
-<span id="cb178-6"><a href="boolean-calculator-problem-postfix-notation.html#cb178-6" aria-hidden="true"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb181"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb181-1"><a href="boolean-calculator-problem-postfix-notation.html#cb181-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
+<span id="cb181-2"><a href="boolean-calculator-problem-postfix-notation.html#cb181-2" aria-hidden="true"></a>  <span class="kw">paste0</span>(</span>
+<span id="cb181-3"><a href="boolean-calculator-problem-postfix-notation.html#cb181-3" aria-hidden="true"></a>    <span class="st">&quot;Median # repressed edges: &quot;</span>,</span>
+<span id="cb181-4"><a href="boolean-calculator-problem-postfix-notation.html#cb181-4" aria-hidden="true"></a>    <span class="kw">median</span>(<span class="kw">filter</span>(melted_network_data, reg_edge_type<span class="op">==</span><span class="st">&quot;repressed_edges_cnt&quot;</span>)<span class="op">$</span>reg_edges_cnt)</span>
+<span id="cb181-5"><a href="boolean-calculator-problem-postfix-notation.html#cb181-5" aria-hidden="true"></a>  )</span>
+<span id="cb181-6"><a href="boolean-calculator-problem-postfix-notation.html#cb181-6" aria-hidden="true"></a>)</span></code></pre></div>
 <pre><code>## [1] &quot;Median # repressed edges: 41&quot;</code></pre>
-<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb180-1"><a href="boolean-calculator-problem-postfix-notation.html#cb180-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
-<span id="cb180-2"><a href="boolean-calculator-problem-postfix-notation.html#cb180-2" aria-hidden="true"></a>  <span class="kw">paste0</span>(</span>
-<span id="cb180-3"><a href="boolean-calculator-problem-postfix-notation.html#cb180-3" aria-hidden="true"></a>    <span class="st">&quot;Median # promoting edges: &quot;</span>,</span>
-<span id="cb180-4"><a href="boolean-calculator-problem-postfix-notation.html#cb180-4" aria-hidden="true"></a>    <span class="kw">median</span>(<span class="kw">filter</span>(melted_network_data, reg_edge_type<span class="op">==</span><span class="st">&quot;promoted_edges_cnt&quot;</span>)<span class="op">$</span>reg_edges_cnt)</span>
-<span id="cb180-5"><a href="boolean-calculator-problem-postfix-notation.html#cb180-5" aria-hidden="true"></a>  )</span>
-<span id="cb180-6"><a href="boolean-calculator-problem-postfix-notation.html#cb180-6" aria-hidden="true"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb183"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb183-1"><a href="boolean-calculator-problem-postfix-notation.html#cb183-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
+<span id="cb183-2"><a href="boolean-calculator-problem-postfix-notation.html#cb183-2" aria-hidden="true"></a>  <span class="kw">paste0</span>(</span>
+<span id="cb183-3"><a href="boolean-calculator-problem-postfix-notation.html#cb183-3" aria-hidden="true"></a>    <span class="st">&quot;Median # promoting edges: &quot;</span>,</span>
+<span id="cb183-4"><a href="boolean-calculator-problem-postfix-notation.html#cb183-4" aria-hidden="true"></a>    <span class="kw">median</span>(<span class="kw">filter</span>(melted_network_data, reg_edge_type<span class="op">==</span><span class="st">&quot;promoted_edges_cnt&quot;</span>)<span class="op">$</span>reg_edges_cnt)</span>
+<span id="cb183-5"><a href="boolean-calculator-problem-postfix-notation.html#cb183-5" aria-hidden="true"></a>  )</span>
+<span id="cb183-6"><a href="boolean-calculator-problem-postfix-notation.html#cb183-6" aria-hidden="true"></a>)</span></code></pre></div>
 <pre><code>## [1] &quot;Median # promoting edges: 43&quot;</code></pre>
-<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="boolean-calculator-problem-postfix-notation.html#cb182-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>reg_edges_cnt <span class="op">~</span><span class="st"> </span>reg_edge_type, <span class="dt">data=</span>melted_network_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb185"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb185-1"><a href="boolean-calculator-problem-postfix-notation.html#cb185-1" aria-hidden="true"></a><span class="kw">print</span>(<span class="kw">wilcox.test</span>(<span class="dt">formula=</span>reg_edges_cnt <span class="op">~</span><span class="st"> </span>reg_edge_type, <span class="dt">data=</span>melted_network_data, <span class="dt">exact=</span><span class="ot">FALSE</span>, <span class="dt">conf.int=</span><span class="ot">TRUE</span>))</span></code></pre></div>
 <pre><code>## 
 ##  Wilcoxon rank sum test with continuity correction
 ## 
@@ -731,28 +753,28 @@ Successful programs must store the numeric inputs embedded in operand signals, a
 <div id="execution-time-3" class="section level4" number="10.6.3.1">
 <h4><span class="header-section-number">10.6.3.1</span> Execution time</h4>
 <p>How many time steps do successful programs take to solve the boolean calculator problem?</p>
-<div class="sourceCode" id="cb184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb184-1"><a href="boolean-calculator-problem-postfix-notation.html#cb184-1" aria-hidden="true"></a><span class="co"># only want solutions</span></span>
-<span id="cb184-2"><a href="boolean-calculator-problem-postfix-notation.html#cb184-2" aria-hidden="true"></a>solutions_inst_exec_data &lt;-<span class="st"> </span><span class="kw">filter</span>(inst_exec_data, SEED <span class="op">%in%</span><span class="st"> </span>sol_data<span class="op">$</span>SEED)</span>
-<span id="cb184-3"><a href="boolean-calculator-problem-postfix-notation.html#cb184-3" aria-hidden="true"></a></span>
-<span id="cb184-4"><a href="boolean-calculator-problem-postfix-notation.html#cb184-4" aria-hidden="true"></a><span class="kw">ggplot</span>( solutions_inst_exec_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>total_execution_time, <span class="dt">color=</span>condition) ) <span class="op">+</span></span>
-<span id="cb184-5"><a href="boolean-calculator-problem-postfix-notation.html#cb184-5" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
-<span id="cb184-6"><a href="boolean-calculator-problem-postfix-notation.html#cb184-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>) <span class="op">+</span></span>
-<span id="cb184-7"><a href="boolean-calculator-problem-postfix-notation.html#cb184-7" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb184-8"><a href="boolean-calculator-problem-postfix-notation.html#cb184-8" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
-<span id="cb184-9"><a href="boolean-calculator-problem-postfix-notation.html#cb184-9" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
-<span id="cb184-10"><a href="boolean-calculator-problem-postfix-notation.html#cb184-10" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb184-11"><a href="boolean-calculator-problem-postfix-notation.html#cb184-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
-<span id="cb184-12"><a href="boolean-calculator-problem-postfix-notation.html#cb184-12" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span></span>
-<span id="cb184-13"><a href="boolean-calculator-problem-postfix-notation.html#cb184-13" aria-hidden="true"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="boolean-calculator-problem-postfix-notation.html#cb187-1" aria-hidden="true"></a><span class="co"># only want solutions</span></span>
+<span id="cb187-2"><a href="boolean-calculator-problem-postfix-notation.html#cb187-2" aria-hidden="true"></a>solutions_inst_exec_data &lt;-<span class="st"> </span><span class="kw">filter</span>(inst_exec_data, SEED <span class="op">%in%</span><span class="st"> </span>sol_data<span class="op">$</span>SEED)</span>
+<span id="cb187-3"><a href="boolean-calculator-problem-postfix-notation.html#cb187-3" aria-hidden="true"></a></span>
+<span id="cb187-4"><a href="boolean-calculator-problem-postfix-notation.html#cb187-4" aria-hidden="true"></a><span class="kw">ggplot</span>( solutions_inst_exec_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>total_execution_time, <span class="dt">color=</span>condition) ) <span class="op">+</span></span>
+<span id="cb187-5"><a href="boolean-calculator-problem-postfix-notation.html#cb187-5" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb187-6"><a href="boolean-calculator-problem-postfix-notation.html#cb187-6" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>) <span class="op">+</span></span>
+<span id="cb187-7"><a href="boolean-calculator-problem-postfix-notation.html#cb187-7" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb187-8"><a href="boolean-calculator-problem-postfix-notation.html#cb187-8" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb187-9"><a href="boolean-calculator-problem-postfix-notation.html#cb187-9" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb187-10"><a href="boolean-calculator-problem-postfix-notation.html#cb187-10" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb187-11"><a href="boolean-calculator-problem-postfix-notation.html#cb187-11" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb187-12"><a href="boolean-calculator-problem-postfix-notation.html#cb187-12" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;none&quot;</span></span>
+<span id="cb187-13"><a href="boolean-calculator-problem-postfix-notation.html#cb187-13" aria-hidden="true"></a>  )</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-102-1.png" width="672" /></p>
 <p>Test for significant difference between conditions using Wilcoxon rank sum test:</p>
-<div class="sourceCode" id="cb185"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb185-1"><a href="boolean-calculator-problem-postfix-notation.html#cb185-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
-<span id="cb185-2"><a href="boolean-calculator-problem-postfix-notation.html#cb185-2" aria-hidden="true"></a>  <span class="kw">wilcox.test</span>(</span>
-<span id="cb185-3"><a href="boolean-calculator-problem-postfix-notation.html#cb185-3" aria-hidden="true"></a>    <span class="dt">formula=</span>total_execution_time<span class="op">~</span>condition,</span>
-<span id="cb185-4"><a href="boolean-calculator-problem-postfix-notation.html#cb185-4" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(solutions_inst_exec_data),</span>
-<span id="cb185-5"><a href="boolean-calculator-problem-postfix-notation.html#cb185-5" aria-hidden="true"></a>    <span class="dt">exact=</span><span class="ot">FALSE</span>,</span>
-<span id="cb185-6"><a href="boolean-calculator-problem-postfix-notation.html#cb185-6" aria-hidden="true"></a>    <span class="dt">conf.int=</span><span class="ot">TRUE</span>)</span>
-<span id="cb185-7"><a href="boolean-calculator-problem-postfix-notation.html#cb185-7" aria-hidden="true"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="boolean-calculator-problem-postfix-notation.html#cb188-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
+<span id="cb188-2"><a href="boolean-calculator-problem-postfix-notation.html#cb188-2" aria-hidden="true"></a>  <span class="kw">wilcox.test</span>(</span>
+<span id="cb188-3"><a href="boolean-calculator-problem-postfix-notation.html#cb188-3" aria-hidden="true"></a>    <span class="dt">formula=</span>total_execution_time<span class="op">~</span>condition,</span>
+<span id="cb188-4"><a href="boolean-calculator-problem-postfix-notation.html#cb188-4" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(solutions_inst_exec_data),</span>
+<span id="cb188-5"><a href="boolean-calculator-problem-postfix-notation.html#cb188-5" aria-hidden="true"></a>    <span class="dt">exact=</span><span class="ot">FALSE</span>,</span>
+<span id="cb188-6"><a href="boolean-calculator-problem-postfix-notation.html#cb188-6" aria-hidden="true"></a>    <span class="dt">conf.int=</span><span class="ot">TRUE</span>)</span>
+<span id="cb188-7"><a href="boolean-calculator-problem-postfix-notation.html#cb188-7" aria-hidden="true"></a>)</span></code></pre></div>
 <pre><code>## 
 ##  Wilcoxon rank sum test with continuity correction
 ## 
@@ -769,27 +791,27 @@ Successful programs must store the numeric inputs embedded in operand signals, a
 <h4><span class="header-section-number">10.6.3.2</span> What types of instructions to successful programs execute?</h4>
 <p>Here, we look at the distribution of instruction types executed by successful programs.
 We’re primarily interested in the proportion of control flow instructions, so let’s look at that first.</p>
-<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="boolean-calculator-problem-postfix-notation.html#cb187-1" aria-hidden="true"></a><span class="kw">ggplot</span>( solutions_inst_exec_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>control_flow_inst_prop, <span class="dt">color=</span>condition) ) <span class="op">+</span></span>
-<span id="cb187-2"><a href="boolean-calculator-problem-postfix-notation.html#cb187-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
-<span id="cb187-3"><a href="boolean-calculator-problem-postfix-notation.html#cb187-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>) <span class="op">+</span></span>
-<span id="cb187-4"><a href="boolean-calculator-problem-postfix-notation.html#cb187-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
-<span id="cb187-5"><a href="boolean-calculator-problem-postfix-notation.html#cb187-5" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
-<span id="cb187-6"><a href="boolean-calculator-problem-postfix-notation.html#cb187-6" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
-<span id="cb187-7"><a href="boolean-calculator-problem-postfix-notation.html#cb187-7" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb187-8"><a href="boolean-calculator-problem-postfix-notation.html#cb187-8" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Proportion of executed flow control instructions&quot;</span>) <span class="op">+</span></span>
-<span id="cb187-9"><a href="boolean-calculator-problem-postfix-notation.html#cb187-9" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
-<span id="cb187-10"><a href="boolean-calculator-problem-postfix-notation.html#cb187-10" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;bottom&quot;</span>,</span>
-<span id="cb187-11"><a href="boolean-calculator-problem-postfix-notation.html#cb187-11" aria-hidden="true"></a>    <span class="dt">axis.title.x=</span><span class="kw">element_blank</span>()</span>
-<span id="cb187-12"><a href="boolean-calculator-problem-postfix-notation.html#cb187-12" aria-hidden="true"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="boolean-calculator-problem-postfix-notation.html#cb190-1" aria-hidden="true"></a><span class="kw">ggplot</span>( solutions_inst_exec_data, <span class="kw">aes</span>(<span class="dt">x=</span>condition, <span class="dt">y=</span>control_flow_inst_prop, <span class="dt">color=</span>condition) ) <span class="op">+</span></span>
+<span id="cb190-2"><a href="boolean-calculator-problem-postfix-notation.html#cb190-2" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb190-3"><a href="boolean-calculator-problem-postfix-notation.html#cb190-3" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_jitter</span>(<span class="dt">alpha=</span><span class="fl">0.2</span>) <span class="op">+</span></span>
+<span id="cb190-4"><a href="boolean-calculator-problem-postfix-notation.html#cb190-4" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_x_discrete</span>(</span>
+<span id="cb190-5"><a href="boolean-calculator-problem-postfix-notation.html#cb190-5" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb190-6"><a href="boolean-calculator-problem-postfix-notation.html#cb190-6" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">disabled&quot;</span>, <span class="st">&quot;Regulation-</span><span class="ch">\n</span><span class="st">enabled&quot;</span>)</span>
+<span id="cb190-7"><a href="boolean-calculator-problem-postfix-notation.html#cb190-7" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb190-8"><a href="boolean-calculator-problem-postfix-notation.html#cb190-8" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Proportion of executed flow control instructions&quot;</span>) <span class="op">+</span></span>
+<span id="cb190-9"><a href="boolean-calculator-problem-postfix-notation.html#cb190-9" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(</span>
+<span id="cb190-10"><a href="boolean-calculator-problem-postfix-notation.html#cb190-10" aria-hidden="true"></a>    <span class="dt">legend.position=</span><span class="st">&quot;bottom&quot;</span>,</span>
+<span id="cb190-11"><a href="boolean-calculator-problem-postfix-notation.html#cb190-11" aria-hidden="true"></a>    <span class="dt">axis.title.x=</span><span class="kw">element_blank</span>()</span>
+<span id="cb190-12"><a href="boolean-calculator-problem-postfix-notation.html#cb190-12" aria-hidden="true"></a>  )</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-104-1.png" width="672" /></p>
 <p>Test for significant difference between conditions using a Wilcoxon rank sum test:</p>
-<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="boolean-calculator-problem-postfix-notation.html#cb188-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
-<span id="cb188-2"><a href="boolean-calculator-problem-postfix-notation.html#cb188-2" aria-hidden="true"></a>  <span class="kw">wilcox.test</span>(</span>
-<span id="cb188-3"><a href="boolean-calculator-problem-postfix-notation.html#cb188-3" aria-hidden="true"></a>    <span class="dt">formula=</span>control_flow_inst_prop<span class="op">~</span>condition,</span>
-<span id="cb188-4"><a href="boolean-calculator-problem-postfix-notation.html#cb188-4" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(solutions_inst_exec_data),</span>
-<span id="cb188-5"><a href="boolean-calculator-problem-postfix-notation.html#cb188-5" aria-hidden="true"></a>    <span class="dt">exact=</span><span class="ot">FALSE</span>,</span>
-<span id="cb188-6"><a href="boolean-calculator-problem-postfix-notation.html#cb188-6" aria-hidden="true"></a>    <span class="dt">conf.int=</span><span class="ot">TRUE</span>)</span>
-<span id="cb188-7"><a href="boolean-calculator-problem-postfix-notation.html#cb188-7" aria-hidden="true"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="boolean-calculator-problem-postfix-notation.html#cb191-1" aria-hidden="true"></a><span class="kw">print</span>(</span>
+<span id="cb191-2"><a href="boolean-calculator-problem-postfix-notation.html#cb191-2" aria-hidden="true"></a>  <span class="kw">wilcox.test</span>(</span>
+<span id="cb191-3"><a href="boolean-calculator-problem-postfix-notation.html#cb191-3" aria-hidden="true"></a>    <span class="dt">formula=</span>control_flow_inst_prop<span class="op">~</span>condition,</span>
+<span id="cb191-4"><a href="boolean-calculator-problem-postfix-notation.html#cb191-4" aria-hidden="true"></a>    <span class="dt">data=</span><span class="kw">filter</span>(solutions_inst_exec_data),</span>
+<span id="cb191-5"><a href="boolean-calculator-problem-postfix-notation.html#cb191-5" aria-hidden="true"></a>    <span class="dt">exact=</span><span class="ot">FALSE</span>,</span>
+<span id="cb191-6"><a href="boolean-calculator-problem-postfix-notation.html#cb191-6" aria-hidden="true"></a>    <span class="dt">conf.int=</span><span class="ot">TRUE</span>)</span>
+<span id="cb191-7"><a href="boolean-calculator-problem-postfix-notation.html#cb191-7" aria-hidden="true"></a>)</span></code></pre></div>
 <pre><code>## 
 ##  Wilcoxon rank sum test with continuity correction
 ## 
@@ -802,33 +824,33 @@ We’re primarily interested in the proportion of control flow instructions, so 
 ## difference in location 
 ##            -0.00543344</code></pre>
 <p>In case you’re curious, here’s all categories of instructions:</p>
-<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="boolean-calculator-problem-postfix-notation.html#cb190-1" aria-hidden="true"></a>melted &lt;-<span class="st"> </span><span class="kw">melt</span>(</span>
-<span id="cb190-2"><a href="boolean-calculator-problem-postfix-notation.html#cb190-2" aria-hidden="true"></a>  solutions_inst_exec_data,</span>
-<span id="cb190-3"><a href="boolean-calculator-problem-postfix-notation.html#cb190-3" aria-hidden="true"></a>  <span class="dt">variable.name =</span> <span class="st">&quot;inst_type&quot;</span>,</span>
-<span id="cb190-4"><a href="boolean-calculator-problem-postfix-notation.html#cb190-4" aria-hidden="true"></a>  <span class="dt">value.name =</span> <span class="st">&quot;inst_type_prop&quot;</span>,</span>
-<span id="cb190-5"><a href="boolean-calculator-problem-postfix-notation.html#cb190-5" aria-hidden="true"></a>  <span class="dt">measure.vars=</span><span class="kw">c</span>(</span>
-<span id="cb190-6"><a href="boolean-calculator-problem-postfix-notation.html#cb190-6" aria-hidden="true"></a>    <span class="st">&quot;math_inst_prop&quot;</span>,</span>
-<span id="cb190-7"><a href="boolean-calculator-problem-postfix-notation.html#cb190-7" aria-hidden="true"></a>    <span class="st">&quot;module_inst_prop&quot;</span>,</span>
-<span id="cb190-8"><a href="boolean-calculator-problem-postfix-notation.html#cb190-8" aria-hidden="true"></a>    <span class="st">&quot;memory_inst_prop&quot;</span>,</span>
-<span id="cb190-9"><a href="boolean-calculator-problem-postfix-notation.html#cb190-9" aria-hidden="true"></a>    <span class="st">&quot;regulation_inst_prop&quot;</span>,</span>
-<span id="cb190-10"><a href="boolean-calculator-problem-postfix-notation.html#cb190-10" aria-hidden="true"></a>    <span class="st">&quot;control_flow_inst_prop&quot;</span>,</span>
-<span id="cb190-11"><a href="boolean-calculator-problem-postfix-notation.html#cb190-11" aria-hidden="true"></a>    <span class="st">&quot;thread_inst_prop&quot;</span>,</span>
-<span id="cb190-12"><a href="boolean-calculator-problem-postfix-notation.html#cb190-12" aria-hidden="true"></a>    <span class="st">&quot;task_inst_prop&quot;</span>,</span>
-<span id="cb190-13"><a href="boolean-calculator-problem-postfix-notation.html#cb190-13" aria-hidden="true"></a>    <span class="st">&quot;nop_inst_prop&quot;</span></span>
-<span id="cb190-14"><a href="boolean-calculator-problem-postfix-notation.html#cb190-14" aria-hidden="true"></a>  )</span>
-<span id="cb190-15"><a href="boolean-calculator-problem-postfix-notation.html#cb190-15" aria-hidden="true"></a>)</span>
-<span id="cb190-16"><a href="boolean-calculator-problem-postfix-notation.html#cb190-16" aria-hidden="true"></a></span>
-<span id="cb190-17"><a href="boolean-calculator-problem-postfix-notation.html#cb190-17" aria-hidden="true"></a><span class="kw">ggplot</span>( melted, <span class="kw">aes</span>(<span class="dt">x=</span>inst_type, <span class="dt">y=</span>inst_type_prop, <span class="dt">color=</span>condition) ) <span class="op">+</span></span>
-<span id="cb190-18"><a href="boolean-calculator-problem-postfix-notation.html#cb190-18" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
-<span id="cb190-19"><a href="boolean-calculator-problem-postfix-notation.html#cb190-19" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_color_discrete</span>(</span>
-<span id="cb190-20"><a href="boolean-calculator-problem-postfix-notation.html#cb190-20" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition:&quot;</span>,</span>
-<span id="cb190-21"><a href="boolean-calculator-problem-postfix-notation.html#cb190-21" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
-<span id="cb190-22"><a href="boolean-calculator-problem-postfix-notation.html#cb190-22" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-disabled&quot;</span>, <span class="st">&quot;Regulation-enabled&quot;</span>)</span>
-<span id="cb190-23"><a href="boolean-calculator-problem-postfix-notation.html#cb190-23" aria-hidden="true"></a>  ) <span class="op">+</span></span>
-<span id="cb190-24"><a href="boolean-calculator-problem-postfix-notation.html#cb190-24" aria-hidden="true"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Instruction type&quot;</span>) <span class="op">+</span></span>
-<span id="cb190-25"><a href="boolean-calculator-problem-postfix-notation.html#cb190-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Proportion of instructions in execution trace&quot;</span>) <span class="op">+</span></span>
-<span id="cb190-26"><a href="boolean-calculator-problem-postfix-notation.html#cb190-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">coord_flip</span>() <span class="op">+</span></span>
-<span id="cb190-27"><a href="boolean-calculator-problem-postfix-notation.html#cb190-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position=</span><span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb193-1"><a href="boolean-calculator-problem-postfix-notation.html#cb193-1" aria-hidden="true"></a>melted &lt;-<span class="st"> </span><span class="kw">melt</span>(</span>
+<span id="cb193-2"><a href="boolean-calculator-problem-postfix-notation.html#cb193-2" aria-hidden="true"></a>  solutions_inst_exec_data,</span>
+<span id="cb193-3"><a href="boolean-calculator-problem-postfix-notation.html#cb193-3" aria-hidden="true"></a>  <span class="dt">variable.name =</span> <span class="st">&quot;inst_type&quot;</span>,</span>
+<span id="cb193-4"><a href="boolean-calculator-problem-postfix-notation.html#cb193-4" aria-hidden="true"></a>  <span class="dt">value.name =</span> <span class="st">&quot;inst_type_prop&quot;</span>,</span>
+<span id="cb193-5"><a href="boolean-calculator-problem-postfix-notation.html#cb193-5" aria-hidden="true"></a>  <span class="dt">measure.vars=</span><span class="kw">c</span>(</span>
+<span id="cb193-6"><a href="boolean-calculator-problem-postfix-notation.html#cb193-6" aria-hidden="true"></a>    <span class="st">&quot;math_inst_prop&quot;</span>,</span>
+<span id="cb193-7"><a href="boolean-calculator-problem-postfix-notation.html#cb193-7" aria-hidden="true"></a>    <span class="st">&quot;module_inst_prop&quot;</span>,</span>
+<span id="cb193-8"><a href="boolean-calculator-problem-postfix-notation.html#cb193-8" aria-hidden="true"></a>    <span class="st">&quot;memory_inst_prop&quot;</span>,</span>
+<span id="cb193-9"><a href="boolean-calculator-problem-postfix-notation.html#cb193-9" aria-hidden="true"></a>    <span class="st">&quot;regulation_inst_prop&quot;</span>,</span>
+<span id="cb193-10"><a href="boolean-calculator-problem-postfix-notation.html#cb193-10" aria-hidden="true"></a>    <span class="st">&quot;control_flow_inst_prop&quot;</span>,</span>
+<span id="cb193-11"><a href="boolean-calculator-problem-postfix-notation.html#cb193-11" aria-hidden="true"></a>    <span class="st">&quot;thread_inst_prop&quot;</span>,</span>
+<span id="cb193-12"><a href="boolean-calculator-problem-postfix-notation.html#cb193-12" aria-hidden="true"></a>    <span class="st">&quot;task_inst_prop&quot;</span>,</span>
+<span id="cb193-13"><a href="boolean-calculator-problem-postfix-notation.html#cb193-13" aria-hidden="true"></a>    <span class="st">&quot;nop_inst_prop&quot;</span></span>
+<span id="cb193-14"><a href="boolean-calculator-problem-postfix-notation.html#cb193-14" aria-hidden="true"></a>  )</span>
+<span id="cb193-15"><a href="boolean-calculator-problem-postfix-notation.html#cb193-15" aria-hidden="true"></a>)</span>
+<span id="cb193-16"><a href="boolean-calculator-problem-postfix-notation.html#cb193-16" aria-hidden="true"></a></span>
+<span id="cb193-17"><a href="boolean-calculator-problem-postfix-notation.html#cb193-17" aria-hidden="true"></a><span class="kw">ggplot</span>( melted, <span class="kw">aes</span>(<span class="dt">x=</span>inst_type, <span class="dt">y=</span>inst_type_prop, <span class="dt">color=</span>condition) ) <span class="op">+</span></span>
+<span id="cb193-18"><a href="boolean-calculator-problem-postfix-notation.html#cb193-18" aria-hidden="true"></a><span class="st">  </span><span class="kw">geom_boxplot</span>() <span class="op">+</span></span>
+<span id="cb193-19"><a href="boolean-calculator-problem-postfix-notation.html#cb193-19" aria-hidden="true"></a><span class="st">  </span><span class="kw">scale_color_discrete</span>(</span>
+<span id="cb193-20"><a href="boolean-calculator-problem-postfix-notation.html#cb193-20" aria-hidden="true"></a>    <span class="dt">name=</span><span class="st">&quot;Condition:&quot;</span>,</span>
+<span id="cb193-21"><a href="boolean-calculator-problem-postfix-notation.html#cb193-21" aria-hidden="true"></a>    <span class="dt">breaks=</span><span class="kw">c</span>(<span class="st">&quot;memory&quot;</span>, <span class="st">&quot;both&quot;</span>),</span>
+<span id="cb193-22"><a href="boolean-calculator-problem-postfix-notation.html#cb193-22" aria-hidden="true"></a>    <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;Regulation-disabled&quot;</span>, <span class="st">&quot;Regulation-enabled&quot;</span>)</span>
+<span id="cb193-23"><a href="boolean-calculator-problem-postfix-notation.html#cb193-23" aria-hidden="true"></a>  ) <span class="op">+</span></span>
+<span id="cb193-24"><a href="boolean-calculator-problem-postfix-notation.html#cb193-24" aria-hidden="true"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Instruction type&quot;</span>) <span class="op">+</span></span>
+<span id="cb193-25"><a href="boolean-calculator-problem-postfix-notation.html#cb193-25" aria-hidden="true"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Proportion of instructions in execution trace&quot;</span>) <span class="op">+</span></span>
+<span id="cb193-26"><a href="boolean-calculator-problem-postfix-notation.html#cb193-26" aria-hidden="true"></a><span class="st">  </span><span class="kw">coord_flip</span>() <span class="op">+</span></span>
+<span id="cb193-27"><a href="boolean-calculator-problem-postfix-notation.html#cb193-27" aria-hidden="true"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position=</span><span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-106-1.png" width="672" /></p>
 </div>
 </div>
@@ -836,70 +858,70 @@ We’re primarily interested in the proportion of control flow instructions, so 
 <div id="visualizaing-an-evolved-regulatory-network-1" class="section level2" number="10.7">
 <h2><span class="header-section-number">10.7</span> Visualizaing an evolved regulatory network</h2>
 <p>Let’s take a closer look at a successful gene regulatory network.</p>
-<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="boolean-calculator-problem-postfix-notation.html#cb191-1" aria-hidden="true"></a>trace_id &lt;-<span class="st"> </span><span class="dv">25392</span></span></code></pre></div>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="boolean-calculator-problem-postfix-notation.html#cb194-1" aria-hidden="true"></a>trace_id &lt;-<span class="st"> </span><span class="dv">25392</span></span></code></pre></div>
 <p>Specifically, we’ll be looking at the solution evolved in run id 2.5392^{4} (arbitrarily selected).</p>
 <div id="evolved-regulatory-network-3" class="section level3" number="10.7.1">
 <h3><span class="header-section-number">10.7.1</span> Evolved regulatory network</h3>
 <p>We use the igraph package to draw this program’s gene regulatory network.</p>
-<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="boolean-calculator-problem-postfix-notation.html#cb192-1" aria-hidden="true"></a><span class="co"># Networks!</span></span>
-<span id="cb192-2"><a href="boolean-calculator-problem-postfix-notation.html#cb192-2" aria-hidden="true"></a>graph_nodes_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_nodes.csv&quot;</span>)</span>
-<span id="cb192-3"><a href="boolean-calculator-problem-postfix-notation.html#cb192-3" aria-hidden="true"></a>graph_edges_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_edges.csv&quot;</span>)</span>
-<span id="cb192-4"><a href="boolean-calculator-problem-postfix-notation.html#cb192-4" aria-hidden="true"></a>graph_nodes_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_nodes_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
-<span id="cb192-5"><a href="boolean-calculator-problem-postfix-notation.html#cb192-5" aria-hidden="true"></a>graph_edges_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_edges_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
-<span id="cb192-6"><a href="boolean-calculator-problem-postfix-notation.html#cb192-6" aria-hidden="true"></a></span>
-<span id="cb192-7"><a href="boolean-calculator-problem-postfix-notation.html#cb192-7" aria-hidden="true"></a>network &lt;-<span class="st"> </span><span class="kw">graph_from_data_frame</span>(</span>
-<span id="cb192-8"><a href="boolean-calculator-problem-postfix-notation.html#cb192-8" aria-hidden="true"></a>  <span class="dt">d=</span>graph_edges_data,</span>
-<span id="cb192-9"><a href="boolean-calculator-problem-postfix-notation.html#cb192-9" aria-hidden="true"></a>  <span class="dt">vertices=</span>graph_nodes_data,</span>
-<span id="cb192-10"><a href="boolean-calculator-problem-postfix-notation.html#cb192-10" aria-hidden="true"></a>  <span class="dt">directed=</span><span class="ot">TRUE</span></span>
-<span id="cb192-11"><a href="boolean-calculator-problem-postfix-notation.html#cb192-11" aria-hidden="true"></a>)</span>
-<span id="cb192-12"><a href="boolean-calculator-problem-postfix-notation.html#cb192-12" aria-hidden="true"></a></span>
-<span id="cb192-13"><a href="boolean-calculator-problem-postfix-notation.html#cb192-13" aria-hidden="true"></a><span class="co"># Setup edge styling</span></span>
-<span id="cb192-14"><a href="boolean-calculator-problem-postfix-notation.html#cb192-14" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> &quot;#FCE640&quot;</span></span>
-<span id="cb192-15"><a href="boolean-calculator-problem-postfix-notation.html#cb192-15" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
-<span id="cb192-16"><a href="boolean-calculator-problem-postfix-notation.html#cb192-16" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> &quot;#441152&quot;</span></span>
-<span id="cb192-17"><a href="boolean-calculator-problem-postfix-notation.html#cb192-17" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
-<span id="cb192-18"><a href="boolean-calculator-problem-postfix-notation.html#cb192-18" aria-hidden="true"></a></span>
-<span id="cb192-19"><a href="boolean-calculator-problem-postfix-notation.html#cb192-19" aria-hidden="true"></a>network_out_name &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/case-study-id-&quot;</span>, trace_id, <span class="st">&quot;-network.svg&quot;</span>)</span>
-<span id="cb192-20"><a href="boolean-calculator-problem-postfix-notation.html#cb192-20" aria-hidden="true"></a></span>
-<span id="cb192-21"><a href="boolean-calculator-problem-postfix-notation.html#cb192-21" aria-hidden="true"></a>draw_network &lt;-<span class="st"> </span><span class="cf">function</span>(net, write_out, out_name) {</span>
-<span id="cb192-22"><a href="boolean-calculator-problem-postfix-notation.html#cb192-22" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
-<span id="cb192-23"><a href="boolean-calculator-problem-postfix-notation.html#cb192-23" aria-hidden="true"></a>    <span class="kw">svg</span>(out_name, <span class="dt">width=</span><span class="dv">4</span>,<span class="dt">height=</span><span class="fl">1.5</span>)</span>
-<span id="cb192-24"><a href="boolean-calculator-problem-postfix-notation.html#cb192-24" aria-hidden="true"></a>    <span class="co"># bottom, left, top, right</span></span>
-<span id="cb192-25"><a href="boolean-calculator-problem-postfix-notation.html#cb192-25" aria-hidden="true"></a>    <span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="fl">0.2</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.5</span>))</span>
-<span id="cb192-26"><a href="boolean-calculator-problem-postfix-notation.html#cb192-26" aria-hidden="true"></a>  }</span>
-<span id="cb192-27"><a href="boolean-calculator-problem-postfix-notation.html#cb192-27" aria-hidden="true"></a>  <span class="kw">plot</span>(</span>
-<span id="cb192-28"><a href="boolean-calculator-problem-postfix-notation.html#cb192-28" aria-hidden="true"></a>    net,</span>
-<span id="cb192-29"><a href="boolean-calculator-problem-postfix-notation.html#cb192-29" aria-hidden="true"></a>    <span class="dt">edge.arrow.size=</span><span class="fl">0.4</span>,</span>
-<span id="cb192-30"><a href="boolean-calculator-problem-postfix-notation.html#cb192-30" aria-hidden="true"></a>    <span class="dt">edge.arrow.width=</span><span class="fl">0.75</span>,</span>
-<span id="cb192-31"><a href="boolean-calculator-problem-postfix-notation.html#cb192-31" aria-hidden="true"></a>    <span class="dt">edge.width=</span><span class="dv">2</span>,</span>
-<span id="cb192-32"><a href="boolean-calculator-problem-postfix-notation.html#cb192-32" aria-hidden="true"></a>    <span class="dt">vertex.size=</span><span class="dv">10</span>,</span>
-<span id="cb192-33"><a href="boolean-calculator-problem-postfix-notation.html#cb192-33" aria-hidden="true"></a>    <span class="dt">vertex.label.cex=</span><span class="fl">0.65</span>,</span>
-<span id="cb192-34"><a href="boolean-calculator-problem-postfix-notation.html#cb192-34" aria-hidden="true"></a>    <span class="dt">curved=</span><span class="ot">TRUE</span>,</span>
-<span id="cb192-35"><a href="boolean-calculator-problem-postfix-notation.html#cb192-35" aria-hidden="true"></a>    <span class="dt">vertex.color=</span><span class="st">&quot;grey99&quot;</span>,</span>
-<span id="cb192-36"><a href="boolean-calculator-problem-postfix-notation.html#cb192-36" aria-hidden="true"></a>    <span class="dt">vertex.label.color=</span><span class="st">&quot;black&quot;</span>,</span>
-<span id="cb192-37"><a href="boolean-calculator-problem-postfix-notation.html#cb192-37" aria-hidden="true"></a>    <span class="dt">vertex.label.family=</span><span class="st">&quot;sans&quot;</span>,</span>
-<span id="cb192-38"><a href="boolean-calculator-problem-postfix-notation.html#cb192-38" aria-hidden="true"></a>    <span class="dt">layout=</span><span class="kw">layout.circle</span>(net)</span>
-<span id="cb192-39"><a href="boolean-calculator-problem-postfix-notation.html#cb192-39" aria-hidden="true"></a>  )</span>
-<span id="cb192-40"><a href="boolean-calculator-problem-postfix-notation.html#cb192-40" aria-hidden="true"></a>  <span class="kw">legend</span>(</span>
-<span id="cb192-41"><a href="boolean-calculator-problem-postfix-notation.html#cb192-41" aria-hidden="true"></a>    <span class="dt">x =</span> <span class="st">&quot;bottomleft&quot;</span>,      <span class="co">## position, also takes x,y coordinates</span></span>
-<span id="cb192-42"><a href="boolean-calculator-problem-postfix-notation.html#cb192-42" aria-hidden="true"></a>    <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;Promoted&quot;</span>, <span class="st">&quot;Repressed&quot;</span>),</span>
-<span id="cb192-43"><a href="boolean-calculator-problem-postfix-notation.html#cb192-43" aria-hidden="true"></a>    <span class="dt">pch =</span> <span class="dv">19</span>,              <span class="co">## legend symbols see ?points</span></span>
-<span id="cb192-44"><a href="boolean-calculator-problem-postfix-notation.html#cb192-44" aria-hidden="true"></a>    <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#FCE640&quot;</span>, <span class="st">&quot;#441152&quot;</span>),</span>
-<span id="cb192-45"><a href="boolean-calculator-problem-postfix-notation.html#cb192-45" aria-hidden="true"></a>    <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>,</span>
-<span id="cb192-46"><a href="boolean-calculator-problem-postfix-notation.html#cb192-46" aria-hidden="true"></a>    <span class="dt">border=</span><span class="st">&quot;black&quot;</span>,</span>
-<span id="cb192-47"><a href="boolean-calculator-problem-postfix-notation.html#cb192-47" aria-hidden="true"></a>    <span class="dt">xpd=</span><span class="ot">TRUE</span>,</span>
-<span id="cb192-48"><a href="boolean-calculator-problem-postfix-notation.html#cb192-48" aria-hidden="true"></a>    <span class="dt">title =</span> <span class="st">&quot;Edges&quot;</span></span>
-<span id="cb192-49"><a href="boolean-calculator-problem-postfix-notation.html#cb192-49" aria-hidden="true"></a>  )</span>
-<span id="cb192-50"><a href="boolean-calculator-problem-postfix-notation.html#cb192-50" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
-<span id="cb192-51"><a href="boolean-calculator-problem-postfix-notation.html#cb192-51" aria-hidden="true"></a>    <span class="kw">dev.flush</span>()</span>
-<span id="cb192-52"><a href="boolean-calculator-problem-postfix-notation.html#cb192-52" aria-hidden="true"></a>    <span class="kw">dev.off</span>()</span>
-<span id="cb192-53"><a href="boolean-calculator-problem-postfix-notation.html#cb192-53" aria-hidden="true"></a>  }</span>
-<span id="cb192-54"><a href="boolean-calculator-problem-postfix-notation.html#cb192-54" aria-hidden="true"></a>}</span>
-<span id="cb192-55"><a href="boolean-calculator-problem-postfix-notation.html#cb192-55" aria-hidden="true"></a></span>
-<span id="cb192-56"><a href="boolean-calculator-problem-postfix-notation.html#cb192-56" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">TRUE</span>, network_out_name)</span></code></pre></div>
+<div class="sourceCode" id="cb195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb195-1"><a href="boolean-calculator-problem-postfix-notation.html#cb195-1" aria-hidden="true"></a><span class="co"># Networks!</span></span>
+<span id="cb195-2"><a href="boolean-calculator-problem-postfix-notation.html#cb195-2" aria-hidden="true"></a>graph_nodes_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_nodes.csv&quot;</span>)</span>
+<span id="cb195-3"><a href="boolean-calculator-problem-postfix-notation.html#cb195-3" aria-hidden="true"></a>graph_edges_loc &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;data/igraphs/reg_graph_id-&quot;</span>, trace_id, <span class="st">&quot;_edges.csv&quot;</span>)</span>
+<span id="cb195-4"><a href="boolean-calculator-problem-postfix-notation.html#cb195-4" aria-hidden="true"></a>graph_nodes_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_nodes_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb195-5"><a href="boolean-calculator-problem-postfix-notation.html#cb195-5" aria-hidden="true"></a>graph_edges_data &lt;-<span class="st"> </span><span class="kw">read.csv</span>(graph_edges_loc, <span class="dt">na.strings=</span><span class="st">&quot;NONE&quot;</span>)</span>
+<span id="cb195-6"><a href="boolean-calculator-problem-postfix-notation.html#cb195-6" aria-hidden="true"></a></span>
+<span id="cb195-7"><a href="boolean-calculator-problem-postfix-notation.html#cb195-7" aria-hidden="true"></a>network &lt;-<span class="st"> </span><span class="kw">graph_from_data_frame</span>(</span>
+<span id="cb195-8"><a href="boolean-calculator-problem-postfix-notation.html#cb195-8" aria-hidden="true"></a>  <span class="dt">d=</span>graph_edges_data,</span>
+<span id="cb195-9"><a href="boolean-calculator-problem-postfix-notation.html#cb195-9" aria-hidden="true"></a>  <span class="dt">vertices=</span>graph_nodes_data,</span>
+<span id="cb195-10"><a href="boolean-calculator-problem-postfix-notation.html#cb195-10" aria-hidden="true"></a>  <span class="dt">directed=</span><span class="ot">TRUE</span></span>
+<span id="cb195-11"><a href="boolean-calculator-problem-postfix-notation.html#cb195-11" aria-hidden="true"></a>)</span>
+<span id="cb195-12"><a href="boolean-calculator-problem-postfix-notation.html#cb195-12" aria-hidden="true"></a></span>
+<span id="cb195-13"><a href="boolean-calculator-problem-postfix-notation.html#cb195-13" aria-hidden="true"></a><span class="co"># Setup edge styling</span></span>
+<span id="cb195-14"><a href="boolean-calculator-problem-postfix-notation.html#cb195-14" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> &quot;#FCE640&quot;</span></span>
+<span id="cb195-15"><a href="boolean-calculator-problem-postfix-notation.html#cb195-15" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;promote&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb195-16"><a href="boolean-calculator-problem-postfix-notation.html#cb195-16" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>color[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> &quot;#441152&quot;</span></span>
+<span id="cb195-17"><a href="boolean-calculator-problem-postfix-notation.html#cb195-17" aria-hidden="true"></a><span class="kw">E</span>(network)<span class="op">$</span>lty[<span class="kw">E</span>(network)<span class="op">$</span>type <span class="op">==</span><span class="st"> &quot;repress&quot;</span>] &lt;-<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb195-18"><a href="boolean-calculator-problem-postfix-notation.html#cb195-18" aria-hidden="true"></a></span>
+<span id="cb195-19"><a href="boolean-calculator-problem-postfix-notation.html#cb195-19" aria-hidden="true"></a>network_out_name &lt;-<span class="st"> </span><span class="kw">paste0</span>(working_directory, <span class="st">&quot;imgs/case-study-id-&quot;</span>, trace_id, <span class="st">&quot;-network.svg&quot;</span>)</span>
+<span id="cb195-20"><a href="boolean-calculator-problem-postfix-notation.html#cb195-20" aria-hidden="true"></a></span>
+<span id="cb195-21"><a href="boolean-calculator-problem-postfix-notation.html#cb195-21" aria-hidden="true"></a>draw_network &lt;-<span class="st"> </span><span class="cf">function</span>(net, write_out, out_name) {</span>
+<span id="cb195-22"><a href="boolean-calculator-problem-postfix-notation.html#cb195-22" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
+<span id="cb195-23"><a href="boolean-calculator-problem-postfix-notation.html#cb195-23" aria-hidden="true"></a>    <span class="kw">svg</span>(out_name, <span class="dt">width=</span><span class="dv">4</span>,<span class="dt">height=</span><span class="fl">1.5</span>)</span>
+<span id="cb195-24"><a href="boolean-calculator-problem-postfix-notation.html#cb195-24" aria-hidden="true"></a>    <span class="co"># bottom, left, top, right</span></span>
+<span id="cb195-25"><a href="boolean-calculator-problem-postfix-notation.html#cb195-25" aria-hidden="true"></a>    <span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="fl">0.2</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.5</span>))</span>
+<span id="cb195-26"><a href="boolean-calculator-problem-postfix-notation.html#cb195-26" aria-hidden="true"></a>  }</span>
+<span id="cb195-27"><a href="boolean-calculator-problem-postfix-notation.html#cb195-27" aria-hidden="true"></a>  <span class="kw">plot</span>(</span>
+<span id="cb195-28"><a href="boolean-calculator-problem-postfix-notation.html#cb195-28" aria-hidden="true"></a>    net,</span>
+<span id="cb195-29"><a href="boolean-calculator-problem-postfix-notation.html#cb195-29" aria-hidden="true"></a>    <span class="dt">edge.arrow.size=</span><span class="fl">0.4</span>,</span>
+<span id="cb195-30"><a href="boolean-calculator-problem-postfix-notation.html#cb195-30" aria-hidden="true"></a>    <span class="dt">edge.arrow.width=</span><span class="fl">0.75</span>,</span>
+<span id="cb195-31"><a href="boolean-calculator-problem-postfix-notation.html#cb195-31" aria-hidden="true"></a>    <span class="dt">edge.width=</span><span class="dv">2</span>,</span>
+<span id="cb195-32"><a href="boolean-calculator-problem-postfix-notation.html#cb195-32" aria-hidden="true"></a>    <span class="dt">vertex.size=</span><span class="dv">10</span>,</span>
+<span id="cb195-33"><a href="boolean-calculator-problem-postfix-notation.html#cb195-33" aria-hidden="true"></a>    <span class="dt">vertex.label.cex=</span><span class="fl">0.65</span>,</span>
+<span id="cb195-34"><a href="boolean-calculator-problem-postfix-notation.html#cb195-34" aria-hidden="true"></a>    <span class="dt">curved=</span><span class="ot">TRUE</span>,</span>
+<span id="cb195-35"><a href="boolean-calculator-problem-postfix-notation.html#cb195-35" aria-hidden="true"></a>    <span class="dt">vertex.color=</span><span class="st">&quot;grey99&quot;</span>,</span>
+<span id="cb195-36"><a href="boolean-calculator-problem-postfix-notation.html#cb195-36" aria-hidden="true"></a>    <span class="dt">vertex.label.color=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb195-37"><a href="boolean-calculator-problem-postfix-notation.html#cb195-37" aria-hidden="true"></a>    <span class="dt">vertex.label.family=</span><span class="st">&quot;sans&quot;</span>,</span>
+<span id="cb195-38"><a href="boolean-calculator-problem-postfix-notation.html#cb195-38" aria-hidden="true"></a>    <span class="dt">layout=</span><span class="kw">layout.circle</span>(net)</span>
+<span id="cb195-39"><a href="boolean-calculator-problem-postfix-notation.html#cb195-39" aria-hidden="true"></a>  )</span>
+<span id="cb195-40"><a href="boolean-calculator-problem-postfix-notation.html#cb195-40" aria-hidden="true"></a>  <span class="kw">legend</span>(</span>
+<span id="cb195-41"><a href="boolean-calculator-problem-postfix-notation.html#cb195-41" aria-hidden="true"></a>    <span class="dt">x =</span> <span class="st">&quot;bottomleft&quot;</span>,      <span class="co">## position, also takes x,y coordinates</span></span>
+<span id="cb195-42"><a href="boolean-calculator-problem-postfix-notation.html#cb195-42" aria-hidden="true"></a>    <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;Promoted&quot;</span>, <span class="st">&quot;Repressed&quot;</span>),</span>
+<span id="cb195-43"><a href="boolean-calculator-problem-postfix-notation.html#cb195-43" aria-hidden="true"></a>    <span class="dt">pch =</span> <span class="dv">19</span>,              <span class="co">## legend symbols see ?points</span></span>
+<span id="cb195-44"><a href="boolean-calculator-problem-postfix-notation.html#cb195-44" aria-hidden="true"></a>    <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#FCE640&quot;</span>, <span class="st">&quot;#441152&quot;</span>),</span>
+<span id="cb195-45"><a href="boolean-calculator-problem-postfix-notation.html#cb195-45" aria-hidden="true"></a>    <span class="dt">bty =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb195-46"><a href="boolean-calculator-problem-postfix-notation.html#cb195-46" aria-hidden="true"></a>    <span class="dt">border=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb195-47"><a href="boolean-calculator-problem-postfix-notation.html#cb195-47" aria-hidden="true"></a>    <span class="dt">xpd=</span><span class="ot">TRUE</span>,</span>
+<span id="cb195-48"><a href="boolean-calculator-problem-postfix-notation.html#cb195-48" aria-hidden="true"></a>    <span class="dt">title =</span> <span class="st">&quot;Edges&quot;</span></span>
+<span id="cb195-49"><a href="boolean-calculator-problem-postfix-notation.html#cb195-49" aria-hidden="true"></a>  )</span>
+<span id="cb195-50"><a href="boolean-calculator-problem-postfix-notation.html#cb195-50" aria-hidden="true"></a>  <span class="cf">if</span> (write_out) {</span>
+<span id="cb195-51"><a href="boolean-calculator-problem-postfix-notation.html#cb195-51" aria-hidden="true"></a>    <span class="kw">dev.flush</span>()</span>
+<span id="cb195-52"><a href="boolean-calculator-problem-postfix-notation.html#cb195-52" aria-hidden="true"></a>    <span class="kw">dev.off</span>()</span>
+<span id="cb195-53"><a href="boolean-calculator-problem-postfix-notation.html#cb195-53" aria-hidden="true"></a>  }</span>
+<span id="cb195-54"><a href="boolean-calculator-problem-postfix-notation.html#cb195-54" aria-hidden="true"></a>}</span>
+<span id="cb195-55"><a href="boolean-calculator-problem-postfix-notation.html#cb195-55" aria-hidden="true"></a></span>
+<span id="cb195-56"><a href="boolean-calculator-problem-postfix-notation.html#cb195-56" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">TRUE</span>, network_out_name)</span></code></pre></div>
 <pre><code>## png 
 ##   2</code></pre>
-<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="boolean-calculator-problem-postfix-notation.html#cb194-1" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">FALSE</span>, <span class="st">&quot;&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb197"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb197-1"><a href="boolean-calculator-problem-postfix-notation.html#cb197-1" aria-hidden="true"></a><span class="kw">draw_network</span>(network, <span class="ot">FALSE</span>, <span class="st">&quot;&quot;</span>)</span></code></pre></div>
 <p><img src="tag-based-regulation-supplemental_files/figure-html/unnamed-chunk-108-1.png" width="672" /></p>
 
 </div>
