@@ -238,18 +238,34 @@ print(fisher.test(perf_table))
 ## How many generations elapse before solutions evolve?
 
 ```{r}
-ggplot( data = sol_data, aes(x=condition, y=update, fill=condition) ) +
+unfinished_data <- filter(data, solution=="0")
+unfinished_data$graph_update <- 12500
+
+ggplot( ) +
   geom_flat_violin(
-    position=position_nudge(x = .2, y = 0),
-    alpha=.8
+    data = sol_data,
+    mapping = aes(x=condition, y=update, fill=condition),
+    position = position_nudge(x = .2, y = 0),
+    alpha = .8
   ) +
   geom_point(
-    aes(y=update, color=condition),
+    data = sol_data,
+    aes(x=condition, y=update, color=condition),
     position = position_jitter(width = .15),
     size = .5,
     alpha = 0.8
   ) +
+  geom_point(
+    data = unfinished_data,
+    mapping=aes(x=condition, y=graph_update),
+    color="gray",
+    position = position_jitter(width = .15, height=500),
+    size = .5,
+    alpha = 0.8
+  ) +
   geom_boxplot(
+    data = sol_data,
+    mapping = aes(x=condition, y=update, fill=condition),
     width = .1,
     outlier.shape = NA,
     alpha = 0.5
@@ -259,11 +275,17 @@ ggplot( data = sol_data, aes(x=condition, y=update, fill=condition) ) +
     breaks=c("memory", "both"),
     labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
   ) +
-  scale_y_continuous(name="Generation first solution evolved") +
+  scale_y_continuous(
+    name="Generation first solution evolved",
+    limits=c(0, 13000),
+    breaks=c(0, 2500, 5000, 7500, 10000, 12500),
+    labels=c("0", "2500", "5000", "7500", "10000", "Unsolved")
+  ) +
+  # coord_flip() +
   guides(fill = FALSE) +
   guides(color = FALSE) +
   ggsave(
-    paste0(working_directory, "imgs/boolean-calc-prefix-solve-time-cloud.png"),
+    paste0(working_directory, "imgs/boolean-calc-prefix-solve-time-cloud.pdf"),
     width=4,
     height=4
   )
