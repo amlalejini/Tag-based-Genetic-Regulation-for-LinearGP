@@ -403,7 +403,14 @@ ggplot( ) +
   facet_wrap(
     ~ NUM_SIGNAL_RESPONSES,
     nrow=1,
-    labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)
+    labeller=labeller(
+      NUM_SIGNAL_RESPONSES=c(
+        "2" = "Two-signal task",
+        "4" = "Four-signal task",
+        "8" = "Eight-signal task",
+        "16" = "Sixteen-signal task"
+      )
+    )
   ) +
   # coord_flip() +
   guides(fill = FALSE) +
@@ -1159,10 +1166,15 @@ ggplot(active_data, aes(x=mod_id_x_pos, y=time_step, fill=regulator_state_simpli
       "neutral",
       "repressed"
     ),
+    # labels=c(
+    #   "+",
+    #   "\u00F8",
+    #   "-"
+    # ),
     labels=c(
-      "+",
-      "\u00F8",
-      "-"
+      "Promoted",
+      "Neutral",
+      "Repressed"
     ),
     discrete=TRUE,
     direction=-1
@@ -1219,7 +1231,7 @@ ggplot(active_data, aes(x=mod_id_x_pos, y=time_step, fill=regulator_state_simpli
   ) +
   theme(
     legend.position = "top",
-    legend.text = element_text(size=9),
+    legend.text = element_text(size=8),
     legend.title=element_text(size=8),
     axis.text.y = element_text(size=8),
     axis.title.y = element_text(size=8),
