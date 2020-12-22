@@ -356,18 +356,34 @@ Do some conditions lead to the evolution of solutions in fewer generations than 
 Here, we compare the generation at which solutions arise (only at difficulty levels where regulation-disabled solutions evovled).
 
 ```{r}
-ggplot( data = filter(sol_data, NUM_SIGNAL_RESPONSES %in% c(2, 4)), aes(x=condition, y=update, fill=condition) ) +
+unfinished_data <- filter(max_fit_org_data, solution=="0")
+unfinished_data$graph_update <- 100000
+
+ggplot( ) +
   geom_flat_violin(
+    data = filter(sol_data, NUM_SIGNAL_RESPONSES %in% c(2, 4)),
+    mapping = aes(x=condition, y=update, fill=condition),
     position = position_nudge(x = .2, y = 0),
     alpha = .8
   ) +
   geom_point(
-    aes(y=update, color=condition),
+    data = filter(sol_data, NUM_SIGNAL_RESPONSES %in% c(2, 4)),
+    aes(x=condition, y=update, color=condition),
+    position = position_jitter(width = .15),
+    size = .5,
+    alpha = 0.8
+  ) +
+  geom_point(
+    data = filter(unfinished_data, NUM_SIGNAL_RESPONSES %in% c(2, 4) ) ,
+    mapping=aes(x=condition, y=graph_update),
+    color="gray",
     position = position_jitter(width = .15),
     size = .5,
     alpha = 0.8
   ) +
   geom_boxplot(
+    data = filter(sol_data, NUM_SIGNAL_RESPONSES %in% c(2, 4)),
+    mapping = aes(x=condition, y=update, fill=condition),
     width = .1,
     outlier.shape = NA,
     alpha = 0.5
@@ -375,12 +391,13 @@ ggplot( data = filter(sol_data, NUM_SIGNAL_RESPONSES %in% c(2, 4)), aes(x=condit
   scale_x_discrete(
     name="Condition",
     breaks=c("memory", "both"),
-    labels=c("Regulation-\ndisabled", "Regulation-enabled")
+    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
   ) +
   scale_y_continuous(
     name="Generation first solution evolved \n(log scale)",
-    limits=c(0, generations),
-    breaks=c(0, 10, 100, 1000, 10000),
+    limits=c(0, 100000),
+    breaks=c(0, 10, 100, 1000, 10000, 100000),
+    labels=c("0", "10", "100", "1000", "10000", "Unsolved"),
     trans="pseudo_log"
   ) +
   facet_wrap(
@@ -388,12 +405,13 @@ ggplot( data = filter(sol_data, NUM_SIGNAL_RESPONSES %in% c(2, 4)), aes(x=condit
     nrow=1,
     labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)
   ) +
+  # coord_flip() +
   guides(fill = FALSE) +
   guides(color = FALSE) +
   ggsave(
-    paste0(working_directory, "./imgs/repeated-signal-solve-time-cloud.png"),
-    width=5,
-    height=4
+    paste0(working_directory, "./imgs/repeated-signal-solve-time-cloud.pdf"),
+    width=8,
+    height=5
   )
 ```
 
