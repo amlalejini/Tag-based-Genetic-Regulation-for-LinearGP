@@ -640,9 +640,9 @@ ggplot(active_data, aes(x=mod_id_x_pos, y=graph_time_step, fill=regulator_state_
       "repressed"
     ),
     labels=c(
-      "+",
-      "\u00F8",
-      "-"
+      "Promoted",
+      "Neutral",
+      "Repressed"
     ),
     discrete=TRUE,
     direction=-1
