@@ -299,6 +299,31 @@ print(wilcox.test(formula=update~condition, data=sol_data, exact=FALSE, conf.int
 
 ## Evolved strategies
 
+### Program length
+
+How long (i.e., total number of instructions) are solutions?
+
+```{r}
+ggplot( sol_data, aes(x=condition, y=num_instructions, color=condition) ) +
+  geom_boxplot() +
+  geom_jitter(alpha=0.2) +
+  ylab("Number of instructions in genome") +
+  scale_color_discrete(
+    name="Condition",
+    breaks=c("memory", "both"),
+    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+  ) +
+  scale_x_discrete(
+    name="Condition",
+    breaks=c("memory", "both"),
+    labels=c("D", "E")
+  ) +
+  theme(
+    legend.position="bottom",
+    axis.title.x=element_blank()
+  )
+```
+
 ### What mechanisms do programs rely on to adjust responses to signals over time?
 
 We used indpendent knockouts of tag-based genetic regulation and global memory buffer access to investigate the mechanisms underpinning successful programs.
@@ -868,4 +893,3 @@ draw_network <- function(net, write_out, out_name) {
 draw_network(network, TRUE, network_out_name)
 draw_network(network, FALSE, "")
 ```
-

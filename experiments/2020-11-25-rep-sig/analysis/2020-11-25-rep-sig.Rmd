@@ -456,6 +456,35 @@ We analyzed:
 - whether programs used stochasticity as part of their strategy
 - instruction execution traces
 
+### Program length
+
+How long (i.e., total number of instructions) are solutions?
+
+```{r}
+ggplot( sol_data, aes(x=condition, y=num_instructions, color=condition) ) +
+  geom_boxplot() +
+  geom_jitter(alpha=0.2) +
+  ylab("Number of instructions in genome") +
+  scale_color_discrete(
+    name="Condition",
+    breaks=c("memory", "both"),
+    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+  ) +
+  scale_x_discrete(
+    name="Condition",
+    breaks=c("memory", "both"),
+    labels=c("D", "E")
+  ) +
+  facet_wrap(
+    ~ NUM_SIGNAL_RESPONSES,
+    labeller=labeller(NUM_SIGNAL_RESPONSES=label_lu)
+  ) +
+  theme(
+    legend.position="bottom",
+    axis.title.x=element_blank()
+  )
+```
+
 ### Do solutions rely on genetic regulation or global memory access to dynamically adjust responses?
 
 Here, we take a closer at the strategies employed by solutions evolved across environment complexities.
