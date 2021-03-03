@@ -39,9 +39,9 @@ README.md                                                        requirements.tx
 _bookdown.yml                                                    scripts
 _config.yml                                                      source
 _output.yml                                                      style.css
-alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp  supplemental
+alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp  _book
 bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp   supplemental.bib
-build_book.sh                                                    supplemental_files
+build_book.sh                                                    _bookdown_files
 build_exps.sh                                                    tail.Rmd
 chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp     tests
 ```
