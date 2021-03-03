@@ -267,3 +267,27 @@ The difference in number of generalizing solutions between regulation-enabled an
 Moreover, `r (num_solutions_reg - num_generalize_reg) - (num_solutions_reg - num_generalize_ko_reg)` of the `r num_solutions_reg - num_generalize_reg` non-generalizing programs generalize when we knockout genetic regulation.
 Upon close inspection, the other `r num_solutions_reg - num_generalize_ko_reg` non-general programs relied on genetic regulation to achieve initial success but failed to generalize to arbitrary environment signal sequences.
 
+## Program length
+
+How long (i.e., total number of instructions) are solutions?
+
+```{r}
+ggplot( sol_data, aes(x=condition, y=num_instructions, color=condition) ) +
+  geom_boxplot() +
+  geom_jitter(alpha=0.2) +
+  ylab("Number of instructions in genome") +
+  scale_color_discrete(
+    name="Condition",
+    breaks=c("memory", "both"),
+    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+  ) +
+  scale_x_discrete(
+    name="Condition",
+    breaks=c("memory", "both"),
+    labels=c("D", "E")
+  ) +
+  theme(
+    legend.position="bottom",
+    axis.title.x=element_blank()
+  )
+```
