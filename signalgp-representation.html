@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 SignalGP representation | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
+  <meta name="description" content="Supplemental material" />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 SignalGP representation | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Supplemental material" />
+  <meta name="github-repo" content="amlalejini/Tag-based-Genetic-Regulation-for-LinearGP" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 SignalGP representation | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  
+  <meta name="twitter:description" content="Supplemental material" />
+  
+
+<meta name="author" content="Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria" />
+
+
+<meta name="date" content="2021-03-03" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="compile-and-run-experiments-locally.html"/>
+<link rel="next" href="exponential-regulator.html"/>
+<script src="libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Supplemental material</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#about-our-supplemental-material"><i class="fa fa-check"></i><b>1.1</b> About our supplemental material</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#contributing-authors"><i class="fa fa-check"></i><b>1.2</b> Contributing authors</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#research-overview"><i class="fa fa-check"></i><b>1.3</b> Research overview</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="index.html"><a href="index.html#abstract"><i class="fa fa-check"></i><b>1.3.1</b> Abstract</a></li>
+<li class="chapter" data-level="1.3.2" data-path="index.html"><a href="index.html#tag-based-referencing"><i class="fa fa-check"></i><b>1.3.2</b> Tag-based Referencing</a></li>
+<li class="chapter" data-level="1.3.3" data-path="index.html"><a href="index.html#tag-based-regulation"><i class="fa fa-check"></i><b>1.3.3</b> Tag-based Regulation</a></li>
+<li class="chapter" data-level="1.3.4" data-path="index.html"><a href="index.html#signalgp"><i class="fa fa-check"></i><b>1.3.4</b> SignalGP</a></li>
+<li class="chapter" data-level="1.3.5" data-path="index.html"><a href="index.html#experiments"><i class="fa fa-check"></i><b>1.3.5</b> Experiments</a></li>
+<li class="chapter" data-level="1.3.6" data-path="index.html"><a href="index.html#results"><i class="fa fa-check"></i><b>1.3.6</b> Results</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="data-availability.html"><a href="data-availability.html"><i class="fa fa-check"></i><b>2</b> Data Availability</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="data-availability.html"><a href="data-availability.html#source-code"><i class="fa fa-check"></i><b>2.1</b> Source code</a></li>
+<li class="chapter" data-level="2.2" data-path="data-availability.html"><a href="data-availability.html#training-and-testing-sets"><i class="fa fa-check"></i><b>2.2</b> Training and testing sets</a></li>
+<li class="chapter" data-level="2.3" data-path="data-availability.html"><a href="data-availability.html#experimental-results"><i class="fa fa-check"></i><b>2.3</b> Experimental results</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="compile-and-run-experiments-locally.html"><a href="compile-and-run-experiments-locally.html"><i class="fa fa-check"></i><b>3</b> Compile and run experiments locally</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="compile-and-run-experiments-locally.html"><a href="compile-and-run-experiments-locally.html#docker"><i class="fa fa-check"></i><b>3.1</b> Docker</a></li>
+<li class="chapter" data-level="3.2" data-path="compile-and-run-experiments-locally.html"><a href="compile-and-run-experiments-locally.html#manually"><i class="fa fa-check"></i><b>3.2</b> Manually</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="compile-and-run-experiments-locally.html"><a href="compile-and-run-experiments-locally.html#get-dependencies"><i class="fa fa-check"></i><b>3.2.1</b> Get dependencies</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="signalgp-representation.html"><a href="signalgp-representation.html"><i class="fa fa-check"></i><b>4</b> SignalGP representation</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="signalgp-representation.html"><a href="signalgp-representation.html#memory-model"><i class="fa fa-check"></i><b>4.1</b> Memory model</a></li>
+<li class="chapter" data-level="4.2" data-path="signalgp-representation.html"><a href="signalgp-representation.html#mutation-operators"><i class="fa fa-check"></i><b>4.2</b> Mutation operators</a></li>
+<li class="chapter" data-level="4.3" data-path="signalgp-representation.html"><a href="signalgp-representation.html#instruction-set"><i class="fa fa-check"></i><b>4.3</b> Instruction set</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="signalgp-representation.html"><a href="signalgp-representation.html#default-instructions"><i class="fa fa-check"></i><b>4.3.1</b> Default Instructions</a></li>
+<li class="chapter" data-level="4.3.2" data-path="signalgp-representation.html"><a href="signalgp-representation.html#global-memory-access-instructions"><i class="fa fa-check"></i><b>4.3.2</b> Global memory access instructions</a></li>
+<li class="chapter" data-level="4.3.3" data-path="signalgp-representation.html"><a href="signalgp-representation.html#regulation-instructions"><i class="fa fa-check"></i><b>4.3.3</b> Regulation instructions</a></li>
+<li class="chapter" data-level="4.3.4" data-path="signalgp-representation.html"><a href="signalgp-representation.html#task-specific-instructions"><i class="fa fa-check"></i><b>4.3.4</b> Task-specific instructions</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="exponential-regulator.html"><a href="exponential-regulator.html"><i class="fa fa-check"></i><b>5</b> Exponential regulator</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="exponential-regulator.html"><a href="exponential-regulator.html#analysis-dependencies"><i class="fa fa-check"></i><b>5.1</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="5.2" data-path="exponential-regulator.html"><a href="exponential-regulator.html#regulator-modifier-equation"><i class="fa fa-check"></i><b>5.2</b> Regulator modifier equation</a></li>
+<li class="chapter" data-level="5.3" data-path="exponential-regulator.html"><a href="exponential-regulator.html#regulator-behavior"><i class="fa fa-check"></i><b>5.3</b> Regulator behavior</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html"><i class="fa fa-check"></i><b>6</b> Repeated-signal problem analysis</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#overview"><i class="fa fa-check"></i><b>6.1</b> Overview</a></li>
+<li class="chapter" data-level="6.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#analysis-dependencies-1"><i class="fa fa-check"></i><b>6.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="6.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#setup"><i class="fa fa-check"></i><b>6.3</b> Setup</a></li>
+<li class="chapter" data-level="6.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#problem-solving-success"><i class="fa fa-check"></i><b>6.4</b> Problem-solving success</a>
+<ul>
+<li class="chapter" data-level="6.4.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#number-of-successful-replicates-by-condition"><i class="fa fa-check"></i><b>6.4.1</b> Number of successful replicates by condition</a></li>
+<li class="chapter" data-level="6.4.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#aggregate-fitness-scores-by-condition"><i class="fa fa-check"></i><b>6.4.2</b> Aggregate fitness scores by condition</a></li>
+</ul></li>
+<li class="chapter" data-level="6.5" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#how-many-generations-elapse-before-solutions-evolve"><i class="fa fa-check"></i><b>6.5</b> How many generations elapse before solutions evolve?</a>
+<ul>
+<li class="chapter" data-level="6.5.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#two-signal-task---statistical-analysis"><i class="fa fa-check"></i><b>6.5.1</b> Two-signal task - statistical analysis</a></li>
+<li class="chapter" data-level="6.5.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#four-signal-task---statistical-analysis"><i class="fa fa-check"></i><b>6.5.2</b> Four-signal task - statistical analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="6.6" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#teasing-apart-evolved-strategies"><i class="fa fa-check"></i><b>6.6</b> Teasing apart evolved strategies</a>
+<ul>
+<li class="chapter" data-level="6.6.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#program-length"><i class="fa fa-check"></i><b>6.6.1</b> Program length</a></li>
+<li class="chapter" data-level="6.6.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#do-solutions-rely-on-genetic-regulation-or-global-memory-access-to-dynamically-adjust-responses"><i class="fa fa-check"></i><b>6.6.2</b> Do solutions rely on genetic regulation or global memory access to dynamically adjust responses?</a></li>
+<li class="chapter" data-level="6.6.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#what-forms-of-genetic-regulation-do-evolved-programs-rely-on"><i class="fa fa-check"></i><b>6.6.3</b> What forms of genetic regulation do evolved programs rely on?</a></li>
+<li class="chapter" data-level="6.6.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#are-evolved-programs-relying-on-stochastic-strategies"><i class="fa fa-check"></i><b>6.6.4</b> Are evolved programs relying on stochastic strategies?</a></li>
+<li class="chapter" data-level="6.6.5" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#program-instruction-execution-traces"><i class="fa fa-check"></i><b>6.6.5</b> Program instruction execution traces</a></li>
+</ul></li>
+<li class="chapter" data-level="6.7" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#case-study-visualizing-regulation-in-an-evolved-program"><i class="fa fa-check"></i><b>6.7</b> Case study: visualizing regulation in an evolved program</a>
+<ul>
+<li class="chapter" data-level="6.7.1" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#data-wrangling"><i class="fa fa-check"></i><b>6.7.1</b> Data wrangling</a></li>
+<li class="chapter" data-level="6.7.2" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#function-regulation-over-time"><i class="fa fa-check"></i><b>6.7.2</b> Function regulation over time</a></li>
+<li class="chapter" data-level="6.7.3" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#environmental-signal-tag-match-score-over-time"><i class="fa fa-check"></i><b>6.7.3</b> Environmental signal tag-match score over time</a></li>
+<li class="chapter" data-level="6.7.4" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#evolved-regulatory-network"><i class="fa fa-check"></i><b>6.7.4</b> Evolved regulatory network</a></li>
+</ul></li>
+<li class="chapter" data-level="6.8" data-path="repeated-signal-problem-analysis.html"><a href="repeated-signal-problem-analysis.html#all-regulation-traces"><i class="fa fa-check"></i><b>6.8</b> All regulation traces</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html"><i class="fa fa-check"></i><b>7</b> Contextual-signal problem analysis</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#overview-1"><i class="fa fa-check"></i><b>7.1</b> Overview</a></li>
+<li class="chapter" data-level="7.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#analysis-dependencies-2"><i class="fa fa-check"></i><b>7.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="7.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#setup-1"><i class="fa fa-check"></i><b>7.3</b> Setup</a></li>
+<li class="chapter" data-level="7.4" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#problem-solving-success-1"><i class="fa fa-check"></i><b>7.4</b> Problem-solving success</a></li>
+<li class="chapter" data-level="7.5" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#how-many-generations-elapse-before-solutions-evolve-1"><i class="fa fa-check"></i><b>7.5</b> How many generations elapse before solutions evolve?</a></li>
+<li class="chapter" data-level="7.6" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-strategies"><i class="fa fa-check"></i><b>7.6</b> Evolved strategies</a>
+<ul>
+<li class="chapter" data-level="7.6.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#program-length-1"><i class="fa fa-check"></i><b>7.6.1</b> Program length</a></li>
+<li class="chapter" data-level="7.6.2" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time"><i class="fa fa-check"></i><b>7.6.2</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
+<li class="chapter" data-level="7.6.3" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#gene-regulatory-networks"><i class="fa fa-check"></i><b>7.6.3</b> Gene regulatory networks</a></li>
+<li class="chapter" data-level="7.6.4" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#program-instruction-execution-traces-1"><i class="fa fa-check"></i><b>7.6.4</b> Program instruction execution traces</a></li>
+</ul></li>
+<li class="chapter" data-level="7.7" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#visualizing-an-evolved-gene-regulatory-network"><i class="fa fa-check"></i><b>7.7</b> Visualizing an evolved gene regulatory network</a>
+<ul>
+<li class="chapter" data-level="7.7.1" data-path="contextual-signal-problem-analysis.html"><a href="contextual-signal-problem-analysis.html#evolved-regulatory-network-1"><i class="fa fa-check"></i><b>7.7.1</b> Evolved regulatory network</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html"><i class="fa fa-check"></i><b>8</b> Boolean calculator problem (prefix notation)</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#overview-2"><i class="fa fa-check"></i><b>8.1</b> Overview</a></li>
+<li class="chapter" data-level="8.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#analysis-dependencies-3"><i class="fa fa-check"></i><b>8.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="8.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#setup-2"><i class="fa fa-check"></i><b>8.3</b> Setup</a></li>
+<li class="chapter" data-level="8.4" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#problem-solving-success-2"><i class="fa fa-check"></i><b>8.4</b> Problem-solving success</a></li>
+<li class="chapter" data-level="8.5" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#how-many-generations-elapse-before-solutions-evolve-2"><i class="fa fa-check"></i><b>8.5</b> How many generations elapse before solutions evolve?</a></li>
+<li class="chapter" data-level="8.6" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-strategies-1"><i class="fa fa-check"></i><b>8.6</b> Evolved strategies</a>
+<ul>
+<li class="chapter" data-level="8.6.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#program-length-2"><i class="fa fa-check"></i><b>8.6.1</b> Program length</a></li>
+<li class="chapter" data-level="8.6.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-1"><i class="fa fa-check"></i><b>8.6.2</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
+<li class="chapter" data-level="8.6.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#gene-regulatory-networks-1"><i class="fa fa-check"></i><b>8.6.3</b> Gene regulatory networks</a></li>
+<li class="chapter" data-level="8.6.4" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#program-instruction-execution-traces-2"><i class="fa fa-check"></i><b>8.6.4</b> Program instruction execution traces</a></li>
+</ul></li>
+<li class="chapter" data-level="8.7" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#visualizaing-an-evolved-regulatory-network"><i class="fa fa-check"></i><b>8.7</b> Visualizaing an evolved regulatory network</a>
+<ul>
+<li class="chapter" data-level="8.7.1" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#data-wrangling-1"><i class="fa fa-check"></i><b>8.7.1</b> Data wrangling</a></li>
+<li class="chapter" data-level="8.7.2" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#function-regulation-over-time-1"><i class="fa fa-check"></i><b>8.7.2</b> Function regulation over time</a></li>
+<li class="chapter" data-level="8.7.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-regulatory-network-2"><i class="fa fa-check"></i><b>8.7.3</b> Evolved regulatory network</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html"><i class="fa fa-check"></i><b>9</b> Changing-signal problem analysis</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#overview-3"><i class="fa fa-check"></i><b>9.1</b> Overview</a></li>
+<li class="chapter" data-level="9.2" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#analysis-dependencies-4"><i class="fa fa-check"></i><b>9.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="9.3" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#setup-3"><i class="fa fa-check"></i><b>9.3</b> Setup</a></li>
+<li class="chapter" data-level="9.4" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#does-regulation-hinder-the-evolution-of-successful-genotypes"><i class="fa fa-check"></i><b>9.4</b> Does regulation hinder the evolution of successful genotypes?</a>
+<ul>
+<li class="chapter" data-level="9.4.1" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#does-access-to-regulation-slow-adaptation"><i class="fa fa-check"></i><b>9.4.1</b> Does access to regulation slow adaptation?</a></li>
+<li class="chapter" data-level="9.4.2" data-path="changing-signal-problem-analysis.html"><a href="changing-signal-problem-analysis.html#do-they-generalize"><i class="fa fa-check"></i><b>9.4.2</b> Do they generalize?</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html"><i class="fa fa-check"></i><b>10</b> Boolean calculator problem (postfix notation)</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#overview-4"><i class="fa fa-check"></i><b>10.1</b> Overview</a></li>
+<li class="chapter" data-level="10.2" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#analysis-dependencies-5"><i class="fa fa-check"></i><b>10.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="10.3" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#setup-4"><i class="fa fa-check"></i><b>10.3</b> Setup</a></li>
+<li class="chapter" data-level="10.4" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#problem-solving-success-3"><i class="fa fa-check"></i><b>10.4</b> Problem-solving success</a></li>
+<li class="chapter" data-level="10.5" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#how-many-generations-elapse-before-solutions-evolve-3"><i class="fa fa-check"></i><b>10.5</b> How many generations elapse before solutions evolve?</a></li>
+<li class="chapter" data-level="10.6" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#evolved-strategies-2"><i class="fa fa-check"></i><b>10.6</b> Evolved strategies</a>
+<ul>
+<li class="chapter" data-level="10.6.1" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#program-length-3"><i class="fa fa-check"></i><b>10.6.1</b> Program length</a></li>
+<li class="chapter" data-level="10.6.2" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#what-mechanisms-do-programs-rely-on-to-adjust-responses-to-signals-over-time-2"><i class="fa fa-check"></i><b>10.6.2</b> What mechanisms do programs rely on to adjust responses to signals over time?</a></li>
+<li class="chapter" data-level="10.6.3" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#gene-regulatory-networks-2"><i class="fa fa-check"></i><b>10.6.3</b> Gene regulatory networks</a></li>
+<li class="chapter" data-level="10.6.4" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#program-instruction-execution-traces-3"><i class="fa fa-check"></i><b>10.6.4</b> Program instruction execution traces</a></li>
+</ul></li>
+<li class="chapter" data-level="10.7" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#visualizaing-an-evolved-regulatory-network-1"><i class="fa fa-check"></i><b>10.7</b> Visualizaing an evolved regulatory network</a>
+<ul>
+<li class="chapter" data-level="10.7.1" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html#evolved-regulatory-network-3"><i class="fa fa-check"></i><b>10.7.1</b> Evolved regulatory network</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="hand-coded-signalgp-example-programs.html"><a href="hand-coded-signalgp-example-programs.html"><i class="fa fa-check"></i><b>11</b> Hand-coded SignalGP example programs</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="hand-coded-signalgp-example-programs.html"><a href="hand-coded-signalgp-example-programs.html#repeated-signal-task"><i class="fa fa-check"></i><b>11.1</b> Repeated Signal Task</a>
+<ul>
+<li class="chapter" data-level="11.1.1" data-path="hand-coded-signalgp-example-programs.html"><a href="hand-coded-signalgp-example-programs.html#two-signal-task---memory-based-solution"><i class="fa fa-check"></i><b>11.1.1</b> Two-signal Task - memory-based solution</a></li>
+<li class="chapter" data-level="11.1.2" data-path="hand-coded-signalgp-example-programs.html"><a href="hand-coded-signalgp-example-programs.html#four-signal-task---memory-based-solution"><i class="fa fa-check"></i><b>11.1.2</b> Four-signal Task - memory-based solution</a></li>
+<li class="chapter" data-level="11.1.3" data-path="hand-coded-signalgp-example-programs.html"><a href="hand-coded-signalgp-example-programs.html#eight-signal-task---memory-based-solution"><i class="fa fa-check"></i><b>11.1.3</b> Eight-signal Task - memory-based solution</a></li>
+<li class="chapter" data-level="11.1.4" data-path="hand-coded-signalgp-example-programs.html"><a href="hand-coded-signalgp-example-programs.html#sixteen-signal-task---memory-based-solution"><i class="fa fa-check"></i><b>11.1.4</b> Sixteen-signal Task - memory-based solution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with ❤ and bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="signalgp-representation" class="section level1" number="4">
+<h1><span class="header-section-number">Chapter 4</span> SignalGP representation</h1>
+<p>Here, we give more details on how we configured SignalGP for this work, including the particular instruction sets used in each experiment.
+For a broad overview of SignalGP, see <span class="citation">(<a href="references.html#ref-lalejini_evolving_2018" role="doc-biblioref">A. Lalejini and Ofria 2018</a>)</span>.
+For exact configurations used in each experiment, see respective <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments">experiment directories</a>.</p>
+<div id="memory-model" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Memory model</h2>
+<p>SignalGP programs have four types of memory buffers with which to carry out computations:</p>
+<ul>
+<li>Working (register) memory
+<ul>
+<li>Call-local (* thread-local) memory.</li>
+<li>Memory used by the majority of computation instructions.</li>
+</ul></li>
+<li>Input memory
+<ul>
+<li>Call-local (&amp; thread-local) memory.</li>
+<li>Read-only.</li>
+<li>This memory is used to specify function call arguments. When a function is called on a thread (i.e.,
+a call instruction is executed), the caller’s working memory is copied into the input memory of
+the new call-state, which is created on top of the thread’s call stack.</li>
+<li>Programs must execute explicit instructions to read from the input memory buffer (into the working
+memory buffer).</li>
+</ul></li>
+<li>Output memory
+<ul>
+<li>Call-local (&amp; thread-local) memory.</li>
+<li>Write-only.</li>
+<li>This memory is used to specify the return values of a function call.</li>
+<li>When a function returns to the previous call-state (i.e., the one just below it on the thread’s
+call stack), positions that were set in the output buffer are returned to the caller’s working memory
+buffer.</li>
+<li>Programs must execute explicit instructions to write to the output memory buffer (from the working
+memory buffer).</li>
+</ul></li>
+<li>Global memory
+<ul>
+<li>This memory buffer is shared by all executing threads. Threads must use explicit instructions to access it.</li>
+</ul></li>
+</ul>
+<p>Memory buffers are implemented as integer to double maps. Instruction use their integer arguments to specify locations in memory.
+In this work, evolving programs do not have de-referencing functionality (i.e., memory pointers).</p>
+</div>
+<div id="mutation-operators" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Mutation operators</h2>
+<ul>
+<li>Single-instruction insertions
+<ul>
+<li>Applied per instruction</li>
+</ul></li>
+<li>Single-instruction deletions
+<ul>
+<li>Applied per instruction</li>
+</ul></li>
+<li>Single-instruction substitutions
+<ul>
+<li>Applied per instruction</li>
+</ul></li>
+<li>Single-argument substitutions
+<ul>
+<li>Applied per argument</li>
+</ul></li>
+<li>Slip mutations <span class="citation">(<a href="references.html#ref-lalejini_gene_2017" role="doc-biblioref">A. Lalejini, Wiser, and Ofria 2017</a>)</span>
+<ul>
+<li>Applied at a per-function rate.</li>
+<li>Pick two random positions in function’s instructions sequence: A and B</li>
+<li>If A &lt; B: duplicate sequence from A to B</li>
+<li>If A &gt; B: delete sequence from A to B</li>
+</ul></li>
+<li>Single-function duplications
+<ul>
+<li>Applied per-function</li>
+</ul></li>
+<li>Single-function deletions
+<ul>
+<li>Applied per-function</li>
+</ul></li>
+<li>Tag bit flips
+<ul>
+<li>Applied at a per-bit rate</li>
+<li>(applies to both instruction- and function-tags)</li>
+</ul></li>
+</ul>
+</div>
+<div id="instruction-set" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> Instruction set</h2>
+<p>Abbreviations:</p>
+<ul>
+<li>EOP: End of program</li>
+<li>Reg: local register
+<ul>
+<li>Reg[0] indicates the value at the register specified by an instruction’s first <em>argument</em> (either tag-based or numeric), Reg[1] indicates the value at the register specified by an instruction’s second argument, and Reg[2] indicates the value at the register specified by the instruction’s third argument.</li>
+<li>Reg[0], Reg[1], <em>etc</em>: Register 0, Register 1, <em>etc.</em></li>
+</ul></li>
+<li>Input: input buffer
+<ul>
+<li>Follows same scheme as Reg</li>
+</ul></li>
+<li>Output: output buffer
+<ul>
+<li>Follows same scheme as Reg</li>
+</ul></li>
+<li>Global: global memory buffer
+<ul>
+<li>Follows same scheme as Reg</li>
+</ul></li>
+<li>Arg: Instruction argument
+<ul>
+<li>Arg[i] indicates the i’th instruction argument (an integer encoded in the genome)</li>
+<li>E.g., Arg[0] is an instruction’s first argument</li>
+</ul></li>
+</ul>
+<p>Instructions that would produce undefined behavior (e.g., division by zero) are treated as no operations.</p>
+<div id="default-instructions" class="section level3" number="4.3.1">
+<h3><span class="header-section-number">4.3.1</span> Default Instructions</h3>
+<p>I.e., instructions used across all diagnostic tasks.</p>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="38%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Instruction</th>
+<th align="center">Arguments Used</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>Nop</code></td>
+<td align="center">0</td>
+<td align="left">No operation</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Not</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = !Reg[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Inc</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = Reg[0] + 1</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Dec</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = Reg[0] - 1</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Add</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] + Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Sub</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] - Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Mult</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] * Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Div</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] / Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Mod</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] % Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Nand</code></td>
+<td align="center">2</td>
+<td align="left">Reg[2] = !(Reg[0] &amp; Reg[1])</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>TestEqu</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] == Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>TestNEqu</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] != Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>TestLess</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] &lt; Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>TestLessEqu</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] &lt;= Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>TestGreater</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] &gt; Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>TestGreaterEqu</code></td>
+<td align="center">3</td>
+<td align="left">Reg[2] = Reg[0] &gt;= Reg[1]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>SetMem</code></td>
+<td align="center">2</td>
+<td align="left">Reg[0] = Arg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Terminal</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = double value encoded by instruction tag</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>CopyMem</code></td>
+<td align="center">2</td>
+<td align="left">Reg[0] = Reg[1]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>SwapMem</code></td>
+<td align="center">2</td>
+<td align="left">Swap(Reg[0], Reg[1])</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>InputToWorking</code></td>
+<td align="center">2</td>
+<td align="left">Reg[1] = Input[0]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>WorkingToOutput</code></td>
+<td align="center">2</td>
+<td align="left">Output[1] = Reg[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>If</code></td>
+<td align="center">1</td>
+<td align="left">If Reg[0] != 0, proceed. Otherwise skip to the next <code>Close</code> or EOP.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>While</code></td>
+<td align="center">1</td>
+<td align="left">While Reg[0] != 0, loop. Otherwise skip to next <code>Close</code> or EOP.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Close</code></td>
+<td align="center">0</td>
+<td align="left">Indicate the end of a control block of code (e.g., loop, if).</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Break</code></td>
+<td align="center">0</td>
+<td align="left">Break out of current control flow (e.g., loop).</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Terminate</code></td>
+<td align="center">0</td>
+<td align="left">Kill thread that this instruction is executing on.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Fork</code></td>
+<td align="center">0</td>
+<td align="left">Generate an internal signal (using this instruction’s tag) that can trigger a function to run in parallel.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Call</code></td>
+<td align="center">0</td>
+<td align="left">Call a function, using this instruction’s tag to determine which function is called.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>Routine</code></td>
+<td align="center">0</td>
+<td align="left">Same as call, but local memory is shared. Sort of like a jump that will jump back when the routine ends.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Return</code></td>
+<td align="center">0</td>
+<td align="left">Return from the current function call.</td>
+</tr>
+</tbody>
+</table>
+<p>Note that <code>Nand</code> performs a bitwise operation.</p>
+</div>
+<div id="global-memory-access-instructions" class="section level3" number="4.3.2">
+<h3><span class="header-section-number">4.3.2</span> Global memory access instructions</h3>
+<p>For experimental conditions without global memory access, these instructions are replaced with no-operation
+such that the instruction set remains a constant size regardless of experimental condition.</p>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="38%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Instruction</th>
+<th align="center">Arguments Used</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>WorkingToGlobal</code></td>
+<td align="center">2</td>
+<td align="left">Global[1] = Reg[0]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>GlobalToWorking</code></td>
+<td align="center">2</td>
+<td align="left">Reg[1] = Global[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>FullGlobalToWorking</code></td>
+<td align="center">0</td>
+<td align="left">Copy entire global memory buffer into working memory buffer</td>
+</tr>
+<tr class="even">
+<td align="left"><code>FullWorkingToGlobal</code></td>
+<td align="center">0</td>
+<td align="left">Copy entire working memory buffer into global memory buffer</td>
+</tr>
+</tbody>
+</table>
+<p>Note that full buffer copies only copy registers that have been set (they do not necessarily stomp all over the entire destination buffer).</p>
+</div>
+<div id="regulation-instructions" class="section level3" number="4.3.3">
+<h3><span class="header-section-number">4.3.3</span> Regulation instructions</h3>
+<p>For experimental conditions without regulation, these instructions are replaced with no-operation
+such that the instruction set remains a constant size regardless of experimental condition.</p>
+<p>Note that several regulation instructions have a baseline and (-) version.
+The (-) versions are identical to the baseline version, except that they multiply the value they are
+regulating with by -1. This eliminates any bias toward either up-/down-regulation.</p>
+<p>Also note that the emp::MatchBin (in the Empirical library) data structure that manages function regulation
+is defined in terms of tag DISTANCE, not similarity. So, decreasing function regulation values decreases
+the distance between potential referring tags, and thus, unintuitively, <em>up-regulates</em> the function.</p>
+<p>All tag-based referencing used by regulation instructions use unregulated, raw match scores. Thus, programs
+can still up-regulate a function that was previously ‘turned off’ with down-regulation.</p>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="38%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Instruction</th>
+<th align="center">Arguments Used</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>SetRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Set regulation value of function (targeted with instruction tag) to Reg[0].</td>
+</tr>
+<tr class="even">
+<td align="left"><code>SetRegulator-</code></td>
+<td align="center">1</td>
+<td align="left">Set regulation value of function (targeted with instruction tag) to -1 * Reg[0].</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>SetOwnRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Set regulation value of function (currently executing) to Reg[0].</td>
+</tr>
+<tr class="even">
+<td align="left"><code>SetOwnRegulator-</code></td>
+<td align="center">1</td>
+<td align="left">Set regulation value of function (currently executing) to -1 * Reg[0].</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>AdjRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Regulation value of function (targeted with instruction tag) += Reg[0]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>AdjRegulator-</code></td>
+<td align="center">1</td>
+<td align="left">Regulation value of function (targeted with instruction tag) -= Reg[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>AdjOwnRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Regulation value of function (currently executing) += Reg[0]</td>
+</tr>
+<tr class="even">
+<td align="left"><code>AdjOwnRegulator-</code></td>
+<td align="center">1</td>
+<td align="left">Regulation value of function (currently executing) -= Reg[0]</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>ClearRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Clear function regulation (reset to neutral) of function targeted by instruction’s tag.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>ClearOwnRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Clear function regulation (reset to neutral) of currently executing function</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>SenseRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = regulator state of function targeted by instruction tag</td>
+</tr>
+<tr class="even">
+<td align="left"><code>SenseOwnRegulator</code></td>
+<td align="center">1</td>
+<td align="left">Reg[0] = regulator state of current function</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>IncRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Increment regulator state of function targeted with this instruction’s tag</td>
+</tr>
+<tr class="even">
+<td align="left"><code>IncOwnRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Increment regulator state of currently executing function</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>DecRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Decrement regulator state of function targeted with this instruction’s tag</td>
+</tr>
+<tr class="even">
+<td align="left"><code>DecOwnRegulator</code></td>
+<td align="center">0</td>
+<td align="left">Decrement regulator state of the currently executing function</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="task-specific-instructions" class="section level3" number="4.3.4">
+<h3><span class="header-section-number">4.3.4</span> Task-specific instructions</h3>
+<p>Each task as a number of response instructions added to the instruction set equal to the possible set
+of responses that can be expressed by a program. Each of these response instructions set a
+flag on the virtual hardware indicating which response the program expressed and reset all executing
+threads such that only function regulation and global memory contents persist.</p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="compile-and-run-experiments-locally.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="exponential-regulator.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/documents/signalgp.md",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["tag-based-regulation-supplemental.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
