@@ -204,9 +204,12 @@ ggplot(sol_data, aes(x=condition, fill=condition)) +
     vjust=0
   ) +
   scale_x_discrete(
-    name="Condition",
+    name="Regulation",
     breaks=c("memory","both"),
-    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+    labels=c("OFF", "ON")
+  ) +
+  scale_fill_brewer(
+    palette=cb_palette
   ) +
   ylab("Successful replciates") +
   ylim(0, 200) +
