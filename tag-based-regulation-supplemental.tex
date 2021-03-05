@@ -5368,8 +5368,8 @@ We use the igraph package to draw this program's gene regulatory network.
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-84-1.pdf}
 
-\hypertarget{indpendent-signal-problem-analysis}{%
-\chapter{Indpendent-signal problem analysis}\label{indpendent-signal-problem-analysis}}
+\hypertarget{independent-signal-problem-analysis}{%
+\chapter{Independent-signal problem analysis}\label{independent-signal-problem-analysis}}
 
 Here, we give an overview of the independent-signal diagnostic problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
@@ -5776,6 +5776,11 @@ The raw data can be found on the OSF project associated with this work \citep{La
 \CommentTok{# Relative location of data.}
 \NormalTok{working_directory <-}\StringTok{ "experiments/2020-11-28-bool-calc-postfix/analysis/"} \CommentTok{# << For bookdown}
 \CommentTok{# working_directory <- "./"                                              # << For local analysis}
+
+\CommentTok{# Settings for visualization}
+\NormalTok{cb_palette <-}\StringTok{ "Set2"}
+\CommentTok{# Create directory to dump plots}
+\KeywordTok{dir.create}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"imgs"}\NormalTok{), }\DataTypeTok{showWarnings=}\OtherTok{FALSE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -5788,7 +5793,7 @@ We explore whether the calculator problem's context-dependence is driving the be
 We can reduce context-dependence of the calculator problem by presenting input sequences in postfix notation.
 In postfix notation, programs receive the requisite numeric operand inputs first and the operator input last.
 As such, the final signal in an input sequence will always differentiate which bitwise operation should be performed.
-Successful programs must store the numeric inputs embedded in operand signals, and then, as in the changing-signal problem, a distinct signal will differentiate which of the response types a program should execute.
+Successful programs must store the numeric inputs embedded in operand signals, and then, as in the independent-signal problem, a distinct signal will differentiate which of the response types a program should execute.
 
 \hypertarget{analysis-dependencies-5}{%
 \section{Analysis Dependencies}\label{analysis-dependencies-5}}
@@ -5802,6 +5807,7 @@ Load all required R libraries.
 \KeywordTok{library}\NormalTok{(cowplot)}
 \KeywordTok{library}\NormalTok{(viridis)}
 \KeywordTok{library}\NormalTok{(reshape2)}
+\KeywordTok{library}\NormalTok{(RColorBrewer)}
 \KeywordTok{library}\NormalTok{(igraph)}
 \KeywordTok{source}\NormalTok{(}\StringTok{"https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R"}\NormalTok{)}
 \end{Highlighting}
@@ -5981,9 +5987,12 @@ The number of successful replicates by condition:
     \DataTypeTok{vjust=}\DecValTok{0}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_x_discrete}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{name=}\StringTok{"Regulation"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{,}\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"OFF"}\NormalTok{, }\StringTok{"ON"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_brewer}\NormalTok{(}
+    \DataTypeTok{palette=}\NormalTok{cb_palette}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Successful replciates"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ylim}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{200}\NormalTok{) }\OperatorTok{+}
@@ -6091,9 +6100,15 @@ Test for significance using Fisher's exact test.
     \DataTypeTok{alpha =} \FloatTok{0.5}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_x_discrete}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{name=}\StringTok{"Regulation"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"OFF"}\NormalTok{, }\StringTok{"ON"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_color_brewer}\NormalTok{(}
+    \DataTypeTok{palette=}\NormalTok{cb_palette}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_brewer}\NormalTok{(}
+    \DataTypeTok{palette=}\NormalTok{cb_palette}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{(}
     \DataTypeTok{name=}\StringTok{"Generation first solution evolved"}\NormalTok{,}
@@ -6118,7 +6133,7 @@ Test for statistical difference between conditions using a Wilcoxon rank sum tes
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{print}\NormalTok{(}\KeywordTok{wilcox.test}\NormalTok{(}\DataTypeTok{formula=}\NormalTok{update}\OperatorTok{~}\NormalTok{condition, }\DataTypeTok{data=}\NormalTok{sol_data, }\DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{))}
+\KeywordTok{print}\NormalTok{(}\KeywordTok{wilcox.test}\NormalTok{(}\DataTypeTok{formula=}\NormalTok{update}\OperatorTok{~}\NormalTok{condition, }\DataTypeTok{data=}\NormalTok{sol_data, }\DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{paired=}\OtherTok{FALSE}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -6153,12 +6168,15 @@ How long (i.e., total number of instructions) are solutions?
 \StringTok{  }\KeywordTok{scale_color_discrete}\NormalTok{(}
     \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation-disabled (D)"}\NormalTok{, }\StringTok{"Regulation-enabled (E)"}\NormalTok{)}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation-off (OFF)"}\NormalTok{, }\StringTok{"Regulation-on (ON)"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_x_discrete}\NormalTok{(}
     \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"D"}\NormalTok{, }\StringTok{"E"}\NormalTok{)}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"OFF"}\NormalTok{, }\StringTok{"ON"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_color_brewer}\NormalTok{(}
+    \DataTypeTok{palette=}\NormalTok{cb_palette}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}
     \DataTypeTok{legend.position=}\StringTok{"bottom"}\NormalTok{,}
@@ -6166,6 +6184,11 @@ How long (i.e., total number of instructions) are solutions?
 \NormalTok{  )}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{verbatim}
+## Scale for 'colour' is already present. Adding another scale for 'colour',
+## which will replace the existing scale.
+\end{verbatim}
 
 \includegraphics{tag-based-regulation-supplemental_files/figure-latex/unnamed-chunk-101-1.pdf}
 
@@ -6187,25 +6210,32 @@ We used indpendent knockouts of tag-based genetic regulation and global memory b
     \DataTypeTok{position=}\KeywordTok{position_fill}\NormalTok{(}\DataTypeTok{vjust=}\FloatTok{0.05}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"% of Solutions"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_fill_discrete}\NormalTok{(}
+\StringTok{  }\KeywordTok{scale_fill_brewer}\NormalTok{(}
     \DataTypeTok{name=}\StringTok{"Strategy:"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}
-      \StringTok{"use regulation"}\NormalTok{,}
       \StringTok{"use memory"}\NormalTok{,}
+      \StringTok{"use regulation"}\NormalTok{,}
+      \StringTok{"use neither"}\NormalTok{,}
+      \StringTok{"use both"}
+\NormalTok{    ),}
+    \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}
+      \StringTok{"use memory"}\NormalTok{,}
+      \StringTok{"use regulation"}\NormalTok{,}
       \StringTok{"use neither"}\NormalTok{,}
       \StringTok{"use both"}
 \NormalTok{    ),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}
-      \StringTok{"Use regulation (only)"}\NormalTok{,}
-      \StringTok{"Use global memory (only)"}\NormalTok{,}
-      \StringTok{"Use neither"}\NormalTok{,}
-      \StringTok{"Use both"}
-\NormalTok{    )}
+      \StringTok{"Memory (only)"}\NormalTok{,}
+      \StringTok{"Regulation (only)"}\NormalTok{,}
+      \StringTok{"Neither"}\NormalTok{,}
+      \StringTok{"Both"}
+\NormalTok{    ),}
+    \DataTypeTok{palette=}\NormalTok{cb_palette}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_x_discrete}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"Condition"}\NormalTok{,}
+    \DataTypeTok{name=}\StringTok{"Regulation"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"OFF"}\NormalTok{, }\StringTok{"ON"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"bottom"}\NormalTok{)}
 \end{Highlighting}
@@ -6272,6 +6302,9 @@ Next, let's look at edges by type.
     \DataTypeTok{limits=}\KeywordTok{c}\NormalTok{(}\StringTok{"repressed_edges_cnt"}\NormalTok{, }\StringTok{"promoted_edges_cnt"}\NormalTok{),}
     \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Repressing edges"}\NormalTok{, }\StringTok{"Promoting edges"}\NormalTok{)}
 \NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_color_brewer}\NormalTok{(}
+    \DataTypeTok{palette=}\NormalTok{cb_palette}
+\NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}
     \DataTypeTok{legend.position=}\StringTok{"none"}\NormalTok{,}
     \DataTypeTok{legend.text=}\KeywordTok{element_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{9}\NormalTok{),}
@@ -6322,22 +6355,22 @@ Test for a statistical difference between edge types using a wilcoxon rank sum t
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{print}\NormalTok{(}\KeywordTok{wilcox.test}\NormalTok{(}\DataTypeTok{formula=}\NormalTok{reg_edges_cnt }\OperatorTok{~}\StringTok{ }\NormalTok{reg_edge_type, }\DataTypeTok{data=}\NormalTok{melted_network_data, }\DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{))}
+\KeywordTok{print}\NormalTok{(}\KeywordTok{wilcox.test}\NormalTok{(}\DataTypeTok{formula=}\NormalTok{reg_edges_cnt }\OperatorTok{~}\StringTok{ }\NormalTok{reg_edge_type, }\DataTypeTok{data=}\NormalTok{melted_network_data, }\DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{, }\DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{paired=}\OtherTok{TRUE}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
 ## 
-##  Wilcoxon rank sum test with continuity correction
+##  Wilcoxon signed rank test with continuity correction
 ## 
 ## data:  reg_edges_cnt by reg_edge_type
-## W = 4411, p-value = 0.4535
+## V = 1550.5, p-value = 0.02192
 ## alternative hypothesis: true location shift is not equal to 0
 ## 95 percent confidence interval:
-##  -7.999975  3.000061
+##  -4.000025 -0.499968
 ## sample estimates:
-## difference in location 
-##              -1.999985
+## (pseudo)median 
+##      -2.000018
 \end{verbatim}
 
 \hypertarget{program-instruction-execution-traces-3}{%
@@ -6357,8 +6390,12 @@ How many time steps do successful programs take to solve the boolean calculator 
 \StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_x_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Regulation"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"OFF"}\NormalTok{, }\StringTok{"ON"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_color_brewer}\NormalTok{(}
+    \DataTypeTok{palette=}\NormalTok{cb_palette}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}
     \DataTypeTok{legend.position=}\StringTok{"none"}
@@ -6377,7 +6414,9 @@ Test for significant difference between conditions using Wilcoxon rank sum test:
     \DataTypeTok{formula=}\NormalTok{total_execution_time}\OperatorTok{~}\NormalTok{condition,}
     \DataTypeTok{data=}\KeywordTok{filter}\NormalTok{(solutions_inst_exec_data),}
     \DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{,}
-    \DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{)}
+    \DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{,}
+    \DataTypeTok{paired=}\OtherTok{FALSE}
+\NormalTok{  )}
 \NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -6408,8 +6447,12 @@ We're primarily interested in the proportion of control flow instructions, so le
 \StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{alpha=}\FloatTok{0.2}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_x_discrete}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Regulation"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{disabled"}\NormalTok{, }\StringTok{"Regulation-}\CharTok{\textbackslash{}n}\StringTok{enabled"}\NormalTok{)}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"OFF"}\NormalTok{, }\StringTok{"ON"}\NormalTok{)}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_color_brewer}\NormalTok{(}
+    \DataTypeTok{palette=}\NormalTok{cb_palette}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Proportion of executed flow control instructions"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}
@@ -6430,7 +6473,9 @@ Test for significant difference between conditions using a Wilcoxon rank sum tes
     \DataTypeTok{formula=}\NormalTok{control_flow_inst_prop}\OperatorTok{~}\NormalTok{condition,}
     \DataTypeTok{data=}\KeywordTok{filter}\NormalTok{(solutions_inst_exec_data),}
     \DataTypeTok{exact=}\OtherTok{FALSE}\NormalTok{,}
-    \DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{)}
+    \DataTypeTok{conf.int=}\OtherTok{TRUE}\NormalTok{,}
+    \DataTypeTok{paired=}\OtherTok{FALSE}
+\NormalTok{  )}
 \NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -6471,10 +6516,11 @@ In case you're curious, here's all categories of instructions:
 
 \KeywordTok{ggplot}\NormalTok{( melted, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{inst_type, }\DataTypeTok{y=}\NormalTok{inst_type_prop, }\DataTypeTok{color=}\NormalTok{condition) ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_color_discrete}\NormalTok{(}
-    \DataTypeTok{name=}\StringTok{"Condition:"}\NormalTok{,}
+\StringTok{  }\KeywordTok{scale_color_brewer}\NormalTok{(}
+    \DataTypeTok{name=}\StringTok{"Regulation:"}\NormalTok{,}
     \DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\StringTok{"memory"}\NormalTok{, }\StringTok{"both"}\NormalTok{),}
-    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"Regulation-disabled"}\NormalTok{, }\StringTok{"Regulation-enabled"}\NormalTok{)}
+    \DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"OFF"}\NormalTok{, }\StringTok{"ON"}\NormalTok{),}
+    \DataTypeTok{palette=}\NormalTok{cb_palette}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Instruction type"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Proportion of instructions in execution trace"}\NormalTok{) }\OperatorTok{+}

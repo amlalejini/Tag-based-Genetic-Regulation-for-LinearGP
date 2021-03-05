@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 10 Indpendent-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
+  <title>Chapter 10 Independent-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
   <meta name="description" content="Supplemental material" />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 10 Indpendent-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta property="og:title" content="Chapter 10 Independent-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="amlalejini/Tag-based-Genetic-Regulation-for-LinearGP" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 10 Indpendent-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta name="twitter:title" content="Chapter 10 Independent-signal problem analysis | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   
   <meta name="twitter:description" content="Supplemental material" />
   
@@ -233,13 +233,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="9.7.3" data-path="boolean-calculator-problem-prefix-notation.html"><a href="boolean-calculator-problem-prefix-notation.html#evolved-regulatory-network-2"><i class="fa fa-check"></i><b>9.7.3</b> Evolved regulatory network</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="10" data-path="indpendent-signal-problem-analysis.html"><a href="indpendent-signal-problem-analysis.html"><i class="fa fa-check"></i><b>10</b> Indpendent-signal problem analysis</a><ul>
-<li class="chapter" data-level="10.1" data-path="indpendent-signal-problem-analysis.html"><a href="indpendent-signal-problem-analysis.html#overview-3"><i class="fa fa-check"></i><b>10.1</b> Overview</a></li>
-<li class="chapter" data-level="10.2" data-path="indpendent-signal-problem-analysis.html"><a href="indpendent-signal-problem-analysis.html#analysis-dependencies-4"><i class="fa fa-check"></i><b>10.2</b> Analysis Dependencies</a></li>
-<li class="chapter" data-level="10.3" data-path="indpendent-signal-problem-analysis.html"><a href="indpendent-signal-problem-analysis.html#setup-3"><i class="fa fa-check"></i><b>10.3</b> Setup</a></li>
-<li class="chapter" data-level="10.4" data-path="indpendent-signal-problem-analysis.html"><a href="indpendent-signal-problem-analysis.html#does-regulation-hinder-the-evolution-of-successful-genotypes"><i class="fa fa-check"></i><b>10.4</b> Does regulation hinder the evolution of successful genotypes?</a><ul>
-<li class="chapter" data-level="10.4.1" data-path="indpendent-signal-problem-analysis.html"><a href="indpendent-signal-problem-analysis.html#does-access-to-regulation-slow-adaptation"><i class="fa fa-check"></i><b>10.4.1</b> Does access to regulation slow adaptation?</a></li>
-<li class="chapter" data-level="10.4.2" data-path="indpendent-signal-problem-analysis.html"><a href="indpendent-signal-problem-analysis.html#do-they-generalize"><i class="fa fa-check"></i><b>10.4.2</b> Do they generalize?</a></li>
+<li class="chapter" data-level="10" data-path="independent-signal-problem-analysis.html"><a href="independent-signal-problem-analysis.html"><i class="fa fa-check"></i><b>10</b> Independent-signal problem analysis</a><ul>
+<li class="chapter" data-level="10.1" data-path="independent-signal-problem-analysis.html"><a href="independent-signal-problem-analysis.html#overview-3"><i class="fa fa-check"></i><b>10.1</b> Overview</a></li>
+<li class="chapter" data-level="10.2" data-path="independent-signal-problem-analysis.html"><a href="independent-signal-problem-analysis.html#analysis-dependencies-4"><i class="fa fa-check"></i><b>10.2</b> Analysis Dependencies</a></li>
+<li class="chapter" data-level="10.3" data-path="independent-signal-problem-analysis.html"><a href="independent-signal-problem-analysis.html#setup-3"><i class="fa fa-check"></i><b>10.3</b> Setup</a></li>
+<li class="chapter" data-level="10.4" data-path="independent-signal-problem-analysis.html"><a href="independent-signal-problem-analysis.html#does-regulation-hinder-the-evolution-of-successful-genotypes"><i class="fa fa-check"></i><b>10.4</b> Does regulation hinder the evolution of successful genotypes?</a><ul>
+<li class="chapter" data-level="10.4.1" data-path="independent-signal-problem-analysis.html"><a href="independent-signal-problem-analysis.html#does-access-to-regulation-slow-adaptation"><i class="fa fa-check"></i><b>10.4.1</b> Does access to regulation slow adaptation?</a></li>
+<li class="chapter" data-level="10.4.2" data-path="independent-signal-problem-analysis.html"><a href="independent-signal-problem-analysis.html#do-they-generalize"><i class="fa fa-check"></i><b>10.4.2</b> Do they generalize?</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="11" data-path="boolean-calculator-problem-postfix-notation.html"><a href="boolean-calculator-problem-postfix-notation.html"><i class="fa fa-check"></i><b>11</b> Boolean calculator problem (postfix notation)</a><ul>
@@ -287,8 +287,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="indpendent-signal-problem-analysis" class="section level1">
-<h1><span class="header-section-number">Chapter 10</span> Indpendent-signal problem analysis</h1>
+<div id="independent-signal-problem-analysis" class="section level1">
+<h1><span class="header-section-number">Chapter 10</span> Independent-signal problem analysis</h1>
 <p>Here, we give an overview of the independent-signal diagnostic problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
 The raw data can be found on the OSF project associated with this work <span class="citation">(Lalejini, Moreno, and Ofria <a href="#ref-Lalejini_Moreno_Ofria_Data_2020">2020</a>)</span>.</p>
