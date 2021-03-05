@@ -16,7 +16,6 @@ description: "Supplemental material"
 
 This is the supplemental material for our work, ['Tag-based Genetic Regulation for Genetic Programming'](https://arxiv.org/abs/2012.09229).
 This is not intended as a stand-alone document, but as a companion to our paper.
-<!-- todo - link to paper -->
 
 ## About our supplemental material
 
@@ -30,6 +29,7 @@ Our supplemental material includes the following:
 - Data availability (Section \@ref(data-availability))
 - Step-by-step guide to compiling and running our experiments (Section \@ref(compile-and-run-experiments-locally))
 - More details on the SignalGP representation used in this work (Section \@ref(signalgp-representation))
+- A formal definition of the Streak metric used to quantify tag similarity in this work (Section \@ref(streak-metric-for-tag-based-referencing))
 - Visualizations of the exponential regulator used in this work (Section \@ref(exponential-regulator))
 - Fully-detailed analysis scripts for each experiment (including source code)
   - Signal-counting problem analysis (Section \@ref(signal-counting-problem-analysis))
