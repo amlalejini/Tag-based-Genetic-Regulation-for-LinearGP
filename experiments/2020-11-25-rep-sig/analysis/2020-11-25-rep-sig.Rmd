@@ -1,6 +1,6 @@
-# Repeated-signal problem analysis
+# Signal-counting problem analysis
 
-Here, we give an overview of the repeated-signal diagnostic problem, and we provide our data analyses for related experiments.
+Here, we give an overview of the signal-counting diagnostic problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
 The raw data can be found on the OSF project associated with this work [@Lalejini_Moreno_Ofria_Data_2020].
 
@@ -20,16 +20,22 @@ env_complexities <- c(2, 4, 8, 16)
 alpha <- 0.05
 correction_method <- "bonferroni"
 
+# Settings for visualization
+cb_palette <- "Set2"
+
 # Relative location of data.
 working_directory <- "experiments/2020-11-25-rep-sig/analysis/" # << For bookdown
 # working_directory <- "./"                                     # << For local analysis
+
+# Create directory to dump plots
+dir.create(paste0(working_directory, "imgs"), showWarnings=FALSE)
 ```
 
-The repeated-signal problem requires programs to output the appropriate (distinct) response to a single environmental signal each of the $K$ times the signal is repeated.
+The signal-counting problem requires programs to output the appropriate (distinct) response to a single environmental signal each of the $K$ times the signal is repeated.
 Programs output responses by executing one of $K$ response instructions.
 For example, if a program receives two signals from the environment during evaluation (i.e., $K=2$), the program should execute `Response-1` after the first signal and `Response-2` after the second signal.
 
-![](`r paste0(working_directory, "../../../media/repeated-signal-task.png")`)
+![](`r paste0(working_directory, "../../../media/signal-counting-task.png")`)
 
 We afford programs `r time_steps` time steps to respond to each environmental signal.
 Once the allotted time expires or the program executes any response, the program's threads of execution are reset, resulting in a loss of all thread-local memory; only the contents of the global memory buffer and each program module's regulatory state persist.
@@ -48,6 +54,7 @@ library(tidyverse)
 library(reshape2)
 library(cowplot)
 library(viridis)
+library(RColorBrewer)
 library(igraph)
 
 source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
@@ -222,11 +229,11 @@ theme_set(theme_cowplot())
 
 ## Problem-solving success
 
-We expected populations with access to genetic regulation to be more successful on the repeated-signal task than those evolved without access to genetic regulation.
+We expected populations with access to genetic regulation to be more successful on the signal-counting task than those evolved without access to genetic regulation.
 Further, we expected the success differential to increase with problem difficulty.
 
 We can look at
-(1) the number of successful replicates (i.e., replicates in which a program capable of perfectly solving the repeated signal task evolved) per condition
+(1) the number of successful replicates (i.e., replicates in which a program capable of perfectly solving the signal-counting task evolved) per condition
 and (2) the scores of the highest-fitness program evolved in each replicate.
 
 ### Number of successful replicates by condition
@@ -248,15 +255,16 @@ ggplot( sol_data, aes(x=condition, fill=condition) ) +
     breaks=seq(0, replicates, 50),
     limits=c(0, replicates+2)
   ) +
-  scale_fill_discrete(
+  scale_fill_brewer(
     name="Condition:",
     limits=c("memory", "both"),
-    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
   ) +
   scale_x_discrete(
     name="Condition",
     limits=c("memory", "both"),
-    labels=c("D", "E")
+    labels=c("OFF", "ON")
   ) +
   facet_wrap(
     ~ NUM_SIGNAL_RESPONSES,
@@ -269,13 +277,13 @@ ggplot( sol_data, aes(x=condition, fill=condition) ) +
     axis.title.x=element_blank()
   ) +
   ggsave(
-    paste0(working_directory, "imgs/repeated-signal-solultion-cnts.png"),
+    paste0(working_directory, "imgs/signal-counting-solultion-cnts.png"),
     width=8,
     height=4
   )
 ```
 
-We confirmed that each difficulty level of the repeated-signal problem is solvable without regulation using [hand-coded SignalGP programs](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/documents/handcoded-examples.md).
+We confirmed that each difficulty level of the signal-counting problem is solvable without regulation using [hand-coded SignalGP programs](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/documents/handcoded-examples.md).
 
 We use a Fisher's exact test to determine if there are significant differences (p < `r alpha`) between the numbers of regulation-enabled versus regulation-disabled solutions for each problem difficulty.
 
@@ -322,15 +330,16 @@ ggplot( max_fit_org_data, aes(x=condition, y=score, color=condition) ) +
   geom_boxplot() +
   geom_jitter(alpha=0.2) +
   ylab("Score (# correct responses)") +
-  scale_color_discrete(
-    name="Condition",
-    breaks=c("memory", "both"),
-    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+  scale_color_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
   ) +
   scale_x_discrete(
     name="Condition",
-    breaks=c("memory", "both"),
-    labels=c("D", "E")
+    limits=c("memory", "both"),
+    labels=c("OFF", "ON")
   ) +
   facet_wrap(
     ~ NUM_SIGNAL_RESPONSES,
@@ -343,7 +352,7 @@ ggplot( max_fit_org_data, aes(x=condition, y=score, color=condition) ) +
   ) +
   ggtitle("Task Scores") +
   ggsave(
-    paste0(working_directory, "imgs/repeated-signal-scores.png"),
+    paste0(working_directory, "imgs/signal-counting-scores.png"),
     width=16,
     height=8
   )
@@ -388,14 +397,26 @@ ggplot( ) +
     outlier.shape = NA,
     alpha = 0.5
   ) +
+  scale_fill_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
+  ) +
+  scale_color_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
+  ) +
   scale_x_discrete(
-    name="Condition",
-    breaks=c("memory", "both"),
-    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+    name="Regulation",
+    limits=c("memory", "both"),
+    labels=c("OFF", "ON")
   ) +
   scale_y_continuous(
     name="Generation first solution evolved \n(log scale)",
-    limits=c(0, 100000),
+    limits=c(-1, 200000),
     breaks=c(0, 10, 100, 1000, 10000, 100000),
     labels=c("0", "10", "100", "1000", "10000", "Unsolved"),
     trans="pseudo_log"
@@ -416,7 +437,7 @@ ggplot( ) +
   guides(fill = FALSE) +
   guides(color = FALSE) +
   ggsave(
-    paste0(working_directory, "./imgs/repeated-signal-solve-time-cloud.pdf"),
+    paste0(working_directory, "./imgs/signal-counting-solve-time-cloud.pdf"),
     width=8,
     height=5
   )
@@ -432,7 +453,7 @@ env_2_sol_data <- filter(
   NUM_SIGNAL_RESPONSES==2
 )
 
-print(wilcox.test(formula=update~condition, data=env_2_sol_data, exact=FALSE, conf.int=TRUE))
+print(wilcox.test(formula=update~condition, data=env_2_sol_data, exact=FALSE, conf.int=TRUE, paired=FALSE))
 ```
 
 ### Four-signal task - statistical analysis
@@ -445,7 +466,7 @@ env_4_sol_data <- filter(
   NUM_SIGNAL_RESPONSES==4
 )
 
-print(wilcox.test(formula=update~condition, data=env_4_sol_data, exact=FALSE, conf.int=TRUE))
+print(wilcox.test(formula=update~condition, data=env_4_sol_data, exact=FALSE, conf.int=TRUE, paired=FALSE))
 ```
 
 ## Teasing apart evolved strategies
@@ -465,15 +486,22 @@ ggplot( sol_data, aes(x=condition, y=num_instructions, color=condition) ) +
   geom_boxplot() +
   geom_jitter(alpha=0.2) +
   ylab("Number of instructions in genome") +
-  scale_color_discrete(
-    name="Condition",
-    breaks=c("memory", "both"),
-    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+  scale_fill_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
+  ) +
+  scale_color_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
   ) +
   scale_x_discrete(
-    name="Condition",
-    breaks=c("memory", "both"),
-    labels=c("D", "E")
+    name="Regulation",
+    limits=c("memory", "both"),
+    labels=c("OFF", "ON")
   ) +
   facet_wrap(
     ~ NUM_SIGNAL_RESPONSES,
@@ -503,7 +531,7 @@ ggplot( data=sol_data, mapping=aes(x=NUM_SIGNAL_RESPONSES, fill=strategy) ) +
   ) +
   ylab("# of Solutions") +
   xlab("Environment Complexity") +
-  scale_fill_discrete(
+  scale_fill_brewer(
     name="Strategy:",
     breaks=c("use regulation",
              "use memory",
@@ -512,9 +540,11 @@ ggplot( data=sol_data, mapping=aes(x=NUM_SIGNAL_RESPONSES, fill=strategy) ) +
     labels=c("Use regulation (only)",
              "Use global memory (only)",
              "Use neither",
-             "Use both")
+             "Use both"),
+    palette=cb_palette
     ) +
   facet_wrap(~condition)
+
 ```
 
 As fun donuts(?!):
@@ -554,14 +584,16 @@ ggplot( donut_data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category) ) +
   geom_label( x=4, aes(y=labelPosition, label=label), size=4, show.legend = FALSE) +
   coord_polar(theta="y") +
   xlim(c(-1, 4)) +
-  scale_fill_discrete(
+  scale_fill_brewer(
     name="Strategy:",
     limits=c("regulation",
              "memory",
              "both"),
     labels=c("Use regulation (only)",
              "Use global memory (only)",
-             "Use both")) +
+             "Use both"),
+    palette=cb_palette
+  ) +
   theme_void() +
   theme(legend.position = "bottom") +
   facet_wrap(
@@ -572,13 +604,13 @@ ggplot( donut_data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category) ) +
 ```
 
 We can see that in conditions where programs have access to regulation, evolved solutions generally rely on regulation to adjust their responses to input signals.
-In conditions where memory is the only mechanism for solving the repeated-signal task, we see that all evolved solutions rely exclusively on global memory access for adjusting responses to input signals.
+In conditions where memory is the only mechanism for solving the signal-counting task, we see that all evolved solutions rely exclusively on global memory access for adjusting responses to input signals.
 
 ### What forms of genetic regulation do evolved programs rely on?
 
 We used two approaches to tease apart forms of genetic regulation that evolved SignalGP programs rely on:
 
-1. We traced program execution step-by-step (including each function's regulatory state) during evaluation on the repeated signal task and extracted regulatory interactions between executing functions as a directed graph.
+1. We traced program execution step-by-step (including each function's regulatory state) during evaluation on the signal-counting task and extracted regulatory interactions between executing functions as a directed graph.
    We draw a directed edge from function A to function B if B's regulatory state changes while A is executing.
    We label each edge as up- or down-regulation. The distribution of edge types in these graphs hints at what strategy the program is using.
 2. We independently knockout up-regulation and down-regulation and record the fitness of knockout-variants.
@@ -589,7 +621,7 @@ as the gene regulation networks may include neutral and non-adaptive regulatory 
 
 #### Gene regulatory network edges
 
-Let's only look at programs that solved the repeated-signal task and rely on regulation.
+Let's only look at programs that solved the signal-counting task and rely on regulation.
 
 First, total edges as a function of problem difficulty.
 
@@ -612,7 +644,7 @@ ggplot( filter(reg_network_data, run_id %in% relies_on_reg ), aes(x=NUM_SIGNAL_R
     axis.title.x=element_text(size=12)
   ) +
   ggsave(
-    paste0(working_directory, "imgs/repeated-signal-regulation-edges.png"),
+    paste0(working_directory, "imgs/signal-counting-regulation-edges.png"),
     width=4,
     height=3
   )
@@ -634,10 +666,11 @@ ggplot( melted_network_data, aes(x=NUM_SIGNAL_RESPONSES, y=reg_edges_cnt, color=
   geom_boxplot() +
   xlab("Environmental Complexity") +
   ylab("# Edges") +
-  scale_color_discrete(
+  scale_color_brewer(
     name="Edge type:",
     limits=c("repressed_edges_cnt", "promoted_edges_cnt"),
-    labels=c("Repressing edges", "Promoting edges")
+    labels=c("Repressing edges", "Promoting edges"),
+    palette=cb_palette
   ) +
   theme(
     legend.position="bottom",
@@ -646,7 +679,7 @@ ggplot( melted_network_data, aes(x=NUM_SIGNAL_RESPONSES, y=reg_edges_cnt, color=
     axis.title.x=element_text(size=12)
   ) +
   ggsave(
-    paste0(working_directory, "imgs/repeated-signal-regulation-edge-types.png"),
+    paste0(working_directory, "imgs/signal-counting-regulation-edge-types.png"),
     width=4,
     height=3
   )
@@ -749,6 +782,9 @@ ggplot(relies_on_reg_orgs, aes(x=regulation_type_usage, fill=regulation_type_usa
       "Both"
     )
   ) +
+  scale_fill_brewer(
+    palette=cb_palette
+  ) +
   facet_wrap(~NUM_SIGNAL_RESPONSES) +
   theme(legend.position="none") +
   ggtitle("Regulation usage by environment") +
@@ -787,6 +823,9 @@ ggplot(relies_on_reg_orgs, aes(x=regulation_type_usage, fill=regulation_type_usa
       "Both"
     )
   ) +
+  scale_fill_brewer(
+    palette=cb_palette
+  ) +
   theme(legend.position="none") +
   ggtitle("Regulation usage across all environments") +
   ggsave(
@@ -799,7 +838,7 @@ ggplot(relies_on_reg_orgs, aes(x=regulation_type_usage, fill=regulation_type_usa
 
 ### Are evolved programs relying on stochastic strategies?
 
-To confirm that evolved programs are not relying on stochastic approaches to solve the repeated signal task,
+To confirm that evolved programs are not relying on stochastic approaches to solve the signal-counting task,
 we tested the most fit individual from each replicate at the end of each run three times.
 If program's behavior was not identical across each of the three trials, we labeled is as using a stochastic strategy.
 
@@ -825,16 +864,14 @@ ggplot( max_fit_org_data, aes(x=condition, fill=stochastic)) +
   )
 ```
 
-We see no evidence of evolved programs relying on stochastic strategies to solve the repeated signal task: all programs responded consistently across trials.
+We see no evidence of evolved programs relying on stochastic strategies to solve the signal-counting task: all programs responded consistently across trials.
 Note, this is unsurprising, as we did not give programs access to instructions capable of generating random values and ensured that the version of SignalGP virtual hardware used in this work operated in a deterministic manner.
-
 
 ### Program instruction execution traces
 
-
 #### Execution time
 
-How many time steps do evolved programs use to solve the repeated-signal task?
+How many time steps do evolved programs use to solve the signal-counting task?
 
 ```{r}
 # only want solutions
@@ -843,14 +880,15 @@ solutions_inst_exec_data <- filter(inst_exec_data, SEED %in% sol_data$SEED)
 ggplot( solutions_inst_exec_data, aes(x=condition, y=total_execution_time, color=condition) ) +
   geom_boxplot() +
   geom_jitter(alpha=0.2) +
-  scale_color_discrete(
+  scale_color_brewer(
     name="Condition: ",
     breaks=c("memory", "both"),
-    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
   ) +
   scale_x_discrete(
     breaks=c("memory", "both"),
-    labels=c("D", "E")
+    labels=c("OFF", "ON")
   ) +
   facet_wrap(
     ~ NUM_SIGNAL_RESPONSES,
@@ -871,7 +909,9 @@ print(
     formula=total_execution_time~condition,
     data=filter(solutions_inst_exec_data, NUM_SIGNAL_RESPONSES==2),
     exact=FALSE,
-    conf.int=TRUE)
+    conf.int=TRUE,
+    paired=FALSE
+  )
 )
 ```
 
@@ -883,7 +923,9 @@ print(
     formula=total_execution_time~condition,
     data=filter(solutions_inst_exec_data, NUM_SIGNAL_RESPONSES==4),
     exact=FALSE,
-    conf.int=TRUE)
+    conf.int=TRUE,
+    paired=FALSE
+  )
 )
 ```
 
@@ -896,14 +938,15 @@ For this work, we are primarily interested in the proportions of control flow in
 ggplot( solutions_inst_exec_data, aes(x=condition, y=control_flow_inst_prop, color=condition) ) +
   geom_boxplot() +
   geom_jitter(alpha=0.2) +
-  scale_color_discrete(
+  scale_color_brewer(
     name="Condition: ",
     breaks=c("memory", "both"),
-    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
   ) +
   scale_x_discrete(
     breaks=c("memory", "both"),
-    labels=c("D", "E")
+    labels=c("OFF", "ON")
   ) +
   ylab("Proportion of executed flow control instructions") +
   facet_wrap(
@@ -925,7 +968,9 @@ print(
     formula=control_flow_inst_prop~condition,
     data=filter(solutions_inst_exec_data, NUM_SIGNAL_RESPONSES==2),
     exact=FALSE,
-    conf.int=TRUE)
+    conf.int=TRUE,
+    paired=FALSE
+  )
 )
 ```
 
@@ -937,7 +982,9 @@ print(
     formula=control_flow_inst_prop~condition,
     data=filter(solutions_inst_exec_data, NUM_SIGNAL_RESPONSES==4),
     exact=FALSE,
-    conf.int=TRUE)
+    conf.int=TRUE,
+    paired=FALSE
+  )
 )
 ```
 
@@ -962,10 +1009,11 @@ melted <- melt(
 
 ggplot( melted, aes(x=inst_type, y=inst_type_prop, color=condition) ) +
   geom_boxplot() +
-  scale_color_discrete(
+  scale_color_brewer(
     name="Condition: ",
     breaks=c("memory", "both"),
-    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
   ) +
   xlab("Instruction type") +
   ylab("Proportion of instructions in execution trace") +
@@ -982,7 +1030,7 @@ ggplot( melted, aes(x=inst_type, y=inst_type_prop, color=condition) ) +
 
 ## Case study: visualizing regulation in an evolved program
 
-Let's take a closer look at the behavioral/regulatory profile of a representative program that solves the four-signal version of the repeated signal task.
+Let's take a closer look at the behavioral/regulatory profile of a representative program that solves the four-signal version of the signal-counting task.
 
 ```{r}
 trace_id <- 20203
