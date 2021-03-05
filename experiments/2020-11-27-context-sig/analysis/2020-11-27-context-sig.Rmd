@@ -21,6 +21,11 @@ alpha <- 0.05
 # Relative location of data.
 working_directory <- "experiments/2020-11-27-context-sig/analysis/" # << For bookdown
 # working_directory <- "./"                                         # << For local analysis
+
+# Settings for visualization
+cb_palette <- "Set2"
+# Create directory to dump plots
+dir.create(paste0(working_directory, "imgs"), showWarnings=FALSE)
 ```
 
 In the contextual-signal problem, programs must respond appropriately to a sequence of two input signals where the first, ''contextual'', signal dictates how a program should respond to each possible second, ''response'', signal.
@@ -43,6 +48,7 @@ library(tidyverse)
 library(cowplot)
 library(viridis)
 library(reshape2)
+library(RColorBrewer)
 library(igraph)
 source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
 ```
@@ -195,10 +201,16 @@ ggplot(filter(sol_data, task=="S4"), aes(x=condition, fill=condition)) +
     position=position_dodge(0.9),
     vjust=0
   ) +
+  scale_fill_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
+  ) +
   scale_x_discrete(
-    name="Condition",
-    breaks=c("memory","both"),
-    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+    name="Regulation",
+    limits=c("memory", "both"),
+    labels=c("OFF", "ON")
   ) +
   ylab("Successful replciates") +
   theme(legend.position = "none") +
@@ -272,10 +284,22 @@ ggplot( ) +
     outlier.shape = NA,
     alpha = 0.5
   ) +
+  scale_fill_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
+  ) +
+  scale_color_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
+  ) +
   scale_x_discrete(
-    name="Condition",
-    breaks=c("memory", "both"),
-    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+    name="Regulation",
+    limits=c("memory", "both"),
+    labels=c("OFF", "ON")
   ) +
   scale_y_continuous(
     name="Generation first solution evolved",
@@ -296,7 +320,7 @@ ggplot( ) +
 Test for statistical difference between conditions using a Wilcoxon rank sum test.
 
 ```{r}
-print(wilcox.test(formula=update~condition, data=filter(sol_data, task=="S4"), exact=FALSE, conf.int=TRUE))
+print(wilcox.test(formula=update~condition, data=filter(sol_data, task=="S4"), exact=FALSE, conf.int=TRUE, paired=FALSE))
 ```
 
 ## Evolved strategies
@@ -310,15 +334,22 @@ ggplot( sol_data, aes(x=condition, y=num_instructions, color=condition) ) +
   geom_boxplot() +
   geom_jitter(alpha=0.2) +
   ylab("Number of instructions in genome") +
-  scale_color_discrete(
-    name="Condition",
-    breaks=c("memory", "both"),
-    labels=c("Regulation-disabled (D)", "Regulation-enabled (E)")
+  scale_fill_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
+  ) +
+  scale_color_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
   ) +
   scale_x_discrete(
-    name="Condition",
-    breaks=c("memory", "both"),
-    labels=c("D", "E")
+    name="Regulation",
+    limits=c("memory", "both"),
+    labels=c("OFF", "ON")
   ) +
   theme(
     legend.position="bottom",
@@ -342,25 +373,32 @@ ggplot( filter(sol_data, task=="S4"), mapping=aes(x=condition, fill=strategy) ) 
     position=position_fill(vjust=0.05)
   ) +
   ylab("% of Solutions") +
-  scale_fill_discrete(
+  scale_fill_brewer(
     name="Strategy:",
     breaks=c(
-      "use regulation",
       "use memory",
+      "use regulation",
+      "use neither",
+      "use both"
+    ),
+    limits=c(
+      "use memory",
+      "use regulation",
       "use neither",
       "use both"
     ),
     labels=c(
-      "Use regulation (only)",
       "Use global memory (only)",
+      "Use regulation (only)",
       "Use neither",
       "Use both"
-    )
+    ),
+    palette=cb_palette
   ) +
   scale_x_discrete(
-    name="Condition",
+    name="Regulation",
     breaks=c("memory", "both"),
-    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+    labels=c("OFF", "ON")
   ) +
   theme(legend.position = "bottom")
 ```
@@ -419,6 +457,9 @@ ggplot(filter(melted_network_data, task=="S4"), aes(x=reg_edge_type, y=reg_edges
     limits=c("repressed_edges_cnt", "promoted_edges_cnt"),
     labels=c("Repressing edges", "Promoting edges")
   ) +
+  scale_color_brewer(
+    palette=cb_palette
+  ) +
   theme(
     legend.position="none",
     legend.text=element_text(size=9),
@@ -449,7 +490,7 @@ print(
   )
 )
 
-print(wilcox.test(formula=reg_edges_cnt ~ reg_edge_type, data=filter(melted_network_data, task=="S4"), exact=FALSE, conf.int=TRUE))
+print(wilcox.test(formula=reg_edges_cnt ~ reg_edge_type, data=filter(melted_network_data, task=="S4"), exact=FALSE, conf.int=TRUE, paired=FALSE))
 
 ```
 
@@ -467,8 +508,12 @@ ggplot( solutions_inst_exec_data, aes(x=condition, y=total_execution_time, color
   geom_boxplot() +
   geom_jitter(alpha=0.2) +
   scale_x_discrete(
+    name="Regulation",
     breaks=c("memory", "both"),
-    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+    labels=c("OFF", "ON")
+  ) +
+  scale_color_brewer(
+    palette=cb_palette
   ) +
   theme(
     legend.position="none"
@@ -483,7 +528,9 @@ print(
     formula=total_execution_time~condition,
     data=filter(solutions_inst_exec_data),
     exact=FALSE,
-    conf.int=TRUE)
+    conf.int=TRUE,
+    paired=FALSE
+  )
 )
 ```
 
@@ -496,9 +543,16 @@ We're primarily interested in the proportion of control flow instructions, so le
 ggplot( solutions_inst_exec_data, aes(x=condition, y=control_flow_inst_prop, color=condition) ) +
   geom_boxplot() +
   geom_jitter(alpha=0.2) +
+  scale_color_brewer(
+    name="Condition:",
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
+  ) +
   scale_x_discrete(
-    breaks=c("memory", "both"),
-    labels=c("Regulation-\ndisabled", "Regulation-\nenabled")
+    name="Regulation",
+    limits=c("memory", "both"),
+    labels=c("OFF", "ON")
   ) +
   ylab("Proportion of executed flow control instructions") +
   theme(
@@ -515,7 +569,9 @@ print(
     formula=control_flow_inst_prop~condition,
     data=filter(solutions_inst_exec_data),
     exact=FALSE,
-    conf.int=TRUE)
+    conf.int=TRUE,
+    paired=FALSE
+  )
 )
 ```
 
@@ -540,10 +596,11 @@ melted <- melt(
 
 ggplot( melted, aes(x=inst_type, y=inst_type_prop, color=condition) ) +
   geom_boxplot() +
-  scale_color_discrete(
+  scale_color_brewer(
     name="Condition:",
-    breaks=c("memory", "both"),
-    labels=c("Regulation-disabled", "Regulation-enabled")
+    limits=c("memory", "both"),
+    labels=c("Regulation-off (OFF)", "Regulation-on (ON)"),
+    palette=cb_palette
   ) +
   xlab("Instruction type") +
   ylab("Proportion of instructions in execution trace") +
