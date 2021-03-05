@@ -2,7 +2,7 @@
 
 <!-- TOC -->
 
-- [Repeated Signal Task](#repeated-signal-task)
+- [Signal-counting Task](#signal-counting-task)
   - [Two-signal Task - memory-based solution](#two-signal-task---memory-based-solution)
   - [Four-signal Task - memory-based solution](#four-signal-task---memory-based-solution)
   - [Eight-signal Task - memory-based solution](#eight-signal-task---memory-based-solution)
@@ -12,10 +12,10 @@
 
 Hand-coded SignalGP programs, useful for task/intuition validation.
 
-## Repeated Signal Task
+## Signal-counting Task
 
 To validate that memory-based solutions are possible in our SignalGP representation, we handcoded memory-based
-solutions for each of two-signal, four-signal, eight-signal, and sixteen-signal repeated signal environments.
+solutions for each of two-signal, four-signal, eight-signal, and sixteen-signal versions of the signal-counting task.
 
 These solutions are most not the most efficient implementations.
 
