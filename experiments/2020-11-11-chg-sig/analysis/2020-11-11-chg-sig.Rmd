@@ -1,6 +1,6 @@
-# Changing-signal problem analysis
+# Indpendent-signal problem analysis
 
-Here, we give an overview of the changing-signal diagnostic problem, and we provide our data analyses for related experiments.
+Here, we give an overview of the independent-signal diagnostic problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
 The raw data can be found on the OSF project associated with this work [@Lalejini_Moreno_Ofria_Data_2020].
 
@@ -23,16 +23,21 @@ correction_method <- "bonferroni"
 # Relative location of data.
 working_directory <- "experiments/2020-11-11-chg-sig/analysis/" # << For bookdown
 # working_directory <- "./"                                     # << For local analysis
+
+# Settings for visualization
+cb_palette <- "Set2"
+# Create directory to dump plots
+dir.create(paste0(working_directory, "imgs"), showWarnings=FALSE)
 ```
 
-The changing-signal task requires programs to express a unique response for each of $K$ distinct environmental signals (i.e., each signal has a distinct tag); the figure below is given as an example.
+The independent-signal task requires programs to express a unique response for each of $K$ distinct environmental signals (i.e., each signal has a distinct tag); the figure below is given as an example.
 Because signals are distinct, programs do not need to alter their responses to particular signals over time.
 Instead, programs may 'hardware' each of the $K$ possible responses to the appropriate environmental signal.
 However, environmental signals are presented in a random order; thus, the correct _order_ of responses will vary and cannot be hardcoded.
-As in the repeated signal task, programs respond by executing one of $K$ response instructions.
-Otherwise, evaluation (and fitness assignment) on the changing-signal task mirrors that of the repeated signal task.
+As in the signal-counting task, programs respond by executing one of $K$ response instructions.
+Otherwise, evaluation (and fitness assignment) on the independent-signal task mirrors that of the signal-counting task.
 
-![](`r paste0(working_directory, "../../../media/changing-signal-task.png")`)
+![](`r paste0(working_directory, "../../../media/independent-signal-task.png")`)
 
 Requiring programs to express a distinct instruction in response to each environmental signal represents programs having to perform distinct behaviors.
 
@@ -42,7 +47,7 @@ _Only_ the contents of a program's global memory and each function's regulatory 
 The environment then produces the next signal (distinct from all previous signals) to which the program may respond.
 A program's fitness is equal to the number of correct responses expressed during evaluation.
 
-We evolved populations of `r population_size` SignalGP programs to solve the changing-signal task at $K=16$ (where $K$ denotes the number of environmental signals).
+We evolved populations of `r population_size` SignalGP programs to solve the independent-signal task at $K=16$ (where $K$ denotes the number of environmental signals).
 We evolved populations for `r generations` generations or until an program capable of achieving a perfect score during task evaluation (i.e., able to express the appropriate response to each of the $K$ signals) evolved.
 
 We ran `r replicates` replicate populations (each with a distinct random number seed) of each of the following experimental conditions:
@@ -63,6 +68,7 @@ Load all required R libraries.
 library(ggplot2)
 library(tidyverse)
 library(cowplot)
+library(RColorBrewer)
 library(viridis)
 source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
 ```
@@ -145,16 +151,19 @@ ggplot( sol_data, aes(x=condition, fill=condition) ) +
     vjust=0
   ) +
   scale_x_discrete(
-    name="Condition",
+    name="Regulation",
     breaks=c("memory","both"),
-    labels=c("Regulation-\ndisabled","Regulation-\nenabled")
+    labels=c("OFF","ON")
+  ) +
+  scale_fill_brewer(
+    palette=cb_palette
   ) +
   ylab("# successful replciates (/200)") +
   theme(legend.position = "none") +
   ggtitle("Successful replicates")
 ```
 
-Programs capable of achieving a perfect score on the changing-signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
+Programs capable of achieving a perfect score on the independent-signal task (for a given sequence of environment signals) evolve in all 200 replicates of each condition (i.e., with and without access to genetic regulation).
 These programs, however, do not necessarily generalize across all possible sequences of environmental signals.
 
 ### Does access to regulation slow adaptation?
@@ -179,9 +188,15 @@ ggplot( sol_data, aes(x=condition, y=update, fill=condition) ) +
     alpha = 0.5
   ) +
   scale_x_discrete(
-    name="Condition",
+    name="Regulation",
     breaks=c("memory", "both"),
-    labels=c("Regulation-\ndisabled","Regulation-\nenabled")
+    labels=c("OFF","ON")
+  ) +
+  scale_fill_brewer(
+    palette=cb_palette
+  ) +
+  scale_color_brewer(
+    palette=cb_palette
   ) +
   scale_y_continuous(
     name="Generation first solution evolved \n(log scale)",
@@ -189,7 +204,7 @@ ggplot( sol_data, aes(x=condition, y=update, fill=condition) ) +
   guides(fill = FALSE) +
   guides(color = FALSE)
 
-print(wilcox.test(formula=update~condition, data=sol_data, exact=FALSE, conf.int=TRUE))
+print(wilcox.test(formula=update~condition, data=sol_data, exact=FALSE, conf.int=TRUE, paired=FALSE))
 ```
 
 The difference in the number of generations before a solution arises is not significantly different.
@@ -231,10 +246,13 @@ ggplot( sol_cnts, aes(x=type, y=val, fill=type) ) +
       "reg_generalize_ko_reg"
       ),
     labels=c(
-      "Regulation-\ndisabled",
-      "Regulation-\nenabled",
-      "Regulation-\nenabled\n(reg. KO)"
+      "Regulation-OFF",
+      "Regulation-ON",
+      "Regulation-ON\n(reg. KO)"
     )
+  ) +
+  scale_fill_brewer(
+    palette=cb_palette
   ) +
   scale_y_continuous(
     name="Solutions that generalize",
