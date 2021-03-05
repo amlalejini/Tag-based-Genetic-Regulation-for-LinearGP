@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 3 Compile and run experiments locally | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
+  <title>Chapter 5 Streak metric for tag-based referencing | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming</title>
   <meta name="description" content="Supplemental material" />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 3 Compile and run experiments locally | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta property="og:title" content="Chapter 5 Streak metric for tag-based referencing | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="amlalejini/Tag-based-Genetic-Regulation-for-LinearGP" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 3 Compile and run experiments locally | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
+  <meta name="twitter:title" content="Chapter 5 Streak metric for tag-based referencing | Supplemental Material for Tag-based Genetic Regulation for Genetic Programming" />
   
   <meta name="twitter:description" content="Supplemental material" />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="data-availability.html"/>
-<link rel="next" href="signalgp-representation.html"/>
+<link rel="prev" href="signalgp-representation.html"/>
+<link rel="next" href="exponential-regulator.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -287,114 +287,54 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="compile-and-run-experiments-locally" class="section level1">
-<h1><span class="header-section-number">Chapter 3</span> Compile and run experiments locally</h1>
-<p>Here, we provide a brief guide to compiling and running our experiments.</p>
-<p>Please file an <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/issues">issue</a> if something is unclear or does not work.</p>
-<div id="docker" class="section level2">
-<h2><span class="header-section-number">3.1</span> Docker</h2>
-<p>On docker hub: <a href="https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp" class="uri">https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp</a></p>
-<pre><code>docker pull amlalejini/tag-based-genetic-regulation-for-gp</code></pre>
-<p>This will create a docker image with:</p>
-<ul>
-<li>all the requisite dependencies installed/downloaded</li>
-<li>all experiments compiled</li>
-<li>our raw data downloaded</li>
-<li>a build of our supplemental material (which will also run all of our analyses)</li>
-</ul>
-<p>To run the container interactively:</p>
-<pre><code>docker run -it --entrypoint bash amlalejini/tag-based-genetic-regulation-for-gp</code></pre>
-<p>You can exit the container at any point with <code>ctrl-d</code>.</p>
-<p>Inside the container, you should be at <code>/opt/Tag-based-Genetic-Regulation-for-LinearGP/</code>.
-If you <code>ls</code> you should see something like this (maybe not exactly):</p>
-<pre><code>Dockerfile                                                       documents
-Gemfile                                                          experiments
-LICENSE                                                          index.Rmd
-Makefile                                                         media
-README.md                                                        requirements.txt
-_bookdown.yml                                                    scripts
-_config.yml                                                      source
-_output.yml                                                      style.css
-alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp  _book
-bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp   supplemental.bib
-build_book.sh                                                    _bookdown_files
-build_exps.sh                                                    tail.Rmd
-chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp     tests</code></pre>
-<p>The important thing is that there should be three executables (with absurdly long names):</p>
-<ul>
-<li><code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run the independent-signal problem.</li>
-<li>To generate a default configuration file, <code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-<li><code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run the signal-counting problem.</li>
-<li>To generate a default configuration file, <code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-<li><code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run any of the boolean-logic calculator problems and the contextual-signal problem.</li>
-<li>To generate a default configuration file, <code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-</ul>
-<p>Find the exact configurations we used for our experiments here: <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments" class="uri">https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments</a></p>
-</div>
-<div id="manually" class="section level2">
-<h2><span class="header-section-number">3.2</span> Manually</h2>
-<p>This guide assumes an Ubuntu-flavored Linux operating system. These instructions <em>should</em> mostly work for MacOS; otherwise, we recommend using our Docker image or a virtual machine.</p>
-<p>Our experiments are implemented in C++, so you’ll need a modern C++ compiler capable of compiling C++17 code.</p>
-<p>E.g., I’m using:</p>
-<pre><code>g++ (Ubuntu 10.2.0-13ubuntu1) 10.2.0</code></pre>
-<div id="get-dependencies" class="section level3">
-<h3><span class="header-section-number">3.2.1</span> Get dependencies</h3>
-<p>First, make a directory were we can put this project and all of its dependencies.</p>
-<pre><code>mkdir workspace
-cd workspace</code></pre>
-<p>Next, clone this repository into your new directory.</p>
-<pre><code>git clone https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP.git</code></pre>
-<p>Our experiments depend on the Empirical and SignalGP libraries on GitHub.
-Inside the <code>workspace</code> directory, we’ll clone SignalGP and checkout the appropriate commit.</p>
-<pre><code>git clone https://github.com/amlalejini/SignalGP.git
-cd SignalGP
-git checkout 83d879cfdb6540862315dc454c1525ccd8054e65
-cd ..</code></pre>
-<p>Next, let’s get Empirical (also stick this in the <code>workspace</code> directory).</p>
-<pre><code>git clone https://github.com/amlalejini/Empirical.git
-cd Empirical
-git checkout e72dae6490dee5caf8e5ec04a634b483d2ad4293</code></pre>
-<p>We’re not quite done with Empirical. We need to grab all of Empirical’s dependencies. This will install <em>all</em> of Empirical’s dependencies, including those needed to build its documentation/tests.</p>
-<pre><code>make install-dependencies</code></pre>
-<p>OR, if you don’t want <em>all</em> of that, instead you could do:</p>
-<pre><code>git submodule init
-git submodule update</code></pre>
-<p>If you don’t have libssl-dev, you’ll also want to install that (some of the tag-matching metrics use cryptographic hash). E.g.,</p>
-<pre><code>sudo apt-get install libssl-dev</code></pre>
-<p>Now we should be good to compile the three executables that we used for our experiments. Inside <code>workspace/Tag-based-Genetic-Regulation-for-LinearGP/</code>:</p>
-<pre><code>./build_exps</code></pre>
-<p>This script just sets some environment variables (e.g., to define which experiment to compile, the tag-matching metric, etc.) and runs <code>make native</code>.</p>
-<p>To use a different compiler (than g++), you’ll need to change <code>CXX_nat</code> in the makefile.</p>
-<p>This should create three executables (with absurdly long names):</p>
-<ul>
-<li><code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run the independent-signal problem.</li>
-<li>To generate a default configuration file, <code>chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-<li><code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run the signal-counting problem.</li>
-<li>To generate a default configuration file, <code>alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-<li><code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp</code>
-<ul>
-<li>Use this to run any of the boolean-logic calculator problems and the contextual-signal problem.</li>
-<li>To generate a default configuration file, <code>bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen</code></li>
-</ul></li>
-</ul>
-<p>Find the exact configurations we used for our experiments here: <a href="https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments" class="uri">https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/experiments</a></p>
+<div id="streak-metric-for-tag-based-referencing" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Streak metric for tag-based referencing</h1>
+<p>For this work, we used the Streak metric to quantify the similarity between two tags when performing
+a tag-based reference.
+The Streak metric was originally proposed by <span class="citation">(Downing <a href="#ref-downing_intelligence_2015">2015</a>)</span>
+At a high-level, this metric measures similarity between two bit strings in terms of the relationship between the lengths of the longest contiguously-matching and longest contiguously-mismatching substrings.
+That is, we XOR the two bit strings and count the longest substring of all 0’s to find the longest contiguously-matching substring and the longest substring of all 1’s to find the longest contiguously-mismatching substring.
+Our implementation of the Streak metric can be found in the Empirical library <span class="citation">(Ofria et al. <a href="#ref-charles_ofria_2020_empirical">2020</a>)</span>.
+We provide a formal definition of the Streak metric below.</p>
+<div id="formal-definition" class="section level2">
+<h2><span class="header-section-number">5.1</span> Formal definition</h2>
+<p>Each tag was represented as an ordered, fixed-length bit string,</p>
+<p><span class="math display">\[ t = \langle t_0, t_1, t_2, \dots, t_{n-2}, t_{n-1} \rangle \]</span></p>
+<p>where</p>
+<p><span class="math display">\[ \forall i, t_i \in \{0, 1\}. \]</span></p>
+<p>We define the greatest contiguously-matching length of <span class="math inline">\(n\)</span>-long bitstrings <span class="math inline">\(t\)</span> and <span class="math inline">\(u\)</span> as follows,</p>
+<p><span class="math display">\[ m(t, u) = \max(\{i - j \forall i, j \in 0..n-1 \mid \forall q \in i..j, t_q = u_q \}) \]</span></p>
+<p>We define the greatest contiguously-mismatching length as follows,</p>
+<p><span class="math display">\[ n(t, u) = \max(\{i - j \forall i, j \in 0..n-1 \mid \forall q \in i..j, t_q \neq u_q \}) \]</span></p>
+<p>The streak metric <span class="math inline">\(S&#39;\)</span> with tags <span class="math inline">\(t\)</span> and <span class="math inline">\(u\)</span></p>
+<p><span class="math display">\[
+S&#39;(t, u)
+= \frac{ p(n(t,u)) }{p(m(t,u)) + p(n(t,u))}.
+\]</span></p>
+<p>where <span class="math inline">\(p\)</span> approximates the probability of a contiguously-matching substring of a given length between <span class="math inline">\(t\)</span> and <span class="math inline">\(u\)</span>.</p>
+<p>It is worth noting that the formula for computing the probability of a <span class="math inline">\(k\)</span>-bit match or mismatch, given by Downing as follows, is actually mathematically flawed.</p>
+<p><span class="math display">\[
+p_k
+= \frac{n - k + 1}{2^k}
+\]</span></p>
+<p>The probability of a <span class="math inline">\(0\)</span>-bit match according to this formula would be computed as <span class="math inline">\(p_0 = \frac{n - 0 + 1}{2^0} = n + 1\)</span> which is clearly impossible because <span class="math inline">\(p_0 &gt; 1 \forall n &gt; 0\)</span>.
+The actual probability be computed using a lookup table computed using dynamic programming.
+However, the formula Downing presented provides a useful approximation to the probability of a <span class="math inline">\(k\)</span> bit match.
+For computational efficiency and consistency with the existing literature we use clamp edge cases between 0 and 1 to yield the corrected streak metric <span class="math inline">\(S\)</span>.</p>
+<p><span class="math display">\[
+S(t, u) =
+\max( \min( S&#39;(t, u), 1), 0)
+\]</span></p>
 
 </div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-downing_intelligence_2015">
+<p>Downing, Keith L. 2015. <em>Intelligence Emerging: Adaptivity and Search in Evolving Neural Systems</em>. Cambridge, Massachusetts: The MIT Press.</p>
+</div>
+<div id="ref-charles_ofria_2020_empirical">
+<p>Ofria, Charles, Matthew Andres Moreno, Emily Dolson, Alexander Lalejini, Santiago Rodriguez-Papa, Jake Fenton, Katherine Perry, et al. 2020. “Empirical: A scientific software library for research, education, and public engagement.” Zenodo. <a href="https://doi.org/10.5281/zenodo.4141943">https://doi.org/10.5281/zenodo.4141943</a>.</p>
 </div>
 </div>
             </section>
@@ -402,8 +342,8 @@ git submodule update</code></pre>
           </div>
         </div>
       </div>
-<a href="data-availability.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="signalgp-representation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="signalgp-representation.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="exponential-regulator.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -434,7 +374,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/documents/running-experiments.md",
+"link": "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/tree/master/documents/streak-metric.md",
 "text": "Edit"
 },
 "history": {
