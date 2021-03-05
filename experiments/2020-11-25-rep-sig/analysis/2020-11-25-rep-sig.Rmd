@@ -533,16 +533,26 @@ ggplot( data=sol_data, mapping=aes(x=NUM_SIGNAL_RESPONSES, fill=strategy) ) +
   xlab("Environment Complexity") +
   scale_fill_brewer(
     name="Strategy:",
-    breaks=c("use regulation",
-             "use memory",
-             "use neither",
-             "use both"),
-    labels=c("Use regulation (only)",
-             "Use global memory (only)",
-             "Use neither",
-             "Use both"),
+    breaks=c(
+      "use memory",
+      "use regulation",
+      "use neither",
+      "use both"
+    ),
+    limits=c(
+      "use memory",
+      "use regulation",
+      "use neither",
+      "use both"
+    ),
+    labels=c(
+      "Use global memory (only)",
+      "Use regulation (only)",
+      "Use neither",
+      "Use both"
+    ),
     palette=cb_palette
-    ) +
+  ) +
   facet_wrap(~condition)
 
 ```
@@ -586,12 +596,16 @@ ggplot( donut_data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category) ) +
   xlim(c(-1, 4)) +
   scale_fill_brewer(
     name="Strategy:",
-    limits=c("regulation",
-             "memory",
-             "both"),
-    labels=c("Use regulation (only)",
-             "Use global memory (only)",
-             "Use both"),
+    limits=c(
+      "memory",
+      "regulation",
+      "both"
+    ),
+    labels=c(
+      "Use global memory (only)",
+      "Use regulation (only)",
+      "Use both"
+    ),
     palette=cb_palette
   ) +
   theme_void() +
