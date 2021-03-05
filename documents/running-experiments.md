@@ -49,10 +49,10 @@ chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp     tests
 The important thing is that there should be three executables (with absurdly long names):
 
 - `chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp`
-  - Use this to run the changing-signal problem.
+  - Use this to run the independent-signal problem.
   - To generate a default configuration file, `chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen`
 - `alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp`
-  - Use this to run the repeated-signal problem.
+  - Use this to run the signal-counting problem.
   - To generate a default configuration file, `alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen`
 - `bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp`
   - Use this to run any of the boolean-logic calculator problems and the contextual-signal problem.
@@ -137,10 +137,10 @@ To use a different compiler (than g++), you'll need to change `CXX_nat` in the m
 This should create three executables (with absurdly long names):
 
 - `chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp`
-  - Use this to run the changing-signal problem.
+  - Use this to run the independent-signal problem.
   - To generate a default configuration file, `chg-env-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen`
 - `alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp`
-  - Use this to run the repeated-signal problem.
+  - Use this to run the signal-counting problem.
   - To generate a default configuration file, `alt-signal-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp --gen`
 - `bool-calc-exp_tag-len-256_match-metric-streak_thresh-0_reg-exp`
   - Use this to run any of the boolean-logic calculator problems and the contextual-signal problem.
