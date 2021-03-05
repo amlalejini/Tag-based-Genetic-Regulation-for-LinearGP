@@ -1,4 +1,4 @@
-# Indpendent-signal problem analysis
+# Independent-signal problem analysis
 
 Here, we give an overview of the independent-signal diagnostic problem, and we provide our data analyses for related experiments.
 All of our source code for statistical analyses and data visualizations is embedded in this document.
