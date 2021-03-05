@@ -32,10 +32,10 @@ Our supplemental material includes the following:
 - More details on the SignalGP representation used in this work (Section \@ref(signalgp-representation))
 - Visualizations of the exponential regulator used in this work (Section \@ref(exponential-regulator))
 - Fully-detailed analysis scripts for each experiment (including source code)
-  - Repeated-signal problem analysis (Section \@ref(repeated-signal-problem-analysis))
+  - Signal-counting problem analysis (Section \@ref(signal-counting-problem-analysis))
   - Contextual-signal problem analysis (Section \@ref(contextual-signal-problem-analysis))
   - Boolean calculator problem (prefix notation) analysis (Section \@ref(boolean-calculator-problem-prefix-notation))
-  - Changing-signal problem analysis (Section \@ref(changing-signal-problem-analysis))
+  - Independent-signal problem analysis (Section \@ref(independent-signal-problem-analysis))
   - Boolean calculator problem (postfix notation) analysis (Section \@ref(boolean-calculator-problem-postfix-notation))
 
 ## Contributing authors
@@ -113,14 +113,14 @@ A simple example of how genetic regulation works (in an event-handling context) 
 
 We compared the performance of regulation-enabled and regulation-disabled SignalGP on five problems:
 
-- Repeated-signal Problem
+- Signal-counting Problem
 - Contextual-signal Problem
-- Changing-signal Problem
+- Indepedent-signal Problem
 - Boolean-logic Calculator Problem (prefix notation)
 - Boolean-logic Calculator Problem (postfix notation)
 
-The repeated-signal, contextual-signal, and prefix notation calculator problems each required programs to dynamically adjust their responses to particular inputs over time.
-The changing-signal and postfix notation calculator problems did not require programs to adjust responses to inputs over time.
+The signal-counting, contextual-signal, and prefix notation calculator problems each required programs to dynamically adjust their responses to particular inputs over time.
+The independent-signal and postfix notation calculator problems did not require programs to adjust responses to inputs over time.
 
 ### Results
 
