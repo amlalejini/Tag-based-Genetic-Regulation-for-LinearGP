@@ -145,7 +145,8 @@ RUN \
 ########################################################
 RUN \
   apt-get install -y -q --no-install-recommends \
-    r-base=4.0.3-1.2004.0 \
+    r-base \
+    r-base-dev \
     && \
   R -e "install.packages('igraph',dependencies=TRUE, repos='http://cran.rstudio.com/')" \
     && \
