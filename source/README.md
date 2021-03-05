@@ -2,9 +2,9 @@
 
 [./native/](./native/) contains the .cc files for our genetic programing problems:
 
-- Repeated-signal problem (alt-signal-exp.cc)
+- Signal-counting problem (alt-signal-exp.cc)
 - Contextual-signal problem (bool-calc-exp.cc)
-- Changing-signal problem (chg-env-exp.cc)
+- Independent-signal problem (chg-env-exp.cc)
 - Boolean-logic calculator problem (bool-calc-exp.cc)
 
 Below, we give the external dependencies for compiling our experiments, and we give which source files are associated with each of the problems.
@@ -21,7 +21,7 @@ Below, we give the external dependencies for compiling our experiments, and we g
   - here's a link to the exact commit: <https://github.com/amlalejini/SignalGP/tree/83d879cfdb6540862315dc454c1525ccd8054e65>
     - commit `83d879cfdb6540862315dc454c1525ccd8054e65`
 
-## Repeated-signal problem
+## Signal-counting problem
 
 Also called 'alternating signal environment' in source code.
 
@@ -42,7 +42,7 @@ The contextual-signal problem is (perhaps confusingly) carried out using the boo
 - [BoolCalcWorld.h](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/BoolCalcWorld.h)
 - [native/bool-calc-exp.cc](https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP/blob/master/source/native/bool-calc-exp.cc)
 
-## Changing-signal problem
+## Independent-signal problem
 
 Also called 'changing environment problem' in source code.
 

@@ -104,14 +104,14 @@ A simple example of how genetic regulation works (in an event-handling context) 
 
 We compared the performance of regulation-enabled and regulation-disabled SignalGP on five problems:
 
-- Repeated-signal Problem
+- Signal-counting Problem
 - Contextual-signal Problem
-- Changing-signal Problem
+- Independent-signal Problem
 - Boolean-logic Calculator Problem (prefix notation)
 - Boolean-logic Calculator Problem (postfix notation)
 
-The repeated-signal, contextual-signal, and prefix notation calculator problems each required programs to dynamically adjust their responses to particular inputs over time.
-The changing-signal and postfix notation calculator problems did not require programs to adjust responses to inputs over time.
+The signal-counting, contextual-signal, and prefix notation calculator problems each required programs to dynamically adjust their responses to particular inputs over time.
+The independent-signal and postfix notation calculator problems did not require programs to adjust responses to inputs over time.
 
 ### Results
 

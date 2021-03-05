@@ -8,14 +8,14 @@ export TAG_NUM_BITS=256
 
 make clean
 
-# Build changing-signal problem
-echo "Compiling changing-signal problem..."
+# Build independent-signal problem
+echo "Compiling independent-signal problem..."
 export PROJECT=chg-env-exp
 make native
 echo "...Done."
 
-echo "Compiling repeated-signal problem..."
-# Build repeated-signal problem
+echo "Compiling signal-counting problem..."
+# Build signal-counting problem
 export PROJECT=alt-signal-exp
 make native
 echo "...Done."
@@ -25,4 +25,3 @@ echo "Compiling boolean logic calculator problem..."
 export PROJECT=bool-calc-exp
 make native
 echo "...Done."
-

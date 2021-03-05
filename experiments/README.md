@@ -3,26 +3,30 @@
 This directory contains files related to exploratory/preliminary experiments and to the final set of
 experiments for our ALife 2020 contribution.
 
+From software development to publication, the names of things sometimes change (often to make the final publication more readable). Note the following experiment name changes:
+-  The signal-counting problem is sometimes referred to as the 'repeated-signal problem' or the 'alternating-signal problem'.
+- The independent-signal problem is sometimes referred to as the 'changing-signal problem' or the 'changing-environment problem'.
+
 This directory contains job submission/analysis/data associated with our experiments.
 See the log below for more information on each experiment.
 
-- [2020-11-11 - Changing-signal problem](#2020-11-11---changing-signal-problem)
-- [2020-11-25 - Repeated-signal problem](#2020-11-25---repeated-signal-problem)
+- [2020-11-11 - Independent-signal problem](#2020-11-11---independent-signal-problem)
+- [2020-11-25 - Signal-counting problem](#2020-11-25---signal-counting-problem)
 - [2020-11-27 - Contextual-signal problem](#2020-11-27---contextual-signal-problem)
 - [2020-11-28 - Boolean-logic calculator problem (prefix notation)](#2020-11-28---boolean-logic-calculator-problem-prefix-notation)
 - [2020-11-28 - Boolean-logic calculator problem (postfix notation)](#2020-11-28---boolean-logic-calculator-problem-postfix-notation)
 - [ALife 2020 experiments](#alife-2020-experiments)
 - [Exploratory experiments](#exploratory-experiments)
 
-## 2020-11-11 - Changing-signal problem
+## 2020-11-11 - Independent-signal problem
 
 Final changing-signal problem experiment.
 
 [./2020-11-11-chg-sig/](./2020-11-11-chg-sig/)
 
-## 2020-11-25 - Repeated-signal problem
+## 2020-11-25 - Signal-counting problem
 
-Final repeated-signal problem experiment.
+Final signal-counting problem experiment.
 
 [./2020-11-25-rep-sig/](./2020-11-25-rep-sig/)
 
