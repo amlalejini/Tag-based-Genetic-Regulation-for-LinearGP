@@ -94,6 +94,8 @@ RUN \
   tar -xzf ${PROJECT_PATH}/experiments/${EXP_CHG_SIG_TAG}/analysis/${EXP_CHG_SIG_TAG}-data.tar.gz \
     -C ${PROJECT_PATH}/experiments/${EXP_CHG_SIG_TAG}/analysis/ \
     && \
+  rm ${PROJECT_PATH}/experiments/${EXP_CHG_SIG_TAG}/analysis/${EXP_CHG_SIG_TAG}-data.tar.gz \
+    && \
   echo "downloaded ${EXP_CHG_SIG_TAG} data" \
     && \
   export EXP_REP_SIG_TAG=2020-11-25-rep-sig \
@@ -103,6 +105,8 @@ RUN \
     && \
   tar -xzf ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/${EXP_REP_SIG_TAG}-data-no-programs.tar.gz \
     -C ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/ \
+    && \
+  rm ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/${EXP_REP_SIG_TAG}-data-no-programs.tar.gz \
     && \
   mv ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/data-noprograms ${PROJECT_PATH}/experiments/${EXP_REP_SIG_TAG}/analysis/data \
     && \
@@ -116,6 +120,8 @@ RUN \
   tar -xzf ${PROJECT_PATH}/experiments/${EXP_CONTEXT_SIG_TAG}/analysis/${EXP_CONTEXT_SIG_TAG}-data.tar.gz \
     -C ${PROJECT_PATH}/experiments/${EXP_CONTEXT_SIG_TAG}/analysis/ \
     && \
+  rm ${PROJECT_PATH}/experiments/${EXP_CONTEXT_SIG_TAG}/analysis/${EXP_CONTEXT_SIG_TAG}-data.tar.gz \
+    && \
   echo "downloaded ${EXP_CONTEXT_SIG_TAG} data" \
     && \
   export EXP_BC_PREFIX_TAG=2020-11-28-bool-calc-prefix \
@@ -126,6 +132,8 @@ RUN \
   tar -xzf ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/${EXP_BC_PREFIX_TAG}-data.tar.gz \
     -C ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/ \
     && \
+  rm ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/${EXP_BC_PREFIX_TAG}-data.tar.gz \
+    && \
   echo "downloaded ${EXP_BC_PREFIX_TAG} data" \
     && \
   export EXP_BC_POSTFIX_TAG=2020-11-28-bool-calc-postfix \
@@ -135,6 +143,8 @@ RUN \
     && \
   tar -xzf ${PROJECT_PATH}/experiments/${EXP_BC_POSTFIX_TAG}/analysis/${EXP_BC_POSTFIX_TAG}-data.tar.gz \
     -C ${PROJECT_PATH}/experiments/${EXP_BC_POSTFIX_TAG}/analysis/ \
+    && \
+  rm ${PROJECT_PATH}/experiments/${EXP_BC_POSTFIX_TAG}/analysis/${EXP_BC_POSTFIX_TAG}-data.tar.gz \
     && \
   echo "downloaded ${EXP_BC_POSTFIX_TAG} data"
 
