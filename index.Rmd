@@ -37,6 +37,7 @@ Our supplemental material includes the following:
   - Boolean calculator problem (prefix notation) analysis (Section \@ref(boolean-calculator-problem-prefix-notation))
   - Independent-signal problem analysis (Section \@ref(independent-signal-problem-analysis))
   - Boolean calculator problem (postfix notation) analysis (Section \@ref(boolean-calculator-problem-postfix-notation))
+- Hand-coded SignalGP example programs (Section \@ref(hand-coded-signalgp-example-programs))
 
 ## Contributing authors
 
