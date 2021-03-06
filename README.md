@@ -5,7 +5,7 @@ This repository holds the supplemental material associated with ["Tag-based Gene
 
 [![preprint](https://img.shields.io/badge/preprint-arXiv:2012.09229-brightgreen)](https://arxiv.org/abs/2012.09229)
 [![supplemental](https://img.shields.io/badge/go%20to-supplemental%20material-ff69b4)](https://lalejini.com/Tag-based-Genetic-Regulation-for-LinearGP/)
-[![DOI](https://zenodo.org/badge/268869271.svg)](https://zenodo.org/badge/latestdoi/268869271)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4586940.svg)](https://doi.org/10.5281/zenodo.4316015)
 [![OSF](https://img.shields.io/badge/data%20%40%20OSF-10.17605%2FOSF.IO%2F928FX-blue)](https://osf.io/928fx/)
 [![DockerHub link](https://img.shields.io/badge/DockerHub-Hosted-blue)](https://hub.docker.com/r/amlalejini/tag-based-genetic-regulation-for-gp)
 ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/amlalejini/tag-based-genetic-regulation-for-gp)
