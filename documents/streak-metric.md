@@ -44,7 +44,7 @@ p_k
 $$
 
 The probability of a $0$-bit match according to this formula would be computed as $p_0 = \frac{n - 0 + 1}{2^0} = n + 1$ which is clearly impossible because $p_0 > 1 \forall n > 0$.
-The actual probability be computed using a lookup table computed using dynamic programming.
+The actual probability can be computed using a lookup table that is generated using dynamic programming.
 However, the formula Downing presented provides a useful approximation to the probability of a $k$ bit match.
 For computational efficiency and consistency with the existing literature we use clamp edge cases between 0 and 1 to yield the corrected streak metric $S$.
 
