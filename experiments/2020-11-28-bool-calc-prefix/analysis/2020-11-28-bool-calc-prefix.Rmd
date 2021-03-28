@@ -61,7 +61,7 @@ print(version)
 Load data, initial data cleanup, configure some global settings.
 
 ```{r}
-data_loc <- paste0(working_directory, "data/max_fit_orgs.csv")
+data_loc <- paste0(working_directory, "data-minimal/max_fit_orgs.csv")
 data <- read.csv(data_loc, na.strings="NONE")
 
 # Specify factors (not all of these matter for this set of runs).
@@ -143,7 +143,7 @@ data$strategy <- factor(
 sol_data <- filter(data, solution=="1")
 
 ####### Load instruction execution data #######
-inst_exec_data <- read.csv(paste0(working_directory, "data/exec_trace_summary.csv"), na.strings="NA")
+inst_exec_data <- read.csv(paste0(working_directory, "data-minimal/exec_trace_summary.csv"), na.strings="NA")
 
 inst_exec_data$condition <- mapply(
   get_con,
@@ -162,7 +162,7 @@ inst_exec_data$notation <- factor(
 )
 
 ####### Load network data #######
-reg_network_data <- read.csv(paste0(working_directory, "data/reg_graphs_summary.csv"), na.strings="NA")
+reg_network_data <- read.csv(paste0(working_directory, "data-minimal/reg_graphs_summary.csv"), na.strings="NA")
 reg_network_data <- filter(reg_network_data, run_id %in% data$SEED)
 
 get_notation <- function(seed) {
@@ -617,7 +617,7 @@ Specifically, we'll be looking at the solution evolved in run id `r trace_id` (a
 
 ```{r}
 case_study_info <- read.csv(
-  paste0(working_directory, "data/max_fit_orgs.csv"),
+  paste0(working_directory, "data-minimal/max_fit_orgs.csv"),
   na.strings="NONE"
 )
 
@@ -631,7 +631,7 @@ is_sol <- case_study_info$solution
 num_modules <- case_study_info$num_modules
 
 # Load trace file associated with this solution.
-trace_file <- paste0(working_directory, "data/reg-traces/trace-reg_update-10000_run-id-", trace_id, ".csv")
+trace_file <- paste0(working_directory, "data-minimal/reg-traces/trace-reg_update-10000_run-id-", trace_id, ".csv")
 trace_data <- read.csv(trace_file, na.strings="NONE")
 trace_data <- filter(trace_data, cur_test_id == test_id)
 
@@ -887,8 +887,8 @@ We use the igraph package to draw this program's gene regulatory network.
 
 ```{r, message=FALSE}
 # Networks!
-graph_nodes_loc <- paste0(working_directory, "data/igraphs/reg_graph_id-", trace_id, "_test-", test_id , "_nodes.csv")
-graph_edges_loc <- paste0(working_directory, "data/igraphs/reg_graph_id-", trace_id, "_test-", test_id , "_edges.csv")
+graph_nodes_loc <- paste0(working_directory, "data-minimal/igraphs/reg_graph_id-", trace_id, "_test-", test_id , "_nodes.csv")
+graph_edges_loc <- paste0(working_directory, "data-minimal/igraphs/reg_graph_id-", trace_id, "_test-", test_id , "_edges.csv")
 graph_nodes_data <- read.csv(graph_nodes_loc, na.strings="NONE")
 graph_edges_data <- read.csv(graph_edges_loc, na.strings="NONE")
 
