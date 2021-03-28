@@ -127,12 +127,12 @@ RUN \
   export EXP_BC_PREFIX_TAG=2020-11-28-bool-calc-prefix \
     && \
   osf -p ${OSF_PROJECT} fetch \
-    data/${EXP_BC_PREFIX_TAG}-data.tar.gz ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/${EXP_BC_PREFIX_TAG}-data.tar.gz \
+    data/${EXP_BC_PREFIX_TAG}-data-minimal.tar.gz ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/${EXP_BC_PREFIX_TAG}-data-minimal.tar.gz \
     && \
-  tar -xzf ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/${EXP_BC_PREFIX_TAG}-data.tar.gz \
+  tar -xzf ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/${EXP_BC_PREFIX_TAG}-data-minimal.tar.gz \
     -C ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/ \
     && \
-  rm ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/${EXP_BC_PREFIX_TAG}-data.tar.gz \
+  rm ${PROJECT_PATH}/experiments/${EXP_BC_PREFIX_TAG}/analysis/${EXP_BC_PREFIX_TAG}-data-minimal.tar.gz \
     && \
   echo "downloaded ${EXP_BC_PREFIX_TAG} data" \
     && \

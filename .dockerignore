@@ -6,6 +6,7 @@ _site/
 
 # Data
 experiments/*/analysis/data
+experiments/*/analysis/data-minimal
 experiments/*/analysis/traces
 *.tar.gz
 

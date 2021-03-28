@@ -46,5 +46,6 @@ _site/
 
 # Data
 data/
+data-minimal/
 *.tar.gz
 traces/
