@@ -110,7 +110,7 @@
 
 \title{Supplemental Material for Tag-based Genetic Regulation for Genetic Programming}
 \author{Alexander Lalejini, Matthew Andres Moreno, and Charles Ofria}
-\date{2021-03-05}
+\date{2021-03-28}
 
 \begin{document}
 \maketitle
@@ -1224,7 +1224,7 @@ p_k
 \]
 
 The probability of a \(0\)-bit match according to this formula would be computed as \(p_0 = \frac{n - 0 + 1}{2^0} = n + 1\) which is clearly impossible because \(p_0 > 1 \forall n > 0\).
-The actual probability be computed using a lookup table computed using dynamic programming.
+The actual probability can be computed using a lookup table that is generated using dynamic programming.
 However, the formula Downing presented provides a useful approximation to the probability of a \(k\) bit match.
 For computational efficiency and consistency with the existing literature we use clamp edge cases between 0 and 1 to yield the corrected streak metric \(S\).
 
@@ -4296,7 +4296,7 @@ Load data, initial data cleanup, configure some global settings.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{data_loc <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data/max_fit_orgs.csv"}\NormalTok{)}
+\NormalTok{data_loc <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data-minimal/max_fit_orgs.csv"}\NormalTok{)}
 \NormalTok{data <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(data_loc, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
 
 \CommentTok{# Specify factors (not all of these matter for this set of runs).}
@@ -4378,7 +4378,7 @@ Load data, initial data cleanup, configure some global settings.
 \NormalTok{sol_data <-}\StringTok{ }\KeywordTok{filter}\NormalTok{(data, solution}\OperatorTok{==}\StringTok{"1"}\NormalTok{)}
 
 \CommentTok{####### Load instruction execution data #######}
-\NormalTok{inst_exec_data <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data/exec_trace_summary.csv"}\NormalTok{), }\DataTypeTok{na.strings=}\StringTok{"NA"}\NormalTok{)}
+\NormalTok{inst_exec_data <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data-minimal/exec_trace_summary.csv"}\NormalTok{), }\DataTypeTok{na.strings=}\StringTok{"NA"}\NormalTok{)}
 
 \NormalTok{inst_exec_data}\OperatorTok{$}\NormalTok{condition <-}\StringTok{ }\KeywordTok{mapply}\NormalTok{(}
 \NormalTok{  get_con,}
@@ -4397,7 +4397,7 @@ Load data, initial data cleanup, configure some global settings.
 \NormalTok{)}
 
 \CommentTok{####### Load network data #######}
-\NormalTok{reg_network_data <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data/reg_graphs_summary.csv"}\NormalTok{), }\DataTypeTok{na.strings=}\StringTok{"NA"}\NormalTok{)}
+\NormalTok{reg_network_data <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data-minimal/reg_graphs_summary.csv"}\NormalTok{), }\DataTypeTok{na.strings=}\StringTok{"NA"}\NormalTok{)}
 \NormalTok{reg_network_data <-}\StringTok{ }\KeywordTok{filter}\NormalTok{(reg_network_data, run_id }\OperatorTok{%in%}\StringTok{ }\NormalTok{data}\OperatorTok{$}\NormalTok{SEED)}
 
 \NormalTok{get_notation <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(seed) \{}
@@ -5007,7 +5007,7 @@ Specifically, we'll be looking at the solution evolved in run id \ensuremath{2.4
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{case_study_info <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}
-  \KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data/max_fit_orgs.csv"}\NormalTok{),}
+  \KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data-minimal/max_fit_orgs.csv"}\NormalTok{),}
   \DataTypeTok{na.strings=}\StringTok{"NONE"}
 \NormalTok{)}
 
@@ -5021,7 +5021,7 @@ Specifically, we'll be looking at the solution evolved in run id \ensuremath{2.4
 \NormalTok{num_modules <-}\StringTok{ }\NormalTok{case_study_info}\OperatorTok{$}\NormalTok{num_modules}
 
 \CommentTok{# Load trace file associated with this solution.}
-\NormalTok{trace_file <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data/reg-traces/trace-reg_update-10000_run-id-"}\NormalTok{, trace_id, }\StringTok{".csv"}\NormalTok{)}
+\NormalTok{trace_file <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data-minimal/reg-traces/trace-reg_update-10000_run-id-"}\NormalTok{, trace_id, }\StringTok{".csv"}\NormalTok{)}
 \NormalTok{trace_data <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(trace_file, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
 \NormalTok{trace_data <-}\StringTok{ }\KeywordTok{filter}\NormalTok{(trace_data, cur_test_id }\OperatorTok{==}\StringTok{ }\NormalTok{test_id)}
 
@@ -5299,8 +5299,8 @@ We use the igraph package to draw this program's gene regulatory network.
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Networks!}
-\NormalTok{graph_nodes_loc <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data/igraphs/reg_graph_id-"}\NormalTok{, trace_id, }\StringTok{"_test-"}\NormalTok{, test_id , }\StringTok{"_nodes.csv"}\NormalTok{)}
-\NormalTok{graph_edges_loc <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data/igraphs/reg_graph_id-"}\NormalTok{, trace_id, }\StringTok{"_test-"}\NormalTok{, test_id , }\StringTok{"_edges.csv"}\NormalTok{)}
+\NormalTok{graph_nodes_loc <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data-minimal/igraphs/reg_graph_id-"}\NormalTok{, trace_id, }\StringTok{"_test-"}\NormalTok{, test_id , }\StringTok{"_nodes.csv"}\NormalTok{)}
+\NormalTok{graph_edges_loc <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(working_directory, }\StringTok{"data-minimal/igraphs/reg_graph_id-"}\NormalTok{, trace_id, }\StringTok{"_test-"}\NormalTok{, test_id , }\StringTok{"_edges.csv"}\NormalTok{)}
 \NormalTok{graph_nodes_data <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(graph_nodes_loc, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
 \NormalTok{graph_edges_data <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(graph_edges_loc, }\DataTypeTok{na.strings=}\StringTok{"NONE"}\NormalTok{)}
 
