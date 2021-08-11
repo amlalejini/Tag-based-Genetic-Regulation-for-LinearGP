@@ -1,7 +1,7 @@
 ## Overview
 
 <!-- TODO: This repository is the supplemental material associated with the following research article: ... -->
-This repository holds the supplemental material associated with ["Tag-based Genetic Regulation for Genetic Programming"](https://arxiv.org/abs/2012.09229). Out as a preprint at the moment!
+This repository holds the supplemental material associated with ["Tag-based Genetic Regulation for Genetic Programming"](https:/doi.org/10.1007/s10710-021-09406-8). Out as a preprint at the moment!
 
 [![preprint](https://img.shields.io/badge/preprint-arXiv:2012.09229-brightgreen)](https://arxiv.org/abs/2012.09229)
 [![supplemental](https://img.shields.io/badge/go%20to-supplemental%20material-ff69b4)](https://lalejini.com/Tag-based-Genetic-Regulation-for-LinearGP/)
