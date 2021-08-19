@@ -1,0 +1,23 @@
+type: software
+date-released: "2021-03-05"
+license: MIT
+authors:
+  - family-names: Lalejini
+    given-names: Alexander
+    orcid: https://orcid.org/0000-0003-0994-2718
+    affiliation: Michigan State University
+  - family-names: Moreno
+    given-names: Matthew Andres
+    orcid: https://orcid.org/0000-0003-4726-4479
+    affiliation: Michigan State University
+repository-code: "https://github.com/amlalejini/Tag-based-Genetic-Regulation-for-LinearGP"
+identifiers:
+  - description: This is the collection of archived snapshots for all versions of this supplemental material
+    type: doi
+    value: 10.5281/zenodo.4316015
+  - description: This is the publication associated with this supplemental material.
+    type: doi
+    value: 10.1007/s10710-021-09406-8
+title: Supplemental material for Tag-based regulation of modules in genetic programming improves context-dependent problem solving
+cff-version: 1.2.0
+message: If you use this software, please additionally cite the associated publication, Tag-based regulation of modules in genetic programming improves context-dependent problem solving.
